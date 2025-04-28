@@ -229,13 +229,8 @@ pipeline {
                             }
                         }
                     } catch (Exception e) {
-                        // 오류 상세 로깅
-                        echo "❌ 배포 중 오류 발생: ${e.toString()}"
-                        echo "❌ 오류 상세 정보: ${e.getMessage()}"
-                        echo "❌ 스택 트레이스:"
-                        e.printStackTrace()
                         // 오류 발생 시 파이프라인 중단
-                        error "배포 실패: ${e.getMessage()}"
+                        error "❌ 배포 실패: ${e.getMessage()}"
                     }
                 }
             }
