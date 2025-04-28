@@ -173,7 +173,7 @@ pipeline {
                                     echo "✅ docker-compose.yml 복사 완료"
 
 
-                                    // 원격 서버에서 블루-그린 배포 수행
+                                    # 원격 서버에서 블루-그린 배포 수행
                                     ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
                                     cd /home/ubuntu
 
