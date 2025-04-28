@@ -174,9 +174,16 @@ pipeline {
                                 '''
 
                                 // 원격 서버에서 블루-그린 배포 수행
-                                sh '''
-                                    ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} '
-                                    cd /home/ubuntu && \
+                                sh """
+                                    ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
+                                    cd /home/ubuntu
+
+                                    # 명시적으로 변수 설정
+                                    export DOCKER_IMAGE=${DOCKER_IMAGE}
+                                    export DOCKER_TAG=${DOCKER_TAG}
+                                    export APP_NAME=${APP_NAME}
+                                    export BLUE_PORT=${BLUE_PORT}
+                                    export GREEN_PORT=${GREEN_PORT}
 
                                     # 현재 어떤 배포가 활성화되어 있는지 확인
                                     if [ -f .active ] && [ "$(cat .active)" == "blue" ]; then
@@ -238,7 +245,7 @@ pipeline {
                                     sleep 10
                                     docker stop $INACTIVE_CONTAINER || true
                                     docker rm $INACTIVE_CONTAINER || true
-                                    '
+                                    "
                                 '''
                             }
                         }
