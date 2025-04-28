@@ -185,7 +185,7 @@ pipeline {
                                     export GREEN_PORT=${GREEN_PORT}
 
                                     # 현재 어떤 배포가 활성화되어 있는지 확인
-                                    if [ -f .active ] && [ "$(cat .active)" == "blue" ]; then
+                                    if [ -f .active ] && [ "$(cat .active)" = "blue" ]; then
                                         echo "✅ Green deployment 실행 중"
                                         export CONTAINER_NAME=${APP_NAME}-green
                                         export CONTAINER_PORT=${GREEN_PORT}
@@ -204,9 +204,10 @@ pipeline {
                                     echo "DOCKER_TAG: ${DOCKER_TAG}"
 
                                     # 새 버전과 포트로 docker-compose 업데이트
-                                    sed -i "s/{{IMAGE}}/${DOCKER_IMAGE}:${DOCKER_TAG}/g" docker-compose.yml
-                                    sed -i "s/{{CONTAINER_NAME}}/${CONTAINER_NAME}/g" docker-compose.yml
-                                    sed -i "s/{{PORT}}/${CONTAINER_PORT}/g" docker-compose.yml
+                                    cp docker-compose.yml docker-compose.yml.bak
+                                    sed "s|{{IMAGE}}|${DOCKER_IMAGE}:${DOCKER_TAG}|g" docker-compose.yml.bak > docker-compose.yml
+                                    sed -i "s|{{CONTAINER_NAME}}|${CONTAINER_NAME}|g" docker-compose.yml
+                                    sed -i "s|{{PORT}}|${CONTAINER_PORT}|g" docker-compose.yml
 
                                     echo "📝 치환 후 compose 내용:"
                                     cat docker-compose.yml
