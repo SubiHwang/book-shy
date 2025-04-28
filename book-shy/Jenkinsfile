@@ -166,8 +166,13 @@ pipeline {
                             dir("${env.WORKSPACE}/book-shy") {
                                 // 도커 컴포즈 파일을 원격 서버에 복사
                                 sh '''
-                                scp -v -o StrictHostKeyChecking=no docker-compose.yml ${DEV_SERVER}:/home/ubuntu/
-                                echo "✅ docker-compose.yml 복사 완료"
+                                     # 불필요한 출력 완전 차단!
+                                     ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no ${DEV_SERVER} "
+                                     mkdir -p /home/ubuntu
+                                     "
+
+                                    scp -v -o StrictHostKeyChecking=no docker-compose.yml ${DEV_SERVER}:/home/ubuntu/
+                                    echo "✅ docker-compose.yml 복사 완료"
                                 '''
 
                                 // 원격 서버에서 블루-그린 배포 수행
