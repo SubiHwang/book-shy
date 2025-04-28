@@ -1,14 +1,16 @@
+version: "3"
 services:
-    backend:
-      image: subihwang/backend
-      container_name: backend
-      ports:
-        - "8080:8080"
-      env_file:
-        - .env
-      restart: always
-      networks:
-        - shy
+  backend:
+    image: {{IMAGE}}
+    container_name: {{CONTAINER_NAME}}
+    ports:
+      - "{{PORT}}:8080"
+    env_file:
+      - .env
+    restart: always
+    networks:
+      - shy
+
 networks:
   shy:
     external: true

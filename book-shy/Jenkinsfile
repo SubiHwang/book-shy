@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         IMAGE_NAME = "backend"
+        DOCKER_IMAGE = "subihwang/backend"   // 추가
+        DOCKER_TAG = "latest"
 
         // 애플리케이션 관련 변수 추가
         APP_NAME = "book-shy-backend" // 애플리케이션 이름 설정
