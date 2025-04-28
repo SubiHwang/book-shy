@@ -224,12 +224,12 @@ pipeline {
                                 '''
                             }
                         }
+                    } catch (Exception e) {
+                        // 오류 상세 로깅
+                        echo "❌ 배포 중 오류 발생: ${e.getMessage()}"
+                        // 선택적으로 오류 시 추가 조치
+                        error "배포 실패: ${e.getMessage()}"
                     }
-                } catch (Exception e) {
-                    // 오류 상세 로깅
-                    echo "❌ 배포 중 오류 발생: ${e.getMessage()}"
-                    // 선택적으로 오류 시 추가 조치
-                    error "배포 실패: ${e.getMessage()}"
                 }
             }
         }
