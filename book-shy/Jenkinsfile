@@ -150,7 +150,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_HUB_PSW', usernameVariable: 'DOCKER_HUB_USR')]) {
                 sh 'echo $DOCKER_HUB_PSW | docker login -u $DOCKER_HUB_USR --password-stdin'
-                sh 'docker push ${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:latest'
+                sh 'docker push ${DOCKER_HUB_USR}/${IMAGE_NAME}:latest'
                 }
             }
         }
