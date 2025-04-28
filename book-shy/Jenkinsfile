@@ -167,17 +167,17 @@ pipeline {
                                 // 도커 컴포즈 파일을 원격 서버에 복사
                                 sh '''
                                      # 불필요한 출력 완전 차단!
-                                     ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no ${DEV_SERVER} "
+                                     ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
                                      mkdir -p /home/ubuntu
                                      "
 
-                                    scp -v -o StrictHostKeyChecking=no docker-compose.yml ${DEV_SERVER}:/home/ubuntu/
+                                    scp -v -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${DEV_SERVER}:/home/ubuntu/
                                     echo "✅ docker-compose.yml 복사 완료"
                                 '''
 
                                 // 원격 서버에서 블루-그린 배포 수행
                                 sh '''
-                                    ssh -o StrictHostKeyChecking=no ${DEV_SERVER} '
+                                    ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} '
                                     cd /home/ubuntu && \
 
                                     # 현재 어떤 배포가 활성화되어 있는지 확인
