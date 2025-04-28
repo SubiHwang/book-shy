@@ -1,4 +1,4 @@
-package com.ssafy.bookshy.bookshy;
+package com.ssafy.bookshy;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
