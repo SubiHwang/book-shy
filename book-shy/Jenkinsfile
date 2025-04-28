@@ -159,69 +159,77 @@ pipeline {
 
         stage('Deploy'){
             steps{
-                // 블루-그린 배포 방식으로 개발 환경에 배포
-                sshagent(credentials: ['remote-server-credentials']) {
-                    dir("${env.WORKSPACE}/book-shy") {
-                        // 도커 컴포즈 파일을 원격 서버에 복사
-                        sh '''
-                            scp -o StrictHostKeyChecking=no docker-compose.yml ${DEV_SERVER}:/home/ubuntu/
-                        '''
+                try{
+                    // 블루-그린 배포 방식으로 개발 환경에 배포
+                    sshagent(credentials: ['remote-server-credentials']) {
+                        dir("${env.WORKSPACE}/book-shy") {
+                            // 도커 컴포즈 파일을 원격 서버에 복사
+                            sh '''
+                                scp -o StrictHostKeyChecking=no docker-compose.yml ${DEV_SERVER}:/home/ubuntu/
+                            '''
 
-                        // 원격 서버에서 블루-그린 배포 수행
-                        sh '''
-                            ssh -o StrictHostKeyChecking=no ${DEV_SERVER} '
-                            cd /home/ubuntu && \
+                            // 원격 서버에서 블루-그린 배포 수행
+                            sh '''
+                                ssh -o StrictHostKeyChecking=no ${DEV_SERVER} '
+                                cd /home/ubuntu && \
 
-                            # 현재 어떤 배포가 활성화되어 있는지 확인
-                            if [ -f .active ] && [ "$(cat .active)" == "blue" ]; then
-                                echo "✅ Green deployment 실행 중"
-                                export CONTAINER_NAME=${APP_NAME}-green
-                                export CONTAINER_PORT=${GREEN_PORT}
-                                export INACTIVE_CONTAINER=${APP_NAME}-blue
-                            else
-                                echo "✅ Blue deployment 실행 중"
-                                export CONTAINER_NAME=${APP_NAME}-blue
-                                export CONTAINER_PORT=${BLUE_PORT}
-                                export INACTIVE_CONTAINER=${APP_NAME}-green
-                            fi
-
-                            # 새 버전과 포트로 docker-compose 업데이트
-                            sed -i "s/{{CONTAINER_NAME}}/$CONTAINER_NAME/g" docker-compose.yml
-                            sed -i "s/{{IMAGE}}/${DOCKER_IMAGE}:${DOCKER_TAG}/g" docker-compose.yml
-                            sed -i "s/{{PORT}}/$CONTAINER_PORT/g" docker-compose.yml
-
-                            # 최신 이미지 가져오기
-                            docker-compose pull
-
-                            # 새 버전 시작
-                            docker-compose up -d
-
-                            # 컨테이너가 정상 상태가 될 때까지 대기
-                            echo "✅ 컨테이너 정상 상태 기다리는 중"
-                            for i in {1..30}; do
-                                if curl -s http://localhost:$CONTAINER_PORT/actuator/health | grep "UP"; then
-                                    echo "✅ 앱 정상 구동됨"
-                                    break
+                                # 현재 어떤 배포가 활성화되어 있는지 확인
+                                if [ -f .active ] && [ "$(cat .active)" == "blue" ]; then
+                                    echo "✅ Green deployment 실행 중"
+                                    export CONTAINER_NAME=${APP_NAME}-green
+                                    export CONTAINER_PORT=${GREEN_PORT}
+                                    export INACTIVE_CONTAINER=${APP_NAME}-blue
+                                else
+                                    echo "✅ Blue deployment 실행 중"
+                                    export CONTAINER_NAME=${APP_NAME}-blue
+                                    export CONTAINER_PORT=${BLUE_PORT}
+                                    export INACTIVE_CONTAINER=${APP_NAME}-green
                                 fi
-                                echo "✅ 애플리케이션이 시작되기를 기다리는 중 $i"
-                                sleep 2
-                            done
 
-                            # 어떤 배포가 활성화되었는지 기록
-                            if [ "$CONTAINER_NAME" == "${APP_NAME}-blue" ]; then
-                                echo "blue" > .active
-                            else
-                                echo "green" > .active
-                            fi
+                                # 새 버전과 포트로 docker-compose 업데이트
+                                sed -i "s/{{CONTAINER_NAME}}/$CONTAINER_NAME/g" docker-compose.yml
+                                sed -i "s/{{IMAGE}}/${DOCKER_IMAGE}:${DOCKER_TAG}/g" docker-compose.yml
+                                sed -i "s/{{PORT}}/$CONTAINER_PORT/g" docker-compose.yml
 
-                            # 연결이 드레인될 때까지 기다린 후 이전 컨테이너 중지
-                            sleep 10
-                            docker stop $INACTIVE_CONTAINER || true
-                            docker rm $INACTIVE_CONTAINER || true
-                            '
-                        '''
+                                # 최신 이미지 가져오기
+                                docker-compose pull
+
+                                # 새 버전 시작
+                                docker-compose up -d
+
+                                # 컨테이너가 정상 상태가 될 때까지 대기
+                                echo "✅ 컨테이너 정상 상태 기다리는 중"
+                                for i in {1..30}; do
+                                    if curl -s http://localhost:$CONTAINER_PORT/actuator/health | grep "UP"; then
+                                        echo "✅ 앱 정상 구동됨"
+                                        break
+                                    fi
+                                    echo "✅ 애플리케이션이 시작되기를 기다리는 중 $i"
+                                    sleep 2
+                                done
+
+                                # 어떤 배포가 활성화되었는지 기록
+                                if [ "$CONTAINER_NAME" == "${APP_NAME}-blue" ]; then
+                                    echo "blue" > .active
+                                else
+                                    echo "green" > .active
+                                fi
+
+                                # 연결이 드레인될 때까지 기다린 후 이전 컨테이너 중지
+                                sleep 10
+                                docker stop $INACTIVE_CONTAINER || true
+                                docker rm $INACTIVE_CONTAINER || true
+                                '
+                            '''
+                        }
                     }
+                } catch (Exception e) {
+                    // 오류 상세 로깅
+                    echo "❌ 배포 중 오류 발생: ${e.getMessage()}"
+                    // 선택적으로 오류 시 추가 조치
+                    error "배포 실패: ${e.getMessage()}"
                 }
+
             }
         }
 
