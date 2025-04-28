@@ -166,7 +166,8 @@ pipeline {
                             dir("${env.WORKSPACE}/book-shy") {
                                 // 도커 컴포즈 파일을 원격 서버에 복사
                                 sh '''
-                                    scp -o StrictHostKeyChecking=no docker-compose.yml ${DEV_SERVER}:/home/ubuntu/
+                                scp -v -o StrictHostKeyChecking=no docker-compose.yml ${DEV_SERVER}:/home/ubuntu/
+                                echo "✅ docker-compose.yml 복사 완료"
                                 '''
 
                                 // 원격 서버에서 블루-그린 배포 수행
@@ -186,6 +187,9 @@ pipeline {
                                         export CONTAINER_PORT=${BLUE_PORT}
                                         export INACTIVE_CONTAINER=${APP_NAME}-green
                                     fi
+
+                                    echo "📝 현재 컨테이너 이름: $CONTAINER_NAME"
+                                    echo "📝 현재 포트: $CONTAINER_PORT"
 
                                     # 새 버전과 포트로 docker-compose 업데이트
                                     sed -i "s/{{CONTAINER_NAME}}/$CONTAINER_NAME/g" docker-compose.yml
@@ -226,8 +230,11 @@ pipeline {
                         }
                     } catch (Exception e) {
                         // 오류 상세 로깅
-                        echo "❌ 배포 중 오류 발생: ${e.getMessage()}"
-                        // 선택적으로 오류 시 추가 조치
+                        echo "❌ 배포 중 오류 발생: ${e.toString()}"
+                        echo "❌ 오류 상세 정보: ${e.getMessage()}"
+                        echo "❌ 스택 트레이스:"
+                        e.printStackTrace()
+                        // 오류 발생 시 파이프라인 중단
                         error "배포 실패: ${e.getMessage()}"
                     }
                 }
