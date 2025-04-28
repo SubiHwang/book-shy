@@ -246,7 +246,7 @@ pipeline {
                                     docker stop $INACTIVE_CONTAINER || true
                                     docker rm $INACTIVE_CONTAINER || true
                                     "
-                                '''
+                                """
                             }
                         }
                     } catch (Exception e) {
