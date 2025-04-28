@@ -1,34 +1,57 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import { VitePWA } from "vite-plugin-pwa";
-import path from "path";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
+import path from 'path';
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: "autoUpdate",
-      includeAssets: [],
+      registerType: 'autoUpdate',
+      includeAssets: [
+        'icons/pwa-192x192.png',
+        'icons/pwa-512x512.png',
+        'icons/favicon-16x16.png',
+        'icons/favicon-32x32.png',
+        'icons/favicon-48x48.png',
+      ],
       manifest: {
-        name: "북끄북끄",
-        short_name: "북끄북끄",
+        name: '북끄북끄',
+        short_name: '북끄북끄',
         description:
-          "북(Book)을 끄집어내고, 북(Book)을 (읽고) 끄적이다. 사용자가 소장한 책을 쉽게 등록하고 다른 사람들과 교환할 수 있으며 독서 기록까지 가능한 서비스",
-        theme_color: "#fffdf8",
-        icons: [],
+          '북(Book)을 끄집어내고, 북(Book)을 (읽고) 끄적이다. 사용자가 소장한 책을 쉽게 등록하고 다른 사람들과 교환할 수 있으며 독서 기록까지 가능한 서비스',
+        theme_color: '#fffdf8',
+        icons: [
+          {
+            src: 'icons/pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+          },
+          {
+            src: 'icons/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+          },
+          {
+            src: 'icons/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
+        ],
       },
     }),
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "@components": path.resolve(__dirname, "./src/components"),
-      "@pages": path.resolve(__dirname, "./src/pages"),
-      "@hooks": path.resolve(__dirname, "./src/hooks"),
-      "@utils": path.resolve(__dirname, "./src/utils"),
-      "@styles": path.resolve(__dirname, "./src/styles"),
-      "@assets": path.resolve(__dirname, "./src/assets"),
+      '@': path.resolve(__dirname, './src'),
+      '@components': path.resolve(__dirname, './src/components'),
+      '@pages': path.resolve(__dirname, './src/pages'),
+      '@hooks': path.resolve(__dirname, './src/hooks'),
+      '@utils': path.resolve(__dirname, './src/utils'),
+      '@styles': path.resolve(__dirname, './src/styles'),
+      '@assets': path.resolve(__dirname, './src/assets'),
     },
   },
 });
