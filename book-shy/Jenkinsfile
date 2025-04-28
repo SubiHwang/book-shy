@@ -31,7 +31,7 @@ pipeline {
                     branches: [[name: 'back']],
                     userRemoteConfigs: [[
                         url: 'https://lab.ssafy.com/s12-final/S12P31D204.git',
-                        credentialsId: 'gitlab'
+                        credentialsId: 'lab-token'
                     ]]
                 ])
                 sh 'echo "✅ 코드 체크아웃 완료"'
