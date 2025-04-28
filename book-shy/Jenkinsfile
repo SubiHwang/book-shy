@@ -205,9 +205,9 @@ pipeline {
                                     cat docker-compose.yml
 
                                     # 새 버전과 포트로 docker-compose 업데이트
-                                    sed -i "s|\{\{IMAGE\}\}|${DOCKER_IMAGE}:${DOCKER_TAG}|g" docker-compose.yml
-                                    sed -i "s|\{\{CONTAINER_NAME\}\}|${CONTAINER_NAME}|g" docker-compose.yml
-                                    sed -i "s|\{\{PORT\}\}|${CONTAINER_PORT}|g" docker-compose.yml
+                                    sed -i "s/{{IMAGE}}/${DOCKER_IMAGE}:${DOCKER_TAG}/g" docker-compose.yml
+                                    sed -i "s/{{CONTAINER_NAME}}/${CONTAINER_NAME}/g" docker-compose.yml
+                                    sed -i "s/{{PORT}}/${CONTAINER_PORT}/g" docker-compose.yml
 
                                     echo "📝 치환 후 compose 내용:"
                                     cat docker-compose.yml
