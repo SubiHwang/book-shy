@@ -80,6 +80,14 @@ pipeline {
                     try{
                         echo '✅ 코드 분석 시작'
 
+                        // 현재 디렉토리 확인
+                        sh 'echo "현재 디렉토리: $(pwd)"'
+                        sh 'echo "디렉토리 내용: $(ls -la)"'
+
+                        // SonarQube 환경 변수 확인
+                        sh 'echo "SonarQube URL: ${SONAR_HOST_URL}"'
+                        sh 'echo "SonarQube Project Key: ${SONAR_PROJECT_KEY}"'
+
                         //SonarQube 스캐너 설정으로 코드 분석 실행
                         withSonarQubeEnv('SonarQube'){
                             dir("${env.WORKSPACE}/book-shy"){
