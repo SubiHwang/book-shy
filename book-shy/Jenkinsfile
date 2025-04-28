@@ -164,17 +164,16 @@ pipeline {
                             dir("${env.WORKSPACE}/book-shy") {
                                 // 도커 컴포즈 파일을 원격 서버에 복사
                                 sh '''
-                                     # 불필요한 출력 완전 차단!
-                                     ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
-                                     mkdir -p /home/ubuntu
-                                     "
+                                    # 불필요한 출력 완전 차단!
+                                    ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
+                                    mkdir -p /home/ubuntu
+                                    "
 
                                     scp -v -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${DEV_SERVER}:/home/ubuntu/
                                     echo "✅ docker-compose.yml 복사 완료"
-                                '''
 
-                                // 원격 서버에서 블루-그린 배포 수행
-                                sh """
+
+                                    // 원격 서버에서 블루-그린 배포 수행
                                     ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
                                     cd /home/ubuntu
 
@@ -203,11 +202,6 @@ pipeline {
                                     echo "CONTAINER_PORT: $CONTAINER_PORT"
                                     echo "DOCKER_IMAGE: ${DOCKER_IMAGE}"
                                     echo "DOCKER_TAG: ${DOCKER_TAG}"
-
-
-                                    # 원본 docker-compose.yml 내용 출력
-                                    echo "📝 치환 전 compose 내용:"
-                                    cat docker-compose.yml
 
                                     # 새 버전과 포트로 docker-compose 업데이트
                                     sed -i "s/{{IMAGE}}/${DOCKER_IMAGE}:${DOCKER_TAG}/g" docker-compose.yml
@@ -246,7 +240,7 @@ pipeline {
                                     docker stop $INACTIVE_CONTAINER || true
                                     docker rm $INACTIVE_CONTAINER || true
                                     "
-                                """
+                                '''
                             }
                         }
                     } catch (Exception e) {
