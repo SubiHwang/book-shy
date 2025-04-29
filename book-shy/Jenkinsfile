@@ -289,7 +289,7 @@ pipeline {
                                         sudo mv /tmp/nginx_active_backend.conf /home/ubuntu/nginx/conf.d/active_backend.conf
 
                                         # NGINX 설정 리로드
-                                        sudo nginx -s reload || echo "❌️ NGINX 리로드 실패"
+                                        docker exec nginx -s reload || echo "❌️ NGINX 리로드 실패"
                                         echo "✅ NGINX 설정 업데이트 완료"
 
                                         # 비활성 컨테이너 정지
