@@ -36,63 +36,31 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                script {
-                    try {
-                        echo '✅ 프론트엔드 빌드 시작'
-                        dir("${env.WORKSPACE}/book-shy-frontend") {  // 프론트엔드 디렉토리로 변경
-                            sh '''
-                                # 에러나면 바로 정지시킴
-                                set -e
-
-                                # Node.js 환경 설정
-                                export NVM_DIR="$HOME/.nvm"
-                                [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-                                nvm use 22 || nvm install 22  # Node.js 22 사용
-
-                                # npm 패키지 설치 (--legacy-peer-deps 옵션 추가)
-                                npm install --legacy-peer-deps
-
-                                # TypeScript 타입 체크 실행
-                                echo "✅ TypeScript 타입 체크 실행 중..."
-                                npm run type-check || (echo "❌ 타입 체크 실패" && exit 1)
-                                
-                                # 린트 검사 실행
-                                echo "✅ ESLint 검사 실행 중..."
-                                npm run lint || (echo "❌ 린트 검사 실패" && exit 1)
-
-                                # 환경 변수 설정
-                                echo "VITE_BASE_URL=${VITE_BASE_URL}" > .env
-
-                                # 빌드 수행
-                                npm run build
-
-                                # 빌드 결과물 확인
-                                echo "✅ 빌드된 파일 목록:"
-                                ls -l build/
-                            '''
-                        }
-                        echo '✅ 프론트엔드 빌드 성공'
-                    } catch (Exception e) {
-                        echo '❌ 프론트엔드 빌드 실패'
-                        error "Build failed: ${e.message}"
-                    }
-                }
-            }
-        }
-
-        // Dockerfile을 사용하여 애플리케이션과 그 의존성을 포함한 이미지 생성
+        // Dockerfile을 사용하여 애플리케이션 빌드 및 이미지 생성
         stage('Build Docker Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_HUB_PSW', usernameVariable: 'DOCKER_HUB_USR')]) {
                     dir("${env.WORKSPACE}/book-shy-frontend") {
-                        sh """
-                        set -e
-                        echo "✅ Docker 이미지 빌드 시작"
-                        docker build -t ${DOCKER_HUB_USR}/${IMAGE_NAME}:latest .
-                        echo "✅ Docker 이미지 빌드 완료"
-                        """
+                        script {
+                            try {
+                                // 환경 변수 파일 생성
+                                sh """
+                                    echo "VITE_BASE_URL=${VITE_BASE_URL}" > .env
+                                    cat .env
+                                """
+                                
+                                // Docker 이미지 빌드
+                                sh """
+                                    set -e
+                                    echo "✅ Docker 이미지 빌드 시작"
+                                    docker build -t ${DOCKER_HUB_USR}/${IMAGE_NAME}:latest .
+                                    echo "✅ Docker 이미지 빌드 완료"
+                                """
+                            } catch (Exception e) {
+                                echo "❌ Docker 이미지 빌드 실패: ${e.message}"
+                                error "Build failed: ${e.message}"
+                            }
+                        }
                     }
                 }
             }
