@@ -276,8 +276,7 @@ pipeline {
                                         fi
                                     '
                                 '''
-
-                                // 3단계: NGINX 설정 업데이트 - 간단한 echo 명령 사용
+                                // 3단계: NGINX 설정 업데이트
                                 sh '''
                                     ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} '
                                         cd /home/ubuntu
@@ -285,21 +284,12 @@ pipeline {
                                         # 현재 활성화된 색상 확인
                                         ACTIVE_COLOR=$(cat .active)
 
-                                        # NGINX 설정 파일 생성
-                                        echo "✅ NGINX 설정 업데이트 중"
-                                        if [ "$ACTIVE_COLOR" = "blue" ]; then
-                                            # 블루 환경으로 설정
-                                            echo "set \\$backend_upstream \\"http://book-shy-backend-blue:8080/\\";" > /tmp/backend_active.conf
-                                        else
-                                            # 그린 환경으로 설정
-                                            echo "set \\$backend_upstream \\"http://book-shy-backend-green:8082/\\";" > /tmp/backend_active.conf
-                                        fi
-
-                                        # NGINX 컨테이너로 설정 파일 복사
-                                        docker cp /tmp/backend_active.conf nginx:/etc/nginx/conf.d/backend_active.conf || echo "❌️ NGINX 설정 파일 복사 실패"
+                                        # Nginx 설정에 활성 배포 정보 기록 (예시: 파일에)
+                                        echo "set \$active_backend \\"${ACTIVE_COLOR}\\";" > /tmp/nginx_active_backend.conf
+                                        sudo mv /tmp/nginx_active_backend.conf /etc/nginx/conf.d/active_backend.conf
 
                                         # NGINX 설정 리로드
-                                        docker exec nginx nginx -s reload || echo "❌️ NGINX 리로드 실패"
+                                        sudo nginx -s reload || echo "❌️ NGINX 리로드 실패"
                                         echo "✅ NGINX 설정 업데이트 완료"
 
                                         # 비활성 컨테이너 정지
@@ -311,8 +301,8 @@ pipeline {
 
                                         # 연결이 드레인될 때까지 기다린 후 이전 컨테이너 중지
                                         sleep 10
-                                        docker stop $INACTIVE_CONTAINER || true
-                                        docker rm $INACTIVE_CONTAINER || true
+                                        docker stop "${INACTIVE_CONTAINER}" || true
+                                        docker rm "${INACTIVE_CONTAINER}" || true
                                     '
                                 '''
                             }
