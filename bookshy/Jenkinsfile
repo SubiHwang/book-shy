@@ -17,7 +17,7 @@ pipeline {
         DEV_SERVER = "k12d204.p.ssafy.io"
 
         // 환경 변수
-        REACT_APP_API_URL = credentials('REACT_APP_API_URL')
+        VITE_BASE_URL = credentials('VITE_BASE_URL')
     }
 
     stages {
@@ -63,7 +63,7 @@ pipeline {
                                 npm run lint || (echo "❌ 린트 검사 실패" && exit 1)
 
                                 # 환경 변수 설정
-                                echo "REACT_APP_API_URL=${REACT_APP_API_URL}" > .env
+                                echo "VITE_BASE_URL=${VITE_BASE_URL}" > .env
 
                                 # 빌드 수행
                                 npm run build
@@ -311,8 +311,14 @@ pipeline {
 
     post {
         always {
-            // 작업 공간 정리
-            cleanWs()
+            script {
+                try {
+                    // 작업 공간 정리
+                    cleanWs()
+                } catch (Exception e) {
+                    echo "작업 공간 정리 중 오류 발생: ${e.message}"
+                }
+            }
         }
         success {
             echo '✅ 파이프라인이 성공!'
