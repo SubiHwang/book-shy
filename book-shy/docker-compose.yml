@@ -4,8 +4,8 @@ services:
     container_name: {{CONTAINER_NAME}}
     ports:
       - "{{PORT}}:8080"
-    env_file:
-      - .env
+#    env_file:
+#      - .env
     restart: always
     networks:
       - shy
