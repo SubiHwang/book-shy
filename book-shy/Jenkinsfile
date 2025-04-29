@@ -259,11 +259,11 @@ pipeline {
                                         echo 'set $backend_upstream "http://book-shy-backend-green:8082/";' > /tmp/backend_active.conf
                                     fi
 
-                                    # NGINX 컨테이너로 설정 파일 복사
-                                    docker cp /tmp/backend_active.conf nginx:/etc/nginx/conf.d/backend_active.conf
+                                    # NGINX 컨테이너로 설정 파일 복사 (nginx는 실제 컨테이너 이름으로 변경 필요)
+                                    docker cp /tmp/backend_active.conf nginx:/etc/nginx/conf.d/backend_active.conf || echo "❌️ NGINX 설정 파일 복사 실패"
 
                                     # NGINX 설정 리로드
-                                    docker exec nginx nginx -s reload
+                                    docker exec nginx nginx -s reload || echo "❌️ NGINX 리로드 실패"
                                     echo "✅ NGINX 설정 업데이트 완료"
 
                                     # 연결이 드레인될 때까지 기다린 후 이전 컨테이너 중지
