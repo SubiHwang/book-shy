@@ -170,9 +170,9 @@ pipeline {
                                 // 도커 컴포즈 파일을 원격 서버에 복사
                                 sh '''
                                     # ✅ 1. docker-compose.yml 안에 DB_URL, DB_USERNAME, DB_PASSWORD 직접 치환
-                                    sed -i "s|\\$\\{DB_URL\\}|${DB_URL}|g" docker-compose.yml
-                                    sed -i "s|\\$\\{DB_USERNAME\\}|${DB_USERNAME}|g" docker-compose.yml
-                                    sed -i "s|\\$\\{DB_PASSWORD\\}|${DB_PASSWORD}|g" docker-compose.yml
+                                    sed -i "s|\\${DB_URL}|${DB_URL}|g" docker-compose.yml
+                                    sed -i "s|\\${DB_USERNAME}|${DB_USERNAME}|g" docker-compose.yml
+                                    sed -i "s|\\${DB_PASSWORD}|${DB_PASSWORD}|g" docker-compose.yml
 
                                     echo "✅ docker-compose.yml DB 정보 치환 완료"
 
