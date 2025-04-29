@@ -10,40 +10,51 @@ pipeline {
         stage ('Checkout') {
             steps {
                checkout scm
-               sh 'ls -la' 
+               sh 'ls -la'
+               sh 'ls -la bookshy'
             }
         }
          
         stage('Install Dependencies') {
             steps {
-                sh 'npm --version'
-                sh 'node --version'
-                sh 'ls -la' 
-                sh 'npm install'
+                dir('bookshy') {
+                    sh 'npm --version'
+                    sh 'node --version'
+                    sh 'ls -la'
+                    sh 'npm install'
+                }
             }
         }
 
         stage('Lint') {
             steps {
-                sh 'npm run lint || true'
+                dir('bookshy') {
+                    sh 'npm run lint || true'
+                }
             }
         }
 
-         stage('Type Check') {
+        stage('Type Check') {
             steps {
-                sh 'npx tsc --noEmit'
+                dir('bookshy') {
+                    sh 'npx tsc --noEmit'
+                }
             }
         }
 
         stage ('Build') {
             steps {
-                sh 'npm run build'
+                dir('bookshy') {
+                    sh 'npm run build'
+                }
             }
         }
 
         stage('Archive Build') {
             steps {
-                archiveArtifacts artifacts: 'dist/**/*', fingerprint: true
+                dir('bookshy') {
+                    archiveArtifacts artifacts: 'dist/**/*', fingerprint: true
+                }
             }
         }
 
@@ -52,15 +63,16 @@ pipeline {
                 branch 'front'
             }
             steps {
-                sh 'echo "Deploying to production environment"'
-                // 실제 배포 스크립트를 여기에 추가
-                // 예: sh 'rsync -avz --delete dist/ user@production-server:/path/to/nginx/html/'
+                dir('bookshy') {
+                    sh 'echo "Deploying to production environment"'
+                    // 실제 배포 스크립트를 여기에 추가
+                    // 예: sh 'rsync -avz --delete dist/ user@production-server:/path/to/nginx/html/'
+                }
             }
         }
-
     }
 
-     post {
+    post {
         always {
             cleanWs()
         }
