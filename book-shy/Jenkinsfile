@@ -299,9 +299,12 @@ pipeline {
                                         # Nginx 설정에 활성 배포 정보 기록 (예시: 파일에)
                                         # echo "    set \$active_backend \\"${ACTIVE_COLOR}\\";" >> /tmp/nginx_active_backend.conf
 
-                                        echo "map \$host \$active_backend {" > /tmp/nginx_active_backend.conf
-                                        echo "    default \"${ACTIVE_COLOR}\";" >> /tmp/nginx_active_backend.conf
-                                        echo "}" >> /tmp/nginx_active_backend.conf
+                                        cat << EOF > /tmp/nginx_active_backend.conf
+                                        map \$host \$active_backend {
+                                            default "${ACTIVE_COLOR}";
+                                        }
+                                        EOF
+
                                         sudo mv /tmp/nginx_active_backend.conf /home/ubuntu/nginx/conf.d/active_backend.conf
 
                                         # NGINX 설정 리로드
