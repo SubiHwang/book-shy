@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "backend"
-        DOCKER_IMAGE = "subihwang/backend"   // 추가
+        DOCKER_IMAGE = "subihwang/backend"
         DOCKER_TAG = "latest"
 
         // 애플리케이션 관련 변수 추가
@@ -149,8 +149,8 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_HUB_PSW', usernameVariable: 'DOCKER_HUB_USR')]) {
-                sh 'echo $DOCKER_HUB_PSW | docker login -u $DOCKER_HUB_USR --password-stdin'
-                sh 'docker push ${DOCKER_HUB_USR}/${IMAGE_NAME}:latest'
+                    sh 'echo $DOCKER_HUB_PSW | docker login -u $DOCKER_HUB_USR --password-stdin'
+                    sh 'docker push ${DOCKER_HUB_USR}/${IMAGE_NAME}:latest'
                 }
             }
         }
@@ -171,42 +171,56 @@ pipeline {
 
                                     scp -v -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${DEV_SERVER}:/home/ubuntu/
                                     echo "✅ docker-compose.yml 복사 완료"
+                                '''
 
-
+                                // 원격 서버에서 블루-그린 배포 수행
+                                sh '''
                                     # 원격 서버에서 블루-그린 배포 수행
-                                    ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
+                                    ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} '
                                     cd /home/ubuntu
 
+                                    # 변수 초기화
+                                    CONTAINER_NAME=""
+                                    CONTAINER_PORT=""
+                                    INACTIVE_CONTAINER=""
+                                    DOCKER_IMAGE="subihwang/backend"
+                                    DOCKER_TAG="latest"
+                                    APP_NAME="book-shy-backend"
+                                    BLUE_PORT="8080"
+                                    GREEN_PORT="8082"
+
                                     # 현재 어떤 배포가 활성화되어 있는지 확인
-                                    export CONTAINER_NAME=""
-                                    export CONTAINER_PORT=""
-                                    export INACTIVE_CONTAINER=""
-
-
                                     if [ -f .active ]; then
                                         ACTIVE_COLOR=$(cat .active)
                                         if [ "$ACTIVE_COLOR" = "blue" ]; then
                                             echo "✅ Green deployment 실행 중"
-                                            export CONTAINER_NAME="${APP_NAME}-green"
-                                            export CONTAINER_PORT="${GREEN_PORT}"
-                                            export INACTIVE_CONTAINER="${APP_NAME}-blue"
+                                            CONTAINER_NAME="${APP_NAME}-green"
+                                            CONTAINER_PORT="${GREEN_PORT}"
+                                            INACTIVE_CONTAINER="${APP_NAME}-blue"
                                         else
                                             echo "✅ Blue deployment 실행 중"
-                                            export CONTAINER_NAME="${APP_NAME}-blue"
-                                            export CONTAINER_PORT="${BLUE_PORT}"
-                                            export INACTIVE_CONTAINER="${APP_NAME}-green"
+                                            CONTAINER_NAME="${APP_NAME}-blue"
+                                            CONTAINER_PORT="${BLUE_PORT}"
+                                            INACTIVE_CONTAINER="${APP_NAME}-green"
                                         fi
                                     else
                                         echo "✅ Initial Blue deployment 실행 중"
-                                        export CONTAINER_NAME="${APP_NAME}-blue"
-                                        export CONTAINER_PORT="${BLUE_PORT}"
-                                        export INACTIVE_CONTAINER="${APP_NAME}-green"
+                                        CONTAINER_NAME="${APP_NAME}-blue"
+                                        CONTAINER_PORT="${BLUE_PORT}"
+                                        INACTIVE_CONTAINER="${APP_NAME}-green"
                                     fi
+
+                                    # 변수 확인
+                                    echo "CONTAINER_NAME: $CONTAINER_NAME"
+                                    echo "CONTAINER_PORT: $CONTAINER_PORT"
+                                    echo "INACTIVE_CONTAINER: $INACTIVE_CONTAINER"
+                                    echo "DOCKER_IMAGE: ${DOCKER_IMAGE}"
+                                    echo "DOCKER_TAG: ${DOCKER_TAG}"
 
                                     # 새 버전과 포트로 docker-compose 업데이트
                                     sed -i "s|{{IMAGE}}|${DOCKER_IMAGE}:${DOCKER_TAG}|g" docker-compose.yml
-                                    sed -i "s|{{CONTAINER_NAME}}|${CONTAINER_NAME}|g" docker-compose.yml
-                                    sed -i "s|{{PORT}}|${CONTAINER_PORT}|g" docker-compose.yml
+                                    sed -i "s|{{CONTAINER_NAME}}|$CONTAINER_NAME|g" docker-compose.yml
+                                    sed -i "s|{{PORT}}|$CONTAINER_PORT|g" docker-compose.yml
 
                                     echo "📝 치환 후 compose 내용:"
                                     cat docker-compose.yml
@@ -229,7 +243,7 @@ pipeline {
                                     done
 
                                     # 어떤 배포가 활성화되었는지 기록
-                                    if [ "$CONTAINER_NAME" == "${APP_NAME}-blue" ]; then
+                                    if [ "$CONTAINER_NAME" = "${APP_NAME}-blue" ]; then
                                         echo "blue" > .active
                                     else
                                         echo "green" > .active
@@ -237,9 +251,11 @@ pipeline {
 
                                     # 연결이 드레인될 때까지 기다린 후 이전 컨테이너 중지
                                     sleep 10
-                                    docker stop $INACTIVE_CONTAINER || true
-                                    docker rm $INACTIVE_CONTAINER || true
-                                    "
+                                    if [ -n "$INACTIVE_CONTAINER" ]; then
+                                        docker stop $INACTIVE_CONTAINER || true
+                                        docker rm $INACTIVE_CONTAINER || true
+                                    fi
+                                    '
                                 '''
                             }
                         }
@@ -282,9 +298,9 @@ pipeline {
             // 실패 시 알림
             echo '❌ 파이프라인 실패'
             emailext (
-            subject: "실패: 파이프라인 '${currentBuild.fullDisplayName}'",
-            body: "파이프라인이 실패했습니다. 빌드 URL: ${env.BUILD_URL}",
-            to: 'ghkdtnql@gmail.com'
+                subject: "실패: 파이프라인 '${currentBuild.fullDisplayName}'",
+                body: "파이프라인이 실패했습니다. 빌드 URL: ${env.BUILD_URL}",
+                to: 'ghkdtnql@gmail.com'
             )
         }
     }
