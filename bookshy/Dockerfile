@@ -13,7 +13,8 @@ RUN npm run build
 # 2. nginx 환경에서 react 빌드 결과물 배포
 FROM nginx:alpine
 
-COPY --from=build /app/build /usr/share/nginx/html
+# vite 프로젝트는 dist 폴더에 빌드 결과물이 생성됨
+COPY --from=build /app/dist /usr/share/nginx/html
 
 CMD ["nginx", "-g", "daemon off;"]
 EXPOSE 80
