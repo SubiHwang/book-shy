@@ -254,13 +254,13 @@ pipeline {
                                     if [ "$CONTAINER_NAME" = "${APP_NAME}-blue" ]; then
                                         # 블루 환경으로 트래픽 전환
                                         cat > /tmp/backend_active.conf << EOF
-set \$backend_upstream "http://book-shy-backend-blue:8080/";
-EOF
+                                    set \$backend_upstream "http://book-shy-backend-blue:8080/";
+                                    EOF
                                     else
                                         # 그린 환경으로 트래픽 전환
                                         cat > /tmp/backend_active.conf << EOF
-set \$backend_upstream "http://book-shy-backend-green:8082/";
-EOF
+                                    set \$backend_upstream "http://book-shy-backend-green:8082/";
+                                    EOF
                                     fi
 
                                     # NGINX 컨테이너로 설정 파일 복사 (nginx는 실제 컨테이너 이름으로 변경 필요)
