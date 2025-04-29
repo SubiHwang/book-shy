@@ -26,7 +26,7 @@ export default tseslint.config(
       'react-hooks/exhaustive-deps': 'warn', // useEffect 의존성 배열 관련 경고
 
       // Prettier 규칙을 ESLint 경고로 표시
-      'prettier/prettier': 'warn',
+      'prettier/prettier': ['error', { endOfLine: 'auto' }], // Prettier 규칙을 ESLint 경고로 표시
     },
     languageOptions: {
       ecmaVersion: 2020,
