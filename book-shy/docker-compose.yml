@@ -6,6 +6,11 @@ services:
       - "{{PORT}}:8080"
 #    env_file:
 #      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
     restart: always
     networks:
       - shy

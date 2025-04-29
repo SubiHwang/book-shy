@@ -20,6 +20,11 @@ pipeline {
         // 원격 서버 정보
         REMOTE_USER = credentials('remote-server-credentials')  // 원격 서버 접속용 사용자 이름/비밀번호
         DEV_SERVER = "k12d204.p.ssafy.io"
+
+        // ✅ DB 관련 추가
+        DB_URL = credentials('DB_URL')
+        DB_USERNAME = credentials('DB_USERNAME')
+        DB_PASSWORD = credentials('DB_PASSWORD')
     }
 
     stages {
