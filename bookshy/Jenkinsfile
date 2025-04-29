@@ -1,72 +1,309 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:22-alpine'
-            args '-v /var/jenkins_home/workspace:/workspace'
-        }
+    agent any
+
+    environment {
+        IMAGE_NAME = "frontend"
+        DOCKER_IMAGE = "subihwang/frontend"
+        DOCKER_TAG = "latest"
+
+        // 애플리케이션 관련 변수
+        APP_NAME = "book-shy-frontend" // 애플리케이션 이름 설정
+
+        BLUE_PORT = "3000"
+        GREEN_PORT = "3001"
+
+        // 원격 서버 정보
+        REMOTE_USER = credentials('remote-server-credentials')  // 원격 서버 접속용 사용자 이름/비밀번호
+        DEV_SERVER = "k12d204.p.ssafy.io"
+
+        // 환경 변수
+        REACT_APP_API_URL = credentials('REACT_APP_API_URL')
     }
 
     stages {
-        stage ('Checkout') {
+        // gitLab 저장소에서 front 브랜치의 코드를 가져온 후 gitlab 자격 증명을 활용해 코드를 checkout
+        stage('Checkout Code') {
             steps {
-               checkout scm
-               sh 'ls -la'
-               sh 'ls -la bookshy'
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: 'front']],  // front 브랜치로 변경
+                    userRemoteConfigs: [[
+                        url: 'https://lab.ssafy.com/s12-final/S12P31D204.git',
+                        credentialsId: 'lab-token'
+                    ]]
+                ])
+                sh 'echo "✅ 코드 체크아웃 완료"'
             }
         }
-         
-        stage('Install Dependencies') {
+
+        stage('Build') {
             steps {
-                dir('bookshy') {
-                    sh 'npm --version'
-                    sh 'node --version'
-                    sh 'ls -la'
-                    sh 'npm install'
+                script {
+                    try {
+                        echo '✅ 프론트엔드 빌드 시작'
+                        dir("${env.WORKSPACE}/book-shy-frontend") {  // 프론트엔드 디렉토리로 변경
+                            sh '''
+                                # 에러나면 바로 정지시킴
+                                set -e
+
+                                # Node.js 환경 설정
+                                export NVM_DIR="$HOME/.nvm"
+                                [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+                                nvm use 22 || nvm install 22  # Node.js 22 사용
+
+                                # npm 패키지 설치 (--legacy-peer-deps 옵션 추가)
+                                npm install --legacy-peer-deps
+
+                                # TypeScript 타입 체크 실행
+                                echo "✅ TypeScript 타입 체크 실행 중..."
+                                npm run type-check || (echo "❌ 타입 체크 실패" && exit 1)
+                                
+                                # 린트 검사 실행
+                                echo "✅ ESLint 검사 실행 중..."
+                                npm run lint || (echo "❌ 린트 검사 실패" && exit 1)
+
+                                # 환경 변수 설정
+                                echo "REACT_APP_API_URL=${REACT_APP_API_URL}" > .env
+
+                                # 빌드 수행
+                                npm run build
+
+                                # 빌드 결과물 확인
+                                echo "✅ 빌드된 파일 목록:"
+                                ls -l build/
+                            '''
+                        }
+                        echo '✅ 프론트엔드 빌드 성공'
+                    } catch (Exception e) {
+                        echo '❌ 프론트엔드 빌드 실패'
+                        error "Build failed: ${e.message}"
+                    }
                 }
             }
         }
 
-        stage('Lint') {
+        // Dockerfile을 사용하여 애플리케이션과 그 의존성을 포함한 이미지 생성
+        stage('Build Docker Image') {
             steps {
-                dir('bookshy') {
-                    sh 'npm run lint || true'
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_HUB_PSW', usernameVariable: 'DOCKER_HUB_USR')]) {
+                    dir("${env.WORKSPACE}/book-shy-frontend") {
+                        sh """
+                        set -e
+                        echo "✅ Docker 이미지 빌드 시작"
+                        docker build -t ${DOCKER_HUB_USR}/${IMAGE_NAME}:latest .
+                        echo "✅ Docker 이미지 빌드 완료"
+                        """
+                    }
                 }
             }
         }
 
-        stage('Type Check') {
+        // 빌드된 Docker 이미지를 Docker Hub에 업로드하는 단계
+        stage('Push Docker Image') {
             steps {
-                dir('bookshy') {
-                    sh 'npx tsc --noEmit'
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_HUB_PSW', usernameVariable: 'DOCKER_HUB_USR')]) {
+                    sh 'echo $DOCKER_HUB_PSW | docker login -u $DOCKER_HUB_USR --password-stdin'
+                    sh 'docker push ${DOCKER_HUB_USR}/${IMAGE_NAME}:latest'
                 }
             }
         }
 
-        stage ('Build') {
-            steps {
-                dir('bookshy') {
-                    sh 'npm run build'
+        stage('Deploy'){
+            steps{
+                script{
+                    try{
+                        // 블루-그린 배포 방식으로 개발 환경에 배포
+                        sshagent(credentials: ['remote-server-credentials']) {
+                            dir("${env.WORKSPACE}/book-shy-frontend") {
+                                // 도커 컴포즈 파일을 원격 서버에 복사
+                                sh '''
+                                    # 불필요한 출력 완전 차단!
+                                    ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
+                                    mkdir -p /home/ubuntu/frontend
+                                    "
+
+                                    scp -v -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${DEV_SERVER}:/home/ubuntu/frontend/
+                                    echo "✅ docker-compose.yml 복사 완료"
+                                '''
+
+                                // 원격 서버에서 블루-그린 배포 수행 - 각 명령을 별도로 실행
+                                sh '''
+                                    # 1단계: 초기 변수 설정 및 배포 컨테이너 결정
+                                    ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} '
+                                        cd /home/ubuntu/frontend
+
+                                        # 변수 초기화
+                                        DOCKER_IMAGE="subihwang/frontend"
+                                        DOCKER_TAG="latest"
+                                        APP_NAME="book-shy-frontend"
+                                        BLUE_PORT="3000"
+                                        GREEN_PORT="3001"
+
+                                        # 현재 어떤 배포가 활성화되어 있는지 확인
+                                        if [ -f .active_frontend ]; then
+                                            ACTIVE_COLOR=$(cat .active_frontend)
+                                            if [ "$ACTIVE_COLOR" = "blue" ]; then
+                                                echo "✅ Green deployment 실행 중"
+                                                CONTAINER_NAME="${APP_NAME}-green"
+                                                CONTAINER_PORT="${GREEN_PORT}"
+                                                INACTIVE_CONTAINER="${APP_NAME}-blue"
+                                            else
+                                                echo "✅ Blue deployment 실행 중"
+                                                CONTAINER_NAME="${APP_NAME}-blue"
+                                                CONTAINER_PORT="${BLUE_PORT}"
+                                                INACTIVE_CONTAINER="${APP_NAME}-green"
+                                            fi
+                                        else
+                                            echo "✅ Initial Blue deployment 실행 중"
+                                            CONTAINER_NAME="${APP_NAME}-blue"
+                                            CONTAINER_PORT="${BLUE_PORT}"
+                                            INACTIVE_CONTAINER="${APP_NAME}-green"
+                                        fi
+
+                                        # 변수 확인
+                                        echo "CONTAINER_NAME: $CONTAINER_NAME"
+                                        echo "CONTAINER_PORT: $CONTAINER_PORT"
+                                        echo "INACTIVE_CONTAINER: $INACTIVE_CONTAINER"
+                                        echo "DOCKER_IMAGE: ${DOCKER_IMAGE}"
+                                        echo "DOCKER_TAG: ${DOCKER_TAG}"
+
+                                        # 새 버전과 포트로 docker-compose 업데이트
+                                        sed -i "s|{{IMAGE}}|${DOCKER_IMAGE}:${DOCKER_TAG}|g" docker-compose.yml
+                                        sed -i "s|{{CONTAINER_NAME}}|$CONTAINER_NAME|g" docker-compose.yml
+                                        sed -i "s|{{PORT}}|$CONTAINER_PORT|g" docker-compose.yml
+
+                                        echo "📝 치환 후 compose 내용:"
+                                        cat docker-compose.yml
+
+                                        # 최신 이미지 가져오기
+                                        docker-compose pull
+
+                                        # 새 버전 시작
+                                        docker-compose up -d
+                                    '
+                                '''
+
+                                // 2단계: 애플리케이션 상태 확인 및 NGINX 설정 업데이트
+                                sh '''
+                                    ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} '
+                                        cd /home/ubuntu/frontend
+
+                                        # 변수 다시 설정
+                                        DOCKER_IMAGE="subihwang/frontend"
+                                        DOCKER_TAG="latest"
+                                        APP_NAME="book-shy-frontend"
+                                        BLUE_PORT="3000"
+                                        GREEN_PORT="3001"
+
+                                        # 현재 어떤 배포가 활성화되어 있는지 확인
+                                        if [ -f .active_frontend ]; then
+                                            ACTIVE_COLOR=$(cat .active_frontend)
+                                            if [ "$ACTIVE_COLOR" = "blue" ]; then
+                                                CONTAINER_NAME="${APP_NAME}-green"
+                                                CONTAINER_PORT="${GREEN_PORT}"
+                                            else
+                                                CONTAINER_NAME="${APP_NAME}-blue"
+                                                CONTAINER_PORT="${BLUE_PORT}"
+                                            fi
+                                        else
+                                            CONTAINER_NAME="${APP_NAME}-blue"
+                                            CONTAINER_PORT="${BLUE_PORT}"
+                                        fi
+
+                                        # 컨테이너가 정상 상태가 될 때까지 대기
+                                        echo "✅ 컨테이너 정상 상태 기다리는 중"
+                                        for i in {1..15}; do
+                                            if curl -s http://localhost:$CONTAINER_PORT | grep -q "body"; then
+                                                echo "✅ 프론트엔드 앱 정상 구동됨"
+                                                break
+                                            fi
+                                            echo "✅ 애플리케이션이 시작되기를 기다리는 중 $i"
+                                            sleep 2
+                                        done
+
+                                        # 어떤 배포가 활성화되었는지 기록
+                                        if [ "$CONTAINER_NAME" = "${APP_NAME}-blue" ]; then
+                                            echo "blue" > .active_frontend
+                                        else
+                                            echo "green" > .active_frontend
+                                        fi
+                                    '
+                                '''
+                                // 3단계: NGINX 설정 업데이트
+                                sh '''
+                                    ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} '
+                                        cd /home/ubuntu/frontend
+
+                                        # 현재 활성화된 색상 확인
+                                        ACTIVE_COLOR=$(cat .active_frontend)
+
+                                        # Nginx 설정에 활성 배포 정보 기록
+                                        echo "upstream frontend_servers {" > /tmp/nginx_frontend_upstream.conf
+                                        if [ "$ACTIVE_COLOR" = "blue" ]; then
+                                            echo "    server 127.0.0.1:3000;" >> /tmp/nginx_frontend_upstream.conf
+                                        else
+                                            echo "    server 127.0.0.1:3001;" >> /tmp/nginx_frontend_upstream.conf
+                                        fi
+                                        echo "}" >> /tmp/nginx_frontend_upstream.conf
+                                        
+                                        # 프론트엔드 location 설정 추가
+                                        echo "server {" >> /tmp/nginx_frontend_upstream.conf
+                                        echo "    listen 80;" >> /tmp/nginx_frontend_upstream.conf
+                                        echo "    server_name k12d204.p.ssafy.io;" >> /tmp/nginx_frontend_upstream.conf
+                                        echo "    location / {" >> /tmp/nginx_frontend_upstream.conf
+                                        echo "        proxy_pass http://frontend_servers;" >> /tmp/nginx_frontend_upstream.conf
+                                        echo "        proxy_http_version 1.1;" >> /tmp/nginx_frontend_upstream.conf
+                                        echo "        proxy_set_header Upgrade \$http_upgrade;" >> /tmp/nginx_frontend_upstream.conf
+                                        echo "        proxy_set_header Connection 'upgrade';" >> /tmp/nginx_frontend_upstream.conf
+                                        echo "        proxy_set_header Host \$host;" >> /tmp/nginx_frontend_upstream.conf
+                                        echo "        proxy_cache_bypass \$http_upgrade;" >> /tmp/nginx_frontend_upstream.conf
+                                        echo "    }" >> /tmp/nginx_frontend_upstream.conf
+                                        echo "}" >> /tmp/nginx_frontend_upstream.conf
+                                        
+                                        # NGINX 설정 디렉토리로 이동
+                                        sudo mv /tmp/nginx_frontend_upstream.conf /home/ubuntu/nginx/conf.d/frontend_upstream.conf
+
+                                        # NGINX 설정 리로드
+                                        docker exec ubuntu-nginx-1 nginx -s reload || echo "❌️ NGINX 리로드 실패"
+                                        echo "✅ NGINX 설정 업데이트 완료"
+
+                                        # 비활성 컨테이너 정지
+                                        if [ "$ACTIVE_COLOR" = "blue" ]; then
+                                            INACTIVE_CONTAINER="${APP_NAME}-green"
+                                        else
+                                            INACTIVE_CONTAINER="${APP_NAME}-blue"
+                                        fi
+
+                                        # 연결이 드레인될 때까지 기다린 후 이전 컨테이너 중지
+                                        sleep 10
+                                        docker stop "${INACTIVE_CONTAINER}" || true
+                                        docker rm "${INACTIVE_CONTAINER}" || true
+                                    '
+                                '''
+                            }
+                        }
+                    } catch (Exception e) {
+                        // 오류 발생 시 파이프라인 중단
+                        error "❌ 배포 실패: ${e.getMessage()}"
+                    }
                 }
             }
         }
 
-        stage('Archive Build') {
+        // 성공적인 배포 후 이전 버전을 정리하는 단계
+        stage('Cleanup Old Deployment'){
             steps {
-                dir('bookshy') {
-                    archiveArtifacts artifacts: 'dist/**/*', fingerprint: true
-                }
-            }
-        }
+                // 이전 컨테이너 및 이미지 정리
+                sshagent(credentials: ['remote-server-credentials']) {
+                    sh '''
+                        # 사용하지 않는 컨테이너 정리
+                        ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} 'docker container prune -f'
 
-        stage('Deploy to Production') {
-            when {
-                branch 'front'
-            }
-            steps {
-                dir('bookshy') {
-                    sh 'echo "Deploying to production environment"'
-                    // 실제 배포 스크립트를 여기에 추가
-                    // 예: sh 'rsync -avz --delete dist/ user@production-server:/path/to/nginx/html/'
+                        # 태그가 없는 이미지 정리
+                        ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} 'docker image prune -f'
+
+                        echo "✅ 이전 배포 정리 완료"
+                    '''
                 }
             }
         }
@@ -74,13 +311,20 @@ pipeline {
 
     post {
         always {
+            // 작업 공간 정리
             cleanWs()
         }
         success {
-            echo 'Build succeeded!'
+            echo '✅ 파이프라인이 성공!'
         }
-        failure {
-            echo 'Build failed!'
+        failure{
+            // 실패 시 알림
+            echo '❌ 파이프라인 실패'
+            emailext (
+                subject: "실패: 파이프라인 '${currentBuild.fullDisplayName}'",
+                body: "파이프라인이 실패했습니다. 빌드 URL: ${env.BUILD_URL}",
+                to: 'ghkdtnql@gmail.com'
+            )
         }
     }
 }

@@ -1,0 +1,15 @@
+services:
+  frontend:
+    image: {{IMAGE}}
+    container_name: {{CONTAINER_NAME}}
+    ports:
+      - "{{PORT}}:80"
+    environment:
+      - NODE_ENV=production
+    restart: always
+    networks:
+      - shy
+
+networks:
+  shy:
+    external: true
