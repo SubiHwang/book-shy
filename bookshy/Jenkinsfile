@@ -1,0 +1,72 @@
+pipeline {
+    agent {
+        docker {
+            image 'node:22-alpine'
+        }
+    }
+
+    stages {
+        stage ('Checkout') {
+            steps {
+               checkout scm
+            }
+        }
+         stage('Install Dependencies') {
+            steps {
+                sh 'npm --version'
+                sh 'node --version'
+                sh 'npm ci'
+            }
+        }
+
+        stage('Lint') {
+            steps {
+                sh 'npm run lint || true'
+            }
+        }
+
+         stage('Type Check') {
+            steps {
+                sh 'npx tsc --noEmit'
+            }
+        }
+
+        stage ('Build') {
+            steps {
+                script {
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Archive Build') {
+            steps {
+                archiveArtifacts artifacts: 'dist/**/*', fingerprint: true
+            }
+        }
+
+        stage('Deploy to Production') {
+            when {
+                branch 'front'
+            }
+            steps {
+                sh 'echo "Deploying to production environment"'
+                // 실제 배포 스크립트를 여기에 추가
+                // 예: sh 'rsync -avz --delete dist/ user@production-server:/path/to/nginx/html/'
+            }
+        }
+
+    }
+
+     post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo 'Build succeeded!'
+        }
+        failure {
+            echo 'Build failed!'
+        }
+    }
+}
