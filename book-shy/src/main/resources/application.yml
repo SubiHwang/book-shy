@@ -2,6 +2,18 @@ spring:
   application:
     name: book-shy
 
+  profiles:
+    active: dev
+    include: key
+
+server:
+  port: 8080  # 공통 포트 (dev/prod에서 오버라이드 가능)
+
+# 로깅 설정, 공통 메시지 등
+logging:
+  level:
+    root: INFO
+
 # health 체크 엔드포인트 활성화 -> 블루-그린 배포 시 컨테이너 상태 확인 가능
 management:
   endpoints:
