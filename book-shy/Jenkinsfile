@@ -177,36 +177,36 @@ pipeline {
                                     ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
                                     cd /home/ubuntu
 
-                                    # 명시적으로 변수 설정
-                                    export DOCKER_IMAGE=${DOCKER_IMAGE}
-                                    export DOCKER_TAG=${DOCKER_TAG}
-                                    export APP_NAME=${APP_NAME}
-                                    export BLUE_PORT=${BLUE_PORT}
-                                    export GREEN_PORT=${GREEN_PORT}
-
                                     # 현재 어떤 배포가 활성화되어 있는지 확인
-                                    if [ -f .active ] && [ "$(cat .active)" == "blue" ]; then
-                                        echo "✅ Green deployment 실행 중"
-                                        export CONTAINER_NAME=${APP_NAME}-green
-                                        export CONTAINER_PORT=${GREEN_PORT}
-                                        export INACTIVE_CONTAINER=${APP_NAME}-blue
+                                    export CONTAINER_NAME=""
+                                    export CONTAINER_PORT=""
+                                    export INACTIVE_CONTAINER=""
+
+
+                                    if [ -f .active ]; then
+                                        ACTIVE_COLOR=$(cat .active)
+                                        if [ "$ACTIVE_COLOR" = "blue" ]; then
+                                            echo "✅ Green deployment 실행 중"
+                                            export CONTAINER_NAME="${APP_NAME}-green"
+                                            export CONTAINER_PORT="${GREEN_PORT}"
+                                            export INACTIVE_CONTAINER="${APP_NAME}-blue"
+                                        else
+                                            echo "✅ Blue deployment 실행 중"
+                                            export CONTAINER_NAME="${APP_NAME}-blue"
+                                            export CONTAINER_PORT="${BLUE_PORT}"
+                                            export INACTIVE_CONTAINER="${APP_NAME}-green"
+                                        fi
                                     else
-                                        echo "✅ Blue deployment 실행 중"
-                                        export CONTAINER_NAME=${APP_NAME}-blue
-                                        export CONTAINER_PORT=${BLUE_PORT}
-                                        export INACTIVE_CONTAINER=${APP_NAME}-green
+                                        echo "✅ Initial Blue deployment 실행 중"
+                                        export CONTAINER_NAME="${APP_NAME}-blue"
+                                        export CONTAINER_PORT="${BLUE_PORT}"
+                                        export INACTIVE_CONTAINER="${APP_NAME}-green"
                                     fi
 
-                                    # 치환 시 추가 디버그
-                                    echo "CONTAINER_NAME: $CONTAINER_NAME"
-                                    echo "CONTAINER_PORT: $CONTAINER_PORT"
-                                    echo "DOCKER_IMAGE: ${DOCKER_IMAGE}"
-                                    echo "DOCKER_TAG: ${DOCKER_TAG}"
-
                                     # 새 버전과 포트로 docker-compose 업데이트
-                                    sed -i "s/{{IMAGE}}/${DOCKER_IMAGE}:${DOCKER_TAG}/g" docker-compose.yml
-                                    sed -i "s/{{CONTAINER_NAME}}/${CONTAINER_NAME}/g" docker-compose.yml
-                                    sed -i "s/{{PORT}}/${CONTAINER_PORT}/g" docker-compose.yml
+                                    sed -i "s|{{IMAGE}}|${DOCKER_IMAGE}:${DOCKER_TAG}|g" docker-compose.yml
+                                    sed -i "s|{{CONTAINER_NAME}}|${CONTAINER_NAME}|g" docker-compose.yml
+                                    sed -i "s|{{PORT}}|${CONTAINER_PORT}|g" docker-compose.yml
 
                                     echo "📝 치환 후 compose 내용:"
                                     cat docker-compose.yml
@@ -255,15 +255,17 @@ pipeline {
         stage('Cleanup Old Deployment'){
             steps {
                 // 이전 컨테이너 및 이미지 정리
-                sh '''
-                    # 사용하지 않는 컨테이너 정리
-                    ssh ${REMOTE_USER}@${DEV_SERVER} 'docker container prune -f'
+                sshagent(credentials: ['remote-server-credentials']) {
+                    sh '''
+                        # 사용하지 않는 컨테이너 정리
+                        ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} 'docker container prune -f'
 
-                    # 태그가 없는 이미지 정리
-                    ssh ${REMOTE_USER}@${DEV_SERVER} 'docker image prune -f'
+                        # 태그가 없는 이미지 정리
+                        ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} 'docker image prune -f'
 
-                    echo "✅ 이전 배포 정리 완료"
-                '''
+                        echo "✅ 이전 배포 정리 완료"
+                    '''
+                }
             }
         }
     }
