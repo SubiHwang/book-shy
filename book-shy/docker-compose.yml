@@ -9,17 +9,6 @@ services:
     restart: always
     networks:
       - shy
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-    volumes:
-      - /home/ubuntu/nginx/conf.d:/etc/nginx/conf.d:ro
-    depends_on:
-      - backend
-    restart: always
-    networks:
-      - shy
 
 networks:
   shy:
