@@ -1,1 +1,13 @@
-spring.application.name=book-shy
+spring:
+  application:
+    name: book-shy
+
+# health 체크 엔드포인트 활성화 -> 블루-그린 배포 시 컨테이너 상태 확인 가능
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
