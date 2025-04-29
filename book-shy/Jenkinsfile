@@ -173,105 +173,146 @@ pipeline {
                                     echo "✅ docker-compose.yml 복사 완료"
                                 '''
 
-                                // 원격 서버에서 블루-그린 배포 수행
+                                // 원격 서버에서 블루-그린 배포 수행 - 각 명령을 별도로 실행
                                 sh '''
-                                    # 원격 서버에서 블루-그린 배포 수행
+                                    # 1단계: 초기 변수 설정 및 배포 컨테이너 결정
                                     ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} '
-                                    cd /home/ubuntu
+                                        cd /home/ubuntu
 
-                                    # 변수 초기화
-                                    CONTAINER_NAME=""
-                                    CONTAINER_PORT=""
-                                    INACTIVE_CONTAINER=""
-                                    DOCKER_IMAGE="subihwang/backend"
-                                    DOCKER_TAG="latest"
-                                    APP_NAME="book-shy-backend"
-                                    BLUE_PORT="8080"
-                                    GREEN_PORT="8082"
+                                        # 변수 초기화
+                                        DOCKER_IMAGE="subihwang/backend"
+                                        DOCKER_TAG="latest"
+                                        APP_NAME="book-shy-backend"
+                                        BLUE_PORT="8080"
+                                        GREEN_PORT="8082"
 
-                                    # 현재 어떤 배포가 활성화되어 있는지 확인
-                                    if [ -f .active ]; then
-                                        ACTIVE_COLOR=$(cat .active)
-                                        if [ "$ACTIVE_COLOR" = "blue" ]; then
-                                            echo "✅ Green deployment 실행 중"
-                                            CONTAINER_NAME="${APP_NAME}-green"
-                                            CONTAINER_PORT="${GREEN_PORT}"
-                                            INACTIVE_CONTAINER="${APP_NAME}-blue"
+                                        # 현재 어떤 배포가 활성화되어 있는지 확인
+                                        if [ -f .active ]; then
+                                            ACTIVE_COLOR=$(cat .active)
+                                            if [ "$ACTIVE_COLOR" = "blue" ]; then
+                                                echo "✅ Green deployment 실행 중"
+                                                CONTAINER_NAME="${APP_NAME}-green"
+                                                CONTAINER_PORT="${GREEN_PORT}"
+                                                INACTIVE_CONTAINER="${APP_NAME}-blue"
+                                            else
+                                                echo "✅ Blue deployment 실행 중"
+                                                CONTAINER_NAME="${APP_NAME}-blue"
+                                                CONTAINER_PORT="${BLUE_PORT}"
+                                                INACTIVE_CONTAINER="${APP_NAME}-green"
+                                            fi
                                         else
-                                            echo "✅ Blue deployment 실행 중"
+                                            echo "✅ Initial Blue deployment 실행 중"
                                             CONTAINER_NAME="${APP_NAME}-blue"
                                             CONTAINER_PORT="${BLUE_PORT}"
                                             INACTIVE_CONTAINER="${APP_NAME}-green"
                                         fi
-                                    else
-                                        echo "✅ Initial Blue deployment 실행 중"
-                                        CONTAINER_NAME="${APP_NAME}-blue"
-                                        CONTAINER_PORT="${BLUE_PORT}"
-                                        INACTIVE_CONTAINER="${APP_NAME}-green"
-                                    fi
 
-                                    # 변수 확인
-                                    echo "CONTAINER_NAME: $CONTAINER_NAME"
-                                    echo "CONTAINER_PORT: $CONTAINER_PORT"
-                                    echo "INACTIVE_CONTAINER: $INACTIVE_CONTAINER"
-                                    echo "DOCKER_IMAGE: ${DOCKER_IMAGE}"
-                                    echo "DOCKER_TAG: ${DOCKER_TAG}"
+                                        # 변수 확인
+                                        echo "CONTAINER_NAME: $CONTAINER_NAME"
+                                        echo "CONTAINER_PORT: $CONTAINER_PORT"
+                                        echo "INACTIVE_CONTAINER: $INACTIVE_CONTAINER"
+                                        echo "DOCKER_IMAGE: ${DOCKER_IMAGE}"
+                                        echo "DOCKER_TAG: ${DOCKER_TAG}"
 
-                                    # 새 버전과 포트로 docker-compose 업데이트
-                                    sed -i "s|{{IMAGE}}|${DOCKER_IMAGE}:${DOCKER_TAG}|g" docker-compose.yml
-                                    sed -i "s|{{CONTAINER_NAME}}|$CONTAINER_NAME|g" docker-compose.yml
-                                    sed -i "s|{{PORT}}|$CONTAINER_PORT|g" docker-compose.yml
+                                        # 새 버전과 포트로 docker-compose 업데이트
+                                        sed -i "s|{{IMAGE}}|${DOCKER_IMAGE}:${DOCKER_TAG}|g" docker-compose.yml
+                                        sed -i "s|{{CONTAINER_NAME}}|$CONTAINER_NAME|g" docker-compose.yml
+                                        sed -i "s|{{PORT}}|$CONTAINER_PORT|g" docker-compose.yml
 
-                                    echo "📝 치환 후 compose 내용:"
-                                    cat docker-compose.yml
+                                        echo "📝 치환 후 compose 내용:"
+                                        cat docker-compose.yml
 
-                                    # 최신 이미지 가져오기
-                                    docker-compose pull
+                                        # 최신 이미지 가져오기
+                                        docker-compose pull
 
-                                    # 새 버전 시작
-                                    docker-compose up -d
+                                        # 새 버전 시작
+                                        docker-compose up -d
+                                    '
+                                '''
 
-                                    # 컨테이너가 정상 상태가 될 때까지 대기
-                                    echo "✅ 컨테이너 정상 상태 기다리는 중"
-                                    for i in {1..30}; do
-                                        if curl -s http://localhost:$CONTAINER_PORT/actuator/health | grep "UP"; then
-                                            echo "✅ 앱 정상 구동됨"
-                                            break
+                                // 2단계: 애플리케이션 상태 확인 및 NGINX 설정 업데이트
+                                sh '''
+                                    ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} '
+                                        cd /home/ubuntu
+
+                                        # 변수 다시 설정
+                                        DOCKER_IMAGE="subihwang/backend"
+                                        DOCKER_TAG="latest"
+                                        APP_NAME="book-shy-backend"
+                                        BLUE_PORT="8080"
+                                        GREEN_PORT="8082"
+
+                                        # 현재 어떤 배포가 활성화되어 있는지 확인
+                                        if [ -f .active ]; then
+                                            ACTIVE_COLOR=$(cat .active)
+                                            if [ "$ACTIVE_COLOR" = "blue" ]; then
+                                                CONTAINER_NAME="${APP_NAME}-green"
+                                                CONTAINER_PORT="${GREEN_PORT}"
+                                            else
+                                                CONTAINER_NAME="${APP_NAME}-blue"
+                                                CONTAINER_PORT="${BLUE_PORT}"
+                                            fi
+                                        else
+                                            CONTAINER_NAME="${APP_NAME}-blue"
+                                            CONTAINER_PORT="${BLUE_PORT}"
                                         fi
-                                        echo "✅ 애플리케이션이 시작되기를 기다리는 중 $i"
-                                        sleep 2
-                                    done
 
-                                    # 어떤 배포가 활성화되었는지 기록
-                                    if [ "$CONTAINER_NAME" = "${APP_NAME}-blue" ]; then
-                                        echo "blue" > .active
-                                    else
-                                        echo "green" > .active
-                                    fi
+                                        # 컨테이너가 정상 상태가 될 때까지 대기
+                                        echo "✅ 컨테이너 정상 상태 기다리는 중"
+                                        for i in {1..30}; do
+                                            if curl -s http://localhost:$CONTAINER_PORT/actuator/health | grep "UP"; then
+                                                echo "✅ 앱 정상 구동됨"
+                                                break
+                                            fi
+                                            echo "✅ 애플리케이션이 시작되기를 기다리는 중 $i"
+                                            sleep 2
+                                        done
 
-                                    # Health check가 끝난 후 NGINX 설정 업데이트
-                                    echo "✅ NGINX 설정 업데이트 중"
-                                    if [ "$CONTAINER_NAME" = "${APP_NAME}-blue" ]; then
-                                        # 블루 환경으로 트래픽 전환
-                                        echo 'set \$backend_upstream "http://book-shy-backend-blue:8080/";' > /tmp/backend_active.conf
-                                    else
-                                        # 그린 환경으로 트래픽 전환
-                                        echo 'set \$backend_upstream "http://book-shy-backend-green:8082/";' > /tmp/backend_active.conf
-                                    fi
+                                        # 어떤 배포가 활성화되었는지 기록
+                                        if [ "$CONTAINER_NAME" = "${APP_NAME}-blue" ]; then
+                                            echo "blue" > .active
+                                        else
+                                            echo "green" > .active
+                                        fi
+                                    '
+                                '''
 
-                                    # NGINX 컨테이너로 설정 파일 복사 (nginx는 실제 컨테이너 이름으로 변경 필요)
-                                    docker cp /tmp/backend_active.conf nginx:/etc/nginx/conf.d/backend_active.conf || echo "❌️ NGINX 설정 파일 복사 실패"
+                                // 3단계: NGINX 설정 업데이트 - 간단한 echo 명령 사용
+                                sh '''
+                                    ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} '
+                                        cd /home/ubuntu
 
-                                    # NGINX 설정 리로드
-                                    docker exec nginx nginx -s reload || echo "❌️ NGINX 리로드 실패"
-                                    echo "✅ NGINX 설정 업데이트 완료"
+                                        # 현재 활성화된 색상 확인
+                                        ACTIVE_COLOR=$(cat .active)
 
-                                    # 연결이 드레인될 때까지 기다린 후 이전 컨테이너 중지
-                                    sleep 10
-                                    if [ -n "$INACTIVE_CONTAINER" ]; then
+                                        # NGINX 설정 파일 생성
+                                        echo "✅ NGINX 설정 업데이트 중"
+                                        if [ "$ACTIVE_COLOR" = "blue" ]; then
+                                            # 블루 환경으로 설정
+                                            echo "set \\$backend_upstream \\"http://book-shy-backend-blue:8080/\\";" > /tmp/backend_active.conf
+                                        else
+                                            # 그린 환경으로 설정
+                                            echo "set \\$backend_upstream \\"http://book-shy-backend-green:8082/\\";" > /tmp/backend_active.conf
+                                        fi
+
+                                        # NGINX 컨테이너로 설정 파일 복사
+                                        docker cp /tmp/backend_active.conf nginx:/etc/nginx/conf.d/backend_active.conf || echo "❌️ NGINX 설정 파일 복사 실패"
+
+                                        # NGINX 설정 리로드
+                                        docker exec nginx nginx -s reload || echo "❌️ NGINX 리로드 실패"
+                                        echo "✅ NGINX 설정 업데이트 완료"
+
+                                        # 비활성 컨테이너 정지
+                                        if [ "$ACTIVE_COLOR" = "blue" ]; then
+                                            INACTIVE_CONTAINER="${APP_NAME}-green"
+                                        else
+                                            INACTIVE_CONTAINER="${APP_NAME}-blue"
+                                        fi
+
+                                        # 연결이 드레인될 때까지 기다린 후 이전 컨테이너 중지
+                                        sleep 10
                                         docker stop $INACTIVE_CONTAINER || true
                                         docker rm $INACTIVE_CONTAINER || true
-                                    fi
                                     '
                                 '''
                             }
