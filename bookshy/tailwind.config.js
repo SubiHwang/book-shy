@@ -18,9 +18,9 @@ export default {
         // 다크 모드 배경 컬러
         'dark-bg': {
           DEFAULT: '#1E1A14', // 기본 배경
-          secondary: '#252018', // 보조 배경 (업데이트됨)
-          card: '#2E2922', // 카드/컴포넌트 배경 (업데이트됨)
-          shade: '#38332D', // 음영 요소 (업데이트됨)
+          secondary: '#252018', // 보조 배경
+          card: '#2E2922', // 카드/컴포넌트 배경
+          shade: '#38332D', // 음영 요소
         },
         // 북끄북끄 포인트 컬러 (차분한 로즈)
         primary: {
@@ -36,11 +36,11 @@ export default {
           muted: '#8A8A8A', // 흐린 텍스트
           inverted: '#FFFFFF', // 반전 텍스트
         },
-        // 다크 모드 텍스트 컬러 (업데이트됨)
+        // 다크 모드 텍스트 컬러
         'dark-text': {
-          DEFAULT: '#F5F0E8', // 기본 텍스트 (업데이트됨)
-          secondary: '#C5C0B8', // 보조 텍스트 (업데이트됨)
-          muted: '#9E9992', // 흐린 텍스트 (업데이트됨)
+          DEFAULT: '#F5F0E8', // 기본 텍스트
+          secondary: '#C5C0B8', // 보조 텍스트
+          muted: '#9E9992', // 흐린 텍스트
           inverted: '#2D2D2D', // 반전 텍스트
         },
         // 상태 표시 컬러 (라이트 모드)
@@ -56,6 +56,12 @@ export default {
           info: '#42A5F5', // 정보
           warning: '#FFA726', // 경고
           error: '#EF5350', // 오류
+        },
+        'card-bg': {
+          pink: '#FFF0EB', // 카드 배경 (핑크)
+          green: '#E8F5E9', // 카드 배경 (그린)
+          blue: '#EBF9FF', // 카드 배경 (블루)
+          yellow: '#FFFDE7', // 카드 배경 (옐로우)
         },
       },
     },
