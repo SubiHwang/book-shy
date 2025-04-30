@@ -7,14 +7,15 @@ export default {
         pretendard: ['Pretendard Variable', 'sans-serif'],
       },
       colors: {
-        // 라이트 모드 배경 컬러 
+        tabBackground: '#F9FAFB', // 탭 배경 색상
+        // 라이트 모드 배경 컬러
         'light-bg': {
-          DEFAULT: '#FFFDF8', // 기본 배경 
+          DEFAULT: '#FFFDF8', // 기본 배경
           secondary: '#FFFBF2', // 보조 배경
           card: '#FFFFFF', // 카드/컴포넌트 배경
           shade: '#F5F2E8', // 음영 요소
         },
-        // 다크 모드 배경 컬러 
+        // 다크 모드 배경 컬러
         'dark-bg': {
           DEFAULT: '#1E1A14', // 기본 배경
           secondary: '#252018', // 보조 배경 (업데이트됨)
@@ -22,7 +23,7 @@ export default {
           shade: '#38332D', // 음영 요소 (업데이트됨)
         },
         // 북끄북끄 포인트 컬러 (차분한 로즈)
-        'primary': {
+        primary: {
           DEFAULT: '#E15F63', // Primary (차분한 로즈)
           light: '#EE8F92', // Primary Light
           dark: '#C04448', // Primary Dark
