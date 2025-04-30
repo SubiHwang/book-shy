@@ -37,5 +37,5 @@
       "@constants/*": ["./src/constants/*"],  
     }
   },
-  "include": ["src"]
+  "include": ["src", "**/*.d.ts"],
 }
