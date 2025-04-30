@@ -17,18 +17,21 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("📚 북끄북끄 API 문서")
-                        .description("React + Spring 기반 중고 도서 교환 플랫폼 Swagger UI")
+                        .title("📚 북끄북끄 API")
+                        .description("Spring Boot 기반 도서 교환 플랫폼 API 문서입니다.")
                         .version("v1.0.0")
-                        .contact(new Contact()
-                                .name("북끄북끄 개발팀")
-                                .email("support@bookshy.com")
-                        )
+                        .contact(new Contact().name("북끄북끄 개발팀").email("support@bookshy.com"))
                 )
                 .servers(List.of(
-                        new Server().url("http://localhost:8080").description("로컬 서버")
+                        new Server()
+                                .url("http://localhost:8089")
+                                .description("🧪 로컬 개발 서버"),
+                        new Server()
+                                .url("http://k12d204.p.ssafy.io:8080")
+                                .description("🚀 배포 서버")
                 ));
     }
+
 
     @Bean
     public GroupedOpenApi publicApi() {
