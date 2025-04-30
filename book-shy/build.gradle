@@ -1,8 +1,8 @@
 plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.2.5'
-    id 'io.spring.dependency-management' version '1.1.7'
-    id "org.sonarqube" version "4.3.0.3225"
+    id 'java' // Java 프로젝트로 인식되도록 지정
+    id 'org.springframework.boot' version '3.2.5' // Spring Boot 지원 (빌드, 실행 등 자동화)
+    id 'io.spring.dependency-management' version '1.1.7' // BOM 기반 의존성 버전 통제
+    id "org.sonarqube" version "4.3.0.3225" // 코드 품질 분석 도구 SonarQube 연동
 }
 
 group = 'com.ssafy.book-shy'
@@ -10,44 +10,61 @@ version = '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(17) // 자바 17 버전 명시 (JDK 17)
     }
 }
 
 repositories {
-    mavenCentral()
+    mavenCentral() // 의존성 다운로드를 위한 중앙 Maven 저장소
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-//    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    // 🌐 웹 및 데이터 계층 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc' // JDBC 기반 데이터 접근 (MyBatis처럼 직접 쿼리할 때 사용)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // JPA 기반 ORM 데이터 접근
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis' // Redis 연동 (캐싱, 세션 등)
+
+    // 🔒 시큐리티 (현재 주석 처리됨)
+    // implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    implementation 'org.springframework.boot:spring-boot-starter-web' // REST API 개발을 위한 기본 웹 스타터
+    implementation 'org.springframework.boot:spring-boot-starter-websocket' // WebSocket 기반 실시간 통신 지원
+
+    // 📘 Swagger(OpenAPI) 문서 자동 생성 (SpringDoc)
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
+    // ✅ Bean Validation(JSR-380) 사용 시 필요 (예: @NotNull 등)
     implementation 'org.hibernate.validator:hibernate-validator'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'io.micrometer:micrometer-registry-prometheus'
-    implementation 'com.zaxxer:HikariCP'
 
     // ✅ Kafka Consumer (유저 서비스에서 결제 성공 이벤트 수신)
     implementation 'org.springframework.kafka:spring-kafka'
+
     // ✅ Kafka JSON 처리
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
+    // 📈 애플리케이션 상태 모니터링
+    implementation 'org.springframework.boot:spring-boot-starter-actuator' // 헬스체크, 메트릭 등 제공
+    implementation 'io.micrometer:micrometer-registry-prometheus' // Prometheus 연동을 위한 Micrometer 모듈
+
+    // ⚙️ 커넥션 풀
+    implementation 'com.zaxxer:HikariCP' // Spring Boot에서 기본 사용되는 HikariCP
+
+    // 🔄 개발 편의성 향상 (자동 리로딩 등)
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // 🐘 PostgreSQL 데이터베이스 드라이버
     runtimeOnly 'org.postgresql:postgresql'
 
+    // 🔧 롬복 (개발 편의용 애노테이션 - @Getter, @Builder 등)
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
+    // ✅ 테스트 관련 의존성
+    testImplementation 'org.springframework.boot:spring-boot-starter-test' // JUnit5 + Mockito 통합
+    testImplementation 'org.springframework.security:spring-security-test' // 시큐리티 테스트 도구
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher' // IDE에서 JUnit 플랫폼 실행 보조
 }
 
 tasks.named('test') {
-    useJUnitPlatform()
+    useJUnitPlatform() // JUnit5 기반 테스트 실행 설정
 }
