@@ -48,7 +48,7 @@ const BottomTabBar: FC<TabBarProps> = ({ defaultActiveTab = 'bookshelf', onTabCh
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 bg-tabBackground border-t border-light-text-muted transition-transform duration-300 ${
+      className={`fixed bottom-0 left-0 right-0 bg-tabBackground border-t border-light-text-muted/30 transition-transform duration-300 ${
         isVisible ? 'translate-y-0' : 'translate-y-full'
       }`}
     >
@@ -70,13 +70,13 @@ const BottomTabBar: FC<TabBarProps> = ({ defaultActiveTab = 'bookshelf', onTabCh
                 <Icon
                   size={24}
                   strokeWidth={isActive ? 1 : 0.5}
-                  className={isActive ? 'fill-primary-light' : ''}
+                  className={isActive ? 'fill-primary-light/20' : ''}
                 />
               </div>
               <p className={`text-xs mt-1 ${isActive ? 'font-medium' : 'font-normal'}`}>
                 {tab.name}
               </p>
-              <div className="bg-primary-light"></div>
+              {isActive && <div className="bg-primary-light h-1 w-3 rounded-sm"></div>}
             </button>
           );
         })}
