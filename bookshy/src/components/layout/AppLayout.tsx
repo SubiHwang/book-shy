@@ -1,6 +1,7 @@
 import { FC, useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import BottomTabBar from '../common/BottomTabBar';
+import MatchingPage from '@/pages/matching/MatchingPage';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -23,12 +24,12 @@ const AppLayout: FC = () => {
   };
 
   return (
-    <div className="app-container pb-16">
+    <div className="app-container">
       <div className="content">
         <Routes>
           <Route path="/" element={<Navigate to="/bookshelf" replace />} />
           <Route path="/bookshelf" element={<div>내 서재</div>} />
-          <Route path="/matching" element={<div>매칭 추천</div>} />
+          <Route path="/matching" element={<MatchingPage />} />
           <Route path="/chat" element={<div>채팅</div>} />
           <Route path="/booknote" element={<div>독서 기록</div>} />
           <Route path="/mypage" element={<div>마이</div>} />
