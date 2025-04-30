@@ -21,10 +21,13 @@ pipeline {
         REMOTE_USER = credentials('remote-server-credentials')  // 원격 서버 접속용 사용자 이름/비밀번호
         DEV_SERVER = "k12d204.p.ssafy.io"
 
-        // ✅ DB 관련 추가
+        // DB 관련 환경 변수
         DB_URL = credentials('DB_URL')
         DB_USERNAME = credentials('DB_USERNAME')
         DB_PASSWORD = credentials('DB_PASSWORD')
+
+        // Redis 환경 변수
+        REDIS_PASSWORD = credentials('REDIS_PASSWORD')
     }
 
     stages {
@@ -175,6 +178,10 @@ pipeline {
                                     sed -i "s|\\${DB_PASSWORD}|${DB_PASSWORD}|g" docker-compose.yml
 
                                     echo "✅ docker-compose.yml DB 정보 치환 완료"
+
+                                    sed -i "s|\\${REDIS_PASSWORD}|${REDIS_PASSWORD}|g" docker-compose.yml
+
+                                    echo "✅ docker-compose.yml Redis 정보 치환 완료"
 
                                     # ✅ 2. 서버에 전송
                                     ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
