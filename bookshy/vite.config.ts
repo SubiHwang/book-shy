@@ -8,6 +8,14 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      // 개발 모드에서 서비스 워커 활성화 (테스트용)
+      devOptions: {
+        enabled: true,
+        type: 'module',
+        navigateFallback: 'index.html',
+      },
+      // 서비스 워커 설정
+      injectRegister: 'auto',
       registerType: 'autoUpdate',
       includeAssets: [
         'icons/pwa-192x192.png',
@@ -47,11 +55,15 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@components': path.resolve(__dirname, './src/components'),
+      '@constants': path.resolve(__dirname, './src/constants'),
       '@pages': path.resolve(__dirname, './src/pages'),
       '@hooks': path.resolve(__dirname, './src/hooks'),
       '@utils': path.resolve(__dirname, './src/utils'),
       '@styles': path.resolve(__dirname, './src/styles'),
       '@assets': path.resolve(__dirname, './src/assets'),
+      '@types': path.resolve(__dirname, './src/types'),
+      '@store': path.resolve(__dirname, './src/store'),
+      '@service': path.resolve(__dirname, './src/service'),
     },
   },
 });
