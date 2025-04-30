@@ -8,6 +8,14 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      // 개발 모드에서 서비스 워커 활성화 (테스트용)
+      devOptions: {
+        enabled: true,
+        type: 'module',
+        navigateFallback: 'index.html',
+      },
+      // 서비스 워커 설정
+      injectRegister: 'auto',
       registerType: 'autoUpdate',
       includeAssets: [
         'icons/pwa-192x192.png',

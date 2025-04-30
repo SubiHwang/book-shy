@@ -20,6 +20,8 @@ const App: FC = () => {
     onRegisterError(error: Error): void {
       console.log('SW 등록 에러:', error);
     },
+
+    immediate: true, // 즉시 등록 시도 (개발 환경에서도)
   } as RegisterSWCallbacks);
 
   // 스플래시 화면 종료 처리
