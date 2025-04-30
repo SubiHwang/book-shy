@@ -2,6 +2,9 @@ import { useState, FC } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import SplashScreen from '@components/splash/SplashScreen';
 import bookAnimation from '@assets/lottie/bookshy-splash.json';
+import { BrowserRouter } from 'react-router-dom';
+import AppLayout from './components/layout/AppLayout';
+import UpdatePrompt from './components/common/UpdatePrompt';
 
 // 서비스 워커 등록 콜백 타입 정의
 interface RegisterSWCallbacks {
@@ -42,14 +45,10 @@ const App: FC = () => {
   }
 
   return (
-    <>
-      <div className="App">
-        <h1>Welcome to BookShy!</h1>
-        {needRefresh && (
-          <button onClick={() => updateServiceWorker()}>새로고침하여 업데이트 적용</button>
-        )}
-      </div>
-    </>
+    <BrowserRouter>
+      <AppLayout />
+      <UpdatePrompt needRefresh={needRefresh} updateServiceWorker={updateServiceWorker} />
+    </BrowserRouter>
   );
 };
 
