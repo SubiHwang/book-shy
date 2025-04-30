@@ -6,6 +6,12 @@ spring:
     active: dev
     include: key
 
+  data:
+    redis:
+      host: k12d204.p.ssafy.io
+      port: 6379
+      password: ${REDIS.PASSWORD}
+
 server:
   port: 8080  # 공통 포트 (dev/prod에서 오버라이드 가능)
 
