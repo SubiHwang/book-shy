@@ -30,6 +30,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'com.zaxxer:HikariCP'
+
+    // ✅ Kafka Consumer (유저 서비스에서 결제 성공 이벤트 수신)
+    implementation 'org.springframework.kafka:spring-kafka'
+    // ✅ Kafka JSON 처리
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.postgresql:postgresql'
 

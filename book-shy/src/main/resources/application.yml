@@ -12,6 +12,18 @@ spring:
       port: 6379
       password: ${REDIS.PASSWORD}
 
+  kafka:
+    bootstrap-servers: ${KAFKA.BOOTSTRAP-SERVERS}
+    consumer:
+      group-id: ${KAFKA.CONSUMER.BOOK-GROUP-ID}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "*"
+    listener:
+      ack-mode: manual_immediate
+
 server:
   port: 8080  # 공통 포트 (dev/prod에서 오버라이드 가능)
 
