@@ -3,9 +3,9 @@ import { LibraryBig, BookCopy, MessageCircle, NotepadText, UserRound } from 'luc
 import { TabBarItem, TabBarProps } from '@/types/common/bottomTabBar';
 import { useLocation } from 'react-router-dom';
 
-const BottomTabBar: FC<TabBarProps> = ({ defaultActiveTab = 'bookshelf', onTabChange }) => {
+const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState<string>(defaultActiveTab);
+  const [activeTab, setActiveTab] = useState<string>('bookshelf');
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [lastScrollY, setLastScrollY] = useState<number>(0);
 

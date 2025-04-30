@@ -1,11 +1,10 @@
-import { FC, useEffect, useState } from 'react';
+import { FC } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import BottomTabBar from '../common/BottomTabBar';
 import MatchingPage from '@/pages/matching/MatchingPage';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<string>('bookshelf');
 
   // 탭 변경 시 해당 경로로 이동
   const handleTabChange = (tabId: string): void => {
@@ -24,7 +23,7 @@ const AppLayout: FC = () => {
           <Route path="/mypage" element={<div>마이</div>} />
         </Routes>
       </div>
-      <BottomTabBar defaultActiveTab={activeTab} onTabChange={handleTabChange} />
+      <BottomTabBar onTabChange={handleTabChange} />
     </div>
   );
 };

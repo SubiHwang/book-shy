@@ -7,6 +7,5 @@ export interface TabBarItem {
 }
 
 export interface TabBarProps {
-  defaultActiveTab?: string;
   onTabChange?: (tabId: string) => void;
 }
