@@ -1,11 +1,22 @@
 import { FC, useState, useEffect, useCallback } from 'react';
 import { LibraryBig, BookCopy, MessageCircle, NotepadText, UserRound } from 'lucide-react';
 import { TabBarItem, TabBarProps } from '@/types/common/bottomTabBar';
+import { useLocation } from 'react-router-dom';
 
 const BottomTabBar: FC<TabBarProps> = ({ defaultActiveTab = 'bookshelf', onTabChange }) => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<string>(defaultActiveTab);
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [lastScrollY, setLastScrollY] = useState<number>(0);
+
+  useEffect(() => {
+    const path = location.pathname.substring(1); // '/' 제거
+    if (path === '') {
+      setActiveTab('bookshelf');
+    } else if (['bookshelf', 'matching', 'chat', 'booknote', 'mypage'].includes(path)) {
+      setActiveTab(path);
+    }
+  }, [location.pathname]);
 
   const handleScroll = useCallback((): void => {
     const currentScrollY = window.scrollY;

@@ -1,22 +1,11 @@
 import { FC, useEffect, useState } from 'react';
-import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import BottomTabBar from '../common/BottomTabBar';
 import MatchingPage from '@/pages/matching/MatchingPage';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [activeTab, setActiveTab] = useState<string>('bookshelf');
-
-  // 현재 경로에 맞게 activeTab 상태 업데이트
-  useEffect(() => {
-    const path = location.pathname.substring(1); // '/' 제거
-    if (path === '') {
-      setActiveTab('bookshelf');
-    } else if (['bookshelf', 'matching', 'chat', 'booknote', 'mypage'].includes(path)) {
-      setActiveTab(path);
-    }
-  }, [location.pathname]);
 
   // 탭 변경 시 해당 경로로 이동
   const handleTabChange = (tabId: string): void => {
