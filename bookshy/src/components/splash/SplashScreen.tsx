@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import Lottie from 'lottie-react';
-// import bookshyAnimation from "@assets/lottie/bookshy.json";
-import { SplashScreenProps } from "@/types/splash";
+import { SplashScreenProps } from '@/types/splash';
 
 const SplashScreen = ({
   animationData,
@@ -44,6 +43,5 @@ const SplashScreen = ({
     </div>
   );
 };
-
 
 export default SplashScreen;
