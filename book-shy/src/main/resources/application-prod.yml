@@ -11,5 +11,8 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+
 server:
   port: 8080
