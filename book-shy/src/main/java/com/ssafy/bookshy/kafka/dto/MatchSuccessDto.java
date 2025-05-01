@@ -1,49 +1,36 @@
 package com.ssafy.bookshy.kafka.dto;
 
-import lombok.*;
-
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.List;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * Kafka에서 결제 성공 이벤트를 수신할 DTO (엘라스틱 서치에 저장될 모든 정보 포함)
+ * 🤝 매칭 성공 이벤트 DTO (Kafka 토픽: match.success)
  */
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Builder
+@Schema(description = "🤝 매칭 성공 Kafka 이벤트 DTO")
 public class MatchSuccessDto {
-    private String transactionId;
-    private long buyerId;
-    private long sellerId;
-    private String userJob;
-    private long birthDate;
-    private BigDecimal totalAmount;
-    private String currency;
-    private String paymentCategory;
-    private String paymentMerchant;
-    private String storeName;
-    private int cardId;
-    private String cardName;
-    private int year;   // 예: 2025
-    private int month;  // 예: 3
-    private int day;    // 예: 28
-    private boolean receiptUploaded;
-    private String paymentStatus;
-    private OffsetDateTime createdAt;
-    private List<OrderDetail> orders;
 
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @ToString
-    @Builder
-    public static class OrderDetail {
-        private String orderId;
-        private String cardNumber;
-        private BigDecimal amount;
-        private String paymentOrderStatus;
-    }
+    @Schema(description = "매칭 ID", example = "150")
+    private Long matchId;
+
+    @Schema(description = "사용자 A ID", example = "1")
+    private Long userIdA;
+
+    @Schema(description = "사용자 B ID", example = "2")
+    private Long userIdB;
+
+    @Schema(description = "사용자 A 책 ID", example = "101")
+    private Long bookIdA;
+
+    @Schema(description = "사용자 B 책 ID", example = "202")
+    private Long bookIdB;
+
+    @Schema(description = "매칭 완료 시각 (ISO-8601)", example = "2025-05-01T14:00:00")
+    private String matchedAt;
 }
