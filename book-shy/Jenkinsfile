@@ -186,7 +186,7 @@ pipeline {
 
                                     echo "✅ docker-compose.yml Redis 정보 치환 완료"
 
-                                    sed -i "s|\\${KAFKA.BOOTSTRAP-SERVERS}|${KAFKA_BOOTSTRAP_SERVERS}|g" docker-compose.yml
+                                    sed -i "s|\\${KAFKA_BOOTSTRAP_SERVERS}|${KAFKA_BOOTSTRAP_SERVERS}|g" docker-compose.yml
 
                                     echo "✅ docker-compose.yml Kafka 정보 치환 완료"
 
