@@ -13,6 +13,8 @@ spring:
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_BOOK_GROUP_ID}
 
 server:
   port: 8080

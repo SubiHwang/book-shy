@@ -13,6 +13,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+      - KAFKA_CONSUMER_BOOK_GROUP_ID=book-shy-group
     restart: always
     networks:
       - shy
