@@ -186,6 +186,10 @@ pipeline {
 
                                     echo "✅ docker-compose.yml Redis 정보 치환 완료"
 
+                                    sed -i "s|\\${KAFKA.BOOTSTRAP-SERVERS}|${KAFKA_BOOTSTRAP_SERVERS}|g" docker-compose.yml
+
+                                    echo "✅ docker-compose.yml Kafka 정보 치환 완료"
+
                                     # ✅ 2. 서버에 전송
                                     ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
                                         mkdir -p /home/ubuntu
