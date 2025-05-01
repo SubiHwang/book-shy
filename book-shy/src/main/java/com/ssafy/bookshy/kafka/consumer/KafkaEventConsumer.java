@@ -21,7 +21,7 @@ public class KafkaEventConsumer {
     /**
      * 🔔 책 등록 이벤트 수신 (book.created 토픽)
      */
-    @KafkaListener(topics = "book.created", groupId = "book-service-group")
+    @KafkaListener(topics = "book.created")
     public void listenBookCreated(ConsumerRecord<String, BookCreatedDto> record, Acknowledgment ack) {
         try {
             BookCreatedDto event = record.value();
@@ -36,7 +36,7 @@ public class KafkaEventConsumer {
     /**
      * 🎉 매칭 성공 이벤트 수신 (match.success 토픽)
      */
-    @KafkaListener(topics = "match.success", groupId = "book-service-group")
+    @KafkaListener(topics = "match.success")
     public void listenMatchSuccess(ConsumerRecord<String, MatchSuccessDto> record, Acknowledgment ack) {
         try {
             MatchSuccessDto event = record.value();
@@ -51,7 +51,7 @@ public class KafkaEventConsumer {
     /**
      * 📦 교환 완료 이벤트 수신 (trade.success 토픽)
      */
-    @KafkaListener(topics = "trade.success", groupId = "book-service-group")
+    @KafkaListener(topics = "trade.success")
     public void listenTradeSuccess(ConsumerRecord<String, TradeSuccessDto> record, Acknowledgment ack) {
         try {
             TradeSuccessDto event = record.value();
