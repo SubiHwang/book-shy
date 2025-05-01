@@ -28,6 +28,9 @@ pipeline {
 
         // Redis 환경 변수
         REDIS_PASSWORD = credentials('REDIS_PASSWORD')
+
+        // Kafka
+        KAFKA_BOOTSTRAP_SERVERS = credentials('KAFKA_BOOTSTRAP_SERVERS')
     }
 
     stages {
