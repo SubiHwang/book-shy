@@ -14,6 +14,10 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
       - KAFKA_CONSUMER_BOOK_GROUP_ID=book-shy-group
+
+      # 로깅 관련 환경 변수 추가
+      - LOGGING_LOGSTASH_HOST=logstash
+      - LOGGING_LOGSTASH_PORT=5000
     restart: always
     networks:
       - shy

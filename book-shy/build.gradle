@@ -55,6 +55,9 @@ dependencies {
     // 🐘 PostgreSQL 데이터베이스 드라이버
     runtimeOnly 'org.postgresql:postgresql'
 
+    // Logstash 로깅 의존성
+    implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+
     // 🔧 롬복 (개발 편의용 애노테이션 - @Getter, @Builder 등)
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
