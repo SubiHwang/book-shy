@@ -1,4 +1,4 @@
-import { ChatRoomSummary } from '../../types/chat';
+import { ChatRoomSummary } from '@/types/chat/chat';
 import ChatListItem from './ChatListItem.tsx';
 
 const dummyChatRooms: ChatRoomSummary[] = [

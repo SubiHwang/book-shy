@@ -1,4 +1,4 @@
-import { ChatMessage } from '../../types/chat';
+import { ChatMessage } from '@/types/chat/chat';
 
 interface Props {
   message: ChatMessage;

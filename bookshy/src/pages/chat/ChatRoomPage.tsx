@@ -1,7 +1,7 @@
 import ChatRoom from '@/components/chat/ChatRoom';
 import { useParams } from 'react-router-dom';
 import { useState } from 'react';
-import { ChatMessage } from '@/types/chat';
+import { ChatMessage } from '@/types/chat/chat';
 
 function ChatRoomPage() {
   const { roomId } = useParams<{ roomId: string }>();

@@ -1,5 +1,5 @@
 import { FC, useEffect, useRef, useState } from 'react';
-import { ChatMessage } from '../../types/chat.ts';
+import { ChatMessage } from '@/types/chat/chat.ts';
 import ChatMessageItem from './ChatMessageItem.tsx';
 import ChatInput from './ChatInput.tsx';
 import { io } from 'socket.io-client';

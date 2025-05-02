@@ -1,4 +1,4 @@
-import { ChatRoomSummary } from '../../types/chat';
+import { ChatRoomSummary } from '@/types/chat/chat';
 import { useNavigate } from 'react-router-dom';
 
 interface Props {
