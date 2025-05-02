@@ -5,6 +5,8 @@ import MyLibraryPage from '../../pages/mylibrary/MyLibraryPage';
 import MatchingPage from '@/pages/matching/MatchingPage';
 import BookSearchPage from '@/pages/mylibrary/BookSearchPage';
 import SelfBookEntryPage from '@/pages/mylibrary/SelfBookEntryPage';
+import AllMyBooksTab from '@/pages/mylibrary/tabs/AllBooksTab';
+import PublicMyBooksTab from '@/pages/mylibrary/tabs/PublicBooksTab';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -19,7 +21,11 @@ const AppLayout: FC = () => {
       <div className="content">
         <Routes>
           <Route path="/" element={<Navigate to="/bookshelf" replace />} />
-          <Route path="/bookshelf" element={<MyLibraryPage />} />
+          <Route path="/bookshelf" element={<MyLibraryPage />}>
+            <Route index element={<Navigate to="/bookshelf/all-my-books" replace />} />
+            <Route path="all-my-books" element={<AllMyBooksTab />} />
+            <Route path="public-my-books" element={<PublicMyBooksTab />} />
+          </Route>
           <Route path="/matching" element={<MatchingPage />}>
             <Route index element={<div>매칭 추천</div>} />
             <Route path="matching-recommendations" element={<div>매칭된 책</div>} />
