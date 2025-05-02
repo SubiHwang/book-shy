@@ -5,18 +5,28 @@ import NoRecommendationState from '@/components/Matching/MatchRecommend/NoRecomm
 import MatchingList from '@/components/Matching/MatchRecommend/MatchingList';
 
 const MatchingRecommend: FC = () => {
-  const [dummyData, setDummyData] = useState<MatchingRecommendation[]>([
-    // {
-    //   id: 1,
-    //   name: '마이콜',
-    //   profileImage: '/images/profile.png',
-    //   matchingPercent: 85,
-    //   shyScore: 85,
-    //   location: '구미시 진평동',
-    //   myWishBooks: ['이기적 유전자', '자존감 수업', '어떻게 원하는 것을 얻는가'],
-    //   theirBooks: ['호모데우스', '정의란 무엇인가'],
-    // },
-  ]);
+  const dummyData: MatchingRecommendation[] = [
+    {
+      id: 1,
+      name: '마이콜',
+      profileImage: '/images/profile.png',
+      matchingPercent: 85,
+      shyScore: 85,
+      location: '구미시 진평동',
+      myWishBooks: ['이기적 유전자', '자존감 수업', '어떻게 원하는 것을 얻는가'],
+      theirBooks: ['호모데우스', '정의란 무엇인가'],
+    },
+    {
+      id: 2,
+      name: '제니',
+      profileImage: '/images/profile.png',
+      matchingPercent: 65,
+      shyScore: 85,
+      location: '구미시 진평동',
+      myWishBooks: ['이기적 유전자'],
+      theirBooks: ['호모데우스'],
+    },
+  ];
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleRetryMatching = (): void => {
@@ -26,10 +36,6 @@ const MatchingRecommend: FC = () => {
       setIsLoading(false);
       // 필요에 따라 데이터를 업데이트합니다
     }, 1500);
-  };
-
-  const handleChatClick = (id: number): void => {
-    console.log(`채팅하기 클릭: ${id}`);
   };
 
   return (
@@ -47,7 +53,7 @@ const MatchingRecommend: FC = () => {
       {isLoading ? (
         <div>로딩중...</div>
       ) : dummyData.length > 0 ? (
-        <MatchingList matchings={dummyData} onChatClick={handleChatClick} />
+        <MatchingList matchings={dummyData} />
       ) : (
         <NoRecommendationState onRetry={handleRetryMatching} />
       )}
