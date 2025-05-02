@@ -5,18 +5,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-/**
- * 채팅방 거래 약속 캘린더 이벤트 DTO
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class ChatCalendarEventDto {
-    private Long chatRoomId;
-    private Long partnerId;
-    private String partnerName;
-    private LocalDate date;  // 거래 예정일 등
+    private Long calendarId;
+    private Long roomId;
+    private Long requestId;
+
+    private String title;
+    private String description;
+
+    private LocalDateTime exchangeDate;
+    private LocalDateTime rentalStartDate;
+    private LocalDateTime rentalEndDate;
 }

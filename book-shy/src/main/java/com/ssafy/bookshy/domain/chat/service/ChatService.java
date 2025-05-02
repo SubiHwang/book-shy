@@ -7,7 +7,7 @@ import com.ssafy.bookshy.domain.chat.repository.ChatMessageRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
 import com.ssafy.bookshy.domain.notification.dto.ChatNotificationRequestDto;
 import com.ssafy.bookshy.domain.notification.service.NotificationService;
-import com.ssafy.bookshy.domain.user.service.UserService; // 닉네임 조회를 위한 UserService
+import com.ssafy.bookshy.domain.users.service.UserService; // 닉네임 조회를 위한 UserService
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +36,7 @@ public class ChatService {
                 .map(room -> {
                     Long partnerId = room.getUserAId().equals(userId) ? room.getUserBId() : room.getUserAId();
                     String partnerName = userService.getNicknameById(partnerId); // 예시
-                    String partnerProfileImage = userService.getProfileImageById(partnerId); // 예시
+                    String partnerProfileImage = userService.getProfileImageUrlById(partnerId); // 예시
                     return ChatRoomDto.from(room, userId, partnerId, partnerName, partnerProfileImage);
                 })
                 .collect(Collectors.toList());
@@ -51,7 +51,7 @@ public class ChatService {
                 .map(room -> {
                     Long partnerId = room.getUserAId().equals(userId) ? room.getUserBId() : room.getUserAId();
                     String partnerName = userService.getNicknameById(partnerId); // 예시
-                    String partnerProfileImage = userService.getProfileImageById(partnerId); // 예시
+                    String partnerProfileImage = userService.getProfileImageUrlById(partnerId); // 예시
                     return ChatRoomDto.from(room, userId, partnerId, partnerName, partnerProfileImage);
                 })
                 .collect(Collectors.toList());
@@ -64,7 +64,7 @@ public class ChatService {
         if (existing.isPresent()) {
             ChatRoom room = existing.get();
             String partnerName = userService.getNicknameById(request.getUserBId());
-            String partnerProfile = userService.getProfileImageById(request.getUserBId());
+            String partnerProfile = userService.getProfileImageUrlById(request.getUserBId());
             return ChatRoomDto.from(room, request.getUserAId(), request.getUserBId(), partnerName, partnerProfile);
         }
 
@@ -73,7 +73,7 @@ public class ChatService {
         chatRoomRepository.save(newRoom);
 
         String partnerName = userService.getNicknameById(request.getUserBId());
-        String partnerProfile = userService.getProfileImageById(request.getUserBId());
+        String partnerProfile = userService.getProfileImageUrlById(request.getUserBId());
 
         return ChatRoomDto.from(newRoom, request.getUserAId(), request.getUserBId(), partnerName, partnerProfile);
     }
