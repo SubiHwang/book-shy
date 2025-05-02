@@ -1,9 +1,9 @@
 services:
   backend:
-    image: {{IMAGE}}
-    container_name: {{CONTAINER_NAME}}
+    image: subihwang/backend:latest
+    container_name: backend
     ports:
-      - "{{PORT}}:8080"
+      - "8080:8080"
 #    env_file:
 #      - .env
     environment:
