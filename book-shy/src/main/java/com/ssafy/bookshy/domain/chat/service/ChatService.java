@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,6 +56,28 @@ public class ChatService {
                 })
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    public ChatRoomDto createChatRoom(CreateChatRoomRequestDto request) {
+        // 두 사용자 간의 채팅방이 이미 존재하는지 확인
+        Optional<ChatRoom> existing = chatRoomRepository.findByParticipants(request.getUserAId(), request.getUserBId());
+        if (existing.isPresent()) {
+            ChatRoom room = existing.get();
+            String partnerName = userService.getNicknameById(request.getUserBId());
+            String partnerProfile = userService.getProfileImageById(request.getUserBId());
+            return ChatRoomDto.from(room, request.getUserAId(), request.getUserBId(), partnerName, partnerProfile);
+        }
+
+        // 존재하지 않으면 새로 생성
+        ChatRoom newRoom = new ChatRoom(request.getUserAId(), request.getUserBId());
+        chatRoomRepository.save(newRoom);
+
+        String partnerName = userService.getNicknameById(request.getUserBId());
+        String partnerProfile = userService.getProfileImageById(request.getUserBId());
+
+        return ChatRoomDto.from(newRoom, request.getUserAId(), request.getUserBId(), partnerName, partnerProfile);
+    }
+
 
     /**
      * 채팅 메시지 조회

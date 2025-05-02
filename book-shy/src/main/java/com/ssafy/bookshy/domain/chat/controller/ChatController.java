@@ -21,28 +21,29 @@ public class ChatController {
     }
 
     @PostMapping("/chats")
-    public ResponseEntity<ChatRoomDto> createChatRoom(@RequestBody CreateChatRoomRequest request) {
+    public ResponseEntity<ChatRoomDto> createChatRoom(@RequestBody CreateChatRoomRequestDto request) {
         return ResponseEntity.ok(chatService.createChatRoom(request));
     }
 
-    @GetMapping("/notifications/chat")
-    public ResponseEntity<List<ChatNotificationDto>> getChatNotifications(@RequestParam Long userId) {
-        return ResponseEntity.ok(chatService.getNotifications(userId));
-    }
+    // 이 API는 실제 알림 시스템 구현 전이면 주석 처리 고려
+    // @GetMapping("/notifications/chat")
+    // public ResponseEntity<List<ChatNotificationDto>> getChatNotifications(@RequestParam Long userId) {
+    //     return ResponseEntity.ok(chatService.getNotifications(userId));
+    // }
 
     @GetMapping("/chats/calendar")
     public ResponseEntity<List<ChatCalendarEventDto>> getChatCalendar(@RequestParam Long userId) {
-        return ResponseEntity.ok(chatService.getCalendarEvents(userId));
+        return ResponseEntity.ok(chatService.getChatRoomsByDate(userId, null)); // 날짜 파라미터 추가 필요
     }
 
     @PostMapping("/messages")
-    public ResponseEntity<ChatMessageDto> sendMessage(@RequestBody ChatMessageRequest request) {
-        return ResponseEntity.ok(chatService.sendMessage(request));
+    public ResponseEntity<ChatMessageResponseDto> sendMessage(@RequestBody ChatMessageRequestDto request) {
+        return ResponseEntity.ok(chatService.saveMessage(request));
     }
 
     @PostMapping("/messages/{messageId}/emoji")
-    public ResponseEntity<Void> addEmoji(@PathVariable Long messageId, @RequestBody EmojiRequest request) {
-        chatService.addEmoji(messageId, request);
+    public ResponseEntity<Void> addEmoji(@PathVariable Long messageId, @RequestBody AddEmojiRequestDto request) {
+        chatService.addEmojiToMessage(messageId, request.getEmoji());
         return ResponseEntity.ok().build();
     }
 }
