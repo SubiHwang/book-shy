@@ -1,7 +1,37 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { Zap } from 'lucide-react';
+import { MatchingRecommendation } from '@/types/Matching';
+import NoRecommendationState from '@/components/Matching/MatchRecommend/NoRecommendationState';
+import MatchingList from '@/components/Matching/MatchRecommend/MatchingList';
 
 const MatchingRecommend: FC = () => {
+  const [dummyData, setDummyData] = useState<MatchingRecommendation[]>([
+    // {
+    //   id: 1,
+    //   name: '마이콜',
+    //   profileImage: '/images/profile.png',
+    //   matchingPercent: 85,
+    //   shyScore: 85,
+    //   location: '구미시 진평동',
+    //   myWishBooks: ['이기적 유전자', '자존감 수업', '어떻게 원하는 것을 얻는가'],
+    //   theirBooks: ['호모데우스', '정의란 무엇인가'],
+    // },
+  ]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const handleRetryMatching = (): void => {
+    setIsLoading(true);
+    // API 호출을 시뮬레이션합니다
+    setTimeout(() => {
+      setIsLoading(false);
+      // 필요에 따라 데이터를 업데이트합니다
+    }, 1500);
+  };
+
+  const handleChatClick = (id: number): void => {
+    console.log(`채팅하기 클릭: ${id}`);
+  };
+
   return (
     <div>
       <div className="bg-primary-light/20 p-5">
@@ -14,6 +44,13 @@ const MatchingRecommend: FC = () => {
           해드려요.
         </p>
       </div>
+      {isLoading ? (
+        <div>로딩중...</div>
+      ) : dummyData.length > 0 ? (
+        <MatchingList matchings={dummyData} onChatClick={handleChatClick} />
+      ) : (
+        <NoRecommendationState onRetry={handleRetryMatching} />
+      )}
     </div>
   );
 };
