@@ -5,7 +5,8 @@ import com.ssafy.bookshy.domain.chat.entity.ChatMessage;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatMessageRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
-import com.ssafy.bookshy.global.notification.NotificationService;
+import com.ssafy.bookshy.domain.notification.dto.ChatNotificationRequestDto;
+import com.ssafy.bookshy.domain.notification.service.NotificationService;
 import com.ssafy.bookshy.domain.user.service.UserService; // 닉네임 조회를 위한 UserService
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -101,10 +102,7 @@ public class ChatService {
      */
     @Transactional
     public void notifyUserOnMessage(ChatNotificationRequestDto request) {
-        notificationService.sendChatNotification(
-                request.getReceiverId(),
-                request.getContent()
-        );
+        notificationService.sendChatNotification(request);
     }
 
     /**
