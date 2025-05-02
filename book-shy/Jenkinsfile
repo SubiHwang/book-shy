@@ -232,8 +232,8 @@ pipeline {
 
                                     # 설정 파일 전송
                                     scp -o StrictHostKeyChecking=no docker-compose-elk.yml ubuntu@${DEV_SERVER}:/home/ubuntu/elk-stack/
-                                    scp -o StrictHostKeyChecking=no logstash/config/logstash.yml ubuntu@${DEV_SERVER}:/home/ubuntu/elk-stack/logstash/config/
-                                    scp -o StrictHostKeyChecking=no logstash/pipeline/logstash.conf ubuntu@${DEV_SERVER}:/home/ubuntu/elk-stack/logstash/pipeline/
+                                    scp -o StrictHostKeyChecking=no logstash.yml ubuntu@${DEV_SERVER}:/home/ubuntu/elk-stack/logstash/config/
+                                    scp -o StrictHostKeyChecking=no logstash.conf ubuntu@${DEV_SERVER}:/home/ubuntu/elk-stack/logstash/pipeline/
 
                                     # Elasticsearch 메모리 설정
                                     ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
