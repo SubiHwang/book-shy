@@ -14,15 +14,15 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     /**
      * 사용자가 참여한 모든 채팅방 조회
      */
-    @Query("SELECT r FROM ChatRoom r WHERE r.participantAId = :userId OR r.participantBId = :userId")
+    @Query("SELECT r FROM ChatRoom r WHERE r.userAId = :userId OR r.userBId = :userId")
     List<ChatRoom> findByUserId(@Param("userId") Long userId);
 
     /**
      * 두 사용자의 1:1 채팅방 조회 (있으면 반환)
      */
     @Query("SELECT r FROM ChatRoom r WHERE " +
-            "(r.participantAId = :userId1 AND r.participantBId = :userId2) " +
-            "OR (r.participantAId = :userId2 AND r.participantBId = :userId1)")
+            "(r.userAId = :userId1 AND r.userBId = :userId2) " +
+            "OR (r.userAId = :userId2 AND r.userBId = :userId1)")
     Optional<ChatRoom> findByParticipants(@Param("userId1") Long userId1, @Param("userId2") Long userId2);
 
     /**
@@ -30,7 +30,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
      */
     @Query("SELECT DISTINCT r FROM ChatRoom r " +
             "JOIN r.messages m " +
-            "WHERE (r.participantAId = :userId OR r.participantBId = :userId) " +
+            "WHERE (r.userAId = :userId OR r.userBId = :userId) " +
             "AND DATE(m.timestamp) = :date")
     List<ChatRoom> findChatRoomsByUserIdAndDate(@Param("userId") Long userId,
                                                 @Param("date") LocalDate date);
