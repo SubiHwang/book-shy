@@ -32,7 +32,8 @@ function ChatRoom({ partnerName, partnerProfileImage, initialMessages }: Props) 
   }, []);
 
   useEffect(() => {
-    if (isNewRoom) {
+    const alreadyHasNotice = initialMessages.some((msg) => msg.id.startsWith('notice-'));
+    if (initialMessages.length === 0 && !alreadyHasNotice) {
       const now = new Date();
       const noticeMessage: ChatMessage = {
         id: 'notice-' + Date.now(),
@@ -42,7 +43,9 @@ function ChatRoom({ partnerName, partnerProfileImage, initialMessages }: Props) 
         timestamp: now.toISOString(),
         type: 'notice',
       };
-      setMessages((prev) => [noticeMessage, ...prev]);
+      setMessages([noticeMessage]);
+    } else {
+      setMessages(initialMessages);
     }
   }, []);
 
@@ -129,7 +132,13 @@ function ChatRoom({ partnerName, partnerProfileImage, initialMessages }: Props) 
               )}
               {isSystem ? (
                 <SystemMessage
-                  title={msg.type === 'notice' ? '거래 시 주의해주세요!' : undefined}
+                  title={
+                    msg.type === 'notice'
+                      ? '거래 시 주의해주세요!'
+                      : msg.type === 'info'
+                        ? '약속이 등록되었습니다!'
+                        : undefined
+                  }
                   content={msg.content}
                   variant={msg.type ?? 'info'}
                 />
