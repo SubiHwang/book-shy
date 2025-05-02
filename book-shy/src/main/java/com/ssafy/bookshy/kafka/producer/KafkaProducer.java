@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.kafka.producer;
 
 import com.ssafy.bookshy.kafka.dto.BookCreatedDto;
+import com.ssafy.bookshy.kafka.dto.ChatMessageKafkaDto;
 import com.ssafy.bookshy.kafka.dto.MatchSuccessDto;
 import com.ssafy.bookshy.kafka.dto.TradeSuccessDto;
 import lombok.RequiredArgsConstructor;
@@ -41,4 +42,14 @@ public class KafkaProducer {
             log.error("❌ Failed to send TradeSuccessEvent", e);
         }
     }
+
+    public void sendChatMessage(ChatMessageKafkaDto event) {
+        try {
+            kafkaTemplate.send("chat.message", event);
+            log.info("💬 Sent ChatMessageEvent: {}", event);
+        } catch (Exception e) {
+            log.error("❌ Failed to send ChatMessageEvent", e);
+        }
+    }
+
 }
