@@ -1,26 +1,24 @@
 import ChatRoom from '@/components/chat/ChatRoom';
 import { useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { ChatMessage } from '@/types/chat';
 
 function ChatRoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
+  const [partnerName, setPartnerName] = useState('');
+  const [partnerProfileImage, setPartnerProfileImage] = useState('');
+  const [initialMessages] = useState<ChatMessage[]>([]);
 
-  // roomId에 따라 상대방 정보 가져오는 로직 추가 가능
-  const dummyPartner = {
-    partnerName: '마이클',
-    partnerProfileImage:
-      'https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbzIOjQ%2FbtsNE2iIUCt%2FScKePxVg6XZCFUMPi6KIg0%2Fimg.png',
-  };
-
-  const dummyMessages = [
-    { id: '1', senderId: 'partner', content: '거래하실게요.', timestamp: '09:10' },
-    { id: '2', senderId: 'partner', content: '위치가 어디시죠?', timestamp: '09:10' },
-  ];
+  if (!roomId) return <div className="p-4 text-center text-gray-500">잘못된 접근입니다.</div>;
 
   return (
     <ChatRoom
-      partnerName={dummyPartner.partnerName}
-      partnerProfileImage={dummyPartner.partnerProfileImage}
-      initialMessages={dummyMessages}
+      partnerName={partnerName || '상대방'}
+      partnerProfileImage={
+        partnerProfileImage ||
+        'https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbguJOC%2FbtsNFnGX9MK%2F2hVVXFWQM8IwjT1h3vKh8k%2Fimg.jpg'
+      }
+      initialMessages={initialMessages}
     />
   );
 }
