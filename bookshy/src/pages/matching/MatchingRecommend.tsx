@@ -3,29 +3,30 @@ import { Zap } from 'lucide-react';
 import { MatchingRecommendation } from '@/types/Matching';
 import NoRecommendationState from '@/components/Matching/MatchRecommend/NoRecommendationState';
 import MatchingList from '@/components/Matching/MatchRecommend/MatchingList';
+import Loading from '@/components/common/Loading';
 
 const MatchingRecommend: FC = () => {
   const dummyData: MatchingRecommendation[] = [
-    {
-      id: 1,
-      name: '마이콜',
-      profileImage: '/images/profile.png',
-      matchingPercent: 85,
-      shyScore: 85,
-      location: '구미시 진평동',
-      myWishBooks: ['이기적 유전자', '자존감 수업', '어떻게 원하는 것을 얻는가'],
-      theirBooks: ['호모데우스', '정의란 무엇인가'],
-    },
-    {
-      id: 2,
-      name: '제니',
-      profileImage: '/images/profile.png',
-      matchingPercent: 65,
-      shyScore: 85,
-      location: '구미시 진평동',
-      myWishBooks: ['이기적 유전자'],
-      theirBooks: ['호모데우스'],
-    },
+    // {
+    //   id: 1,
+    //   name: '마이콜',
+    //   profileImage: '/images/profile.png',
+    //   matchingPercent: 85,
+    //   shyScore: 85,
+    //   location: '구미시 진평동',
+    //   myWishBooks: ['이기적 유전자', '자존감 수업', '어떻게 원하는 것을 얻는가'],
+    //   theirBooks: ['호모데우스', '정의란 무엇인가'],
+    // },
+    // {
+    //   id: 2,
+    //   name: '제니',
+    //   profileImage: '/images/profile.png',
+    //   matchingPercent: 65,
+    //   shyScore: 85,
+    //   location: '구미시 진평동',
+    //   myWishBooks: ['이기적 유전자'],
+    //   theirBooks: ['호모데우스'],
+    // },
   ];
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -39,7 +40,7 @@ const MatchingRecommend: FC = () => {
   };
 
   return (
-    <div>
+    <div className="flex flex-col bg-light-bg">
       <div className="bg-primary-light/20 p-5">
         <div className="flex items-center gap-1">
           <Zap className="text-primary-dark" size={20} strokeWidth={1} />
@@ -51,7 +52,7 @@ const MatchingRecommend: FC = () => {
         </p>
       </div>
       {isLoading ? (
-        <div>로딩중...</div>
+        <Loading loadingText="매칭 추천을 불러오는 중..." />
       ) : dummyData.length > 0 ? (
         <MatchingList matchings={dummyData} />
       ) : (
