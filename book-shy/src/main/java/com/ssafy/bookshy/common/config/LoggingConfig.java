@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.common.config;  // 패키지 선언이요. 프로젝트 구조에 맞게 넣으신 거죠? 짱! 👍
 
+import ch.qos.logback.core.util.Duration;
 import jakarta.annotation.PostConstruct;  // 스프링 부트 3.x에서는 javax가 아니라 jakarta로 바뀌었어요. 트렌디~
 import net.logstash.logback.appender.LogstashTcpSocketAppender;  // 로그스태시로 로그 보내는 클래스예요. 진짜 중요!
 import net.logstash.logback.encoder.LogstashEncoder;  // JSON으로 로그 변환하는 인코더. 없으면 앙대요!
@@ -41,7 +42,7 @@ public class LoggingConfig {  // 클래스 선언부. 이름은 딱 봐도 로�
         logstashAppender.addDestination(logstashHost + ":" + logstashPort);
 
         // 재연결 지연 시간 설정. 연결 끊기면 1초 후에 재시도. 너무 짧게 하면 서버에 부담이 갈 수도...
-        logstashAppender.setReconnectionDelay("1 second");
+        logstashAppender.setReconnectionDelay(Duration.valueOf("1 second"));
 
         // 로그스태시 인코더 설정. 로그를 JSON 형식으로 변환해줌. 진짜 중요!!
         LogstashEncoder encoder = new LogstashEncoder();
