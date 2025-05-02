@@ -31,7 +31,12 @@ public class ChatService {
     public List<ChatRoomDto> getChatRooms(Long userId) {
         List<ChatRoom> rooms = chatRoomRepository.findByUserId(userId);
         return rooms.stream()
-                .map(ChatRoomDto::from)
+                .map(room -> {
+                    Long partnerId = room.getUserAId().equals(userId) ? room.getUserBId() : room.getUserAId();
+                    String partnerName = userService.getNicknameById(partnerId); // 예시
+                    String partnerProfileImage = userService.getProfileImageById(partnerId); // 예시
+                    return ChatRoomDto.from(room, userId, partnerId, partnerName, partnerProfileImage);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -41,7 +46,12 @@ public class ChatService {
     public List<ChatRoomDto> getChatRoomsByDate(Long userId, LocalDate date) {
         List<ChatRoom> rooms = chatRoomRepository.findChatRoomsByUserIdAndDate(userId, date);
         return rooms.stream()
-                .map(ChatRoomDto::from)
+                .map(room -> {
+                    Long partnerId = room.getUserAId().equals(userId) ? room.getUserBId() : room.getUserAId();
+                    String partnerName = userService.getNicknameById(partnerId); // 예시
+                    String partnerProfileImage = userService.getProfileImageById(partnerId); // 예시
+                    return ChatRoomDto.from(room, userId, partnerId, partnerName, partnerProfileImage);
+                })
                 .collect(Collectors.toList());
     }
 

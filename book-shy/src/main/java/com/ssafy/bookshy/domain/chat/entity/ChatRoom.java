@@ -12,13 +12,17 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatRoom {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long userAId;
     private Long userBId;
 
     private LocalDateTime createdAt;
+
+    private String lastMessage;              // ✅ 마지막 메시지
+    private LocalDateTime lastMessageTimestamp; // ✅ 마지막 메시지 시간
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatMessage> messages = new ArrayList<>();
@@ -28,5 +32,10 @@ public class ChatRoom {
         this.userBId = userBId;
         this.createdAt = LocalDateTime.now();
     }
-}
 
+    // ✅ 채팅 메시지 저장 후 마지막 메시지 업데이트
+    public void updateLastMessage(String content, LocalDateTime timestamp) {
+        this.lastMessage = content;
+        this.lastMessageTimestamp = timestamp;
+    }
+}
