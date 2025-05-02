@@ -25,7 +25,7 @@ const AddBookDialog: React.FC<AddBookDialogProps> = ({ isOpen, onClose }) => {
   };
 
   const handleManualSearch = () => {
-    navigate('/my-library/search');
+    navigate('/bookshelf/add-by-search');
     onClose();
   };
 

@@ -3,6 +3,8 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import BottomTabBar from '../common/BottomTabBar';
 import MyLibraryPage from '../../pages/mylibrary/MyLibraryPage';
 import MatchingPage from '@/pages/matching/MatchingPage';
+import BookSearchPage from '@/pages/mylibrary/BookSearchPage';
+import SelfBookEntryPage from '@/pages/mylibrary/SelfBookEntryPage';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -22,6 +24,11 @@ const AppLayout: FC = () => {
           <Route path="/chat" element={<div>채팅</div>} />
           <Route path="/booknote" element={<div>독서 기록</div>} />
           <Route path="/mypage" element={<div>마이</div>} />
+
+          <Route path="/bookshelf/add-by-search" element={<BookSearchPage />} />
+          <Route path="/bookshelf/self-book-entry" element={<SelfBookEntryPage />} />
+          {/* <Route path="/my-library/add-by-title" element={<AddByTitlePage />} />
+          <Route path="/my-library/add-by-isbn" element={<AddByISBNPage />} /> */}
         </Routes>
       </div>
       <BottomTabBar onTabChange={handleTabChange} />

@@ -116,34 +116,38 @@ const MyLibraryPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen bg-light-bg">
       {/* Header 컴포넌트 적용 */}
       <Header
         title="내 서재"
         onBackClick={() => navigate(-1)}
         showBackButton={false}
         showNotification={true}
-        extraButton={true}
+        extraButton={null}
         extraButtonIcon={null}
         onExtraButtonClick={() => {}}
         className="bg-white shadow-md"
       />
 
-      <div className="max-w-screen-md mx-auto px-4 py-4 flex-1 overflow-auto">
-        {/* 통계 카드 */}
-        <StatsCard totalBooks={books.length} rank={userRank} achievement={achievement} />
+      {/* 스크롤 영역 - window 스크롤 이벤트를 발생시키기 위해 최상위 구조 변경 */}
+      <div className="pb-16 bg-light-bg">
+        {' '}
+        {/* 하단 탭바 영역만큼 패딩 추가 */}
+        <div className="max-w-screen-md mx-auto px-4 py-4">
+          {/* 통계 카드 */}
+          <StatsCard totalBooks={books.length} rank={userRank} achievement={achievement} />
 
-        {/* 탭 네비게이션 */}
-        <LibraryTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          allCount={sampleBooks.length}
-          publicCount={sampleBooks.filter((book) => book.isPublic).length}
-        />
+          {/* 탭 네비게이션 */}
+          <LibraryTabs
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            allCount={sampleBooks.length}
+            publicCount={sampleBooks.filter((book) => book.isPublic).length}
+          />
 
-        {/* 책장 컴포넌트 */}
-        <BookShelf books={books} isLoading={isLoading} />
-
+          {/* 책장 컴포넌트 */}
+          <BookShelf books={books} isLoading={isLoading} />
+        </div>
         {/* 책 추가 플로팅 액션 버튼*/}
         <div className="fixed bottom-28 right-5 md:right-10">
           <button
@@ -153,7 +157,6 @@ const MyLibraryPage: React.FC = () => {
             <img src="/icons/camera-upload.svg" alt="카메라 업로드" className="w-10 h-10" />
           </button>
         </div>
-
         {/* 책 추가 다이얼로그 */}
         <AddBookDialog isOpen={isDialogOpen} onClose={closeDialog} />
       </div>
