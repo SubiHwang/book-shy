@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SendHorizonal, Plus } from 'lucide-react';
+import { SendHorizonal, Plus, Minus } from 'lucide-react';
 
 interface Props {
   onSend: (content: string) => void;
@@ -27,7 +27,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
           onClick={onToggleOptions}
           className="p-2 rounded-full text-primary hover:bg-red-100 transition"
         >
-          <Plus size={20} />
+          {showOptions ? <Minus size={20} /> : <Plus size={20} />}
         </button>
 
         <input
