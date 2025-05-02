@@ -23,6 +23,12 @@ const AppLayout: FC = () => {
         <Routes>
           <Route path="/" element={<Navigate to="/bookshelf" replace />} />
           <Route path="/bookshelf" element={<div>내 서재</div>} />
+          <Route path="/matching" element={<MatchingPage />}>
+            <Route index element={<div>매칭 추천</div>} />
+            <Route path="matching-recommendations" element={<div>매칭된 책</div>} />
+            <Route path="wish-books" element={<div>읽고 싶은 책</div>} />
+          </Route>
+          <Route path="/chat" element={<div>채팅</div>} />
           <Route path="/matching" element={<MatchingPage />} />
           <Route path="/chat" element={<ChatListPage />} />
           <Route path="/chat/:roomId" element={<ChatRoomPage />} />
