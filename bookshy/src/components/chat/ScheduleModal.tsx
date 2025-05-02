@@ -60,10 +60,20 @@ const ScheduleModal: FC<Props> = ({ partnerName, partnerProfileImage, onClose, o
   };
 
   const handleComplete = () => {
-    if (!startDate || !borrowTime || !returnTime) return;
-    const msg = `📚 약속 제안 - ${tab}\n날짜: ${startDate ?? ''}${
-      endDate ? ` ~ ${endDate}` : ''
-    }\n대여 시간: ${borrowTime}\n반납 시간: ${returnTime}`;
+    if (!startDate || !borrowTime) return;
+
+    const formatFullDate = (day: string) => {
+      const date = new Date(year, month, parseInt(day));
+      return date.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    };
+
+    const dateString = formatFullDate(startDate);
+    const msg = `${dateString} ${borrowTime}`;
+
     onConfirm(msg);
     onClose();
   };
