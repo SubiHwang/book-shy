@@ -1,26 +1,31 @@
 import { FC } from 'react';
 import Header from '@/components/common/Header';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Outlet } from 'react-router-dom';
+import TabNavBar from '@/components/common/TabNavBar';
 
 const MatchingPage: FC = () => {
   const navigate = useNavigate();
+  const pages = [
+    { path: '/matching/matching-recommendations', label: '매칭된 책' },
+    { path: '/matching/wish-books', label: '읽고 싶은 책' },
+  ];
   return (
-    <>
+    <div className="matching-container bg-light-bg flex flex-col h-screen">
       <Header
         title="매칭 추천"
         onBackClick={() => navigate(-1)}
-        showBackButton={true}
-        showNotification={false}
+        showBackButton={false}
+        showNotification={true}
         extraButton={null}
         extraButtonIcon={null}
         onExtraButtonClick={() => {}}
-        className="bg-white shadow-md"
+        className="bg-light-bg shadow-md"
       />
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-        <h1 className="text-2xl font-bold mb-4">Matching Page</h1>
-        <p className="text-gray-600">This is the matching page content.</p>
+      <TabNavBar pages={pages} />
+      <div className="tab-content">
+        <Outlet />
       </div>
-    </>
+    </div>
   );
 };
 export default MatchingPage;
