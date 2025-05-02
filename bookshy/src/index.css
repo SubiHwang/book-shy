@@ -15,6 +15,10 @@
   }
 }
 
+body, #root {
+  background-color: #FFFDF8;
+}
+
 /* 스크롤바 커스텀 */
 ::-webkit-scrollbar {
   width: 5px;
