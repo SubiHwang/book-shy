@@ -62,6 +62,11 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    // 💬 채팅
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+
     // ✅ 테스트 관련 의존성
     testImplementation 'org.springframework.boot:spring-boot-starter-test' // JUnit5 + Mockito 통합
     testImplementation 'org.springframework.security:spring-security-test' // 시큐리티 테스트 도구
