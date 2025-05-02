@@ -15,5 +15,9 @@ export interface NoRecommendationStateProps {
 
 export interface MatchingListProps {
   matchings: MatchingRecommendation[];
+}
+
+export interface MatchingCardProps {
+  matching: MatchingRecommendation;
   onChatClick: (id: number) => void;
 }
