@@ -35,20 +35,16 @@ public class ChatRoomService {
                     String partnerName = userService.getNicknameById(partnerId);
                     String partnerProfileImage = userService.getProfileImageUrlById(partnerId);
 
-                    // ✅ 1. 책 제목 가져오기
-                    String bookTitle = matchingRepository.findBookTitleByChatRoomId(room.getId(), userId);
-
-                    // ✅ 2. 안 읽은 메시지 수
+                    // ✅ 1. 안 읽은 메시지 수
                     int unreadCount = chatMessageRepository.countUnreadMessages(room.getId(), userId);
 
-                    // ✅ 3. DTO 생성
+                    // ✅ 2. DTO 생성
                     return ChatRoomDto.from(
                             room,
                             userId,
                             partnerId,
                             partnerName,
                             partnerProfileImage,
-                            bookTitle,
                             unreadCount
                     );
                 })

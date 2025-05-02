@@ -22,7 +22,6 @@ public class BookQuote {
 
     private Long bookId;
 
-    @Lob
     private String content;
 
     private LocalDateTime createdAt;

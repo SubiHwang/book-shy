@@ -22,7 +22,6 @@ public class BookNote {
 
     private Long bookId;
 
-    @Lob
     private String content;
 
     private LocalDateTime createdAt;

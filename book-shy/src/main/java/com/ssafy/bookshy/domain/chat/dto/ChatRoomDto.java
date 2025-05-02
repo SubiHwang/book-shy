@@ -23,7 +23,6 @@ public class ChatRoomDto {
     private String partnerProfileImage;  // 상대방 프로필 이미지 URL
     private String lastMessage;          // 마지막 메시지
     private String lastMessageTime;      // 마지막 메시지 시간 (ISO 포맷)
-    private String bookTitle;            // 교환 대상 책 제목
     private int unreadCount;             // 안 읽은 메시지 수
 
     public static ChatRoomDto from(ChatRoom room,
@@ -31,7 +30,6 @@ public class ChatRoomDto {
                                    Long partnerId,
                                    String partnerName,
                                    String partnerProfileImage,
-                                   String bookTitle,
                                    int unreadCount) {
         String lastMessage = room.getLastMessage();
         String lastMessageTime = room.getLastMessageTimestamp() != null
@@ -46,7 +44,6 @@ public class ChatRoomDto {
                 .partnerProfileImage(partnerProfileImage)
                 .lastMessage(lastMessage)
                 .lastMessageTime(lastMessageTime)
-                .bookTitle(bookTitle)
                 .unreadCount(unreadCount)
                 .build();
     }

@@ -20,7 +20,6 @@ public class ChatCalendar extends TimeStampEntity {
 
     private String title;
 
-    @Lob
     private String description;
 
     private LocalDateTime exchangeDate;
