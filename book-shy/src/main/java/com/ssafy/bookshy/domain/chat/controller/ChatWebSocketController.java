@@ -1,0 +1,31 @@
+package com.ssafy.bookshy.domain.chat.controller;
+
+import com.ssafy.bookshy.domain.chat.dto.ChatMessageRequestDto;
+import com.ssafy.bookshy.domain.chat.dto.ChatMessageResponseDto;
+import com.ssafy.bookshy.domain.chat.service.ChatService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
+
+@Controller
+@RequiredArgsConstructor
+public class ChatWebSocketController {
+
+    private final ChatService chatService;
+    private final SimpMessagingTemplate messagingTemplate;
+
+    /**
+     * 클라이언트에서 "/app/chat.send"로 메시지를 보낼 때 실행됨
+     */
+    @MessageMapping("/chat.send")
+    public void sendMessage(ChatMessageRequestDto requestDto) {
+        // 메시지를 저장하고 응답 DTO로 변환
+        ChatMessageResponseDto savedMessage = chatService.saveMessage(requestDto);
+
+        // /topic/chat/{chatRoomId}로 메시지 전송
+        String destination = "/topic/chat/" + requestDto.getChatRoomId();
+        messagingTemplate.convertAndSend(destination, savedMessage);
+    }
+}
