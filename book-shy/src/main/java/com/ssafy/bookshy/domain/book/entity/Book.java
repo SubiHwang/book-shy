@@ -33,7 +33,7 @@ public class Book {
 
     private LocalDate pubDate;
     private String coverImageUrl;
-    
+
     private String description;
 
     @Enumerated(EnumType.STRING)

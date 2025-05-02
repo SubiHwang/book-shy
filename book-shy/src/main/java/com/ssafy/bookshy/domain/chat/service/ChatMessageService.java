@@ -17,10 +17,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 채팅 메시지 관련 비즈니스 로직을 담당하는 서비스 클래스입니다.
- * - 메시지 저장, 조회
- * - Kafka를 통해 수신된 메시지 저장
- * - 메시지에 이모지 추가 등 기능을 제공합니다.
+ * 💬 채팅 메시지 비즈니스 로직 처리 서비스
+ *
+ * 주요 기능:
+ * - 채팅 메시지 저장 (WebSocket, Kafka)
+ * - 메시지 조회 (시간순)
+ * - 읽음 처리
+ * - 이모지 추가
  */
 @Service
 @RequiredArgsConstructor
@@ -32,13 +35,14 @@ public class ChatMessageService {
     private final UserService userService;
 
     /**
-     * 지정된 채팅방의 모든 메시지를 시간 순으로 조회합니다.
+     * 🕐 채팅방의 메시지 전체를 시간 순으로 조회
      *
-     * @param chatRoomId 조회할 채팅방 ID
-     * @return ChatMessageResponseDto 리스트
+     * @param chatRoomId 채팅방 ID
+     * @return 채팅 메시지 DTO 리스트
      */
     public List<ChatMessageResponseDto> getMessages(Long chatRoomId) {
         List<ChatMessage> messages = chatMessageRepository.findAllByChatRoomIdOrderByTimestampAsc(chatRoomId);
+
         return messages.stream()
                 .map(msg -> {
                     String nickname = userService.getNicknameById(msg.getSenderId());
@@ -48,11 +52,15 @@ public class ChatMessageService {
     }
 
     /**
-     * 클라이언트가 보낸 메시지를 DB에 저장합니다.
-     * - WebSocket을 통해 직접 받은 메시지를 처리
+     * ✉️ 클라이언트가 WebSocket으로 보낸 메시지를 DB에 저장
+     *
+     * - 채팅방 존재 여부 확인
+     * - ChatMessage 엔티티 생성 및 저장
+     * - 채팅방의 마지막 메시지/시간 갱신
+     * - 응답 DTO 반환
      *
      * @param request 클라이언트 요청 DTO
-     * @return 저장된 메시지 정보 DTO
+     * @return 저장된 메시지 응답 DTO
      */
     @Transactional
     public ChatMessageResponseDto saveMessage(ChatMessageRequestDto request) {
@@ -63,25 +71,28 @@ public class ChatMessageService {
                 .chatRoom(chatRoom)
                 .senderId(request.getSenderId())
                 .content(request.getContent())
-                .timestamp(LocalDateTime.now()) // 보낸 시간
+                .timestamp(LocalDateTime.now())
                 .build();
 
         ChatMessage saved = chatMessageRepository.save(message);
 
-        // 채팅방의 마지막 메시지 내용/시간 갱신
+        // 채팅방의 마지막 메시지 내용 및 시간 업데이트
         chatRoom.updateLastMessage(saved.getContent(), saved.getTimestamp());
 
-        // 닉네임 조회 및 응답 DTO 변환
         String nickname = userService.getNicknameById(saved.getSenderId());
         return ChatMessageResponseDto.from(saved, nickname);
     }
 
     /**
-     * Kafka에서 수신한 채팅 메시지를 DB에 저장합니다.
-     * - 메시지를 직접 broadcast 하지 않고 Kafka를 통해 전달받는 구조
+     * 📨 Kafka에서 수신한 메시지를 DB에 저장
      *
-     * @param dto Kafka로부터 수신된 메시지 DTO
-     * @return 저장된 메시지 정보 DTO
+     * - 외부 서비스 또는 Kafka Consumer를 통해 들어온 메시지 처리
+     * - 채팅방 존재 여부 확인
+     * - 메시지 저장 및 채팅방 마지막 메시지 갱신
+     * - 응답 DTO 반환
+     *
+     * @param dto Kafka DTO
+     * @return 저장된 메시지 응답 DTO
      */
     @Transactional
     public ChatMessageResponseDto saveMessageFromKafka(ChatMessageKafkaDto dto) {
@@ -92,29 +103,47 @@ public class ChatMessageService {
                 .chatRoom(chatRoom)
                 .senderId(dto.getSenderId())
                 .content(dto.getContent())
-                .timestamp(LocalDateTime.now()) // Kafka 메시지에는 timestamp가 없으므로 현재 시간 사용
+                .timestamp(LocalDateTime.now()) // Kafka 메시지에는 timestamp가 없을 수 있으므로 현재 시간
                 .build();
 
         ChatMessage saved = chatMessageRepository.save(message);
-
-        // 채팅방의 마지막 메시지 내용/시간 갱신
         chatRoom.updateLastMessage(saved.getContent(), saved.getTimestamp());
 
-        // 사용자 닉네임 조회 및 응답 DTO 반환
         String nickname = userService.getNicknameById(saved.getSenderId());
         return ChatMessageResponseDto.from(saved, nickname);
     }
 
     /**
-     * 특정 메시지에 이모지를 추가합니다.
+     * 🧸 특정 메시지에 이모지를 추가
+     *
+     * - 메시지 존재 여부 확인
+     * - 이모지 리스트에 추가
      *
      * @param messageId 메시지 ID
-     * @param emoji     추가할 이모지 문자열
+     * @param emoji 추가할 이모지
      */
     @Transactional
     public void addEmojiToMessage(Long messageId, String emoji) {
         ChatMessage message = chatMessageRepository.findById(messageId)
                 .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다."));
         message.addEmoji(emoji);
+    }
+
+    /**
+     * ✅ 채팅방 내 읽지 않은 메시지들을 읽음 처리
+     *
+     * - senderId가 userId와 다른 메시지 중 isRead=false인 것만 필터링
+     * - 각 메시지에 대해 `isRead = true` 설정
+     *
+     * @param chatRoomId 채팅방 ID
+     * @param userId 읽은 사용자 ID
+     */
+    @Transactional
+    public void markMessagesAsRead(Long chatRoomId, Long userId) {
+        List<ChatMessage> unreadMessages = chatMessageRepository.findUnreadMessages(chatRoomId, userId);
+        for (ChatMessage message : unreadMessages) {
+            message.markAsRead();
+        }
+        // Dirty Checking으로 자동 반영
     }
 }

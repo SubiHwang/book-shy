@@ -35,4 +35,24 @@ public class ChatMessageController {
         chatMessageService.addEmojiToMessage(messageId, request.getEmoji());
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * ✅ 채팅방 메시지 읽음 처리
+     */
+    @Operation(
+            summary = "👁️‍🗨️ 메시지 읽음 처리",
+            description = """
+            사용자가 채팅방의 메시지를 읽었을 때 호출하는 API입니다.  
+            보낸 사람이 아닌 메시지 중 읽지 않은 메시지들을 모두 `읽음 처리`합니다.  
+            - 🧠 senderId와 userId가 다를 때만 처리됩니다.
+            - 📌 읽음 여부는 `isRead = true`로 반영됩니다.
+            """
+    )
+    @PostMapping("/{chatRoomId}/read")
+    public void markMessagesAsRead(
+            @PathVariable Long chatRoomId,
+            @RequestParam Long userId
+    ) {
+        chatMessageService.markMessagesAsRead(chatRoomId, userId);
+    }
 }
