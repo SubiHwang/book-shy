@@ -1,5 +1,7 @@
 // src/pages/MyLibrary/MyLibraryPage.tsx
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Header from '@/components/common/Header';
 import StatsCard from '@/components/mylibrary/StatsCard';
 import LibraryTabs from '@/components/mylibrary/LibraryTabs';
 import BookShelf from '@/components/mylibrary/BookShelf';
@@ -83,6 +85,7 @@ const sampleBooks: BookType[] = [
 ];
 
 const MyLibraryPage: React.FC = () => {
+  const navigate = useNavigate();
   const [books, setBooks] = useState<BookType[]>(sampleBooks); // 샘플 데이터로 초기화
   const [activeTab, setActiveTab] = useState<'all' | 'public'>('all');
   const [isLoading, setIsLoading] = useState<boolean>(false); // 샘플 데이터가 있으므로 로딩 상태 false로 시작
@@ -113,48 +116,47 @@ const MyLibraryPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-screen-md mx-auto px-4 py-4">
-      {/* 페이지 헤더 */}
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-semibold text-gray-800">내 서재</h1>
-        <button className="p-2 text-gray-500 hover:text-gray-800">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-            ></path>
-          </svg>
-        </button>
-      </div>
-
-      {/* 통계 카드 */}
-      <StatsCard totalBooks={books.length} rank={userRank} achievement={achievement} />
-
-      {/* 탭 네비게이션 */}
-      <LibraryTabs
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        allCount={sampleBooks.length}
-        publicCount={sampleBooks.filter((book) => book.isPublic).length}
+    <div className="flex flex-col h-screen">
+      {/* Header 컴포넌트 적용 */}
+      <Header
+        title="내 서재"
+        onBackClick={() => navigate(-1)}
+        showBackButton={false}
+        showNotification={true}
+        extraButton={true}
+        extraButtonIcon={null}
+        onExtraButtonClick={() => {}}
+        className="bg-white shadow-md"
       />
 
-      {/* 책장 컴포넌트 */}
-      <BookShelf books={books} isLoading={isLoading} />
+      <div className="max-w-screen-md mx-auto px-4 py-4 flex-1 overflow-auto">
+        {/* 통계 카드 */}
+        <StatsCard totalBooks={books.length} rank={userRank} achievement={achievement} />
 
-      {/* 책 추가 플로팅 액션 버튼*/}
-      <div className="fixed bottom-28 right-5 md:right-10">
-        <button
-          className="bg-primary hover:bg-primary-dark text-light-text-inverted rounded-full p-3 shadow-lg transition-colors"
-          onClick={openDialog}
-        >
-          <img src="/icons/camera-upload.svg" alt="카메라 업로드" className="w-10 h-10" />
-        </button>
+        {/* 탭 네비게이션 */}
+        <LibraryTabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          allCount={sampleBooks.length}
+          publicCount={sampleBooks.filter((book) => book.isPublic).length}
+        />
+
+        {/* 책장 컴포넌트 */}
+        <BookShelf books={books} isLoading={isLoading} />
+
+        {/* 책 추가 플로팅 액션 버튼*/}
+        <div className="fixed bottom-28 right-5 md:right-10">
+          <button
+            className="bg-primary hover:bg-primary-dark text-light-text-inverted rounded-full p-3 shadow-lg transition-colors"
+            onClick={openDialog}
+          >
+            <img src="/icons/camera-upload.svg" alt="카메라 업로드" className="w-10 h-10" />
+          </button>
+        </div>
+
+        {/* 책 추가 다이얼로그 */}
+        <AddBookDialog isOpen={isDialogOpen} onClose={closeDialog} />
       </div>
-
-      {/* 책 추가 다이얼로그 */}
-      <AddBookDialog isOpen={isDialogOpen} onClose={closeDialog} />
     </div>
   );
 };
