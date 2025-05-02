@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.chat.dto;
 
+import com.ssafy.bookshy.domain.chat.entity.ChatCalendar;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,4 +23,17 @@ public class ChatCalendarEventDto {
     private LocalDateTime exchangeDate;
     private LocalDateTime rentalStartDate;
     private LocalDateTime rentalEndDate;
+
+    public static ChatCalendarEventDto from(ChatCalendar entity) {
+        return ChatCalendarEventDto.builder()
+                .calendarId(entity.getCalendarId())
+                .title(entity.getTitle())
+                .description(entity.getDescription())
+                .exchangeDate(entity.getExchangeDate())
+                .rentalStartDate(entity.getRentalStartDate())
+                .rentalEndDate(entity.getRentalEndDate())
+                .roomId(entity.getChatRoom().getId())
+                .requestId(entity.getRequestId())
+                .build();
+    }
 }

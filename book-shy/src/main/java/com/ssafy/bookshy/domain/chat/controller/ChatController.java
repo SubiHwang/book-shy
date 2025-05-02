@@ -3,9 +3,11 @@ package com.ssafy.bookshy.domain.chat.controller;
 import com.ssafy.bookshy.domain.chat.dto.*;
 import com.ssafy.bookshy.domain.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -32,8 +34,10 @@ public class ChatController {
     // }
 
     @GetMapping("/chats/calendar")
-    public ResponseEntity<List<ChatCalendarEventDto>> getChatCalendar(@RequestParam Long userId) {
-        return ResponseEntity.ok(chatService.getChatRoomsByDate(userId, null)); // 날짜 파라미터 추가 필요
+    public ResponseEntity<List<ChatCalendarEventDto>> getChatCalendar(
+            @RequestParam Long userId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return ResponseEntity.ok(chatService.getCalendarEventsByDate(userId, date));
     }
 
     @PostMapping("/messages")

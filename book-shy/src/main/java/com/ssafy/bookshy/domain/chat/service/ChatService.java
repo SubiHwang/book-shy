@@ -1,8 +1,10 @@
 package com.ssafy.bookshy.domain.chat.service;
 
 import com.ssafy.bookshy.domain.chat.dto.*;
+import com.ssafy.bookshy.domain.chat.entity.ChatCalendar;
 import com.ssafy.bookshy.domain.chat.entity.ChatMessage;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
+import com.ssafy.bookshy.domain.chat.repository.ChatCalendarRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatMessageRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
 import com.ssafy.bookshy.domain.notification.dto.ChatNotificationRequestDto;
@@ -24,6 +26,7 @@ public class ChatService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatCalendarRepository chatCalendarRepository;
     private final UserService userService; // senderNickname 조회용
     private final NotificationService notificationService; // 알림 전송용 (선택적)
 
@@ -134,5 +137,16 @@ public class ChatService {
     private ChatRoom getChatRoomOrThrow(Long chatRoomId) {
         return chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChatCalendarEventDto> getCalendarEventsByDate(Long userId, LocalDate date) {
+        // 1. 해당 날짜에 해당하는 캘린더 이벤트를 조회
+        List<ChatCalendar> calendars = chatCalendarRepository.findByUserIdAndDate(userId, date);
+
+        // 2. DTO로 변환
+        return calendars.stream()
+                .map(ChatCalendarEventDto::from)
+                .collect(Collectors.toList());
     }
 }
