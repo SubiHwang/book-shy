@@ -18,7 +18,7 @@ const App: FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // PWA 업데이트 관리
-  const { needRefresh, updateServiceWorker, offlineReady } = useRegisterSW({
+  const { needRefresh, updateServiceWorker } = useRegisterSW({
     onRegistered(registration: ServiceWorkerRegistration | undefined): void {
       console.log('SW 등록됨', registration);
     },
