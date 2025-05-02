@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,6 +28,9 @@ public class ChatMessage extends TimeStampEntity {
     private String content;
     private LocalDateTime timestamp;
 
+    @Column(nullable = false)
+    private boolean isRead = false; // ✅ 읽음 여부 필드 추가
+
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> emojis = new ArrayList<>();
 
@@ -36,9 +40,15 @@ public class ChatMessage extends TimeStampEntity {
         this.senderId = senderId;
         this.content = content;
         this.timestamp = timestamp != null ? timestamp : LocalDateTime.now();
+        this.isRead = false; // 메시지 생성 시 기본값 false
     }
 
     public void addEmoji(String emoji) {
         this.emojis.add(emoji);
     }
+
+    public void markAsRead() {
+        this.isRead = true;
+    }
 }
+

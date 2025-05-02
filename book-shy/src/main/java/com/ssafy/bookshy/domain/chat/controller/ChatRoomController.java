@@ -27,10 +27,4 @@ public class ChatRoomController {
         return ResponseEntity.ok(chatRoomService.getChatRooms(userId));
     }
 
-    @Operation(summary = "➕ 채팅방 생성", description = "✨ 두 사용자 간 1:1 채팅방을 생성합니다.")
-    @PostMapping
-    public ResponseEntity<ChatRoomDto> createChatRoom(
-            @RequestBody CreateChatRoomRequestDto request) {
-        return ResponseEntity.ok(chatRoomService.createChatRoom(request));
-    }
 }

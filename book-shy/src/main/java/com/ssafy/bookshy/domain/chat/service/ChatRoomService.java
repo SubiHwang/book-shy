@@ -3,7 +3,9 @@ package com.ssafy.bookshy.domain.chat.service;
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomDto;
 import com.ssafy.bookshy.domain.chat.dto.CreateChatRoomRequestDto;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
+import com.ssafy.bookshy.domain.chat.repository.ChatMessageRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
+import com.ssafy.bookshy.domain.matching.repository.MatchingRepository;
 import com.ssafy.bookshy.domain.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,8 @@ import java.util.stream.Collectors;
 public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
+    private final MatchingRepository matchingRepository;
+    private final ChatMessageRepository chatMessageRepository;
     private final UserService userService;
 
     @Transactional(readOnly = true)
