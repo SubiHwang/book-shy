@@ -7,7 +7,7 @@ pipeline {
         DOCKER_TAG = "latest"
 
         // SonarQube 관련 설정
-        SONAR_HOST_URL = "http://k12d204.p.ssafy.io:9000/sonarqube"
+        SONAR_HOST_URL = "http://sonarqube:9000/sonarqube"
         SONAR_PROJECT_KEY = "book-shy"
         SONAR_TOKEN = credentials('sonarqube-token')  // Jenkins Credentials에 등록된 토큰
 
