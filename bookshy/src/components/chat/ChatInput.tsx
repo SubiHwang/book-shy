@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+import { SendHorizonal, Plus } from 'lucide-react';
 
 interface Props {
   onSend: (content: string) => void;
   showOptions: boolean;
   onToggleOptions: () => void;
+  onScheduleClick: () => void;
 }
 
-function ChatInput({ onSend, showOptions, onToggleOptions }: Props) {
+function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Props) {
   const [content, setContent] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -17,33 +19,39 @@ function ChatInput({ onSend, showOptions, onToggleOptions }: Props) {
   };
 
   return (
-    <div className="p-2 bg-light-bg-secondary">
-      <form onSubmit={handleSubmit} className="flex items-center">
+    <div className="bg-[#FFFCF9] p-3 border-t">
+      {/* 입력창 */}
+      <form onSubmit={handleSubmit} className="flex items-center gap-2">
         <button
           type="button"
           onClick={onToggleOptions}
-          className="text-2xl text-light-text-secondary focus:outline-none"
+          className="p-2 rounded-full text-primary hover:bg-red-100 transition"
         >
-          {showOptions ? '-' : '+'}
+          <Plus size={20} />
         </button>
+
         <input
           type="text"
           placeholder="메시지 보내기"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="flex-1 ml-2 px-4 py-2 rounded-full border border-gray-300 outline-none bg-primary-light text-white placeholder-white"
+          className="flex-1 px-4 py-2 bg-primary-light text-white placeholder-white rounded-full focus:outline-none"
         />
-        <button type="submit" className="ml-2 text-2xl text-gray-800 focus:outline-none">
-          ➤
+
+        <button
+          type="submit"
+          className="p-2 text-primary border border-primary rounded-full hover:bg-primary hover:text-white transition"
+        >
+          <SendHorizonal size={18} />
         </button>
       </form>
 
-      {/* 추가 옵션 메뉴 */}
+      {/* 확장 기능 버튼 */}
       {showOptions && (
-        <div className="flex justify-around mt-6">
+        <div className="flex justify-around mt-4">
           <OptionButton icon="📷" label="카메라" />
           <OptionButton icon="🖼️" label="앨범" />
-          <OptionButton icon="📅" label="약속" />
+          <OptionButton icon="📅" label="약속" onClick={onScheduleClick} />
           <OptionButton icon="📞" label="전화" />
         </div>
       )}
@@ -63,10 +71,12 @@ function OptionButton({
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center text-sm text-gray-600 focus:outline-none"
+      className="flex flex-col items-center text-primary hover:opacity-80 transition"
     >
-      <span className="text-2xl">{icon}</span>
-      <span>{label}</span>
+      <div className="w-12 h-12 rounded-full border border-primary flex items-center justify-center text-2xl">
+        {icon}
+      </div>
+      <span className="text-sm mt-1">{label}</span>
     </button>
   );
 }
