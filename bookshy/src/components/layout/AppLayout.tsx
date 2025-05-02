@@ -28,8 +28,6 @@ const AppLayout: FC = () => {
             <Route path="matching-recommendations" element={<div>매칭된 책</div>} />
             <Route path="wish-books" element={<div>읽고 싶은 책</div>} />
           </Route>
-          <Route path="/chat" element={<div>채팅</div>} />
-          <Route path="/matching" element={<MatchingPage />} />
           <Route path="/chat" element={<ChatListPage />} />
           <Route path="/chat/:roomId" element={<ChatRoomPage />} />
           <Route path="/booknote" element={<div>독서 기록</div>} />
