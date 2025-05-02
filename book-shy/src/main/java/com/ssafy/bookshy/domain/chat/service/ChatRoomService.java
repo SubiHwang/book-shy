@@ -21,34 +21,47 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserService userService;
 
+    @Transactional(readOnly = true)
     public List<ChatRoomDto> getChatRooms(Long userId) {
         List<ChatRoom> rooms = chatRoomRepository.findByUserId(userId);
+
         return rooms.stream()
                 .map(room -> {
                     Long partnerId = room.getUserAId().equals(userId) ? room.getUserBId() : room.getUserAId();
                     String partnerName = userService.getNicknameById(partnerId);
                     String partnerProfileImage = userService.getProfileImageUrlById(partnerId);
-                    return ChatRoomDto.from(room, userId, partnerId, partnerName, partnerProfileImage);
+
+                    // ✅ 1. 책 제목 가져오기
+                    String bookTitle = matchingRepository.findBookTitleByChatRoomId(room.getId(), userId);
+
+                    // ✅ 2. 안 읽은 메시지 수
+                    int unreadCount = chatMessageRepository.countUnreadMessages(room.getId(), userId);
+
+                    // ✅ 3. DTO 생성
+                    return ChatRoomDto.from(
+                            room,
+                            userId,
+                            partnerId,
+                            partnerName,
+                            partnerProfileImage,
+                            bookTitle,
+                            unreadCount
+                    );
                 })
                 .collect(Collectors.toList());
     }
 
+
     @Transactional
-    public ChatRoomDto createChatRoom(CreateChatRoomRequestDto request) {
-        Optional<ChatRoom> existing = chatRoomRepository.findByParticipants(request.getUserAId(), request.getUserBId());
+    public ChatRoom createChatRoomFromMatch(Long userAId, Long userBId) {
+        // 기존에 존재하는 방이 있다면 반환
+        Optional<ChatRoom> existing = chatRoomRepository.findByParticipants(userAId, userBId);
         if (existing.isPresent()) {
-            ChatRoom room = existing.get();
-            String partnerName = userService.getNicknameById(request.getUserBId());
-            String partnerProfile = userService.getProfileImageUrlById(request.getUserBId());
-            return ChatRoomDto.from(room, request.getUserAId(), request.getUserBId(), partnerName, partnerProfile);
+            return existing.get();
         }
 
-        ChatRoom newRoom = new ChatRoom(request.getUserAId(), request.getUserBId());
-        chatRoomRepository.save(newRoom);
-
-        String partnerName = userService.getNicknameById(request.getUserBId());
-        String partnerProfile = userService.getProfileImageUrlById(request.getUserBId());
-
-        return ChatRoomDto.from(newRoom, request.getUserAId(), request.getUserBId(), partnerName, partnerProfile);
+        // 새 채팅방 생성
+        ChatRoom chatRoom = new ChatRoom(userAId, userBId);
+        return chatRoomRepository.save(chatRoom);
     }
 }

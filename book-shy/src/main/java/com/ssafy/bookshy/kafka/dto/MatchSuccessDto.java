@@ -20,16 +20,16 @@ public class MatchSuccessDto {
     private Long matchId;
 
     @Schema(description = "사용자 A ID", example = "1")
-    private Long userIdA;
+    private Long userAId;
 
     @Schema(description = "사용자 B ID", example = "2")
-    private Long userIdB;
+    private Long userBId;
 
     @Schema(description = "사용자 A 책 ID", example = "101")
-    private Long bookIdA;
+    private Long bookAId;
 
     @Schema(description = "사용자 B 책 ID", example = "202")
-    private Long bookIdB;
+    private Long bookBId;
 
     @Schema(description = "매칭 완료 시각 (ISO-8601)", example = "2025-05-01T14:00:00")
     private String matchedAt;

@@ -2,7 +2,9 @@ package com.ssafy.bookshy.kafka.consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.bookshy.domain.chat.dto.ChatMessageResponseDto;
+import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.service.ChatMessageService;
+import com.ssafy.bookshy.domain.chat.service.ChatRoomService;
 import com.ssafy.bookshy.kafka.dto.ChatMessageKafkaDto;
 import com.ssafy.bookshy.kafka.dto.MatchSuccessDto;
 import com.ssafy.bookshy.kafka.dto.BookCreatedDto;
@@ -25,6 +27,7 @@ public class KafkaEventConsumer {
 
     private final ObjectMapper objectMapper;
     private final ChatMessageService chatMessageService;
+    private final ChatRoomService chatRoomService;
     private final SimpMessagingTemplate messagingTemplate;
 
     /**
@@ -57,13 +60,18 @@ public class KafkaEventConsumer {
             MatchSuccessDto event = record.value();
             log.info("🤝 Match Success Event received: {}", event);
 
-            // TODO: 매칭 성공 후처리 로직 작성 필요
+            // 🎯 채팅방 생성
+            ChatRoom chatRoom = chatRoomService.createChatRoomFromMatch(event.getUserAId(), event.getUserBId());
+            log.info("💬 ChatRoom created for matchId {} -> chatRoomId={}", event.getMatchId(), chatRoom.getId());
+
+            // TODO: Matching - ChatRoom 연결 관계가 필요하다면 여기서 저장 (ex. matching.setChatRoomId(chatRoom.getId()))
 
             ack.acknowledge();
         } catch (Exception e) {
             log.error("❌ Error processing match.success event: {}", record.value(), e);
         }
     }
+
 
     /**
      * 📦 교환 완료 이벤트 수신 처리
