@@ -78,7 +78,7 @@ const ScheduleModal: FC<Props> = ({ partnerName, partnerProfileImage, onClose, o
     onClose();
   };
 
-  const isCompleteDisabled = !startDate || !borrowTime || !returnTime;
+  const isCompleteDisabled = !startDate || !borrowTime || (tab === '대여' && !returnTime);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -179,7 +179,9 @@ const ScheduleModal: FC<Props> = ({ partnerName, partnerProfileImage, onClose, o
         </div>
 
         <div className="mb-3">
-          <label className="text-sm text-gray-700 font-medium">⏰ 대여 시간</label>
+          <label className="text-sm text-gray-700 font-medium">
+            ⏰ {tab === '대여' ? '대여 시간' : '교환 시간'}
+          </label>
           <div
             className="w-full mt-1 px-4 py-2 bg-white rounded-lg border border-gray-300 text-gray-500 cursor-pointer"
             onClick={() => setShowTimePickerFor('대여')}
@@ -188,15 +190,17 @@ const ScheduleModal: FC<Props> = ({ partnerName, partnerProfileImage, onClose, o
           </div>
         </div>
 
-        <div className="mb-4">
-          <label className="text-sm text-gray-700 font-medium">⏰ 반납 시간</label>
-          <div
-            className="w-full mt-1 px-4 py-2 bg-white rounded-lg border border-gray-300 text-gray-500 cursor-pointer"
-            onClick={() => setShowTimePickerFor('반납')}
-          >
-            {returnTime || '시간을 선택해주세요'}
+        {tab === '대여' && (
+          <div className="mb-4">
+            <label className="text-sm text-gray-700 font-medium">⏰ 반납 시간</label>
+            <div
+              className="w-full mt-1 px-4 py-2 bg-white rounded-lg border border-gray-300 text-gray-500 cursor-pointer"
+              onClick={() => setShowTimePickerFor('반납')}
+            >
+              {returnTime || '시간을 선택해주세요'}
+            </div>
           </div>
-        </div>
+        )}
 
         <button
           onClick={handleComplete}
