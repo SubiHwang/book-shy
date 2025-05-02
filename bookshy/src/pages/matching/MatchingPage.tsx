@@ -9,8 +9,8 @@ const MatchingPage: FC = () => {
       <Header
         title="매칭 추천"
         onBackClick={() => navigate(-1)}
-        showBackButton={true}
-        showNotification={false}
+        showBackButton={false}
+        showNotification={true}
         extraButton={null}
         extraButtonIcon={null}
         onExtraButtonClick={() => {}}
