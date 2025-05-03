@@ -6,7 +6,7 @@ export interface MatchingRecommendation {
   shyScore: number;
   location: string;
   myWishBooks: string[];
-  theirBooks: string[];
+  yourWishBooks: string[];
 }
 
 export interface NoRecommendationStateProps {

@@ -15,7 +15,7 @@ const MatchingRecommend: FC = () => {
       shyScore: 85,
       location: '구미시 진평동',
       myWishBooks: ['이기적 유전자', '자존감 수업', '어떻게 원하는 것을 얻는가'],
-      theirBooks: ['호모데우스', '정의란 무엇인가'],
+      yourWishBooks: ['호모데우스', '정의란 무엇인가'],
     },
     {
       id: 2,
@@ -25,7 +25,7 @@ const MatchingRecommend: FC = () => {
       shyScore: 85,
       location: '구미시 진평동',
       myWishBooks: ['이기적 유전자'],
-      theirBooks: ['호모데우스'],
+      yourWishBooks: ['호모데우스'],
     },
   ];
   const [isLoading, setIsLoading] = useState<boolean>(false);
