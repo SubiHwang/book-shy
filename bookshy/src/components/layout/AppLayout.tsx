@@ -4,6 +4,7 @@ import BottomTabBar from '../common/BottomTabBar';
 import MatchingPage from '@/pages/matching/MatchingPage';
 import ChatListPage from '@/pages/chat/ChatListPage';
 import ChatRoomPage from '@/pages/chat/ChatRoomPage';
+import MatchingRecommend from '@/pages/matching/MatchingRecommend';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -23,7 +24,10 @@ const AppLayout: FC = () => {
         <Routes>
           <Route path="/" element={<Navigate to="/bookshelf" replace />} />
           <Route path="/bookshelf" element={<div>내 서재</div>} />
-          <Route path="/matching" element={<MatchingPage />} />
+          <Route path="/matching" element={<MatchingPage />}>
+            <Route index element={<MatchingRecommend />} />
+            <Route path="wish-books" element={<div>읽고 싶은 책</div>} />
+          </Route>
           <Route path="/chat" element={<ChatListPage />} />
           <Route path="/chat/:roomId" element={<ChatRoomPage />} />
           <Route path="/booknote" element={<div>독서 기록</div>} />
