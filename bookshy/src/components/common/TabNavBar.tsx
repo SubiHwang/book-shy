@@ -16,6 +16,7 @@ const TabNavBar: FC<TabNavBarProps> = ({ pages }) => {
                 : 'text-light-text-muted hover:opacity-70'
             }`
           }
+          end={true}
         >
           {page.label}
         </NavLink>
