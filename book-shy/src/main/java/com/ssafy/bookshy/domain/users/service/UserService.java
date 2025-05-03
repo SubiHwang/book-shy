@@ -33,11 +33,16 @@ public class UserService {
     public UserProfileResponseDto getUserProfile(Long userId) {
         Users user = getUserById(userId);
 
+        String fileName = user.getProfileImageUrl(); // 예: "1.png"
+        String profileImageUrl = (fileName != null && !fileName.isEmpty())
+                ? "http://k12d204.p.ssafy.io/images/profile/" + fileName
+                : null; // 기본 이미지가 있다면 이 부분에 기본 URL로 대체 가능
+
         return UserProfileResponseDto.builder()
                 .nickname(user.getNickname())
-                .bookShyScore((user.getTemperature() != null ? user.getTemperature() : 0))  // NULL 방지
-                .badge(user.getBadges() != null ? user.getBadges() : "북끄북끄 입문자") // 기본값 보장
-                .profileImageUrl(user.getProfileImageUrl())
+                .bookShyScore((user.getTemperature() != null ? user.getTemperature() : 0))
+                .badge(user.getBadges() != null ? user.getBadges() : "북끄북끄 입문자")
+                .profileImageUrl(profileImageUrl)
                 .build();
     }
 }
