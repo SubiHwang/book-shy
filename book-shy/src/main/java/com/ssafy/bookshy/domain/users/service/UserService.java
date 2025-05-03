@@ -35,7 +35,7 @@ public class UserService {
 
         return UserProfileResponseDto.builder()
                 .nickname(user.getNickname())
-                .booksyScore((int) (user.getTemperature() != null ? user.getTemperature() : 0))  // NULL 방지
+                .bookShyScore((user.getTemperature() != null ? user.getTemperature() : 0))  // NULL 방지
                 .badge(user.getBadges() != null ? user.getBadges() : "북끄북끄 입문자") // 기본값 보장
                 .profileImageUrl(user.getProfileImageUrl())
                 .build();

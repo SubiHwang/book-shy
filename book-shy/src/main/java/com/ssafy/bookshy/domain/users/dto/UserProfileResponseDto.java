@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserProfileResponseDto {
     private String nickname;
-    private int booksyScore;
+    private float bookShyScore;
     private String badge;
     private String profileImageUrl;
 }
