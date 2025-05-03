@@ -1,20 +1,24 @@
 spring:
   datasource:
     url: ${DB_URL}
-    username: ${DB.USERNAME}
-    password: ${DB.PASSWORD}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: validate  # ✅ 운영에서는 테이블 구조 변경을 금지하고 유효성만 검사
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: false
+    show-sql: false       # ✅ 운영에서는 SQL 로그 미출력
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     consumer:
-      group-id: ${KAFKA_CONSUMER_BOOK_GROUP_ID}
+      # ✅ 운영에서도 동일하게 각 역할별 그룹 ID 지정
+      BOOK-GROUP-ID: book-consumer-group
+      MATCH-GROUP-ID: match-consumer-group
+      TRADE-GROUP-ID: trade-consumer-group
+      CHAT-GROUP-ID: chat-consumer-group
 
 server:
-  port: 8080
+  port: 8080  # ✅ 운영용 포트

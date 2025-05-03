@@ -1,18 +1,27 @@
 spring:
   datasource:
-    url: jdbc:postgresql://${DB.HOST}:${DB.PORT}/${DB.NAME}
-    username: ${DB.USERNAME}
-    password: ${DB.PASSWORD}
+    url: jdbc:postgresql://${DB.HOST}:${DB.PORT}/${DB.NAME}  # ✅ PostgreSQL 접속 URL (개발용)
+    username: ${DB.USERNAME}                                 # ✅ DB 유저명
+    password: ${DB.PASSWORD}                                 # ✅ DB 비밀번호
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: update   # ✅ 개발 시에는 테이블 자동 생성/업데이트 허용
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
+    show-sql: true       # ✅ SQL 로그 출력
     properties:
       hibernate:
-        format_sql: true
+        format_sql: true # ✅ SQL을 보기 좋게 포맷팅
+
+  kafka:
+    bootstrap-servers: ${KAFKA.BOOTSTRAP-SERVERS}
+    consumer:
+      # ✅ 그룹별 ID를 설정하여 메시지 처리를 역할별로 분리
+      book-group-id: ${KAFKA.CONSUMER.BOOK-GROUP-ID}
+      match-group-id: ${KAFKA.CONSUMER.MATCH-GROUP-ID}
+      trade-group-id: ${KAFKA.CONSUMER.TRADE-GROUP-ID}
+      chat-group-id: ${KAFKA.CONSUMER.CHAT-GROUP-ID}
 
 server:
-  port: 8089
+  port: 8089  # ✅ 개발용 포트

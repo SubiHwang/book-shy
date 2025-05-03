@@ -1,9 +1,6 @@
 package com.ssafy.bookshy.kafka.config;
 
-import com.ssafy.bookshy.kafka.dto.BookCreatedDto;
-import com.ssafy.bookshy.kafka.dto.ChatMessageKafkaDto;
-import com.ssafy.bookshy.kafka.dto.MatchSuccessDto;
-import com.ssafy.bookshy.kafka.dto.TradeSuccessDto;
+import com.ssafy.bookshy.kafka.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -22,6 +19,11 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 📡 Kafka 설정 클래스
+ * - Producer / Consumer Factory 및 ListenerContainerFactory 설정
+ * - 재사용 가능한 Generic Factory 메서드를 활용하여 중복 제거
+ */
 @EnableKafka
 @Configuration
 @RequiredArgsConstructor
@@ -29,140 +31,84 @@ public class KafkaConfig {
 
     private final Environment env;
 
+    /**
+     * ✅ 공통 Producer 설정
+     */
     @Bean
     public Map<String, Object> producerConfig() {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, env.getProperty("spring.kafka.bootstrap-servers"));
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        // 클래스 정보 포함하지 않음 (역직렬화 오류 방지)
-        props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
+        props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false); // 타입 헤더 생략
         return props;
     }
 
     /**
-     * 제네릭 Kafka ProducerFactory (모든 DTO에서 재사용 가능)
+     * ✅ Generic ProducerFactory
      */
     @Bean
     public <T> ProducerFactory<String, T> producerFactory() {
-        JsonSerializer<T> jsonSerializer = new JsonSerializer<>();
-        jsonSerializer.setAddTypeInfo(false);
-
-        return new DefaultKafkaProducerFactory<>(
-                producerConfig(),
-                new StringSerializer(),
-                jsonSerializer
-        );
+        JsonSerializer<T> serializer = new JsonSerializer<>();
+        serializer.setAddTypeInfo(false);
+        return new DefaultKafkaProducerFactory<>(producerConfig(), new StringSerializer(), serializer);
     }
 
     /**
-     * 제네릭 KafkaTemplate (필요 시 명시적 타입으로 주입 가능)
+     * ✅ Generic KafkaTemplate
      */
     @Bean
     public <T> KafkaTemplate<String, T> kafkaTemplate(ProducerFactory<String, T> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
 
-    // BookCreatedDto용 ConsumerFactory
-    @Bean
-    public ConsumerFactory<String, BookCreatedDto> bookConsumerFactory() {
-        JsonDeserializer<BookCreatedDto> deserializer = new JsonDeserializer<>(BookCreatedDto.class);
+    /**
+     * ✅ 공통 Consumer 설정
+     */
+    private Map<String, Object> baseConsumerProps(String groupId) {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, env.getProperty("spring.kafka.bootstrap-servers"));
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        return props;
+    }
+
+    /**
+     * ✅ Generic ConsumerFactory
+     */
+    private <T> ConsumerFactory<String, T> consumerFactory(Class<T> clazz, String groupId) {
+        JsonDeserializer<T> deserializer = new JsonDeserializer<>(clazz);
+        deserializer.addTrustedPackages("*");
         deserializer.setRemoveTypeHeaders(false);
-        deserializer.addTrustedPackages("*");
         deserializer.setUseTypeMapperForKey(true);
-
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, env.getProperty("spring.kafka.bootstrap-servers"));
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, env.getProperty("KAFKA.CONSUMER.BOOK-GROUP-ID"));
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
+        return new DefaultKafkaConsumerFactory<>(baseConsumerProps(groupId), new StringDeserializer(), deserializer);
     }
 
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, BookCreatedDto> bookListenerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, BookCreatedDto> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(bookConsumerFactory());
+    /**
+     * ✅ Generic ListenerFactory
+     */
+    private <T> ConcurrentKafkaListenerContainerFactory<String, T> listenerFactory(Class<T> clazz, String groupId) {
+        ConcurrentKafkaListenerContainerFactory<String, T> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory(clazz, groupId));
         factory.setConcurrency(3);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
 
-    // MatchSuccessDto용 ConsumerFactory
-    @Bean
-    public ConsumerFactory<String, MatchSuccessDto> matchConsumerFactory() {
-        JsonDeserializer<MatchSuccessDto> deserializer = new JsonDeserializer<>(MatchSuccessDto.class);
-        deserializer.addTrustedPackages("*");
-
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, env.getProperty("spring.kafka.bootstrap-servers"));
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, env.getProperty("KAFKA.CONSUMER.MATCH-GROUP-ID"));
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
+    @Bean public ConcurrentKafkaListenerContainerFactory<String, BookCreatedDto> bookListenerFactory() {
+        return listenerFactory(BookCreatedDto.class, env.getProperty("KAFKA.CONSUMER.BOOK-GROUP-ID"));
     }
 
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, MatchSuccessDto> matchListenerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, MatchSuccessDto> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(matchConsumerFactory());
-        factory.setConcurrency(3);
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
-        return factory;
+    @Bean public ConcurrentKafkaListenerContainerFactory<String, MatchSuccessDto> matchListenerFactory() {
+        return listenerFactory(MatchSuccessDto.class, env.getProperty("KAFKA.CONSUMER.MATCH-GROUP-ID"));
     }
 
-    // TradeSuccessDto용 ConsumerFactory
-    @Bean
-    public ConsumerFactory<String, TradeSuccessDto> tradeConsumerFactory() {
-        JsonDeserializer<TradeSuccessDto> deserializer = new JsonDeserializer<>(TradeSuccessDto.class);
-        deserializer.addTrustedPackages("*");
-
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, env.getProperty("spring.kafka.bootstrap-servers"));
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, env.getProperty("KAFKA.CONSUMER.TRADE-GROUP-ID"));
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
+    @Bean public ConcurrentKafkaListenerContainerFactory<String, TradeSuccessDto> tradeListenerFactory() {
+        return listenerFactory(TradeSuccessDto.class, env.getProperty("KAFKA.CONSUMER.TRADE-GROUP-ID"));
     }
 
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, TradeSuccessDto> tradeListenerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, TradeSuccessDto> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(tradeConsumerFactory());
-        factory.setConcurrency(3);
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
-        return factory;
+    @Bean public ConcurrentKafkaListenerContainerFactory<String, ChatMessageKafkaDto> chatListenerFactory() {
+        return listenerFactory(ChatMessageKafkaDto.class, env.getProperty("KAFKA.CONSUMER.CHAT-GROUP-ID"));
     }
-
-    // ChatMessageKafkaDto용 ConsumerFactory
-    @Bean
-    public ConsumerFactory<String, ChatMessageKafkaDto> chatConsumerFactory() {
-        JsonDeserializer<ChatMessageKafkaDto> deserializer = new JsonDeserializer<>(ChatMessageKafkaDto.class);
-        deserializer.addTrustedPackages("*");
-
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, env.getProperty("spring.kafka.bootstrap-servers"));
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, env.getProperty("KAFKA.CONSUMER.CHAT-GROUP-ID"));
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ChatMessageKafkaDto> chatListenerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, ChatMessageKafkaDto> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(chatConsumerFactory());
-        factory.setConcurrency(3);
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
-        return factory;
-    }
-
 }
