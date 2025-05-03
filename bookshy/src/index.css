@@ -15,12 +15,6 @@
   }
 }
 
-@layer components {
-  .card {
-    @apply bg-white rounded-[10px] shadow-md p-5;
-  }
-}
-
 body,
 #root {
   background-color: #fffdf8;
@@ -47,4 +41,14 @@ body,
 
 ::-webkit-scrollbar-button {
   display: none;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.badge {
+  @apply flex justify-center items-center px-2 py-0.5 rounded-full font-light text-xs text-center;
 }
