@@ -35,7 +35,7 @@ public class KafkaEventConsumer {
      * - 토픽: book.created
      * - 도서 등록 관련 이벤트를 수신하고 처리하는 자리입니다.
      */
-    @KafkaListener(topics = "book.created")
+    @KafkaListener(topics = "book.created", containerFactory = "bookListenerFactory")
     public void listenBookCreated(ConsumerRecord<String, BookCreatedDto> record, Acknowledgment ack) {
         try {
             BookCreatedDto event = record.value();
@@ -54,7 +54,7 @@ public class KafkaEventConsumer {
      * - 토픽: match.success
      * - 책 교환 매칭이 성사되었을 때 후처리를 위한 Consumer입니다.
      */
-    @KafkaListener(topics = "match.success")
+    @KafkaListener(topics = "match.success", containerFactory = "matchListenerFactory")
     public void listenMatchSuccess(ConsumerRecord<String, MatchSuccessDto> record, Acknowledgment ack) {
         try {
             MatchSuccessDto event = record.value();
@@ -78,7 +78,7 @@ public class KafkaEventConsumer {
      * - 토픽: trade.success
      * - 실제 책 교환이 완료되었을 때 발생하는 이벤트 처리
      */
-    @KafkaListener(topics = "trade.success")
+    @KafkaListener(topics = "trade.success", containerFactory = "tradeListenerFactory")
     public void listenTradeSuccess(ConsumerRecord<String, TradeSuccessDto> record, Acknowledgment ack) {
         try {
             TradeSuccessDto event = record.value();
@@ -98,7 +98,7 @@ public class KafkaEventConsumer {
      * - Kafka를 통해 전달된 채팅 메시지를 DB에 저장하고,
      *   해당 채팅방 구독자들에게 WebSocket으로 전달합니다.
      */
-    @KafkaListener(topics = "chat.message")
+    @KafkaListener(topics = "chat.message", containerFactory = "chatListenerFactory")
     public void listenChatMessage(ConsumerRecord<String, ChatMessageKafkaDto> record, Acknowledgment ack) {
         try {
             ChatMessageKafkaDto dto = record.value();
