@@ -59,7 +59,7 @@ const TradeHistoryList: FC = () => {
         <div key={month} className="space-y-3">
           <h2 className="text-lg font-semibold text-gray-800">{month}</h2>
           {trades.map((item) => (
-            <div key={item.id} className="bg-white rounded-xl shadow p-4 flex flex-col space-y-3">
+            <div key={item.id} className="card flex flex-col space-y-3">
               <div className="flex items-center justify-between text-xs text-gray-400">
                 <span>{item.date}</span>
                 <span className="bg-gray-100 text-pink-500 px-2 py-0.5 rounded-full font-medium text-[11px]">

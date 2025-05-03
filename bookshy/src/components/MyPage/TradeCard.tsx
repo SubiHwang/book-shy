@@ -9,7 +9,7 @@ interface TradeCardProps {
 
 const TradeCard: FC<TradeCardProps> = ({ userName, userProfileUrl, statusText, meetTime }) => {
   return (
-    <div className="bg-white shadow-md rounded-lg p-4 flex flex-col space-y-2">
+    <div className="card flex flex-col space-y-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <img
@@ -19,7 +19,7 @@ const TradeCard: FC<TradeCardProps> = ({ userName, userProfileUrl, statusText, m
           />
           <div>
             <p className="font-medium">{userName} 님</p>
-            <p className="text-sm text-gray-500">구매자 입장에서</p>
+            <p className="text-sm text-gray-500">구미시 인의동</p>
           </div>
         </div>
         <div className="text-xs text-white bg-pink-400 px-2 py-1 rounded">{statusText}</div>

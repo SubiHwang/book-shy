@@ -15,8 +15,15 @@
   }
 }
 
-body, #root {
-  background-color: #FFFDF8;
+@layer components {
+  .card {
+    @apply bg-white rounded-[10px] shadow-md p-5;
+  }
+}
+
+body,
+#root {
+  background-color: #fffdf8;
 }
 
 /* 스크롤바 커스텀 */
