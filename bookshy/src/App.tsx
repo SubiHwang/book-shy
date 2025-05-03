@@ -1,4 +1,5 @@
 import { useState, FC } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import SplashScreen from '@components/splash/SplashScreen';
 import bookAnimation from '@assets/lottie/bookshy-splash.json';
@@ -13,6 +14,17 @@ interface RegisterSWCallbacks {
   onOfflineReady?: () => void;
   onNeedRefresh?: () => void;
 }
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5분 동안 데이터 신선하게 유지
+      gcTime: 1000 * 60 * 60 * 24, // 24시간 동안 캐시 유지
+      retry: 3, // 최대 3회 재시도
+      refetchOnReconnect: true, // 재연결 시 refetch
+    },
+  },
+});
 
 const App: FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -54,10 +66,12 @@ const App: FC = () => {
   }
 
   return (
-    <BrowserRouter>
-      <AppLayout />
-      <UpdatePrompt needRefresh={needRefresh} updateServiceWorker={updateServiceWorker} />
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AppLayout />
+        <UpdatePrompt needRefresh={needRefresh} updateServiceWorker={updateServiceWorker} />
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 };
 
