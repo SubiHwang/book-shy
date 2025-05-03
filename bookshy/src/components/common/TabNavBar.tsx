@@ -12,7 +12,7 @@ const TabNavBar: FC<TabNavBarProps> = ({ pages }) => {
           className={({ isActive }) =>
             `flex-1 text-center py-4 text-xl transition-all relative ${
               isActive
-                ? 'text-primary font-bold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:w-full after:h-[3px] after:bg-primary'
+                ? 'text-primary-dark font-bold after:content-[""] after:absolute after:bottom-[-1px] after:left-0 after:w-full after:h-[3px] after:bg-primary-dark'
                 : 'text-light-text-muted hover:opacity-70'
             }`
           }
