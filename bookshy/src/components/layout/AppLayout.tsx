@@ -3,6 +3,9 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import BottomTabBar from '../common/BottomTabBar';
 import MatchingPage from '@/pages/matching/MatchingPage';
 import MatchingRecommend from '@/pages/matching/MatchingRecommend';
+import MyPage from '@/pages/mypage/MyPage';
+import TradePromiseList from '@/pages/mypage/TradePromiseList';
+import TradeHistoryList from '@/pages/mypage/TradeHistoryList';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -24,7 +27,11 @@ const AppLayout: FC = () => {
           </Route>
           <Route path="/chat" element={<div>채팅</div>} />
           <Route path="/booknote" element={<div>독서 기록</div>} />
-          <Route path="/mypage" element={<div>마이</div>} />
+          {/* ✅ 마이페이지 라우팅 추가 */}
+          <Route path="/mypage" element={<MyPage />}>
+            <Route index element={<TradePromiseList />} />
+            <Route path="history" element={<TradeHistoryList />} />
+          </Route>
         </Routes>
       </div>
       <BottomTabBar onTabChange={handleTabChange} />
