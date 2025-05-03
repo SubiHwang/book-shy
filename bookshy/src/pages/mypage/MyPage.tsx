@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchUserProfile } from '@/apis/profile'; // 위 함수 import
+import { fetchUserProfile } from '@/apis/profile';
 import Header from '@/components/common/Header';
 import { useNavigate, Outlet } from 'react-router-dom';
 import TabNavBar from '@/components/common/TabNavBar';
+import type { UserProfile } from '@/types/User/user'; // 타입 경로 조정 필요
 
 const greetings = [
   '오늘도 북끄북끄한 하루 되세요!',
@@ -19,7 +20,7 @@ const MyPage = () => {
     data: profile,
     isLoading,
     error,
-  } = useQuery({
+  } = useQuery<UserProfile, Error, UserProfile>({
     queryKey: ['profile'],
     queryFn: fetchUserProfile,
   });
@@ -32,7 +33,7 @@ const MyPage = () => {
   ];
 
   if (isLoading) return <div className="p-4">불러오는 중...</div>;
-  if (error) return <div className="p-4 text-red-500">프로필 불러오기 실패</div>;
+  if (error || !profile) return <div className="p-4 text-red-500">프로필 불러오기 실패</div>;
 
   return (
     <div className="bg-light-bg flex flex-col min-h-screen">
@@ -53,7 +54,9 @@ const MyPage = () => {
         <div className="flex-1">
           <p className="font-semibold">{profile.nickname}님 🛠️</p>
           <p className="text-sm text-gray-500">{randomGreeting}</p>
-          <div className="text-xs text-pink-500 font-medium">북끄지수 {profile.booksyScore}</div>
+          <div className="text-xs text-pink-500 font-medium">
+            북끄지수 {profile.bookShyScore.toFixed(1)}
+          </div>
           <div className="text-xs text-green-600 font-medium mt-1">{profile.badge}</div>
         </div>
       </section>
