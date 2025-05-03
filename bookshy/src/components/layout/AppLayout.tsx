@@ -20,7 +20,6 @@ const AppLayout: FC = () => {
           <Route path="/bookshelf" element={<div>내 서재</div>} />
           <Route path="/matching" element={<MatchingPage />}>
             <Route index element={<MatchingRecommend />} />
-            <Route path="matching-recommendations" element={<MatchingRecommend />} />
             <Route path="wish-books" element={<div>읽고 싶은 책</div>} />
           </Route>
           <Route path="/chat" element={<div>채팅</div>} />
