@@ -41,7 +41,7 @@ const MatchingRecommend: FC = () => {
 
   return (
     <div className="flex flex-col bg-light-bg">
-      <div className="bg-primary-light/20 p-5">
+      <div className="bg-primary-light/20 px-10 py-4">
         <div className="flex items-center gap-1">
           <Zap className="text-primary-dark" size={20} strokeWidth={1} />
           <h1 className="text-primary-dark font-medium">북끄북끄 매칭 시스템</h1>
