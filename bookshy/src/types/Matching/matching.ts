@@ -9,6 +9,15 @@ export interface MatchingRecommendation {
   yourWishBooks: string[];
 }
 
+export interface Neighborhood {
+  userId: number;
+  name: string;
+  location: string;
+  profileImage: string;
+  shyScore: number;
+  farfrom: number;
+}
+
 export interface NoRecommendationStateProps {
   onRetry: () => void;
 }
@@ -20,4 +29,8 @@ export interface MatchingListProps {
 export interface MatchingCardProps {
   matching: MatchingRecommendation;
   onChatClick: (id: number) => void;
+}
+
+export interface NeighborhoodCardProps {
+  neighborhood: Neighborhood;
 }
