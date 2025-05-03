@@ -15,10 +15,10 @@ spring:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     consumer:
       # ✅ 운영에서도 동일하게 각 역할별 그룹 ID 지정
-      BOOK-GROUP-ID: book-consumer-group
-      MATCH-GROUP-ID: match-consumer-group
-      TRADE-GROUP-ID: trade-consumer-group
-      CHAT-GROUP-ID: chat-consumer-group
+      book-group-id: book-consumer-group
+      match-group-id: match-consumer-group
+      trade-group-id: trade-consumer-group
+      chat-group-id: chat-consumer-group
 
 server:
   port: 8080  # ✅ 운영용 포트
