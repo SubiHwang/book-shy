@@ -5,7 +5,6 @@ import MatchingListCard from '@/components/Matching/MatchRecommend/MatchingListC
 const MatchingList: FC<MatchingListProps> = ({ matchings }) => {
   return (
     <div>
-      <h1>매칭 목록</h1>
       <div>
         {matchings.map((matching) => (
           <MatchingListCard
