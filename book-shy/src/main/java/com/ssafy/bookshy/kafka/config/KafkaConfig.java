@@ -96,19 +96,24 @@ public class KafkaConfig {
         return factory;
     }
 
-    @Bean public ConcurrentKafkaListenerContainerFactory<String, BookCreatedDto> bookListenerFactory() {
-        return listenerFactory(BookCreatedDto.class, env.getProperty("KAFKA.CONSUMER.BOOK-GROUP-ID"));
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, BookCreatedDto> bookListenerFactory() {
+        return listenerFactory(BookCreatedDto.class, env.getProperty("spring.kafka.consumer.book-group-id"));
     }
 
-    @Bean public ConcurrentKafkaListenerContainerFactory<String, MatchSuccessDto> matchListenerFactory() {
-        return listenerFactory(MatchSuccessDto.class, env.getProperty("KAFKA.CONSUMER.MATCH-GROUP-ID"));
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, MatchSuccessDto> matchListenerFactory() {
+        return listenerFactory(MatchSuccessDto.class, env.getProperty("spring.kafka.consumer.match-group-id"));
     }
 
-    @Bean public ConcurrentKafkaListenerContainerFactory<String, TradeSuccessDto> tradeListenerFactory() {
-        return listenerFactory(TradeSuccessDto.class, env.getProperty("KAFKA.CONSUMER.TRADE-GROUP-ID"));
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, TradeSuccessDto> tradeListenerFactory() {
+        return listenerFactory(TradeSuccessDto.class, env.getProperty("spring.kafka.consumer.trade-group-id"));
     }
 
-    @Bean public ConcurrentKafkaListenerContainerFactory<String, ChatMessageKafkaDto> chatListenerFactory() {
-        return listenerFactory(ChatMessageKafkaDto.class, env.getProperty("KAFKA.CONSUMER.CHAT-GROUP-ID"));
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, ChatMessageKafkaDto> chatListenerFactory() {
+        return listenerFactory(ChatMessageKafkaDto.class, env.getProperty("spring.kafka.consumer.chat-group-id"));
     }
+
 }
