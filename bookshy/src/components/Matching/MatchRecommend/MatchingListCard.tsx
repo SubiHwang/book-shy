@@ -83,11 +83,11 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
           </div>
           <div className="flex justify-center mb-4">
             <button className="bg-white text-light-text-secondary mx-3 text-md font-extralight px-10 py-2 rounded-md border border-light-text-secondary flex justify-between">
-              <BookMarked strokeWidth={0.5} />
+              <BookMarked width={20} strokeWidth={0.5} className="mx-2" />
               서재 보러 가기
             </button>
             <button className="bg-primary-light text-white mx-3 text-md font-extralight px-10 py-2 rounded-md border border-white flex justify-between">
-              <MessageCircle strokeWidth={0.5} />
+              <MessageCircle width={20} strokeWidth={0.5} className="mx-2" />
               채팅하러 가기
             </button>
           </div>
