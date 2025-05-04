@@ -9,6 +9,12 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [lastScrollY, setLastScrollY] = useState<number>(0);
 
+  // 숨길 경로 목록
+  const hiddenPaths = ['/bookshelf/add/title', 'bookshelf/add/isbn'];
+
+  // 현재 경로가 숨김 목록에 있는지 확인
+  const shouldHideTabBar = hiddenPaths.some((path) => location.pathname.includes(path));
+
   useEffect(() => {
     const path = location.pathname.substring(1); // '/' 제거
     if (path === '') {
@@ -56,6 +62,10 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
     { id: 'booknote', name: '독서 기록', icon: NotepadText },
     { id: 'mypage', name: '마이', icon: UserRound },
   ];
+
+  if (shouldHideTabBar) {
+    return null; // 경로가 숨김 목록에 포함되면 탭바를 렌더링하지 않음
+  }
 
   return (
     <div
