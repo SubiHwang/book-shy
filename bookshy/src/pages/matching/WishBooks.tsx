@@ -122,7 +122,10 @@ const WishBooks: FC = () => {
             ))}
           </div>
         ) : (
-          <div>아직 읽고 싶은 책을 고르지 않았네요! 읽고 싶은 책들을 찾아볼까요?</div>
+          <div className="flex flex-col items-center justify-center h-96 text-light-text-secondary">
+            <p>아직 읽고 싶은 책을 고르지 않았네요!</p> 
+            <p>읽고 싶은 책들을 찾아볼까요?</p>
+          </div>
         )}
       </div>
       <div className="fixed bottom-24 right-6">
