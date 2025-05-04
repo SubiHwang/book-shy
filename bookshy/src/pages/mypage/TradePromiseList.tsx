@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import TradeCard from '@/components/MyPage/TradeCard';
+import TradeCard from '@/components/MyPage/TradePromiseCard';
 
 const dummyTradeData = [
   {
