@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchUserProfile } from '@/apis/profile';
+import { fetchUserProfile } from '@/services/mypage/profile';
 import Header from '@/components/common/Header';
 import { useNavigate, Outlet } from 'react-router-dom';
 import TabNavBar from '@/components/common/TabNavBar';
