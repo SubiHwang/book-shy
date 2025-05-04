@@ -48,6 +48,13 @@ public class Users extends TimeStampEntity {
     @Column(name = "badges")
     private String badges = "북끄북끄 입문자";
 
+    @Column(nullable = false)
+    private String refreshToken;
+    
+    @Column(nullable = false)
+    private String fcmToken;
+
+
     public enum Gender {
         M, F
     }
