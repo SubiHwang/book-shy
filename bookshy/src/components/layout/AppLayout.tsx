@@ -27,7 +27,7 @@ const AppLayout: FC = () => {
             <Route index element={<MatchingRecommend />} />
             <Route path="wish-books" element={<WishBooks />} />
           </Route>
-          <Route path="/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage/>}/>
+            <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
           <Route path="/chat" element={<div>채팅</div>} />
           <Route path="/booknote" element={<div>독서 기록</div>} />
           {/* ✅ 마이페이지 라우팅 추가 */}

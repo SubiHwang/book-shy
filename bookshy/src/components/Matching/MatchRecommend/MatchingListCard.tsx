@@ -12,7 +12,7 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
   };
 
   const handleClickNeighborsBookshelf = (userId: number): void => {
-    navigate(`/neigbors-bookshelf/${userId}`);
+    navigate(`/matching/neigbors-bookshelf/${userId}`);
   };
   return (
     <div className="flex flex-col card m-4">
