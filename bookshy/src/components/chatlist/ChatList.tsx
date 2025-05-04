@@ -1,11 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import ChatListItem from './ChatListItem';
-import { ChatRoomSummary } from '@/types/chat/chat';
-import { authAxiosInstance } from '@/services/axiosInstance';
-
-async function fetchChatList(userId: number): Promise<ChatRoomSummary[]> {
-  return await authAxiosInstance.get(`/chats?userId=${userId}`);
-}
+import { fetchChatList } from '@/services/chat/chat';
 
 function ChatList() {
   // 추후 로그인 사용자 ID로 대체 필요
