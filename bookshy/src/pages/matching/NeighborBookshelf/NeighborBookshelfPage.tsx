@@ -2,7 +2,7 @@ import Header from '@/components/common/Header';
 import { Book, NeighborBookshelf } from '@/types/book';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BookshelfRow from '@/components/Matching/NeighborBookshelf/BookshelfRow';
+import BookshelfRow from '@/components/common/BookshelfRow';
 
 const NeighborBookshelfPage = () => {
   const navigate = useNavigate();
