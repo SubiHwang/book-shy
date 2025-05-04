@@ -37,6 +37,7 @@ const WishBooks: FC = () => {
 
   const [selectedFilter, setSelectedFilter] = useState<string>('전체 보기');
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   const filterList = useMemo(() => {
     const categorySet = new Set<string>();
@@ -49,9 +50,19 @@ const WishBooks: FC = () => {
   }, [dummyData]);
 
   const filteredBooks = useMemo(() => {
-    if (selectedFilter === '전체 보기') return dummyData;
-    return dummyData.filter((book) => book.categories === selectedFilter);
-  }, [dummyData, selectedFilter]);
+    const categoryFiltered =
+      selectedFilter === '전체 보기'
+        ? dummyData
+        : dummyData.filter((book) => book.categories === selectedFilter);
+
+    if (!searchTerm.trim()) return categoryFiltered;
+
+    const term = searchTerm.toLowerCase().trim();
+    return categoryFiltered.filter(
+      (book) =>
+        book.title?.toLowerCase().includes(term) || book.author?.toLowerCase().includes(term),
+    );
+  }, [dummyData, selectedFilter, searchTerm]);
 
   return (
     <div className="relative pb-16 px-4 pt-4">
@@ -63,6 +74,7 @@ const WishBooks: FC = () => {
           <input
             type="text"
             placeholder="읽고 싶은 책 검색 (책 제목, 저자)"
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-200"
           />
         </div>
