@@ -1,12 +1,18 @@
 import { FC, useState } from 'react';
 import { MatchingCardProps } from '@/types/Matching';
 import { ChevronDown, ChevronUp, BookMarked, MessageCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
+  const navigate = useNavigate();
   const [isCardExtended, setIsCardExtended] = useState<boolean>(false);
 
   const handleCardExtend = (): void => {
     setIsCardExtended(!isCardExtended);
+  };
+
+  const handleClickNeighborsBookshelf = (userId: number): void => {
+    navigate(`/neigbors-bookshelf/${userId}`);
   };
   return (
     <div className="flex flex-col card m-4">
@@ -96,11 +102,14 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
             </span>
           </div>
           <div className="flex justify-center mb-4">
-            <button className="bg-white text-light-text-secondary mx-3 text-sm font-extralight px-4 py-2 rounded-md border border-light-text-secondary flex justify-between">
+            <button
+              onClick={() => handleClickNeighborsBookshelf(matching.id)}
+              className="bg-white text-light-text-secondary mx-3 text-sm font-extralight px-4 py-1 rounded-md border border-light-text-secondary/30 flex justify-between"
+            >
               <BookMarked width={20} strokeWidth={0.5} className="mx-2" />
               <span className="mr-2">서재 보러가기</span>
             </button>
-            <button className="bg-primary-light text-white mx-3 text-sm font-extralight px-4 py-2 rounded-md border border-white flex justify-between">
+            <button className="bg-primary-light text-white mx-3 text-sm font-extralight px-4 py-1 rounded-md border border-white flex justify-between">
               <MessageCircle width={20} strokeWidth={0.5} className="mx-2" />
               <span className="mr-2">채팅 하러가기</span>
             </button>
