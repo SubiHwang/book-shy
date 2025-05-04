@@ -1,5 +1,6 @@
 import { Book } from '@/types/book';
 import { FC } from 'react';
+import { PlusCircle } from 'lucide-react';
 
 const WishBooks: FC = () => {
   const dummyData: Book[] = [
@@ -35,6 +36,11 @@ const WishBooks: FC = () => {
         ) : (
           <div>아직 읽고 싶은 책을 고르지 않았네요!</div>
         )}
+      </div>
+      <div className="fixed bottom-24 right-6">
+        <button className="w-14 h-14 rounded-xl bg-primary text-white flex justify-center items-center shadow-lg">
+          <PlusCircle size={32} strokeWidth={1} />
+        </button>
       </div>
     </div>
   );
