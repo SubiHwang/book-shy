@@ -44,25 +44,39 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
         </div>
       </div>
       <div className="m-2 px-4">
-        <div className="flex my-1">
-          <span className="text-light-text-muted text-sm font-extralight">
+        <div className="flex flex-wrap my-1">
+          <span className="text-light-text-muted text-sm font-extralight mr-1">
             내가 읽고 싶은 책 :{' '}
           </span>
-          {matching.myWishBooks.map((myWishBook) => (
-            <div className="badge bg-light-status-success/20 mx-1">
-              <span className="text-light-status-success">{myWishBook}</span>
-            </div>
-          ))}
+          <div className="flex flex-wrap">
+            {matching.myWishBooks.map((myWishBook, index) => (
+              <div
+                key={index}
+                className="badge bg-light-status-success/20 mx-1 mb-1 whitespace-nowrap"
+              >
+                <span className="text-light-status-success text-xs truncate max-w-32">
+                  {myWishBook}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="flex my-1">
-          <span className="text-light-text-muted text-sm font-extralight">
+        <div className="flex flex-wrap my-1">
+          <span className="text-light-text-muted text-sm font-extralight mr-1">
             상대가 읽고 싶은 책:{' '}
           </span>
-          {matching.yourWishBooks.map((yourWishBook) => (
-            <div className="badge bg-light-status-info/20 mx-1">
-              <span className="text-light-status-info">{yourWishBook}</span>
-            </div>
-          ))}
+          <div className="flex flex-wrap">
+            {matching.yourWishBooks.map((yourWishBook, index) => (
+              <div
+                key={index}
+                className="badge bg-light-status-info/20 mx-1 mb-1 whitespace-nowrap"
+              >
+                <span className="text-light-status-info text-xs truncate max-w-32">
+                  {yourWishBook}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       <div className="flex justify-end mb-1">
@@ -82,13 +96,13 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
             </span>
           </div>
           <div className="flex justify-center mb-4">
-            <button className="bg-white text-light-text-secondary mx-3 text-md font-extralight px-10 py-2 rounded-md border border-light-text-secondary flex justify-between">
+            <button className="bg-white text-light-text-secondary mx-3 text-sm font-extralight px-4 py-2 rounded-md border border-light-text-secondary flex justify-between">
               <BookMarked width={20} strokeWidth={0.5} className="mx-2" />
-              <span className="mr-2">서재 보러 가기</span>
+              <span className="mr-2">서재 보러가기</span>
             </button>
-            <button className="bg-primary-light text-white mx-3 text-md font-extralight px-10 py-2 rounded-md border border-white flex justify-between">
+            <button className="bg-primary-light text-white mx-3 text-sm font-extralight px-4 py-2 rounded-md border border-white flex justify-between">
               <MessageCircle width={20} strokeWidth={0.5} className="mx-2" />
-              <span className="mr-2">채팅 하러 가기</span>
+              <span className="mr-2">채팅 하러가기</span>
             </button>
           </div>
         </div>
