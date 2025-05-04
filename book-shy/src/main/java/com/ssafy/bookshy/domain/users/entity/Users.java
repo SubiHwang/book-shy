@@ -2,6 +2,7 @@ package com.ssafy.bookshy.domain.users.entity;
 
 import com.ssafy.bookshy.common.entity.TimeStampEntity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "users")
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
+@Builder
 public class Users extends TimeStampEntity {
 
     @Id
@@ -42,22 +45,8 @@ public class Users extends TimeStampEntity {
     @Column(name = "temperature")
     private Float temperature;
 
-    @Column(name = "badges", length = 255)
-    private String badges = "북끄북끄 입문자"; // ✅ 기본값 설정
-
-    @Builder
-    public Users(Long kakaoId, String email, String nickname, String profileImageUrl,
-                 String address, int age, Gender gender, Float temperature, String badges) {
-        this.kakaoId = kakaoId;
-        this.email = email;
-        this.nickname = nickname;
-        this.profileImageUrl = profileImageUrl;
-        this.address = address;
-        this.age = age;
-        this.gender = gender;
-        this.temperature = temperature;
-        this.badges = badges != null ? badges : "북끄북끄 입문자";
-    }
+    @Column(name = "badges")
+    private String badges = "북끄북끄 입문자";
 
     public enum Gender {
         M, F
