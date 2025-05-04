@@ -1,8 +1,8 @@
 // src/pages/MyLibrary/MyLibraryPage.tsx
 import React, { useState } from 'react';
 import Header from '@/components/common/Header';
-import StatsCard from '@/components/mylibrary/StatsCard';
-import AddBookDialog from '@/components/mylibrary/AddBookDialog';
+import StatsCard from '@/components/MyLibrary/BookShelf/StatsCard';
+import AddBookDialog from '@/components/MyLibrary/BookAdd/AddBookDialog';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import TabNavBar from '@/components/common/TabNavBar';
 
