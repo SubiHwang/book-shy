@@ -10,3 +10,7 @@ export interface Book {
   categories?: string;
   bookImgUrl?: string;
 }
+
+export interface WishBook extends Book {
+  isLiked: boolean;
+}
