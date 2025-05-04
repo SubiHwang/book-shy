@@ -1,30 +1,28 @@
-// src/pages/mylibrary/tabs/AllMyBooksTab.tsx
+// src/pages/mylibrary/tabs/BookshelfTab.tsx (새로 만듦)
 import React, { useState, useEffect } from 'react';
-import { Book } from '@/types/book/book';
+import BookshelfRow from '@/components/common/BookshelfRow'; // 이미 존재하는 공통 컴포넌트
+import { BookType } from '@/types/mylibrary/models';
 import { sampleBooks } from '@/data/sampleBooks';
-import BookshelfRow from '@/components/common/BookshelfRow';
 
-const AllMyBooksTab: React.FC = () => {
-  const [books, setBooks] = useState<Book[]>([]);
+interface BookshelfTabProps {
+  filterPublic?: boolean;
+}
+
+const BookshelfTab: React.FC<BookshelfTabProps> = ({ filterPublic = false }) => {
+  const [books, setBooks] = useState<BookType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // 데이터 로딩 시뮬레이션
     setIsLoading(true);
     setTimeout(() => {
-      // sampleBooks에서 Book 타입으로 변환
-      const convertedBooks: Book[] = sampleBooks.map((book) => ({
-        bookId: parseInt(book.id),
-        title: book.title,
-        author: book.author,
-        publisher: book.publisher || '',
-        bookImgUrl: book.coverUrl,
-      }));
-
-      setBooks(convertedBooks);
+      const filteredBooks = filterPublic
+        ? sampleBooks.filter((book) => book.isPublic)
+        : sampleBooks;
+      setBooks(filteredBooks);
       setIsLoading(false);
     }, 300);
-  }, []);
+  }, [filterPublic]);
 
   if (isLoading) {
     return (
@@ -62,27 +60,29 @@ const AllMyBooksTab: React.FC = () => {
 
   // 책을 3권씩 선반에 나누기
   const booksPerShelf = 3;
-  const shelves: (Book | null)[][] = [];
+  const shelves = [];
 
   for (let i = 0; i < Math.ceil(books.length / booksPerShelf); i++) {
     const shelfBooks = books.slice(i * booksPerShelf, (i + 1) * booksPerShelf);
-    // 각 선반마다 책 3권을 채우기 위해 null 추가
-    const filledShelf: (Book | null)[] = [...shelfBooks];
-    while (filledShelf.length < booksPerShelf) {
-      filledShelf.push(null);
-    }
-    shelves.push(filledShelf);
+    shelves.push(shelfBooks);
   }
 
   return (
-    <div className="all-books-tab">
-      <div className="container mx-auto px-4 pb-16 space-y-8">
-        {shelves.map((shelfBooks, index) => (
-          <BookshelfRow key={`shelf-${index}`} books={shelfBooks} />
-        ))}
-      </div>
+    <div className="container mx-auto px-4 pb-16 space-y-8">
+      {shelves.map((shelfBooks, index) => {
+        // BookType을 BookshelfRow 컴포넌트에 필요한 형식으로 변환
+        const convertedBooks = shelfBooks.map((book) => ({
+          bookId: parseInt(book.id),
+          title: book.title,
+          author: book.author,
+          publisher: book.publisher || '',
+          bookImgUrl: book.coverUrl,
+        }));
+
+        return <BookshelfRow key={`shelf-${index}`} books={convertedBooks} />;
+      })}
     </div>
   );
 };
 
-export default AllMyBooksTab;
+export default BookshelfTab;
