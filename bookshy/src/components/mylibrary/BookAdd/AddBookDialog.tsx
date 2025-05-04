@@ -1,4 +1,4 @@
-// src/components/mylibrary/AddBookDialog.tsx
+// src/components/MyLibrary/BookAdd/AddBookDialog.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,17 +15,17 @@ const AddBookDialog: React.FC<AddBookDialogProps> = ({ isOpen, onClose }) => {
 
   // 각 옵션 선택 시 처리 함수
   const handleTitleRecognition = () => {
-    navigate('/my-library/add-by-title');
+    navigate('/bookshelf/add/title');
     onClose();
   };
 
   const handleISBNRecognition = () => {
-    navigate('/my-library/add-by-isbn');
+    navigate('/bookshelf/add/isbn');
     onClose();
   };
 
   const handleManualSearch = () => {
-    navigate('/bookshelf/add-by-search');
+    navigate('/bookshelf/add/search');
     onClose();
   };
 
