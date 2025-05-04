@@ -1,6 +1,7 @@
 import { WishBook } from '@/types/book';
 import { FC, useMemo, useState } from 'react';
 import { PlusCircle, Search, ChevronDown } from 'lucide-react';
+import WishBookCard from '@/components/Matching/WishBooks/WishBookCard';
 
 const WishBooks: FC = () => {
   const dummyData: WishBook[] = [
@@ -117,16 +118,11 @@ const WishBooks: FC = () => {
         {filteredBooks.length > 0 ? (
           <div>
             {filteredBooks.map((book) => (
-              <div key={book.bookId}>
-                <h3>{book.title}</h3>
-                <p>저자: {book.author}</p>
-                <p>출판사: {book.publisher}</p>
-                {book.translator && <p>번역: {book.translator}</p>}
-              </div>
+              <WishBookCard wishBook={book} />
             ))}
           </div>
         ) : (
-          <div>아직 읽고 싶은 책을 고르지 않았네요!</div>
+          <div>아직 읽고 싶은 책을 고르지 않았네요! 읽고 싶은 책들을 찾아볼까요?</div>
         )}
       </div>
       <div className="fixed bottom-24 right-6">
