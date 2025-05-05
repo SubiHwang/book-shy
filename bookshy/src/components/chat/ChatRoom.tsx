@@ -8,7 +8,7 @@ import SystemMessage from './SystemMessage.tsx';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchMessages } from '@/services/chat/chat.ts';
-import { client } from '@/services/chat/socketclient.ts';
+import { useStomp } from '@/hooks/chat/useStomp.ts';
 
 interface Props {
   partnerName: string;
@@ -47,16 +47,9 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
     }
   }, [initialMessages]);
 
-  useEffect(() => {
-    if (!chatRoomId) return;
-
-    const subscription = client.subscribe(`/topic/chat/${chatRoomId}`, (message) => {
-      const newMessage: ChatMessage = JSON.parse(message.body);
-      setMessages((prev) => [...prev, newMessage]);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [chatRoomId]);
+  const { sendMessage } = useStomp(Number(chatRoomId), (newMessage: ChatMessage) => {
+    setMessages((prev) => [...prev, newMessage]);
+  });
 
   useEffect(() => {
     scrollToBottom();
@@ -68,13 +61,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
 
   const handleSendMessage = (content: string) => {
     if (!chatRoomId) return;
-
-    const messagePayload = {
-      chatRoomId: Number(chatRoomId),
-      senderId: 1, // 추후 로그인한 사용자 ID로 변경
-      content,
-    };
-    client.publish({ destination: '/app/chat.send', body: JSON.stringify(messagePayload) });
+    sendMessage(Number(chatRoomId), 1, content); // 나중에 senderId인 1은 로그인 한 ID로 교체
   };
 
   const handleSendSystemMessage = (
