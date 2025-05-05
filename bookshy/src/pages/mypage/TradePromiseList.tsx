@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTradePromises } from '@/services/mypage/trade';
-import TradePromiseCard from '@/components/mypage/TradePromiseCard';
+import TradePromiseCard from '@/components/mypage1/TradePromiseCard';
 import type { TradePromise } from '@/types/trade';
 
 const TradePromiseList: FC = () => {
