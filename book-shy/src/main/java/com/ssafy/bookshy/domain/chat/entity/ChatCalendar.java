@@ -2,9 +2,7 @@ package com.ssafy.bookshy.domain.chat.entity;
 
 import com.ssafy.bookshy.common.entity.TimeStampEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +10,8 @@ import java.time.LocalDateTime;
 @Table(name = "chat_calendar")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class ChatCalendar extends TimeStampEntity {
 
     @Id
@@ -19,7 +19,6 @@ public class ChatCalendar extends TimeStampEntity {
     private Long calendarId;
 
     private String title;
-
     private String description;
 
     private LocalDateTime exchangeDate;
@@ -30,5 +29,5 @@ public class ChatCalendar extends TimeStampEntity {
     @JoinColumn(name = "room_id")
     private ChatRoom chatRoom;
 
-    private Long requestId; // 거래 요청 식별자
+    private Long requestId;
 }

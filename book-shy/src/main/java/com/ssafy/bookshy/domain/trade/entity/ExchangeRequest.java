@@ -2,9 +2,7 @@ package com.ssafy.bookshy.domain.trade.entity;
 
 import com.ssafy.bookshy.common.entity.TimeStampEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +10,8 @@ import java.time.LocalDateTime;
 @Table(name = "exchange_requests")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class ExchangeRequest extends TimeStampEntity {
 
     @Id
@@ -20,17 +20,16 @@ public class ExchangeRequest extends TimeStampEntity {
 
     private Long bookAId;
     private Long bookBId;
-
-    private Long requesterId;  // 요청자
-    private Long responderId;  // 응답자
+    private Long requesterId;
+    private Long responderId;
 
     @Enumerated(EnumType.STRING)
-    private RequestStatus status = RequestStatus.PENDING;
+    private RequestStatus status;
 
     private LocalDateTime requestedAt;
 
     @Enumerated(EnumType.STRING)
-    private RequestType type; // EXCHANGE or RENTAL
+    private RequestType type;
 
     public enum RequestStatus {
         PENDING, ACCEPTED, REJECTED
@@ -38,5 +37,11 @@ public class ExchangeRequest extends TimeStampEntity {
 
     public enum RequestType {
         EXCHANGE, RENTAL
+    }
+
+    @PrePersist
+    public void prePersist() {
+        this.status = this.status == null ? RequestStatus.PENDING : this.status;
+        this.requestedAt = this.requestedAt == null ? LocalDateTime.now() : this.requestedAt;
     }
 }
