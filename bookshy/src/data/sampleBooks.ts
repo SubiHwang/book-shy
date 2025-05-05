@@ -1,0 +1,77 @@
+// src/data/sampleBooks.ts
+import { BookType } from '@/types/mylibrary/models';
+
+export const sampleBooks: BookType[] = [
+  {
+    id: '1',
+    title: '어린 왕자',
+    author: '생텍쥐페리',
+    coverUrl: 'https://image.aladin.co.kr/product/26/0/cover500/s742633278_1.jpg',
+    isPublic: true,
+    addedAt: new Date('2023-01-15'),
+  },
+  {
+    id: '2',
+    title: '데미안',
+    author: '헤르만 헤세',
+    coverUrl: 'https://image.aladin.co.kr/product/26/0/cover500/s742633278_1.jpg',
+    isPublic: false,
+    addedAt: new Date('2023-03-10'),
+  },
+  {
+    id: '3',
+    title: '사피엔스: 유인원에서 사이보그까지, 인간 역사의 대담하고 위대한 질문',
+    author: '유발 하라리',
+    coverUrl: 'https://image.aladin.co.kr/product/26/0/cover500/s742633278_1.jpg',
+    isPublic: true,
+    addedAt: new Date('2023-05-22'),
+  },
+  {
+    id: '4',
+    title: '사피엔스: 유인원에서 사이보그까지, 인간 역사의 대담하고 위대한 질문',
+    author: '유발 하라리',
+    coverUrl: 'https://image.aladin.co.kr/product/26/0/cover500/s742633278_1.jpg',
+    isPublic: true,
+    addedAt: new Date('2023-05-22'),
+  },
+  {
+    id: '5',
+    title: '사피엔스: 유인원에서 사이보그까지, 인간 역사의 대담하고 위대한 질문',
+    author: '유발 하라리',
+    coverUrl: 'https://image.aladin.co.kr/product/26/0/cover500/s742633278_1.jpg',
+    isPublic: true,
+    addedAt: new Date('2023-05-22'),
+  },
+  {
+    id: '6',
+    title: '사피엔스: 유인원에서 사이보그까지, 인간 역사의 대담하고 위대한 질문',
+    author: '유발 하라리',
+    coverUrl: 'https://image.aladin.co.kr/product/26/0/cover500/s742633278_1.jpg',
+    isPublic: true,
+    addedAt: new Date('2023-05-22'),
+  },
+  {
+    id: '7',
+    title: '사피엔스: 유인원에서 사이보그까지, 인간 역사의 대담하고 위대한 질문',
+    author: '유발 하라리',
+    coverUrl: 'https://image.aladin.co.kr/product/26/0/cover500/s742633278_1.jpg',
+    isPublic: true,
+    addedAt: new Date('2023-05-22'),
+  },
+  {
+    id: '8',
+    title: '사피엔스: 유인원에서 사이보그까지, 인간 역사의 대담하고 위대한 질문',
+    author: '유발 하라리',
+    coverUrl: 'https://image.aladin.co.kr/product/26/0/cover500/s742633278_1.jpg',
+    isPublic: true,
+    addedAt: new Date('2023-05-22'),
+  },
+  {
+    id: '9',
+    title: '사피엔스: 유인원에서 사이보그까지, 인간 역사의 대담하고 위대한 질문',
+    author: '유발 하라리',
+    coverUrl: 'https://image.aladin.co.kr/product/26/0/cover500/s742633278_1.jpg',
+    isPublic: true,
+    addedAt: new Date('2023-05-22'),
+  },
+];
