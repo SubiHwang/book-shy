@@ -1,4 +1,4 @@
-package com.ssafy.bookshy.domain.trade.dto;
+package com.ssafy.bookshy.domain.exchange.dto;
 
 import lombok.Getter;
 

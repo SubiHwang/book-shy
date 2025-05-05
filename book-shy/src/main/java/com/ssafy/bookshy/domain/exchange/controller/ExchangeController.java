@@ -1,11 +1,10 @@
-package com.ssafy.bookshy.domain.trade.controller;
+package com.ssafy.bookshy.domain.exchange.controller;
 
-import com.ssafy.bookshy.domain.trade.dto.ExchangeRequestDto;
-import com.ssafy.bookshy.domain.trade.dto.ReviewRequestDto;
-import com.ssafy.bookshy.domain.trade.service.TradeService;
+import com.ssafy.bookshy.domain.exchange.dto.ExchangeRequestDto;
+import com.ssafy.bookshy.domain.exchange.dto.ReviewRequestDto;
+import com.ssafy.bookshy.domain.exchange.service.ExchangeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +16,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/trades")
 @RequiredArgsConstructor
 @Tag(name = "📚 Trade API", description = "📦 교환/대여 요청 관련 API")
-public class TradeController {
+public class ExchangeController {
 
-    private final TradeService tradeService;
+    private final ExchangeService exchangeService;
 
     @Operation(summary = "📩 도서 교환 요청", description = "두 사용자의 책을 교환하기 위한 요청을 생성합니다.",
             responses = {
@@ -29,7 +28,7 @@ public class TradeController {
             })
     @PostMapping("/exchange")
     public ResponseEntity<String> requestExchange(@RequestBody ExchangeRequestDto requestDto) {
-        tradeService.requestExchange(requestDto);
+        exchangeService.requestExchange(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("교환 요청이 완료되었습니다.");
     }
 
@@ -41,7 +40,7 @@ public class TradeController {
             })
     @PostMapping("/rental")
     public ResponseEntity<String> requestRental(@RequestBody ExchangeRequestDto requestDto) {
-        tradeService.requestRental(requestDto);
+        exchangeService.requestRental(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("대여 요청이 완료되었습니다.");
     }
 
@@ -53,7 +52,7 @@ public class TradeController {
             })
     @PostMapping("/reviews")
     public ResponseEntity<String> submitReview(@RequestBody ReviewRequestDto reviewDto) {
-        tradeService.submitReview(reviewDto);
+        exchangeService.submitReview(reviewDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("매너 평가가 완료되었습니다.");
     }
 }

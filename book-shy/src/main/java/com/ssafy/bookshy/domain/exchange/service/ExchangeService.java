@@ -1,15 +1,15 @@
-package com.ssafy.bookshy.domain.trade.service;
+package com.ssafy.bookshy.domain.exchange.service;
 
 import com.ssafy.bookshy.domain.chat.entity.ChatCalendar;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatCalendarRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
-import com.ssafy.bookshy.domain.trade.dto.ExchangeRequestDto;
-import com.ssafy.bookshy.domain.trade.dto.ReviewRequestDto;
-import com.ssafy.bookshy.domain.trade.entity.ExchangeRequest;
-import com.ssafy.bookshy.domain.trade.entity.ExchangeRequestReview;
-import com.ssafy.bookshy.domain.trade.repository.ExchangeRequestRepository;
-import com.ssafy.bookshy.domain.trade.repository.ExchangeRequestReviewRepository;
+import com.ssafy.bookshy.domain.exchange.dto.ExchangeRequestDto;
+import com.ssafy.bookshy.domain.exchange.dto.ReviewRequestDto;
+import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequest;
+import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequestReview;
+import com.ssafy.bookshy.domain.exchange.repository.ExchangeRequestRepository;
+import com.ssafy.bookshy.domain.exchange.repository.ExchangeRequestReviewRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
-public class TradeService {
+public class ExchangeService {
 
     private final ExchangeRequestRepository exchangeRequestRepository;
     private final ExchangeRequestReviewRepository reviewRepository;

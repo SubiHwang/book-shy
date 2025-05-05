@@ -1,4 +1,4 @@
-package com.ssafy.bookshy.domain.trade.dto;
+package com.ssafy.bookshy.domain.exchange.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TradeHistoryGroupDto {
+public class ExchangeHistoryGroupDto {
     private String yearMonth;
-    private List<TradeHistoryDto> trades;
+    private List<ExchangeHistoryDto> trades;
 }

@@ -1,4 +1,4 @@
-package com.ssafy.bookshy.domain.trade.entity;
+package com.ssafy.bookshy.domain.exchange.entity;
 
 import com.ssafy.bookshy.common.entity.TimeStampEntity;
 import jakarta.persistence.*;
