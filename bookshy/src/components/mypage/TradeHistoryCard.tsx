@@ -8,10 +8,10 @@ interface TradeHistoryCardProps {
   receivedBookTitle: string;
   receivedBookAuthor: string;
   receivedBookCoverUrl: string;
-  givenBookTitle?: string;
-  givenBookAuthor?: string;
-  givenBookCoverUrl?: string;
-  tradeType: 'EXCHANGE' | 'RENTAL'; // 🔥 추가
+  givenBookTitle: string;
+  givenBookAuthor: string;
+  givenBookCoverUrl: string;
+  tradeType: 'EXCHANGE' | 'RENTAL';
 }
 
 const TradeHistoryCard: FC<TradeHistoryCardProps> = ({
@@ -20,14 +20,11 @@ const TradeHistoryCard: FC<TradeHistoryCardProps> = ({
   counterpartNickname,
   counterpartProfileImageUrl,
   receivedBookTitle,
-  receivedBookAuthor,
   receivedBookCoverUrl,
   givenBookTitle,
-  givenBookAuthor,
   givenBookCoverUrl,
   tradeType,
 }) => {
-  // 🔄 유형별 표시 텍스트 정의
   const tradeTypeLabel = tradeType === 'EXCHANGE' ? '🔁 교환' : '📦 대여 / 반납';
 
   return (
@@ -64,27 +61,23 @@ const TradeHistoryCard: FC<TradeHistoryCardProps> = ({
           <p>
             📗 <b>받은 책:</b> {receivedBookTitle}
           </p>
-          {givenBookTitle && (
-            <p>
-              📘 <b>준 책:</b> {givenBookTitle}
-            </p>
-          )}
+          <p className="mt-2">
+            📘 <b>준 책:</b> {givenBookTitle}
+          </p>
         </div>
 
-        {/* 3. 책 이미지들 */}
-        <div className="flex flex-col gap-2">
+        {/* 3. 책 이미지들 - 가로 배치 */}
+        <div className="flex gap-2">
           <img
             src={receivedBookCoverUrl}
             alt="받은 책"
             className="w-14 h-20 rounded-md shadow object-cover border border-gray-200"
           />
-          {givenBookCoverUrl && (
-            <img
-              src={givenBookCoverUrl}
-              alt="준 책"
-              className="w-14 h-20 rounded-md shadow object-cover border border-gray-200"
-            />
-          )}
+          <img
+            src={givenBookCoverUrl}
+            alt="준 책"
+            className="w-14 h-20 rounded-md shadow object-cover border border-gray-200"
+          />
         </div>
       </div>
     </div>
