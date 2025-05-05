@@ -11,7 +11,8 @@ import WishBooks from '@/pages/matching/WishBooks';
 import NeighborBookshelfPage from '@/pages/matching/NeighborBookshelf/NeighborBookshelfPage';
 import AddBySelfPage from '@/pages/mylibrary/AddBook/AddBySelfPage';
 import AddByTitlePage from '@/pages/mylibrary/AddBook/AddByTitlePage';
-import AddByISBNPage from '@/pages/mylibrary/AddBook/AddByISBNPage';
+import AddByBarcodePage from '@/pages/mylibrary/AddBook/AddByISBNPage';
+import AddISBNResultPage from '@/pages/mylibrary/AddBook/AddISBNResultPage';
 import AddBySearchPage from '@/pages/mylibrary/AddBook/AddBySearchPage';
 import OCRResultPage from '@/pages/mylibrary/AddBook/OCRResultPage';
 import AllMyBooksTab from '@/pages/mylibrary/tabs/AllBooksTab';
@@ -51,7 +52,9 @@ const AppLayout: FC = () => {
           <Route path="/bookshelf/add/search" element={<AddBySearchPage />} />
           <Route path="/bookshelf/add/self" element={<AddBySelfPage />} />
           <Route path="/bookshelf/add/title" element={<AddByTitlePage />} />
-          <Route path="/bookshelf/add/isbn" element={<AddByISBNPage />} />
+          <Route path="/bookshelf/add/isbn" element={<AddByBarcodePage />} />
+          <Route path="/bookshelf/add/isbn-result" element={<AddISBNResultPage />} />
+          {/* OCR 결과 페이지 */}
           <Route path="/bookshelf/add/ocr-result" element={<OCRResultPage />} />
           <Route path="/matching" element={<MatchingPage />}>
             <Route index element={<MatchingRecommend />} />
