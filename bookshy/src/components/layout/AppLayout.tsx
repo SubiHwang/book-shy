@@ -18,6 +18,7 @@ import AddBySearchPage from '@/pages/mylibrary/AddBook/AddBySearchPage';
 import OCRResultPage from '@/pages/mylibrary/AddBook/OCRResultPage';
 import AllMyBooksTab from '@/pages/mylibrary/tabs/AllBooksTab';
 import PublicMyBooksTab from '@/pages/mylibrary/tabs/PublicBooksTab';
+import TradeReviewPage from '@/pages/chat/TradeReviewPage';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const AppLayout: FC = () => {
 
   // 채팅창에서 BottomTabBar 숨기기
   const isChatRoom = matchPath('/chat/:roomId', location.pathname);
+  const isReviewPage = matchPath('/chat/:roomId/review', location.pathname);
 
   return (
     <div className="app-container">
@@ -58,6 +60,7 @@ const AppLayout: FC = () => {
           <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
           <Route path="/chat" element={<ChatListPage />} />
           <Route path="/chat/:roomId" element={<ChatRoomPage />} />
+          <Route path="/chat/:roomId/review" element={<TradeReviewPage />} />
           <Route path="/booknote" element={<div>독서 기록</div>} />
           {/* ✅ 마이페이지 라우팅 추가 */}
           <Route path="/mypage" element={<MyPage />}>
@@ -67,6 +70,7 @@ const AppLayout: FC = () => {
         </Routes>
       </div>
       {!isChatRoom && <BottomTabBar onTabChange={handleTabChange} />}
+      {!isReviewPage && <BottomTabBar onTabChange={handleTabChange} />}
     </div>
   );
 };
