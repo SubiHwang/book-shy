@@ -13,13 +13,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import static com.ssafy.bookshy.domain.exchange.dto.ExchangePromiseDto.CounterpartDto;
+import static com.ssafy.bookshy.common.constants.ImageUrlConstants.PROFILE_IMAGE_BASE_URL;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-
-import static com.ssafy.bookshy.domain.exchange.dto.ExchangePromiseDto.CounterpartDto;
 
 @Service
 @RequiredArgsConstructor
@@ -67,7 +67,7 @@ public class ExchangePromiseService {
                     .counterpart(CounterpartDto.builder()
                             .userId(counterpart.getUserId())
                             .nickname(counterpart.getNickname())
-                            .profileImageUrl(counterpart.getProfileImageUrl())
+                            .profileImageUrl(PROFILE_IMAGE_BASE_URL + counterpart.getProfileImageUrl())
                             .build())
                     .timeLeft(timeLeft)
                     .build();

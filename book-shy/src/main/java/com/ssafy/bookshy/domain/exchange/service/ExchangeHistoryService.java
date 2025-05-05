@@ -14,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import static com.ssafy.bookshy.common.constants.ImageUrlConstants.PROFILE_IMAGE_BASE_URL;
+import static com.ssafy.bookshy.common.constants.ImageUrlConstants.COVER_IMAGE_BASE_URL;
 
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -57,12 +59,12 @@ public class ExchangeHistoryService {
             return ExchangeHistoryDto.builder()
                     .tradeId(request.getRequestId())
                     .counterpartNickname(nickname)
-                    .counterpartProfileImageUrl(profileImageUrl)
+                    .counterpartProfileImageUrl(PROFILE_IMAGE_BASE_URL + profileImageUrl)
                     .place("추후 구현된 장소 정보")
                     .completedAt(request.getRequestedAt())
                     .receivedBookTitle(receivedBook.getTitle())
                     .receivedBookAuthor(receivedBook.getAuthor())
-                    .receivedBookCoverUrl(receivedBook.getCoverImageUrl())
+                    .receivedBookCoverUrl(COVER_IMAGE_BASE_URL + receivedBook.getCoverImageUrl())
                     .build();
         }).toList();
 

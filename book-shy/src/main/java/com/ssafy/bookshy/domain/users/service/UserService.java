@@ -5,6 +5,7 @@ import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import static com.ssafy.bookshy.common.constants.ImageUrlConstants.PROFILE_IMAGE_BASE_URL;
 
 @Service
 @RequiredArgsConstructor
@@ -35,8 +36,8 @@ public class UserService {
 
         String fileName = user.getProfileImageUrl(); // 예: "1.png"
         String profileImageUrl = (fileName != null && !fileName.isEmpty())
-                ? "http://k12d204.p.ssafy.io/images/profile/" + fileName
-                : null; // 기본 이미지가 있다면 이 부분에 기본 URL로 대체 가능
+                ? PROFILE_IMAGE_BASE_URL + fileName
+                : null;
 
         return UserProfileResponseDto.builder()
                 .nickname(user.getNickname())
