@@ -16,6 +16,9 @@ import AddBySearchPage from '@/pages/mylibrary/AddBook/AddBySearchPage';
 import OCRResultPage from '@/pages/mylibrary/AddBook/OCRResultPage';
 import AllMyBooksTab from '@/pages/mylibrary/tabs/AllBooksTab';
 import PublicMyBooksTab from '@/pages/mylibrary/tabs/PublicBooksTab';
+import BookDetailPage from '@/pages/mylibrary/BookDetailPage';
+import BookInfoTab from '@/pages/mylibrary/tabs/BookInfoTab';
+import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -37,6 +40,11 @@ const AppLayout: FC = () => {
             {/* 책 보기 탭 */}
             <Route path="all-my-books" element={<AllMyBooksTab />} />
             <Route path="public-my-books" element={<PublicMyBooksTab />} />
+          </Route>
+          {/* 책 상세 페이지 */}
+          <Route path="/bookshelf/books/:id" element={<BookDetailPage />}>
+            <Route path="info" element={<BookInfoTab />} />
+            <Route path="notes" element={<BookNotesTab />} />
           </Route>
 
           {/* 📚 책 추가 페이지들 - 별도 라우트로 분리 */}
