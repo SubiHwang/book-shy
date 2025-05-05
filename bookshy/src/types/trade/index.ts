@@ -43,6 +43,10 @@ export interface TradeHistory {
   receivedBookTitle: string;
   receivedBookAuthor: string;
   receivedBookCoverUrl: string;
+  givenBookTitle: string;
+  givenBookAuthor: string;
+  givenBookCoverUrl: string;
+  tradeType: 'EXCHANGE' | 'RENTAL';
 }
 
 // 거래 완료 내역 그룹 (월별)

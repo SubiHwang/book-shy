@@ -8,10 +8,10 @@ interface TradeHistoryCardProps {
   receivedBookTitle: string;
   receivedBookAuthor: string;
   receivedBookCoverUrl: string;
-  // 🔜 향후 준 책 정보 추가 예정
   givenBookTitle?: string;
   givenBookAuthor?: string;
   givenBookCoverUrl?: string;
+  tradeType: 'EXCHANGE' | 'RENTAL'; // 🔥 추가
 }
 
 const TradeHistoryCard: FC<TradeHistoryCardProps> = ({
@@ -25,7 +25,11 @@ const TradeHistoryCard: FC<TradeHistoryCardProps> = ({
   givenBookTitle,
   givenBookAuthor,
   givenBookCoverUrl,
+  tradeType,
 }) => {
+  // 🔄 유형별 표시 텍스트 정의
+  const tradeTypeLabel = tradeType === 'EXCHANGE' ? '🔁 교환' : '📦 대여 / 반납';
+
   return (
     <div
       key={tradeId}
@@ -41,7 +45,7 @@ const TradeHistoryCard: FC<TradeHistoryCardProps> = ({
           })}
         </span>
         <span className="text-[11px] text-pink-500 bg-pink-50 border border-pink-200 px-2 py-0.5 rounded-full">
-          🔁 완료 / 반납
+          {tradeTypeLabel}
         </span>
       </div>
 
@@ -60,18 +64,10 @@ const TradeHistoryCard: FC<TradeHistoryCardProps> = ({
           <p>
             📗 <b>받은 책:</b> {receivedBookTitle}
           </p>
-          <p>
-            ✍ <b>저자:</b> {receivedBookAuthor}
-          </p>
           {givenBookTitle && (
-            <>
-              <p>
-                📘 <b>준 책:</b> {givenBookTitle}
-              </p>
-              <p>
-                ✍ <b>저자:</b> {givenBookAuthor}
-              </p>
-            </>
+            <p>
+              📘 <b>준 책:</b> {givenBookTitle}
+            </p>
           )}
         </div>
 

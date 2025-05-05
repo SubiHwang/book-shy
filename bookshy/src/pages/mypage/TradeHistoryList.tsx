@@ -28,6 +28,10 @@ const TradeHistoryList: FC = () => {
               receivedBookTitle={item.receivedBookTitle}
               receivedBookAuthor={item.receivedBookAuthor}
               receivedBookCoverUrl={item.receivedBookCoverUrl}
+              givenBookTitle={item.givenBookTitle}
+              givenBookAuthor={item.givenBookAuthor}
+              givenBookCoverUrl={item.givenBookCoverUrl}
+              tradeType={item.tradeType}
             />
           ))}
         </div>
