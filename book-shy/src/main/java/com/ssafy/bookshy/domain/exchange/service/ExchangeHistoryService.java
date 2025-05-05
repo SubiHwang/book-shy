@@ -10,6 +10,8 @@ import com.ssafy.bookshy.domain.exchange.repository.ExchangeRequestRepository;
 import com.ssafy.bookshy.domain.users.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -33,23 +35,18 @@ public class ExchangeHistoryService {
      * @return 완료된 교환 내역 그룹 (연월별)
      */
     @Transactional
-    public List<ExchangeHistoryGroupDto> getCompletedExchanges(Long userId, Pageable pageable) {
-        // 나와 관련 있고 완료된 교환 요청 조회
+    public Page<ExchangeHistoryGroupDto> getCompletedExchanges(Long userId, Pageable pageable) {
         List<ExchangeRequest> completedRequests =
                 exchangeRequestRepository.findByUserAndStatus(userId, RequestStatus.COMPLETED, pageable);
 
-        List<ExchangeHistoryDto> dtoList = new ArrayList<>();
-
-        for (ExchangeRequest request : completedRequests) {
+        List<ExchangeHistoryDto> dtoList = completedRequests.stream().map(request -> {
             Long counterpartId = request.getRequesterId().equals(userId)
                     ? request.getResponderId()
                     : request.getRequesterId();
 
-            // 사용자 정보 조회
             String nickname = userService.getNicknameById(counterpartId);
             String profileImageUrl = userService.getProfileImageUrlById(counterpartId);
 
-            // 책 정보 조회 (내가 받은 책 기준)
             Long receivedBookId = request.getRequesterId().equals(userId)
                     ? request.getBookBId()
                     : request.getBookAId();
@@ -57,34 +54,34 @@ public class ExchangeHistoryService {
             Book receivedBook = bookRepository.findById(receivedBookId)
                     .orElseThrow(() -> new RuntimeException("책 정보를 찾을 수 없습니다."));
 
-            // DTO 생성
-            ExchangeHistoryDto dto = ExchangeHistoryDto.builder()
+            return ExchangeHistoryDto.builder()
                     .tradeId(request.getRequestId())
                     .counterpartNickname(nickname)
                     .counterpartProfileImageUrl(profileImageUrl)
-                    .place("추후 구현된 장소 정보") // 현재 엔티티에는 장소 정보 없음
-                    .completedAt(request.getRequestedAt()) // 확정일자로 대체
+                    .place("추후 구현된 장소 정보")
+                    .completedAt(request.getRequestedAt())
                     .receivedBookTitle(receivedBook.getTitle())
                     .receivedBookAuthor(receivedBook.getAuthor())
                     .receivedBookCoverUrl(receivedBook.getCoverImageUrl())
                     .build();
+        }).toList();
 
-            dtoList.add(dto);
-        }
-
-        // 연월별로 그룹핑하여 결과 반환
-        return dtoList.stream()
+        // Group by yearMonth
+        Map<String, List<ExchangeHistoryDto>> grouped = dtoList.stream()
                 .collect(Collectors.groupingBy(
                         dto -> dto.getCompletedAt().format(DateTimeFormatter.ofPattern("yyyy.MM")),
-                        LinkedHashMap::new, // 입력 순서 유지
+                        LinkedHashMap::new,
                         Collectors.toList()
-                ))
-                .entrySet()
-                .stream()
+                ));
+
+        List<ExchangeHistoryGroupDto> groupedDtos = grouped.entrySet().stream()
                 .map(entry -> ExchangeHistoryGroupDto.builder()
                         .yearMonth(entry.getKey())
                         .trades(entry.getValue())
                         .build())
-                .collect(Collectors.toList());
+                .toList();
+
+        return new PageImpl<>(groupedDtos, pageable, groupedDtos.size());
     }
+
 }

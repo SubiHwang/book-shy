@@ -101,13 +101,14 @@ public class ExchangeController {
             }
     )
     @GetMapping("/history")
-    public ResponseEntity<List<ExchangeHistoryGroupDto>> getExchangeHistory(
+    public ResponseEntity<Page<ExchangeHistoryGroupDto>> getExchangeHistory(
             @RequestHeader("X-User-Id") Long userId,
             @ParameterObject Pageable pageable
     ) {
-        List<ExchangeHistoryGroupDto> result = exchangeHistoryService.getCompletedExchanges(userId, pageable);
+        Page<ExchangeHistoryGroupDto> result = exchangeHistoryService.getCompletedExchanges(userId, pageable);
         return ResponseEntity.ok(result);
     }
+
 
     @Operation(summary = "✅ 거래 완료 처리", description = "사용자가 교환 완료 버튼을 눌러 거래를 완료 처리합니다.")
     @PostMapping("/complete/{requestId}")
