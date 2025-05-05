@@ -117,6 +117,32 @@ public class ExchangeService {
     }
 
     /**
+     * 🌟 거래 완료 처리
+     */
+    @Transactional
+    public void completeExchange(Long requestId, Long userId) {
+        ExchangeRequest request = exchangeRequestRepository.findById(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 요청이 존재하지 않습니다."));
+
+        // 1. 사용자가 해당 거래의 당사자인지 확인
+        if (!request.getRequesterId().equals(userId) && !request.getResponderId().equals(userId)) {
+            throw new SecurityException("해당 거래에 참여한 사용자만 완료할 수 있습니다.");
+        }
+
+        // 2. 이미 완료된 거래인지 체크
+        if (request.getStatus() == ExchangeRequest.RequestStatus.COMPLETED) {
+            throw new IllegalStateException("이미 완료된 거래입니다.");
+        }
+
+        // 3. 상태를 COMPLETED로 변경
+        request.setStatus(ExchangeRequest.RequestStatus.COMPLETED);
+
+        // 4. 필요한 후처리: 예) 알림, 포인트 적립 등
+        // ...
+    }
+
+
+    /**
      * ⚠️ 중복 거래 요청 방지
      * - 동일한 A→B 요청이 이미 존재할 경우 예외 발생
      */

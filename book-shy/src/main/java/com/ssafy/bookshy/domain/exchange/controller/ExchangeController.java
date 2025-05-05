@@ -108,4 +108,15 @@ public class ExchangeController {
         List<ExchangeHistoryGroupDto> result = exchangeHistoryService.getCompletedExchanges(userId, pageable);
         return ResponseEntity.ok(result);
     }
+
+    @Operation(summary = "✅ 거래 완료 처리", description = "사용자가 교환 완료 버튼을 눌러 거래를 완료 처리합니다.")
+    @PostMapping("/complete/{requestId}")
+    public ResponseEntity<String> completeExchange(
+            @PathVariable Long requestId,
+            @RequestHeader("X-User-Id") Long userId
+    ) {
+        exchangeService.completeExchange(requestId, userId);
+        return ResponseEntity.ok("거래가 완료되었습니다.");
+    }
+
 }
