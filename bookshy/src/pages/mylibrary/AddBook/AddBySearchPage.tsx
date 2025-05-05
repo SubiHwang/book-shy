@@ -1,23 +1,14 @@
 import { useState, FC, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search } from 'lucide-react';
-import BookSearchItem from '@/components/MyLibrary/BookSearchItem';
+import BookSearchItem from '@/components/MyLibrary/BookAdd/BookSearchItem';
 import { BookType } from '@/types/mylibrary/models';
-
-// API로 검색된 책 타입
-interface SearchedBook {
-  id: number;
-  title: string;
-  author: string;
-  coverUrl: string;
-  hasBadge: boolean;
-  badge: string;
-}
+import { Book } from '@/types/book'; // ✅ Book 타입으로 변경
 
 const AddBySearchPage: FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [books, setBooks] = useState<SearchedBook[]>([]);
+  const [books, setBooks] = useState<Book[]>([]); // ✅ Book 타입 사용
 
   const navigate = useNavigate();
 
@@ -30,58 +21,60 @@ const AddBySearchPage: FC = () => {
 
     setIsSearching(true);
 
-    // 실제로는 여기서 API 호출
-    // 임시 데이터로 대체 (실제로는 API 응답 구조에 맞게 수정)
+    // 더미 데이터
     setTimeout(() => {
-      // 더미 데이터 - 검색어를 포함하는 책만 필터링하여 보여줌
-      const dummyBooks: SearchedBook[] = [
+      const dummyBooks: Book[] = [
         {
-          id: 1,
+          bookId: 1,
           title: '총, 균, 쇠',
-          author: '저자: 제레드 다이아몬드 | 출판사: 김진준',
-          coverUrl: '/api/placeholder/100/150',
-          hasBadge: true,
-          badge: '베스트셀러',
+          author: '제레드 다이아몬드',
+          publisher: '김진준',
+          translator: '이명식',
+          categories: '고전 문학',
+          bookImgUrl: '/api/placeholder/100/150',
         },
         {
-          id: 2,
+          bookId: 2,
           title: '총, 균, 쇠 (양장판)',
-          author: '저자: 제레드 다이아몬드 | 출판사: 김진준',
-          coverUrl: '/api/placeholder/100/150',
-          hasBadge: false,
-          badge: '',
+          author: '제레드 다이아몬드',
+          publisher: '김진준',
+          translator: '이명식',
+          categories: '고전 문학',
+          bookImgUrl: '/api/placeholder/100/150',
         },
         {
-          id: 3,
+          bookId: 3,
           title: '사피엔스',
-          author: '저자: 유발 하라리 | 출판사: 김영사',
-          coverUrl: '/api/placeholder/100/150',
-          hasBadge: true,
-          badge: '인기',
+          author: '유발 하라리',
+          publisher: '김영사',
+          translator: '이명식',
+          categories: '고전 문학',
+          bookImgUrl: '/api/placeholder/100/150',
         },
         {
-          id: 4,
+          bookId: 4,
           title: '호모 데우스',
-          author: '저자: 유발 하라리 | 출판사: 김영사',
-          coverUrl: '/api/placeholder/100/150',
-          hasBadge: false,
-          badge: '',
+          author: '유발 하라리',
+          translator: '이명식',
+          categories: '고전 문학',
+          publisher: '김영사',
+          bookImgUrl: '/api/placeholder/100/150',
         },
         {
-          id: 5,
+          bookId: 5,
           title: '21세기를 위한 21가지 제언',
-          author: '저자: 유발 하라리 | 출판사: 김영사',
-          coverUrl: '/api/placeholder/100/150',
-          hasBadge: false,
-          badge: '',
+          author: '유발 하라리',
+          translator: '이명식',
+          categories: '고전 문학',
+          publisher: '김영사',
+          bookImgUrl: '/api/placeholder/100/150',
         },
       ];
 
-      // 검색어가 제목 또는 저자에 포함된 책만 필터링
       const filteredBooks = dummyBooks.filter(
         (book) =>
-          book.title.toLowerCase().includes(query.toLowerCase()) ||
-          book.author.toLowerCase().includes(query.toLowerCase()),
+          book.title?.toLowerCase().includes(query.toLowerCase()) ||
+          book.author?.toLowerCase().includes(query.toLowerCase()),
       );
 
       setBooks(filteredBooks);
@@ -101,7 +94,6 @@ const AddBySearchPage: FC = () => {
       const debounceTimer = setTimeout(() => {
         searchBooks(searchQuery);
       }, 500);
-
       return () => clearTimeout(debounceTimer);
     } else {
       setBooks([]);
@@ -111,25 +103,26 @@ const AddBySearchPage: FC = () => {
   // 책 추가 핸들러
   const handleAddBook = async (bookId: number) => {
     try {
-      const selectedBook = books.find((book) => book.id === bookId);
+      const selectedBook = books.find((book) => book.bookId === bookId);
       if (!selectedBook) return;
 
       const newBook: BookType = {
-        id: String(selectedBook.id),
-        title: selectedBook.title,
-        author: selectedBook.author.split('|')[0].trim(),
-        coverUrl: selectedBook.coverUrl,
+        id: String(selectedBook.bookId),
+        title: selectedBook.title || '',
+        author: selectedBook.author || '',
+        coverUrl: selectedBook.bookImgUrl || '',
         isPublic: true,
         addedAt: new Date(),
       };
 
+      // 나중에 실제로 DB 저장 API 호출 가능
       navigate('/bookshelf');
     } catch (error) {
       console.error('책 추가 중 오류 발생:', error);
     }
   };
 
-  // 직접 등록 페이지로 이동 핸들러
+  // 직접 등록 페이지로 이동
   const handleSelfRegister = () => {
     navigate('/bookshelf/add/self');
   };
@@ -140,7 +133,7 @@ const AddBySearchPage: FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-light-bg">
-      {/* 메인 콘텐츠 영역 */}
+      {/* 메인 콘텐츠 */}
       <div className="flex-1 overflow-auto">
         {/* 헤더 */}
         <div className="bg-primary-light p-4 text-white">
@@ -190,7 +183,7 @@ const AddBySearchPage: FC = () => {
             </div>
           ) : (
             books.map((book) => (
-              <BookSearchItem key={book.id} book={book} onAddBook={handleAddBook} />
+              <BookSearchItem key={book.bookId} book={book} onAddBook={handleAddBook} />
             ))
           )}
         </div>
