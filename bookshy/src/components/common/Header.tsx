@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { HeaderProps } from '@/types/common';
 import { ArrowLeft, Bell } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 const Header: FC<HeaderProps> = ({
   title,
@@ -12,6 +13,18 @@ const Header: FC<HeaderProps> = ({
   onExtraButtonClick,
   className = '',
 }) => {
+  const location = useLocation();
+
+  // 숨길 경로 목록
+  const hiddenPaths = ['/bookshelf/add/title', '/bookshelf/add/isbn'];
+
+  // 현재 경로가 숨김 목록에 있는지 확인
+  const shouldHide = hiddenPaths.some((path) => location.pathname.includes(path));
+
+  // 특정 경로에서는 헤더를 표시하지 않음
+  if (shouldHide) {
+    return null;
+  }
   return (
     <header
       className={`sticky top-0 w-full shadow-md px-4 py-3 flex items-center justify-between z-50 ${className}`}

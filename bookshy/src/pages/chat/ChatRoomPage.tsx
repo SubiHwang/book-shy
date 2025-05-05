@@ -13,7 +13,7 @@ function ChatRoomPage() {
 
   return (
     <ChatRoom
-      partnerName={partnerName || '상대방'}
+      partnerName={partnerName || '상대방테스트'}
       partnerProfileImage={
         partnerProfileImage ||
         'https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbguJOC%2FbtsNFnGX9MK%2F2hVVXFWQM8IwjT1h3vKh8k%2Fimg.jpg'

@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation, matchPath } from 'react-router-dom';
 import BottomTabBar from '../common/BottomTabBar';
+import MyLibraryPage from '../../pages/mylibrary/MyLibraryPage';
 import MatchingPage from '@/pages/matching/MatchingPage';
 import ChatListPage from '@/pages/chat/ChatListPage';
 import ChatRoomPage from '@/pages/chat/ChatRoomPage';
@@ -10,6 +11,13 @@ import TradePromiseList from '@/pages/mypage/TradePromiseList';
 import TradeHistoryList from '@/pages/mypage/TradeHistoryList';
 import WishBooks from '@/pages/matching/WishBooks';
 import NeighborBookshelfPage from '@/pages/matching/NeighborBookshelf/NeighborBookshelfPage';
+import AddBySelfPage from '@/pages/mylibrary/AddBook/AddBySelfPage';
+import AddByTitlePage from '@/pages/mylibrary/AddBook/AddByTitlePage';
+import AddByISBNPage from '@/pages/mylibrary/AddBook/AddByISBNPage';
+import AddBySearchPage from '@/pages/mylibrary/AddBook/AddBySearchPage';
+import OCRResultPage from '@/pages/mylibrary/AddBook/OCRResultPage';
+import AllMyBooksTab from '@/pages/mylibrary/tabs/AllBooksTab';
+import PublicMyBooksTab from '@/pages/mylibrary/tabs/PublicBooksTab';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -28,12 +36,26 @@ const AppLayout: FC = () => {
       <div className="content">
         <Routes>
           <Route path="/" element={<Navigate to="/bookshelf" replace />} />
-          <Route path="/bookshelf" element={<div>내 서재</div>} />
+          {/* 📚 서재 기본 페이지 */}
+          <Route path="/bookshelf" element={<MyLibraryPage />}>
+            {/* 기본 라우트는 모든 책 페이지로 리다이렉트 */}
+            <Route index element={<Navigate to="/bookshelf/all-my-books" replace />} />
+            {/* 책 보기 탭 */}
+            <Route path="all-my-books" element={<AllMyBooksTab />} />
+            <Route path="public-my-books" element={<PublicMyBooksTab />} />
+          </Route>
+
+          {/* 📚 책 추가 페이지들 - 별도 라우트로 분리 */}
+          <Route path="/bookshelf/add/search" element={<AddBySearchPage />} />
+          <Route path="/bookshelf/add/self" element={<AddBySelfPage />} />
+          <Route path="/bookshelf/add/title" element={<AddByTitlePage />} />
+          <Route path="/bookshelf/add/isbn" element={<AddByISBNPage />} />
+          <Route path="/bookshelf/add/ocr-result" element={<OCRResultPage />} />
           <Route path="/matching" element={<MatchingPage />}>
             <Route index element={<MatchingRecommend />} />
             <Route path="wish-books" element={<WishBooks />} />
           </Route>
-            <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
+          <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
           <Route path="/chat" element={<ChatListPage />} />
           <Route path="/chat/:roomId" element={<ChatRoomPage />} />
           <Route path="/booknote" element={<div>독서 기록</div>} />
