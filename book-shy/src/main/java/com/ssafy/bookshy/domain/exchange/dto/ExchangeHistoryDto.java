@@ -32,4 +32,9 @@ public class ExchangeHistoryDto {
     private String receivedBookTitle;
     private String receivedBookAuthor;
     private String receivedBookCoverUrl;
+
+    // 내가 건네준 책 정보
+    private String givenBookTitle;
+    private String givenBookAuthor;
+    private String givenBookCoverUrl;
 }

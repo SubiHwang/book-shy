@@ -47,28 +47,37 @@ public class ExchangeHistoryService {
                     : request.getRequesterId();
 
             String nickname = userService.getNicknameById(counterpartId);
-            String profileImageUrl = userService.getProfileImageUrlById(counterpartId);
+            String profileImageFile = userService.getProfileImageUrlById(counterpartId);
+            String profileImageUrl = PROFILE_IMAGE_BASE_URL + profileImageFile;
 
             Long receivedBookId = request.getRequesterId().equals(userId)
                     ? request.getBookBId()
                     : request.getBookAId();
 
+            Long givenBookId = request.getRequesterId().equals(userId)
+                    ? request.getBookAId()
+                    : request.getBookBId();
+
             Book receivedBook = bookRepository.findById(receivedBookId)
-                    .orElseThrow(() -> new RuntimeException("책 정보를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new RuntimeException("받은 책 정보를 찾을 수 없습니다."));
+            Book givenBook = bookRepository.findById(givenBookId)
+                    .orElseThrow(() -> new RuntimeException("준 책 정보를 찾을 수 없습니다."));
 
             return ExchangeHistoryDto.builder()
                     .tradeId(request.getRequestId())
                     .counterpartNickname(nickname)
-                    .counterpartProfileImageUrl(PROFILE_IMAGE_BASE_URL + profileImageUrl)
+                    .counterpartProfileImageUrl(profileImageUrl)
                     .place("추후 구현된 장소 정보")
                     .completedAt(request.getRequestedAt())
                     .receivedBookTitle(receivedBook.getTitle())
                     .receivedBookAuthor(receivedBook.getAuthor())
                     .receivedBookCoverUrl(COVER_IMAGE_BASE_URL + receivedBook.getCoverImageUrl())
+                    .givenBookTitle(givenBook.getTitle())
+                    .givenBookAuthor(givenBook.getAuthor())
+                    .givenBookCoverUrl(COVER_IMAGE_BASE_URL + givenBook.getCoverImageUrl())
                     .build();
         }).toList();
 
-        // Group by yearMonth
         Map<String, List<ExchangeHistoryDto>> grouped = dtoList.stream()
                 .collect(Collectors.groupingBy(
                         dto -> dto.getCompletedAt().format(DateTimeFormatter.ofPattern("yyyy.MM")),
@@ -85,5 +94,6 @@ public class ExchangeHistoryService {
 
         return new PageImpl<>(groupedDtos, pageable, groupedDtos.size());
     }
+
 
 }
