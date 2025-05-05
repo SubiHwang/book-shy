@@ -28,6 +28,9 @@ public class ExchangeHistoryDto {
     private String place;
     private LocalDateTime completedAt;
 
+    // 거래 타입 (교환 or 대여/반납)
+    private String tradeType;
+
     // 내가 받은 책 정보
     private String receivedBookTitle;
     private String receivedBookAuthor;

@@ -69,6 +69,7 @@ public class ExchangeHistoryService {
                     .counterpartProfileImageUrl(profileImageUrl)
                     .place("추후 구현된 장소 정보")
                     .completedAt(request.getRequestedAt())
+                    .tradeType(request.getType().name())
                     .receivedBookTitle(receivedBook.getTitle())
                     .receivedBookAuthor(receivedBook.getAuthor())
                     .receivedBookCoverUrl(COVER_IMAGE_BASE_URL + receivedBook.getCoverImageUrl())
