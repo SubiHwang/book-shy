@@ -5,8 +5,11 @@ import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatCalendarRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
 import com.ssafy.bookshy.domain.trade.dto.ExchangeRequestDto;
+import com.ssafy.bookshy.domain.trade.dto.ReviewRequestDto;
 import com.ssafy.bookshy.domain.trade.entity.ExchangeRequest;
+import com.ssafy.bookshy.domain.trade.entity.ExchangeRequestReview;
 import com.ssafy.bookshy.domain.trade.repository.ExchangeRequestRepository;
+import com.ssafy.bookshy.domain.trade.repository.ExchangeRequestReviewRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 public class TradeService {
 
     private final ExchangeRequestRepository exchangeRequestRepository;
+    private final ExchangeRequestReviewRepository reviewRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatCalendarRepository chatCalendarRepository;
 
@@ -90,6 +94,26 @@ public class TradeService {
                 .requestId(request.getRequestId())
                 .build();
         chatCalendarRepository.save(calendar);
+    }
+
+    /**
+     * 🌟 거래 완료 후 매너 평가 등록
+     * - 같은 거래에 대한 리뷰가 이미 존재하면 예외 발생
+     * - 리뷰 테이블에 저장
+     */
+    @Transactional
+    public void submitReview(ReviewRequestDto dto) {
+        boolean exists = reviewRepository.existsByRequestIdAndReviewerId(dto.getRequestId(), dto.getReviewerId());
+        if (exists) throw new IllegalStateException("이미 이 요청에 대한 리뷰를 작성하셨습니다.");
+
+        ExchangeRequestReview review = ExchangeRequestReview.builder()
+                .requestId(dto.getRequestId())
+                .reviewerId(dto.getReviewerId())
+                .revieweeId(dto.getRevieweeId())
+                .rating(dto.getRating())
+                .build();
+
+        reviewRepository.save(review);
     }
 
     /**

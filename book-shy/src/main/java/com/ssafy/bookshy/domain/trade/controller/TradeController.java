@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.trade.controller;
 
 import com.ssafy.bookshy.domain.trade.dto.ExchangeRequestDto;
+import com.ssafy.bookshy.domain.trade.dto.ReviewRequestDto;
 import com.ssafy.bookshy.domain.trade.service.TradeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -42,5 +43,17 @@ public class TradeController {
     public ResponseEntity<String> requestRental(@RequestBody ExchangeRequestDto requestDto) {
         tradeService.requestRental(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("대여 요청이 완료되었습니다.");
+    }
+
+    @Operation(summary = "🌟 매너 평가 작성", description = "거래 후 상대방에 대한 매너 평가를 등록합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "✅ 평가 완료"),
+                    @ApiResponse(responseCode = "400", description = "🚫 잘못된 요청"),
+                    @ApiResponse(responseCode = "409", description = "⚠️ 이미 작성된 리뷰")
+            })
+    @PostMapping("/reviews")
+    public ResponseEntity<String> submitReview(@RequestBody ReviewRequestDto reviewDto) {
+        tradeService.submitReview(reviewDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body("매너 평가가 완료되었습니다.");
     }
 }

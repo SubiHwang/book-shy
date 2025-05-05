@@ -2,13 +2,13 @@ package com.ssafy.bookshy.domain.trade.entity;
 
 import com.ssafy.bookshy.common.entity.TimeStampEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "exchange_requests_reviews")
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ExchangeRequestReview extends TimeStampEntity {
 
