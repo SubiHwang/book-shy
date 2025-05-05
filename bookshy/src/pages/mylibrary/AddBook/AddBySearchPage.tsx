@@ -2,7 +2,6 @@ import { useState, FC, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search } from 'lucide-react';
 import BookSearchItem from '@/components/MyLibrary/BookAdd/BookSearchItem';
-import { BookType } from '@/types/mylibrary/models';
 import { Book } from '@/types/book'; // ✅ Book 타입으로 변경
 
 const AddBySearchPage: FC = () => {
@@ -106,13 +105,8 @@ const AddBySearchPage: FC = () => {
       const selectedBook = books.find((book) => book.bookId === bookId);
       if (!selectedBook) return;
 
-      const newBook: BookType = {
-        id: String(selectedBook.bookId),
-        title: selectedBook.title || '',
-        author: selectedBook.author || '',
-        coverUrl: selectedBook.bookImgUrl || '',
-        isPublic: true,
-        addedAt: new Date(),
+      const newBook: Book = {
+        ...selectedBook,
       };
 
       // 나중에 실제로 DB 저장 API 호출 가능
