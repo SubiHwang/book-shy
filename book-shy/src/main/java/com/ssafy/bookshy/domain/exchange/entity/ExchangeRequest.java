@@ -18,14 +18,22 @@ public class ExchangeRequest extends TimeStampEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long requestId;
 
+    @Column(name = "book_a_id")
     private Long bookAId;
+
+    @Column(name = "book_b_id")
     private Long bookBId;
+
+    @Column(name = "requester_id")
     private Long requesterId;
+
+    @Column(name = "responder_id")
     private Long responderId;
 
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
 
+    @Column(name = "requested_at")
     private LocalDateTime requestedAt;
 
     @Enumerated(EnumType.STRING)
