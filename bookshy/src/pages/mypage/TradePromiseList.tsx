@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTradePromises } from '@/services/mypage/trade';
-import TradeCard from '@/components/MyPage/TradePromiseCard';
+import TradePromiseCard from '@/components/MyPage/TradePromiseCard';
 import type { TradePromise } from '@/types/trade';
 
 const TradePromiseList: FC = () => {
@@ -16,7 +16,7 @@ const TradePromiseList: FC = () => {
   return (
     <div className="px-4 mt-4 space-y-4 pb-32">
       {data.map((item) => (
-        <TradeCard
+        <TradePromiseCard
           key={item.tradeId}
           tradeId={item.tradeId}
           userName={item.counterpart.nickname}
