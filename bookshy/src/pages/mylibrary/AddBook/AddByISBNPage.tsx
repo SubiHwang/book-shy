@@ -118,8 +118,7 @@ const AddByISBNPage: React.FC = () => {
 
           {/* 중앙 텍스트 */}
           <div className="text-center">
-            <h2 className="text-lg font-bold">등록할 책을 찍어주세요</h2>
-            <p className="text-sm mt-1">책 표지, 책 등의 제목을 인식 시켜주세요.</p>
+            <h2 className="text-lg font-bold">등록할 책의 바코드를를 찍어주세요</h2>
           </div>
         </div>
       </div>
