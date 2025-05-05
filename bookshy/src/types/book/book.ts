@@ -18,3 +18,8 @@ export interface WishBook extends Book {
 export interface WishBookProps {
   wishBook: WishBook;
 }
+
+export interface BookSearchItemProps {
+  book: Book;
+  onAddBook: (bookId: number) => void;
+}
