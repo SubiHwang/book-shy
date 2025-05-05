@@ -67,7 +67,7 @@ public class ExchangePromiseService {
                     .counterpart(CounterpartDto.builder()
                             .userId(counterpart.getUserId())
                             .nickname(counterpart.getNickname())
-                            .profileImageUrl("/images/profile/" + counterpart.getProfileImageUrl())
+                            .profileImageUrl(counterpart.getProfileImageUrl())
                             .build())
                     .timeLeft(timeLeft)
                     .build();
