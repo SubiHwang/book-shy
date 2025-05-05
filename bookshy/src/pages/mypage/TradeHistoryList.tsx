@@ -19,6 +19,7 @@ const TradeHistoryList: FC = () => {
           <h2 className="text-lg font-semibold text-gray-800">{yearMonth}</h2>
           {trades.map((item) => (
             <div key={item.tradeId} className="card flex flex-col space-y-3">
+              {/* 날짜 + 상태 */}
               <div className="flex items-center justify-between text-xs text-gray-400">
                 <span>
                   {new Date(item.completedAt).toLocaleDateString('ko-KR', {
@@ -32,27 +33,30 @@ const TradeHistoryList: FC = () => {
                 </span>
               </div>
 
+              {/* 상대방 정보 */}
               <div className="flex items-center gap-3">
                 <img
-                  src={item.counterpart.profileImageUrl}
+                  src={item.counterpartProfileImageUrl}
                   alt="상대방 프로필"
                   className="w-10 h-10 rounded-full object-cover"
                 />
-                <div className="text-sm font-medium">{item.counterpart.nickname} 님</div>
+                <div className="text-sm font-medium">{item.counterpartNickname} 님</div>
               </div>
 
+              {/* 책 정보 */}
               <div className="flex flex-col text-sm">
                 <p>
-                  📗 <b>받은 책:</b> {item.receivedBook.title}
+                  📗 <b>받은 책:</b> {item.receivedBookTitle}
                 </p>
                 <p>
-                  ✍ <b>저자:</b> {item.receivedBook.author}
+                  ✍ <b>저자:</b> {item.receivedBookAuthor}
                 </p>
               </div>
 
+              {/* 책 이미지 */}
               <div className="flex gap-2 mt-2">
                 <img
-                  src={item.receivedBook.coverImageUrl}
+                  src={item.receivedBookCoverUrl}
                   alt="받은 책"
                   className="w-14 h-20 rounded shadow object-cover"
                 />

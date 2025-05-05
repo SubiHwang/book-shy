@@ -36,15 +36,13 @@ export interface ReceivedBook {
 // 거래 완료 내역
 export interface TradeHistory {
   tradeId: number;
-  counterpart: {
-    userId: number;
-    nickname: string;
-    profileImageUrl: string;
-  };
-  completedAt: string;
-  receivedBook: ReceivedBook;
+  counterpartNickname: string;
+  counterpartProfileImageUrl: string;
   place: string;
-  status: 'COMPLETED';
+  completedAt: string;
+  receivedBookTitle: string;
+  receivedBookAuthor: string;
+  receivedBookCoverUrl: string;
 }
 
 // 거래 완료 내역 그룹 (월별)
