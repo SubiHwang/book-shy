@@ -36,7 +36,7 @@ public class ExchangeHistoryService {
     public List<ExchangeHistoryGroupDto> getCompletedExchanges(Long userId, Pageable pageable) {
         // 나와 관련 있고 완료된 교환 요청 조회
         List<ExchangeRequest> completedRequests =
-                exchangeRequestRepository.findByUserAndStatus(userId, RequestStatus.ACCEPTED, pageable);
+                exchangeRequestRepository.findByUserAndStatus(userId, RequestStatus.COMPLETED, pageable);
 
         List<ExchangeHistoryDto> dtoList = new ArrayList<>();
 

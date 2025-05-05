@@ -3,6 +3,8 @@ package com.ssafy.bookshy.domain.exchange.entity;
 import com.ssafy.bookshy.common.entity.TimeStampEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -31,6 +33,8 @@ public class ExchangeRequest extends TimeStampEntity {
     private Long responderId;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status", columnDefinition = "request_status_enum")
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private RequestStatus status;
 
     @Column(name = "requested_at")
