@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { Book } from '@/types/book';
+import { LibraryBook } from '@/types/book';
 import Header from '@/components/common/Header';
 import BottomTabBar from '@/components/common/BottomTabBar';
 import TabNavBar from '@/components/common/TabNavBar';
@@ -10,7 +10,7 @@ interface BookDetailProps {
 }
 
 const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
-  const [book, setBook] = useState<Book | null>(null);
+  const [libraryBook, setLibraryBook] = useState<LibraryBook | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -29,19 +29,21 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
     }
   }, [bookId, location.pathname, navigate]);
 
+  // 서재 책 정보 로드
   useEffect(() => {
-    const fetchBookDetail = async () => {
+    const fetchLibraryBook = async () => {
       try {
         setLoading(true);
 
         // 실제 API 연동 시 아래 주석 해제
-        // const response = await fetch(`/api/books/${bookId}`);
-        // const bookData = await response.json();
-        // setBook(bookData);
+        // const response = await fetch(`/api/library/${bookId}`);
+        // const data = await response.json();
+        // setLibraryBook(data);
 
         // 임시 데이터 (API 연동 전까지 사용)
         setTimeout(() => {
-          const mockBook: Book = {
+          const mockLibraryBook: LibraryBook = {
+            libraryId: 1,
             bookId: bookId,
             title: '어린왕자',
             author: '생텍쥐페리',
@@ -52,29 +54,60 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
             publishDate: '2014년 8월 15일',
             pages: 138,
             categories: '소설 > 고전문학',
-            bookImgUrl: 'https://image.aladin.co.kr/product/11990/17/cover/8952766989_1.jpg',
+            bookImgUrl: '',
+            isPublic: false,
+            registeredAt: '2025-04-30T12:00:00',
           };
-          setBook(mockBook);
+
+          setLibraryBook(mockLibraryBook);
           setLoading(false);
         }, 500);
       } catch (err) {
-        console.error('책 상세 정보를 가져오는 중 오류 발생:', err);
+        console.error('책 정보를 가져오는 중 오류 발생:', err);
         setError('책 정보를 불러오는 중 문제가 발생했습니다.');
         setLoading(false);
       }
     };
 
-    fetchBookDetail();
+    fetchLibraryBook();
   }, [bookId]);
 
   const handleBack = () => {
     navigate('/bookshelf'); // 서재 페이지로 돌아가기
   };
 
-  // 공개 서재에 추가하는 함수
-  const handleAddToPublicShelf = () => {
-    alert('공개 서재에 추가되었습니다.');
-    // 여기에 실제 API 호출 구현
+  // 공개 상태 토글 함수
+  const togglePublicStatus = async () => {
+    if (!libraryBook) return;
+
+    try {
+      const newPublicStatus = !libraryBook.isPublic;
+
+      // 실제 API 연동 시 아래 주석 해제
+      // await fetch(`/api/library/${libraryBook.libraryId}/visibility`, {
+      //   method: 'PUT',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ isPublic: newPublicStatus }),
+      // });
+
+      // 상태 업데이트
+      setLibraryBook({
+        ...libraryBook,
+        isPublic: newPublicStatus,
+      });
+
+      // 알림 표시
+      if (newPublicStatus) {
+        alert('공개 서재에 추가되었습니다.');
+      } else {
+        alert('공개 서재에서 숨김 처리되었습니다.');
+      }
+    } catch (error) {
+      console.error('공개 상태 변경 중 오류 발생:', error);
+      alert('공개 상태 변경 중 오류가 발생했습니다.');
+    }
   };
 
   const handleTabChange = (tabId: string) => {
@@ -93,7 +126,7 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
     );
   }
 
-  if (error || !book) {
+  if (error || !libraryBook) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-light-bg">
         <p className="text-red-500 mb-4">{error || '책 정보를 찾을 수 없습니다.'}</p>
@@ -125,8 +158,8 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
           <div className="bg-light-bg flex">
             <div className="w-24 h-32 mr-4">
               <img
-                src={book.bookImgUrl || '/placeholder-book.jpg'}
-                alt={book.title}
+                src={libraryBook.bookImgUrl || '/placeholder-book.jpg'}
+                alt={libraryBook.title}
                 className="w-full h-full object-cover rounded-md shadow-sm"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
@@ -135,15 +168,21 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
               />
             </div>
             <div className="flex-grow">
-              <h2 className="text-2xl font-bold mb-2">{book.title}</h2>
-              <p className="text-sm mb-1">작가: {book.author}</p>
-              {book.translator && <p className="text-sm mb-1">옮김이: {book.translator}</p>}
-              <p className="text-sm mb-1">출판사: {book.publisher}</p>
+              <h2 className="text-2xl font-bold mb-2">{libraryBook.title}</h2>
+              <p className="text-sm mb-1">작가: {libraryBook.author}</p>
+              {libraryBook.translator && (
+                <p className="text-sm mb-1">옮김이: {libraryBook.translator}</p>
+              )}
+              <p className="text-sm mb-1">출판사: {libraryBook.publisher}</p>
               <button
-                className="mt-2 bg-white text-gray-700 rounded-full py-1 px-4 text-sm"
-                onClick={handleAddToPublicShelf}
+                className={`mt-2 py-1 px-4 text-sm rounded-full ${
+                  libraryBook.isPublic
+                    ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+                onClick={togglePublicStatus}
               >
-                공개 서재에 추가
+                {libraryBook.isPublic ? '공개 서재에서 숨기기' : '공개 서재에 추가'}
               </button>
             </div>
           </div>

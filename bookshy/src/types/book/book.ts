@@ -19,6 +19,12 @@ export interface WishBookProps {
   wishBook: WishBook;
 }
 
+export interface LibraryBook extends Book {
+  libraryId: number;
+  isPublic: boolean;
+  registeredAt: string;
+}
+
 export interface BookSearchItemProps {
   book: Book;
   onAddBook: (bookId: number) => void;
