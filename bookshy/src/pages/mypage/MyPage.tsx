@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchUserProfile } from '@/apis/profile';
+import { fetchUserProfile } from '@/services/mypage/profile';
 import Header from '@/components/common/Header';
 import { useNavigate, Outlet } from 'react-router-dom';
 import TabNavBar from '@/components/common/TabNavBar';
@@ -54,10 +54,14 @@ const MyPage = () => {
         <div className="flex-1">
           <p className="font-semibold">{profile.nickname}님 🛠️</p>
           <p className="text-sm text-gray-500">{randomGreeting}</p>
-          <div className="text-xs text-pink-500 font-medium">
-            북끄지수 {profile.bookShyScore.toFixed(1)}
+          <div className="flex gap-2 mt-2">
+            <div className="badge bg-pink-100 text-pink-500 border border-pink-300">
+              북끄지수 {profile.bookShyScore.toFixed(1)}
+            </div>
+            <div className="badge bg-green-100 text-green-600 border border-green-300">
+              {profile.badge}
+            </div>
           </div>
-          <div className="text-xs text-green-600 font-medium mt-1">{profile.badge}</div>
         </div>
       </section>
 
