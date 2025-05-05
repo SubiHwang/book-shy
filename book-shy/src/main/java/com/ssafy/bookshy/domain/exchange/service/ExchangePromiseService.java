@@ -10,12 +10,14 @@ import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static com.ssafy.bookshy.domain.exchange.dto.ExchangePromiseDto.CounterpartDto;
 
@@ -32,48 +34,53 @@ public class ExchangePromiseService {
      *
      * @param userId   사용자 ID
      * @param pageable 페이지 정보
-     * @return 거래 약속 목록
+     * @return 거래 약속 목록 (Page 객체로 반환)
      */
     public Page<ExchangePromiseDto> getPromiseList(Long userId, Pageable pageable) {
-        return exchangeRequestRepository.findPromiseByUserId(userId, pageable)
-                .map(request -> {
-                    // 상대방 정보 추출
-                    Long counterpartId = request.getRequesterId().equals(userId)
-                            ? request.getResponderId()
-                            : request.getRequesterId();
-                    Users counterpart = userRepository.findById(counterpartId)
-                            .orElseThrow(() -> new RuntimeException("상대방을 찾을 수 없습니다."));
+        List<ExchangeRequest> requests = exchangeRequestRepository.findPromiseByUserId(userId, pageable);
 
-                    // 받은 책 정보 추출 (기준: 내가 responder라면 상대방 책)
-                    Long bookId = request.getRequesterId().equals(userId)
-                            ? request.getBookBId()
-                            : request.getBookAId();
-                    Book book = bookRepository.findById(bookId)
-                            .orElseThrow(() -> new RuntimeException("도서를 찾을 수 없습니다."));
+        List<ExchangePromiseDto> dtos = requests.stream().map(request -> {
+            // 상대방 ID 구분
+            Long counterpartId = request.getRequesterId().equals(userId)
+                    ? request.getResponderId()
+                    : request.getRequesterId();
 
-                    // 남은 시간 계산
-                    TimeLeftDto timeLeft = calculateTimeLeft(request.getRequestedAt());
+            Users counterpart = userRepository.findById(counterpartId)
+                    .orElseThrow(() -> new RuntimeException("상대방을 찾을 수 없습니다."));
 
-                    return ExchangePromiseDto.builder()
-                            .tradeId(request.getRequestId())
-                            .bookTitle(book.getTitle())
-                            .scheduledTime(request.getRequestedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                            .status(request.getStatus().name())
-                            .counterpart(CounterpartDto.builder()
-                                    .userId(counterpart.getId())
-                                    .nickname(counterpart.getNickname())
-                                    .profileImageUrl("/images/profile/" + counterpart.getProfileImageUrl())
-                                    .build())
-                            .timeLeft(timeLeft)
-                            .build();
-                });
+            // 상대방 책 ID (내가 responder면 상대방 책은 bookA)
+            Long bookId = request.getRequesterId().equals(userId)
+                    ? request.getBookBId()
+                    : request.getBookAId();
+
+            Book book = bookRepository.findById(bookId)
+                    .orElseThrow(() -> new RuntimeException("도서를 찾을 수 없습니다."));
+
+            // 남은 시간 계산
+            TimeLeftDto timeLeft = calculateTimeLeft(request.getRequestedAt());
+
+            return ExchangePromiseDto.builder()
+                    .tradeId(request.getRequestId())
+                    .bookTitle(book.getTitle())
+                    .scheduledTime(request.getRequestedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                    .status(request.getStatus().name())
+                    .counterpart(CounterpartDto.builder()
+                            .userId(counterpart.getUserId())
+                            .nickname(counterpart.getNickname())
+                            .profileImageUrl("/images/profile/" + counterpart.getProfileImageUrl())
+                            .build())
+                    .timeLeft(timeLeft)
+                    .build();
+        }).toList();
+
+        return new PageImpl<>(dtos, pageable, dtos.size());
     }
 
     /**
-     * 주어진 시간까지 남은 시간을 계산하고, 표시 형식을 포함한 DTO로 반환합니다.
+     * 주어진 시간까지 남은 시간을 계산하고, 사람이 보기 쉬운 표시 문자열로 구성합니다.
      *
-     * @param scheduledTime 예정된 시간
-     * @return 남은 시간 DTO
+     * @param scheduledTime 예정된 거래 시간
+     * @return TimeLeftDto (일/시간/분 및 표시 텍스트 포함)
      */
     private TimeLeftDto calculateTimeLeft(LocalDateTime scheduledTime) {
         Duration duration = Duration.between(LocalDateTime.now(), scheduledTime);

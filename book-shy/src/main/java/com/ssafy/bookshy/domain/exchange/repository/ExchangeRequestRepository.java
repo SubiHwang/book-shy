@@ -58,4 +58,14 @@ public interface ExchangeRequestRepository extends JpaRepository<ExchangeRequest
         ORDER BY e.requestedAt DESC
     """)
     List<ExchangeRequest> findPromiseByUserId(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("""
+    SELECT e
+    FROM ExchangeRequest e
+    WHERE e.status = :status
+      AND (e.requesterId = :userId OR e.responderId = :userId)
+    ORDER BY e.requestedAt DESC
+""")
+    List<ExchangeRequest> findByUserAndStatus(@Param("userId") Long userId, @Param("status") ExchangeRequest.RequestStatus status, Pageable pageable);
+
 }
