@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.users.controller;
 
+import com.ssafy.bookshy.common.jwt.JwtProvider;
 import com.ssafy.bookshy.domain.users.dto.FcmTokenDto;
 import com.ssafy.bookshy.domain.users.dto.JwtTokenDto;
 import com.ssafy.bookshy.domain.users.dto.OAuthTokenDto;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final AuthTokenService authTokenService;
+    private final JwtProvider jwtProvider;
 
 //    @PostMapping("/sign-up")
 //    @Operation(summary = "회원가입 메서드", description = "사용자가 회원가입을 하기 위한 메서드입니다.")
@@ -69,7 +72,7 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "로그인 성공"),
             @ApiResponse(responseCode = "400(401)", description = "존재하지 않는 사용자")
     })
-    public ResponseEntity<?> signOut() {
+    public ResponseEntity<?> signOut(HttpServletRequest request) {
         Long userId = jwtProvider.getUserId(jwtProvider.resolveToken(request).substring(7));
         authService.signOut(userId);
         return ResponseEntity.ok(null);

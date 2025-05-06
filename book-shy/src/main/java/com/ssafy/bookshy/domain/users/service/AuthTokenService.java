@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.users.service;
 
 import com.ssafy.bookshy.common.exception.GlobalException;
+import com.ssafy.bookshy.common.jwt.JwtProvider;
 import com.ssafy.bookshy.domain.users.dto.JwtTokenDto;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.exception.UserErrorCode;
@@ -24,8 +25,7 @@ public class AuthTokenService {
                 .orElseThrow(() -> new GlobalException(UserErrorCode.INVALID_USER_ID));
 
         // 사용자 정보에 리프레시 토큰과 FCM 토큰 업데이트
-        user.setRefreshToken(jwtTokenDto.getRefreshToken());
-        user.setFcmToken(fcmToken);
+        user.updateTokens(jwtTokenDto.getRefreshToken(), fcmToken);
 
         userRepository.save(user);
     }
@@ -41,7 +41,6 @@ public class AuthTokenService {
     public String createNewRefreshTokenByValidateRefreshToken(String refreshToken) {
         if (jwtProvider.validateToken(refreshToken)) {
             refreshToken = refreshToken.substring(7);
-            return jwtProvider.generateRefreshToken(jwtProvider.getUsername(refreshToken), jwtProvider.getUserId(refreshToken));
         }
         return null;
     }

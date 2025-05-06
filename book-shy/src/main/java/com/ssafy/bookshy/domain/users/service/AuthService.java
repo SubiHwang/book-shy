@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.users.service;
 
+import com.ssafy.bookshy.common.jwt.JwtProvider;
 import com.ssafy.bookshy.domain.users.dto.JwtTokenDto;
 import com.ssafy.bookshy.domain.users.dto.OAuthTokenDto;
 import com.ssafy.bookshy.domain.users.dto.OAuthUserInfoDto;
@@ -12,10 +13,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserService userService;
     private final OAuthService oAuthService;
     private final AuthTokenService uAuthTokenService;
     private final UserRepository userRepository;
+    private final JwtProvider jwtProvider;
 
 //    /**
 //     * 회원가입
@@ -76,8 +77,8 @@ public class AuthService {
      * @return
      */
     private JwtTokenDto generateJwtTokenDto(Users user) {
-        String accessToken = jwtProvider.generateToken(user.getUsername(), user.getId());
-        String refreshToken = jwtProvider.generateRefreshToken(user.getUsername(), user.getId());
+        String accessToken = jwtProvider.generateToken(user.getNickname(), user.getUserId());
+        String refreshToken = jwtProvider.generateRefreshToken(user.getNickname(), user.getUserId());
 
         JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
                 .accessToken(accessToken)

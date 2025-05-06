@@ -5,6 +5,8 @@ import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -47,6 +49,16 @@ public class UserService {
                 .badge(user.getBadges() != null ? user.getBadges() : "북끄북끄 입문자")
                 .profileImageUrl(profileImageUrl)
                 .build();
+    }
+
+
+    public UserDetails loadUserByNickname(String nickname) throws UsernameNotFoundException {
+
+        Users user = userRepository.findByNickname(nickname);
+        if (user == null) {
+            throw new UsernameNotFoundException("존재하지 않는 회원입니다.");
+        }
+        return user;
     }
 
 }
