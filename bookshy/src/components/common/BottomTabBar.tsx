@@ -10,10 +10,16 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
   const [lastScrollY, setLastScrollY] = useState<number>(0);
 
   // 숨길 경로 목록
-  const hiddenPaths = ['/bookshelf/add/title', 'bookshelf/add/isbn'];
+  const hiddenPaths = [
+    '/bookshelf/add/title',
+    '/bookshelf/add/isbn',
+    '/bookshelf/add/self',
+    '/bookshelf/add/search',
+    '/bookshelf/add/ocr-result',
+  ];
 
   // 현재 경로가 숨김 목록에 있는지 확인
-  const shouldHideTabBar = hiddenPaths.some((path) => location.pathname.includes(path));
+  const shouldHideTabBar = hiddenPaths.includes(location.pathname);
 
   useEffect(() => {
     const path = location.pathname.substring(1); // '/' 제거
