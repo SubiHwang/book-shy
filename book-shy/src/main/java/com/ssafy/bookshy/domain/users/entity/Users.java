@@ -26,8 +26,8 @@ public class Users extends TimeStampEntity implements UserDetails {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "kakao_id", nullable = false)
-    private Long kakaoId;
+//    @Column(name = "kakao_id", nullable = false)
+//    private Long kakaoId;
 
     @Column(name = "email")
     private String email;
@@ -38,14 +38,14 @@ public class Users extends TimeStampEntity implements UserDetails {
     @Column(name = "profile_image_url", columnDefinition = "TEXT")
     private String profileImageUrl;
 
-    @Column(name = "address", nullable = false)
+    @Column(name = "address")
     private String address;
 
-    @Column(name = "age", nullable = false)
+    @Column(name = "age")
     private int age;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "gender", nullable = false)
+    @Column(name = "gender")
     private Gender gender;
 
     @Column(name = "temperature")
@@ -54,10 +54,10 @@ public class Users extends TimeStampEntity implements UserDetails {
     @Column(name = "badges")
     private String badges = "북끄북끄 입문자";
 
-    @Column(nullable = false)
+    @Column(name = "refresh_token")
     private String refreshToken;
 
-    @Column(nullable = false)
+    @Column(name = "fcm_token")
     private String fcmToken;
 
     public void updateTokens(String refreshToken, String fcmToken) {

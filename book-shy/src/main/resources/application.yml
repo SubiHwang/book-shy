@@ -41,12 +41,3 @@ management:
   endpoint:
     health:
       show-details: always  # 헬스체크 상세 정보 응답 포함
-
-jwt:
-  secret-key: "여기에_강력한_비밀키를_입력할까말까"
-  expiration-time: 3600000 # 액세스 토큰 만료 시간 (1시간)
-  refresh-expiration: 1296000000 # 리프레시 토큰 만료 시간
-  token-prefix: "Bearer "
-  header-string: "Authorization"
-
-issuer: "bookshy-application"

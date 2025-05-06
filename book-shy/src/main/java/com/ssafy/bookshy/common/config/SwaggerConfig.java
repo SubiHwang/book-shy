@@ -1,9 +1,9 @@
 package com.ssafy.bookshy.common.config;
 
-import io.swagger.v3.oas.models.*;
-import io.swagger.v3.oas.models.info.*;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
-import io.swagger.v3.oas.models.security.*;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +24,7 @@ public class SwaggerConfig {
                 )
                 .servers(List.of(
                         new Server()
-                                .url("http://localhost:8089")
+                                .url("http://localhost:8080")
                                 .description("🧪 로컬 개발 서버"),
                         new Server()
                                 .url("http://k12d204.p.ssafy.io:8080")
@@ -40,4 +40,5 @@ public class SwaggerConfig {
                 .pathsToMatch("/api/**") // 문서화할 API 경로 지정
                 .build();
     }
+
 }
