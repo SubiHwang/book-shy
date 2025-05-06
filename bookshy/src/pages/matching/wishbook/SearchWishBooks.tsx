@@ -1,6 +1,6 @@
-import SearchBar from '@/components/Matching/WishBooks/SearchBar';
-import { ArrowLeft} from 'lucide-react';
-import { useState, KeyboardEvent} from 'react';
+import SearchBar from '@/components/temp/WishBooks/SearchBar';
+import { ArrowLeft } from 'lucide-react';
+import { useState, KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const SearchWishBooks = () => {
@@ -22,8 +22,10 @@ const SearchWishBooks = () => {
             <ArrowLeft size={24} />
           </button>
         </div>
-        <p className="text-xl font-light text-white text-center mb-3">읽고 싶은 책을 검색 해보세요.</p>
-        <SearchBar onSearch={handleSearch}/>
+        <p className="text-xl font-light text-white text-center mb-3">
+          읽고 싶은 책을 검색 해보세요.
+        </p>
+        <SearchBar onSearch={handleSearch} />
       </div>
     </div>
   );
