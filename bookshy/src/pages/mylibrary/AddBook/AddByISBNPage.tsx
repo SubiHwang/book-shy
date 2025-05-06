@@ -17,12 +17,9 @@ const AddByBarcodePage: React.FC = () => {
   const [lastScannedData, setLastScannedData] = useState<string | null>(null);
   const [scanAttempts, setScanAttempts] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
-  const [isbnInput, setIsbnInput] = useState<string>('');
-  const [showInputForm, setShowInputForm] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
-  // 카메라 초기화
   useEffect(() => {
     const initCamera = async () => {
       try {
@@ -43,17 +40,15 @@ const AddByBarcodePage: React.FC = () => {
               await videoRef.current?.play();
               setCameraReady(true);
               readerRef.current = new BrowserMultiFormatReader();
-
-              // 카메라가 준비되면 자동 스캔 시작
               startAutoScan();
-            } catch (err: unknown) {
+            } catch (err) {
               setError(
                 err instanceof Error ? `비디오 재생 실패: ${err.message}` : '비디오 재생 오류',
               );
             }
           };
         }
-      } catch (err: unknown) {
+      } catch (err) {
         setError(err instanceof Error ? `카메라 접근 오류: ${err.message}` : '카메라 사용 불가');
       }
     };
@@ -61,20 +56,14 @@ const AddByBarcodePage: React.FC = () => {
     initCamera();
 
     return () => {
-      if (scanIntervalRef.current) {
-        clearInterval(scanIntervalRef.current);
-      }
+      if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
       streamRef.current?.getTracks().forEach((track) => track.stop());
     };
   }, []);
 
-  // 자동 스캔 시작 함수
   const startAutoScan = () => {
-    if (scanIntervalRef.current) {
-      clearInterval(scanIntervalRef.current);
-    }
+    if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
 
-    // 1.5초마다 자동으로 스캔
     scanIntervalRef.current = setInterval(() => {
       if (!scanning && cameraReady && !scanSuccess) {
         handleScan();
@@ -84,7 +73,6 @@ const AddByBarcodePage: React.FC = () => {
 
   const handleScan = async () => {
     if (scanning || scanSuccess) return;
-
     setScanning(true);
     setScanAttempts((prev) => prev + 1);
 
@@ -111,21 +99,13 @@ const AddByBarcodePage: React.FC = () => {
         const rawText = result.getText();
         const isbn = rawText.replace(/[^0-9X]/g, '');
 
-        // 유효한 ISBN인지 확인 (기본적인 길이 확인)
         if (isbn.length === 10 || isbn.length === 13) {
           setLastScannedData(isbn);
           setScanSuccess(true);
+          if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
 
-          // 자동 스캔 중지
-          if (scanIntervalRef.current) {
-            clearInterval(scanIntervalRef.current);
-          }
-
-          // 스캔 성공 표시를 잠시 보여주고 자동으로 결과 페이지로 이동
           setTimeout(() => {
-            // 스트림 정지
             streamRef.current?.getTracks().forEach((track) => track.stop());
-            // URL 파라미터로 ISBN 전달
             navigate(`/bookshelf/add/isbn-result/${isbn}`);
           }, 1000);
         } else {
@@ -135,9 +115,7 @@ const AddByBarcodePage: React.FC = () => {
         if (err instanceof NotFoundException) {
           setLastError('바코드를 찾지 못했습니다.');
         } else {
-          setLastError(
-            err instanceof Error ? `스캔 오류: ${err.message}` : '스캔 중 알 수 없는 오류',
-          );
+          setLastError(err instanceof Error ? `스캔 오류: ${err.message}` : '스캔 중 오류');
         }
       }
     } finally {
@@ -145,41 +123,22 @@ const AddByBarcodePage: React.FC = () => {
     }
   };
 
-  // 직접 입력 폼 토글
   const handleManualEntry = () => {
-    // 자동 스캔 중지
-    if (scanIntervalRef.current) {
-      clearInterval(scanIntervalRef.current);
-    }
-
-    // 테스트 흐름을 위해 임시 ISBN 값으로 이동
-    const tempIsbn = '9788934972464'; // 테스트용 ISBN
-
-    // 스트림 정지
+    if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
     streamRef.current?.getTracks().forEach((track) => track.stop());
-
-    // ISBN 결과 페이지로 이동
-    navigate(`/bookshelf/add/isbn-result/${tempIsbn}`);
+    navigate(`/bookshelf/add/isbn-result/9788934972464`);
   };
 
   const handleRetry = () => {
-    // 페이지 새로고침 대신 상태만 리셋
     setScanSuccess(false);
     setLastScannedData(null);
     setLastError(null);
     setScanAttempts(0);
-
-    // 자동 스캔 다시 시작
     startAutoScan();
   };
 
   const handleBack = () => {
-    // 자동 스캔 중지
-    if (scanIntervalRef.current) {
-      clearInterval(scanIntervalRef.current);
-    }
-
-    // 스트림 정지
+    if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
     streamRef.current?.getTracks().forEach((track) => track.stop());
     navigate(-1);
   };
@@ -188,15 +147,13 @@ const AddByBarcodePage: React.FC = () => {
     <div className="fixed inset-0 bg-black">
       <canvas ref={canvasRef} className="hidden" />
 
-      {/* 상단 안내 및 뒤로가기 */}
+      {/* 상단 안내 */}
       <div className="absolute top-0 left-0 w-full h-32 z-10 text-white bg-black flex flex-col items-center justify-center">
-        {/* 뒤로가기 버튼 */}
         <div className="absolute top-4 left-4">
           <button onClick={handleBack} className="text-xl text-white">
             ←
           </button>
         </div>
-        {/* 안내 텍스트 */}
         <h2 className="text-lg font-bold">
           {error || (scanSuccess ? '✅ ISBN 인식 성공!' : '등록할 책의 바코드를 찍어주세요')}
         </h2>
@@ -207,7 +164,7 @@ const AddByBarcodePage: React.FC = () => {
         )}
       </div>
 
-      {/* 비디오 */}
+      {/* 비디오 화면 */}
       <div className="absolute top-32 bottom-24 inset-x-0">
         <video
           ref={videoRef}
@@ -219,14 +176,22 @@ const AddByBarcodePage: React.FC = () => {
             <div className="w-12 h-12 border-t-2 border-b-2 border-white rounded-full animate-spin" />
           </div>
         )}
-        {cameraReady && !scanSuccess && (
+
+        {/* 스캔 가이드 영역 */}
+        {cameraReady && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-64 h-24 border-2 border-white rounded-lg opacity-70" />
+            <div
+              className={`w-64 h-24 border-4 ${
+                scanSuccess ? 'border-green-400 animate-pulse' : 'border-white'
+              } rounded-lg opacity-80`}
+            />
           </div>
         )}
+
+        {/* 스캔 성공 시 오버레이 */}
         {scanSuccess && (
           <div className="absolute inset-0 bg-green-500 bg-opacity-20 flex items-center justify-center">
-            <div className="bg-green-500 rounded-full p-4">
+            <div className="bg-green-500 rounded-full p-4 animate-bounce">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-16 w-16 text-white"
@@ -247,7 +212,7 @@ const AddByBarcodePage: React.FC = () => {
       </div>
 
       {/* 하단 버튼 */}
-      <div className="absolute bottom-0 left-0 w-full h-24 bg-black z-10 flex flex-col items-center justify-center text-white">
+      <div className="absolute bottom-0 left-0 w-full h-40 bg-black z-10 flex flex-col items-center justify-center text-white">
         {!error && !scanSuccess && <p>카메라를 바코드에 맞춰주세요</p>}
         <div className="flex mt-2 space-x-2">
           {error && (
