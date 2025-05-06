@@ -77,6 +77,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test' // JUnit5 + Mockito 통합
     testImplementation 'org.springframework.security:spring-security-test' // 시큐리티 테스트 도구
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher' // IDE에서 JUnit 플랫폼 실행 보조
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
 
 tasks.named('test') {
