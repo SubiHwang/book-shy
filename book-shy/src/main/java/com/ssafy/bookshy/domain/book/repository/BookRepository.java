@@ -1,20 +1,15 @@
 package com.ssafy.bookshy.domain.book.repository;
 
 import com.ssafy.bookshy.domain.book.entity.Book;
-<<<<<<< HEAD
 import com.ssafy.bookshy.domain.users.entity.Users;
-=======
->>>>>>> back
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-<<<<<<< HEAD
     // 사용자 기준 ISBN 중복 방지용
     Optional<Book> findByUserAndIsbn(Users user, String isbn);
-=======
     /**
      * 책 ID를 기준으로 책 정보를 조회합니다.
      *
@@ -28,5 +23,4 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      * 추후 필요 시 추가 쿼리 메서드 확장 가능
      */
     boolean existsByIdAndStatus(Long id, Book.Status status);
->>>>>>> back
 }
