@@ -25,6 +25,8 @@ const MyPage = () => {
     queryFn: fetchUserProfile,
   });
 
+  console.log(profile);
+
   const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
 
   const pages = [
@@ -47,7 +49,7 @@ const MyPage = () => {
 
       <section className="px-4 py-4 bg-white flex items-center rounded-xl mx-3 mt-3 shadow-sm">
         <img
-          src={profile.profileImageUrl || '/images/default-profile.jpg'}
+          src={profile.profileImageUrl}
           alt="프로필"
           className="w-16 h-16 rounded-full object-cover mr-4"
         />

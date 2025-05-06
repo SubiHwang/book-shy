@@ -1,13 +1,20 @@
 import { FC } from 'react';
 
-interface TradeCardProps {
+export interface TradeCardProps {
+  tradeId: number;
   userName: string;
   userProfileUrl: string;
   statusText: string; // 예: "12시간 남음"
   meetTime: string; // 예: "2025년 4월 24일 목 오후 12:00"
 }
 
-const TradeCard: FC<TradeCardProps> = ({ userName, userProfileUrl, statusText, meetTime }) => {
+const TradePromiseCard: FC<TradeCardProps> = ({
+  tradeId,
+  userName,
+  userProfileUrl,
+  statusText,
+  meetTime,
+}) => {
   return (
     <div className="card p-4 rounded-xl shadow-sm space-y-3">
       {/* 상단 프로필 및 상태 */}
@@ -47,4 +54,4 @@ const TradeCard: FC<TradeCardProps> = ({ userName, userProfileUrl, statusText, m
   );
 };
 
-export default TradeCard;
+export default TradePromiseCard;
