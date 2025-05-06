@@ -69,8 +69,7 @@ const AppLayout: FC = () => {
           </Route>
         </Routes>
       </div>
-      {!isChatRoom && <BottomTabBar onTabChange={handleTabChange} />}
-      {!isReviewPage && <BottomTabBar onTabChange={handleTabChange} />}
+      {!(isChatRoom || isReviewPage) && <BottomTabBar onTabChange={handleTabChange} />}
     </div>
   );
 };
