@@ -4,6 +4,8 @@ import com.ssafy.bookshy.domain.users.dto.UserProfileResponseDto;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,9 +14,18 @@ public class UserService {
 
     private final UserRepository usersRepository;
 
-    private Users getUserById(Long userId) {
+    public Users getUserById(Long userId) {
         return usersRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+    }
+
+    public Users getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new RuntimeException("인증된 사용자가 없습니다.");
+        }
+        Long userId = Long.valueOf(auth.getName());
+        return getUserById(userId);
     }
 
     public String getNicknameById(Long userId) {
