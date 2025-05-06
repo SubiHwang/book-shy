@@ -1,5 +1,5 @@
-// src/pages/mylibrary/tabs/AllMyBooksTab.tsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Book } from '@/types/book/book';
 import { sampleBooks } from '@/data/sampleBooks';
 import BookshelfRow from '@/components/common/BookshelfRow';
@@ -7,6 +7,7 @@ import BookshelfRow from '@/components/common/BookshelfRow';
 const AllMyBooksTab: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // 데이터 로딩 시뮬레이션
@@ -25,6 +26,12 @@ const AllMyBooksTab: React.FC = () => {
       setIsLoading(false);
     }, 300);
   }, []);
+
+  // 책 선택 처리 함수 => 책 상세 페이지로 이동
+  // 나중에 bookshelfrow에다가 넣어야 할 것 같음..
+  const handleBookClick = (bookId: number) => {
+    navigate(`/bookshelf/books/${bookId}`);
+  };
 
   if (isLoading) {
     return (
@@ -78,7 +85,20 @@ const AllMyBooksTab: React.FC = () => {
     <div className="all-books-tab">
       <div className="container mx-auto px-4 pb-16 space-y-8">
         {shelves.map((shelfBooks, index) => (
-          <BookshelfRow key={`shelf-${index}`} books={shelfBooks} />
+          <div key={`shelf-${index}`} className="relative">
+            <BookshelfRow books={shelfBooks} />
+
+            {/* 클릭 영역 오버레이 */}
+            <div className="absolute top-0 left-0 right-0 flex justify-center items-start z-10">
+              {shelfBooks.map((book, bookIndex) => (
+                <div
+                  key={`book-overlay-${bookIndex}`}
+                  className={`mx-2 w-24 h-40 ${book ? 'cursor-pointer hover:bg-white hover:bg-opacity-10 transition-colors rounded' : ''}`}
+                  onClick={() => book && handleBookClick(book.bookId)}
+                />
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     </div>
