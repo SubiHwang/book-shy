@@ -1,8 +1,8 @@
 import { FC, useState } from 'react';
 import { Zap } from 'lucide-react';
 import { MatchingRecommendation } from '@/types/Matching';
-import NoRecommendationState from '@/components/Matching/MatchRecommend/NoRecommendationState';
-import MatchingList from '@/components/Matching/MatchRecommend/MatchingList';
+import NoRecommendationState from '@/components/matching/matching-list/NoRecommendationState';
+import MatchingList from '@/components/matching/matching-list/MatchingList';
 import Loading from '@/components/common/Loading';
 
 const MatchingRecommend: FC = () => {
