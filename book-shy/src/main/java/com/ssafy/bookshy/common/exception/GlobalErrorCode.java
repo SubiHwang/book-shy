@@ -15,7 +15,9 @@ public enum GlobalErrorCode implements ErrorCode {
     METHOD_NOT_ALLOWED(405, "지원하지 않는 HTTP 메소드입니다"),
     MEDIA_TYPE_NOT_ACCEPTABLE(406, "지원하지 않는 미디어 타입입니다."),
     CONCURRENT_UPDATE(500, "다른 트랜잭션에 의해 데이터가 변경되었습니다"),
-    UNAUTHORIZED_ACCESS(403, "인가되지 않은 사용자입니다.");
+    UNAUTHORIZED_ACCESS(403, "인가되지 않은 사용자입니다."),
+    UNDEFINED_URL(404, "잘못된 URL을 통해 요청하였습니다."),
+    UNDEFINED_PROTOCOL(404, "잘못된 Protocol을 통해 요청하였습니다.");
 
     private final int status;
     private final String message;

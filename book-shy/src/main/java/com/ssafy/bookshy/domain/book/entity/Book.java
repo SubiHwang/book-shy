@@ -35,6 +35,8 @@ public class Book {
 
     private LocalDate pubDate;
     private String coverImageUrl;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
     private String category;
     private Integer pageCount;
@@ -46,6 +48,9 @@ public class Book {
 
     private Integer exchangeCount;
 
+    /**
+     * 📌 현재 이 책을 소유한 사용자 정보
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
@@ -54,8 +59,8 @@ public class Book {
     private List<Library> libraries;
 
     public enum Status {
-        AVAILABLE,
-        EXCHANGING,
-        EXCHANGED
+        AVAILABLE,     // 교환 가능
+        EXCHANGING,    // 교환 중
+        EXCHANGED      // 교환 완료
     }
 }

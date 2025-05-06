@@ -72,6 +72,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.core:jackson-databind")
 
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
     // ✅ 테스트 관련 의존성
     testImplementation 'org.springframework.boot:spring-boot-starter-test' // JUnit5 + Mockito 통합
     testImplementation 'org.springframework.security:spring-security-test' // 시큐리티 테스트 도구
@@ -84,6 +90,9 @@ dependencies {
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1' // 클로바 OCR 호출용
 
     implementation 'org.apache.commons:commons-text:1.11.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 }
 
 tasks.named('test') {

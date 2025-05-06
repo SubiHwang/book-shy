@@ -24,4 +24,4 @@ spring:
       chat-group-id: ${KAFKA.CONSUMER.CHAT-GROUP-ID}
 
 server:
-  port: 8089  # ✅ 개발용 포트
+  port: 8080  # ✅ 개발용 포트
