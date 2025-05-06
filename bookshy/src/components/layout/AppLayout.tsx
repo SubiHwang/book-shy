@@ -8,7 +8,7 @@ import MyPage from '@/pages/mypage/MyPage';
 import TradePromiseList from '@/pages/mypage/TradePromiseList';
 import TradeHistoryList from '@/pages/mypage/TradeHistoryList';
 import WishBooks from '@/pages/matching/wishbook/WishBooks';
-import NeighborBookshelfPage from '@/pages/matching/temp/NeighborBookshelfPage';
+import NeighborBookshelfPage from '@/pages/matching/neighborbookshelf/NeighborBookshelfPage';
 import AddBySelfPage from '@/pages/mylibrary/AddBook/AddBySelfPage';
 import AddByTitlePage from '@/pages/mylibrary/AddBook/AddByTitlePage';
 import AddByISBNPage from '@/pages/mylibrary/AddBook/AddByISBNPage';
