@@ -2,8 +2,11 @@ import { WishBook } from '@/types/book';
 import { FC, useMemo, useState } from 'react';
 import { PlusCircle, Search, ChevronDown } from 'lucide-react';
 import WishBookCard from '@/components/Matching/WishBooks/WishBookCard';
+import { useNavigate } from 'react-router-dom';
 
 const WishBooks: FC = () => {
+  const navigate = useNavigate()
+
   const dummyData: WishBook[] = [
     {
       bookId: 1,
@@ -129,7 +132,7 @@ const WishBooks: FC = () => {
         )}
       </div>
       <div className="fixed bottom-24 right-6">
-        <button className="w-14 h-14 rounded-xl bg-primary text-white flex justify-center items-center shadow-lg">
+        <button onClick={()=>navigate("/matching/search-wish-books")}className="w-14 h-14 rounded-xl bg-primary text-white flex justify-center items-center shadow-lg">
           <PlusCircle size={32} strokeWidth={1} />
         </button>
       </div>
