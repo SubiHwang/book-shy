@@ -11,7 +11,7 @@ const Header: FC<HeaderProps> = ({
   extraButton = null,
   extraButtonIcon = null,
   onExtraButtonClick,
-  className = '',
+  className = 'bg-light-bg',
 }) => {
   const location = useLocation();
 

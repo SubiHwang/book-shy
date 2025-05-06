@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { MatchingListProps } from '@/types/Matching';
-import MatchingListCard from '@/components/Matching/MatchRecommend/MatchingListCard';
+import MatchingListCard from '@/components/matching/matching/MatchingListCard';
 
 const MatchingList: FC<MatchingListProps> = ({ matchings }) => {
   return (

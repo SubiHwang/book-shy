@@ -2,13 +2,13 @@ import { FC } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import BottomTabBar from '../common/BottomTabBar';
 import MyLibraryPage from '../../pages/mylibrary/MyLibraryPage';
-import MatchingPage from '@/pages/matching/MatchingPage';
-import MatchingRecommend from '@/pages/matching/MatchingRecommend';
+import MatchingPage from '@/pages/matching/matching/MatchingPage';
+import MatchingRecommend from '@/pages/matching/matching/MatchingRecommend';
 import MyPage from '@/pages/mypage/MyPage';
 import TradePromiseList from '@/pages/mypage/TradePromiseList';
 import TradeHistoryList from '@/pages/mypage/TradeHistoryList';
-import WishBooks from '@/pages/matching/WishBooks';
-import NeighborBookshelfPage from '@/pages/matching/NeighborBookshelf/NeighborBookshelfPage';
+import WishBooks from '@/pages/matching/wishbook/WishBooks';
+import NeighborBookshelfPage from '@/pages/matching/neighborbookshelf/NeighborBookshelfPage';
 import AddBySelfPage from '@/pages/mylibrary/AddBook/AddBySelfPage';
 import AddByTitlePage from '@/pages/mylibrary/AddBook/AddByTitlePage';
 import AddByBarcodePage from '@/pages/mylibrary/AddBook/AddByISBNPage';
@@ -17,6 +17,7 @@ import AddBySearchPage from '@/pages/mylibrary/AddBook/AddBySearchPage';
 import OCRResultPage from '@/pages/mylibrary/AddBook/OCRResultPage';
 import AllMyBooksTab from '@/pages/mylibrary/tabs/AllBooksTab';
 import PublicMyBooksTab from '@/pages/mylibrary/tabs/PublicBooksTab';
+import SearchWishBooks from '@/pages/matching/wishbook/SearchWishBooks';
 import BookDetailPage from '@/pages/mylibrary/BookDetailPage';
 import BookInfoTab from '@/pages/mylibrary/tabs/BookInfoTab';
 import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
@@ -64,6 +65,7 @@ const AppLayout: FC = () => {
             <Route path="wish-books" element={<WishBooks />} />
           </Route>
           <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
+          <Route path="matching/search-wish-books" element={<SearchWishBooks />} />
           <Route path="/chat" element={<div>채팅</div>} />
           <Route path="/booknote" element={<div>독서 기록</div>} />
 
