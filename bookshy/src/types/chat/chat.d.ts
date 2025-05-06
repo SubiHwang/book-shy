@@ -1,5 +1,5 @@
 export interface ChatRoomSummary {
-  roomId: string;
+  roomId: number;
   partnerName: string;
   partnerProfileImage: string;
   lastMessage: string;
