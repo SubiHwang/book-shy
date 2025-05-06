@@ -1,7 +1,7 @@
 import { WishBook } from '@/types/book';
 import { FC, useMemo, useState } from 'react';
 import { PlusCircle, Search, ChevronDown } from 'lucide-react';
-import WishBookCard from '@/components/temp/WishBooks/WishBookCard';
+import WishBookCard from '@/components/matching/WishBooks/WishBookCard';
 import { useNavigate } from 'react-router-dom';
 
 const WishBooks: FC = () => {

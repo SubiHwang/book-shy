@@ -1,4 +1,4 @@
-import SearchBar from '@/components/temp/WishBooks/SearchBar';
+import SearchBar from '@/components/matching/WishBooks/SearchBar';
 import { ArrowLeft } from 'lucide-react';
 import { useState, KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
