@@ -1,3 +1,4 @@
+import PopularSearchTerm from '@/components/matching/wishbooks/PopularSearchTerm';
 import SearchBar from '@/components/matching/wishbooks/SearchBar';
 import { ArrowLeft } from 'lucide-react';
 import { useState, KeyboardEvent } from 'react';
@@ -26,6 +27,7 @@ const SearchWishBooks = () => {
           읽고 싶은 책을 검색 해보세요.
         </p>
         <SearchBar onSearch={handleSearch} />
+        <PopularSearchTerm/>
       </div>
     </div>
   );
