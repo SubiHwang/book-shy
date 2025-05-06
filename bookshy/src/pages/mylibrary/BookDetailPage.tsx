@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import BookDetail from '@/components/mylibrary/BookDetail/BookDetail';
+import BookDetail from '@/components/Mylibrary/BookDetail/BookDetail';
 
 const BookDetailPage = () => {
   // URL 파라미터에서 책 ID 가져오기

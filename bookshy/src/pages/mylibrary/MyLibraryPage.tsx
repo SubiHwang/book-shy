@@ -3,14 +3,14 @@ import React, { useState, useEffect } from 'react';
 import Header from '@/components/common/Header';
 import BannerCarousel from '@/components/Mylibrary/BookShelf/BannerCarousel';
 import AddBookDialog from '@/components/Mylibrary/BookAdd/AddBookDialog';
-import { useNavigate, Outlet, useLocation } from 'react-router-dom';
+import { useNavigate, Outlet } from 'react-router-dom';
 import TabNavBar from '@/components/common/TabNavBar';
 import { getHeightAchievementMessage } from '@/utils/achievementUtils';
 import { AllBannersData } from '@/types/mylibrary/components';
 
 const MyLibraryPage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
 
   // 탭 페이지 설정
   const pages = [
@@ -19,7 +19,7 @@ const MyLibraryPage: React.FC = () => {
   ];
 
   // 현재 활성화된 탭 결정
-  const currentPath = location.pathname;
+  // const currentPath = location.pathname;
 
   // 배너 데이터 상태
   const [bannerData, setBannerData] = useState<AllBannersData | null>(null);
