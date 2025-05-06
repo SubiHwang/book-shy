@@ -4,17 +4,21 @@ import com.ssafy.bookshy.domain.users.dto.UserProfileResponseDto;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import static com.ssafy.bookshy.common.constants.ImageUrlConstants.PROFILE_IMAGE_BASE_URL;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
-    private final UserRepository usersRepository;
+    private final UserRepository userRepository;
 
     private Users getUserById(Long userId) {
-        return usersRepository.findById(userId)
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
     }
 
@@ -28,6 +32,7 @@ public class UserService {
 
     /**
      * 🔍 현재 로그인한 사용자의 프로필 정보를 조회합니다.
+     *
      * @param userId 현재 로그인한 사용자 ID
      * @return UserProfileResponseDto 사용자 프로필 정보
      */
@@ -46,4 +51,15 @@ public class UserService {
                 .profileImageUrl(profileImageUrl )
                 .build();
     }
+
+
+    public UserDetails loadUserByNickname(String nickname) throws UsernameNotFoundException {
+
+        Users user = userRepository.findByNickname(nickname);
+        if (user == null) {
+            throw new UsernameNotFoundException("존재하지 않는 회원입니다.");
+        }
+        return user;
+    }
+
 }
