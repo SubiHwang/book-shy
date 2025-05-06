@@ -41,3 +41,7 @@ management:
   endpoint:
     health:
       show-details: always  # 헬스체크 상세 정보 응답 포함
+
+file:
+  upload-dir: /home/ubuntu/bookshy/images/coverImage
+

@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.users.entity;
 
 import com.ssafy.bookshy.common.entity.TimeStampEntity;
+import com.ssafy.bookshy.domain.library.entity.Library;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -65,6 +66,22 @@ public class Users extends TimeStampEntity implements UserDetails {
         this.fcmToken = fcmToken;
     }
 
+    @Builder
+    public Users(String email, String nickname, String profileImageUrl,
+                 String address, int age, Gender gender, Float temperature,
+                 String badges, String refreshToken, String fcmToken) {
+        this.email = email;
+        this.nickname = nickname;
+        this.profileImageUrl = profileImageUrl;
+        this.address = address;
+        this.age = age;
+        this.gender = gender;
+        this.temperature = temperature;
+        this.badges = badges != null ? badges : "북끄북끄 입문자";
+        this.refreshToken = refreshToken;
+        this.fcmToken = fcmToken;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
@@ -100,8 +117,10 @@ public class Users extends TimeStampEntity implements UserDetails {
         return true;
     }
 
-
     public enum Gender {
         M, F
     }
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Library> libraries;
 }
