@@ -9,7 +9,7 @@ export interface TradeCardProps {
 }
 
 const TradePromiseCard: FC<TradeCardProps> = ({
-  tradeId,
+  // tradeId,
   userName,
   userProfileUrl,
   statusText,
