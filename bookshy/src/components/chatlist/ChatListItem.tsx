@@ -1,4 +1,5 @@
 import { ChatRoomSummary } from '@/types/chat/chat';
+import { formatLastMessageTime } from '@/utils/formatLastMessageTime';
 import { useNavigate } from 'react-router-dom';
 
 interface Props {
@@ -28,7 +29,7 @@ function ChatListItem({ room }: Props) {
             {room.partnerName}
           </h3>
           <span className="text-xs text-light-text-muted dark:text-dark-text-muted whitespace-nowrap">
-            {room.lastMessageTime}
+            {formatLastMessageTime(room.lastMessageTime)}
           </span>
         </div>
         <div className="flex justify-between items-center">

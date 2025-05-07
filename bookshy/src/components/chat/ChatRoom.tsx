@@ -1,11 +1,14 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChatMessage } from '@/types/chat/chat.ts';
 import ChatMessageItem from './ChatMessageItem.tsx';
 import ChatInput from './ChatInput.tsx';
-import { io } from 'socket.io-client';
 import ChatRoomHeader from './ChatRoomHeader.tsx';
 import ScheduleModal from './ScheduleModal.tsx';
 import SystemMessage from './SystemMessage.tsx';
+import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { fetchMessages } from '@/services/chat/chat.ts';
+import { useStomp } from '@/hooks/chat/useStomp.ts';
 
 interface Props {
   partnerName: string;
@@ -13,27 +16,22 @@ interface Props {
   initialMessages: ChatMessage[];
 }
 
-const socket = io('http://localhost:4000');
-
-function ChatRoom({ partnerName, partnerProfileImage, initialMessages }: Props) {
-  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
+function ChatRoom({ partnerName, partnerProfileImage }: Props) {
+  const { chatRoomId } = useParams();
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showOptions, setShowOptions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const isNewRoom = initialMessages.length === 0;
   const [showScheduleModal, setShowScheduleModal] = useState(false);
 
-  useEffect(() => {
-    socket.on('receiveMessage', (data: ChatMessage) => {
-      setMessages((prev) => [...prev, data]);
-    });
-    return () => {
-      socket.off('receiveMessage');
-    };
-  }, []);
+  const { data: initialMessages = [] } = useQuery({
+    queryKey: ['chatMessages', chatRoomId],
+    queryFn: () => fetchMessages(Number(chatRoomId)),
+    enabled: !!chatRoomId,
+    retry: false,
+  });
 
   useEffect(() => {
-    const alreadyHasNotice = initialMessages.some((msg) => msg.id.startsWith('notice-'));
-    if (initialMessages.length === 0 && !alreadyHasNotice) {
+    if (initialMessages.length === 0) {
       const now = new Date();
       const noticeMessage: ChatMessage = {
         id: 'notice-' + Date.now(),
@@ -47,7 +45,11 @@ function ChatRoom({ partnerName, partnerProfileImage, initialMessages }: Props) 
     } else {
       setMessages(initialMessages);
     }
-  }, []);
+  }, [initialMessages]);
+
+  const { sendMessage } = useStomp(Number(chatRoomId), (newMessage: ChatMessage) => {
+    setMessages((prev) => [...prev, newMessage]);
+  });
 
   useEffect(() => {
     scrollToBottom();
@@ -58,15 +60,8 @@ function ChatRoom({ partnerName, partnerProfileImage, initialMessages }: Props) 
   };
 
   const handleSendMessage = (content: string) => {
-    const now = new Date();
-    const newMessage: ChatMessage = {
-      id: String(Date.now()),
-      senderId: 'me',
-      content,
-      timestamp: now.toISOString(),
-    };
-    setMessages((prev) => [...prev, newMessage]);
-    socket.emit('sendMessage', newMessage);
+    if (!chatRoomId) return;
+    sendMessage(Number(chatRoomId), 1, content); // 나중에 senderId인 1은 로그인 한 ID로 교체
   };
 
   const handleSendSystemMessage = (
@@ -82,7 +77,6 @@ function ChatRoom({ partnerName, partnerProfileImage, initialMessages }: Props) 
       type,
     };
     setMessages((prev) => [...prev, newMessage]);
-    socket.emit('sendMessage', newMessage);
   };
 
   const toggleOptions = () => {
@@ -145,7 +139,7 @@ function ChatRoom({ partnerName, partnerProfileImage, initialMessages }: Props) 
               ) : (
                 <ChatMessageItem
                   message={{ ...msg, timestamp: formatTime(msg.timestamp) }}
-                  isMyMessage={msg.senderId === 'me'}
+                  isMyMessage={msg.senderId === '1'} // 추후 로그인한 사용자 ID랑 비교하도록 변경
                 />
               )}
             </div>

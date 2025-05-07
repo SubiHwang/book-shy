@@ -1,31 +1,21 @@
-import { ChatRoomSummary } from '@/types/chat/chat';
-import ChatListItem from './ChatListItem.tsx';
-
-const dummyChatRooms: ChatRoomSummary[] = [
-  {
-    roomId: '1',
-    partnerName: '마이콜',
-    partnerProfileImage:
-      'https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbguJOC%2FbtsNFnGX9MK%2F2hVVXFWQM8IwjT1h3vKh8k%2Fimg.jpg',
-    lastMessage: '위치가 어디시죠?',
-    lastMessageTime: '오후 3:01',
-    unreadCount: 2,
-  },
-  {
-    roomId: '2',
-    partnerName: '잭슨',
-    partnerProfileImage:
-      'https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbzIOjQ%2FbtsNE2iIUCt%2FScKePxVg6XZCFUMPi6KIg0%2Fimg.png',
-    lastMessage: '좋아요. 거래 합시다.',
-    lastMessageTime: '오후 3:01',
-    unreadCount: 1,
-  },
-];
+import { useQuery } from '@tanstack/react-query';
+import ChatListItem from './ChatListItem';
+import { fetchChatList } from '@/services/chat/chat';
 
 function ChatList() {
+  // 추후 로그인 사용자 ID로 대체 필요
+  const userId = 1;
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['chatList', userId],
+    queryFn: () => fetchChatList(userId),
+  });
+
+  if (isLoading) return <div className="p-4">불러오는 중...</div>;
+  if (isError || !data) return <div className="p-4">채팅 목록을 불러올 수 없습니다.</div>;
+
   return (
     <div className="bg-light-bg dark:bg-dark-bg h-full">
-      {dummyChatRooms.map((room) => (
+      {data.map((room) => (
         <ChatListItem key={room.roomId} room={room} />
       ))}
     </div>
