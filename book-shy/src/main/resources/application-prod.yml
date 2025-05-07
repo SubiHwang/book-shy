@@ -20,5 +20,11 @@ spring:
       trade-group-id: trade-consumer-group
       chat-group-id: chat-consumer-group
 
+aladin:
+  api:
+    base-url: ${ALADIN_BASE_URL}
+  ttb:
+    key: ${ALADIN_TTB_KEY}
+
 server:
   port: 8080  # ✅ 운영용 포트
