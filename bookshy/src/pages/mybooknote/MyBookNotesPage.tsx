@@ -2,16 +2,34 @@ import { useQuery } from '@tanstack/react-query';
 import Header from '@/components/common/Header';
 import TabNavBar from '@/components/common/TabNavBar';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { fetchBookNotes } from '@/services/mybooknote/booknote';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import BookNoteCard from '@/components/booknote/BookNoteCard';
 
 const MyBookNotesPage = () => {
   const navigate = useNavigate();
-  const { data = [], isLoading } = useQuery<BookNote[]>({
+  const {
+    data = [],
+    isLoading,
+    error,
+  } = useQuery<BookNote[], Error>({
     queryKey: ['my-booknotes'],
     queryFn: fetchBookNotes,
   });
+
+  // ✅ fetch 결과 로그 찍기
+  useEffect(() => {
+    console.log('📘 useQuery 결과:', { isLoading, error, data });
+  }, [isLoading, error, data]);
+
+  if (isLoading) {
+    return <p className="p-4">불러오는 중...</p>;
+  }
+
+  if (error) {
+    return <p className="p-4 text-red-500">독서 기록 불러오기 실패: {error.message}</p>;
+  }
 
   const pages = [
     { path: '/booknote', label: '내 독서 기록 보기' },
