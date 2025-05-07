@@ -96,8 +96,8 @@ const AppLayout: FC = () => {
 
                   {/* 채팅과 독서기록 페이지 */}
                   <Route path="/chat" element={<ChatListPage />} />
-          <Route path="/chat/:roomId" element={<ChatRoomPage />} />
-          <Route path="/chat/:roomId/review" element={<TradeReviewPage />} />
+                  <Route path="/chat/:roomId" element={<ChatRoomPage />} />
+                  <Route path="/chat/:roomId/review" element={<TradeReviewPage />} />
                   <Route path="/booknote" element={<div>독서 기록</div>} />
 
                   {/* ✅ 마이페이지 라우팅 */}
@@ -116,7 +116,7 @@ const AppLayout: FC = () => {
       </div>
 
       {/* 하단 탭 바 (로그인된 경우에만 표시) */}
-      {!isLoading && <BottomTabBar onTabChange={handleTabChange} />}
+      {!(isLoading || isChatRoom || isReviewPage) && <BottomTabBar onTabChange={handleTabChange} />}
     </div>
   );
 };
