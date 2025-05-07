@@ -22,6 +22,7 @@ import BookDetailPage from '@/pages/mylibrary/BookDetailPage';
 import BookInfoTab from '@/pages/mylibrary/tabs/BookInfoTab';
 import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
 import ISBNScanResultPage from '@/pages/mylibrary/AddBook/ISBNScanResultPage';
+import Login from '@/pages/auth/Login';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ const AppLayout: FC = () => {
     <div className="app-container">
       <div className="content">
         <Routes>
+          <Route path="/login" element={<Login />} />
           <Route path="/" element={<Navigate to="/bookshelf" replace />} />
           {/* 📚 서재 기본 페이지 */}
           <Route path="/bookshelf" element={<MyLibraryPage />}>
@@ -74,6 +76,8 @@ const AppLayout: FC = () => {
             <Route index element={<TradePromiseList />} />
             <Route path="history" element={<TradeHistoryList />} />
           </Route>
+          {/* 그 외 경로는 홈으로 리다이렉션 */}
+          <Route path="*" element={<Navigate to="/bookshelf" />} />
         </Routes>
       </div>
       <BottomTabBar onTabChange={handleTabChange} />
