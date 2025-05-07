@@ -1,43 +1,34 @@
+// src/pages/mylibrary/ISBNScanResultPage.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Check } from 'lucide-react';
-import { Book } from '@/types/book';
+import { ArrowLeft } from 'lucide-react';
+import bookAddService from '@/services/mylibrary/isbnresultservice';
+import { ISBNSearchResponse } from '@/types/mylibrary/isbn';
 
 const ISBNScanResultPage: React.FC = () => {
   const { isbn } = useParams<{ isbn: string }>();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [bookDetail, setBookDetail] = useState<Book | null>(null);
+  const [bookDetail, setBookDetail] = useState<ISBNSearchResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBookByISBN = async () => {
+      if (!isbn) {
+        setError('ISBN 정보가 올바르지 않습니다.');
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
 
       try {
-        // 개발용 더미 데이터
-        setTimeout(() => {
-          if (isbn) {
-            const dummyData: Book = {
-              bookId: 1,
-              title: '총, 균, 쇠',
-              author: '제레드 다이아몬드',
-              publisher: '김영사',
-              publishDate: '2005-12-19',
-              translator: '김진준',
-              categories: '역사/문명',
-              summary:
-                '왜 어떤 민족들은 다른 민족들의 정복과 지배의 대상으로 전락했는가? 왜 원주민들은 유럽인들을 정복하지 못하고 그 반대가 되었는가? 왜 잉카 제국의 황제는 스페인 국왕을 포로로 잡지 못하고 그 반대가 되었는가? 정복의 불균형 뒤에 숨겨진 지리, 생물학, 문명의 비밀을 밝혀낸다.',
-              bookImgUrl: 'https://image.aladin.co.kr/product/26/0/cover500/s742633278_1.jpg',
-              pages: 752,
-            };
-            setBookDetail(dummyData);
-          } else {
-            setError('ISBN 정보가 올바르지 않습니다.');
-          }
-          setIsLoading(false);
-        }, 1000);
+        // API를 통해 ISBN으로 책 정보 검색
+        const response = await bookAddService.searchBookByISBN(isbn);
+        setBookDetail(response);
+        setIsLoading(false);
       } catch (err) {
+        console.error('ISBN 검색 오류:', err);
         setError('책 정보를 불러오는데 실패했습니다.');
         setIsLoading(false);
       }
@@ -48,10 +39,6 @@ const ISBNScanResultPage: React.FC = () => {
 
   const handleGoBack = () => {
     navigate(-1);
-  };
-
-  const handleAddBook = () => {
-    navigate('/bookshelf');
   };
 
   const handleScanAgain = () => {
@@ -94,10 +81,14 @@ const ISBNScanResultPage: React.FC = () => {
               <div className="flex gap-4">
                 {/* 책 이미지 */}
                 <img
-                  src={bookDetail.bookImgUrl}
+                  src={bookDetail.coverImageUrl}
                   alt={bookDetail.title}
                   loading="lazy"
                   className="w-[160px] h-[240px] object-cover rounded-md border shadow-sm flex-shrink-0"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder-book.jpg';
+                  }}
                 />
 
                 {/* 책 텍스트 정보 */}
@@ -108,15 +99,10 @@ const ISBNScanResultPage: React.FC = () => {
                     </h2>
                     <p className="text-sm text-gray-600 mb-2">{bookDetail.author} 저</p>
                     <ul className="text-xs text-gray-500 space-y-1">
-                      {bookDetail.translator && <li>역자: {bookDetail.translator}</li>}
                       <li>출판사: {bookDetail.publisher}</li>
-                      {bookDetail.publishDate && (
-                        <li>
-                          출판일: {new Date(bookDetail.publishDate).toLocaleDateString('ko-KR')}
-                        </li>
-                      )}
-                      {bookDetail.pages && <li>페이지: {bookDetail.pages}쪽</li>}
-                      {bookDetail.categories && <li>분류: {bookDetail.categories}</li>}
+                      {bookDetail.pubDate && <li>출판일: {bookDetail.pubDate}</li>}
+                      {bookDetail.pageCount > 0 && <li>페이지: {bookDetail.pageCount}쪽</li>}
+                      {bookDetail.category && <li>분류: {bookDetail.category}</li>}
                       <li>ISBN: {isbn}</li>
                     </ul>
                   </div>
@@ -124,11 +110,13 @@ const ISBNScanResultPage: React.FC = () => {
               </div>
 
               {/* 책 소개 */}
-              {bookDetail.summary && (
+              {bookDetail.description && (
                 <div>
                   <h3 className="text-ml font-semibold text-gray-800 mb-1 mt-8">책 소개</h3>
-                  <p className="text-sm text-gray-600 line-clamp-4 mb-16">{bookDetail.summary}</p>
-                  {bookDetail.summary.length > 250 && (
+                  <p className="text-sm text-gray-600 line-clamp-4 mb-16">
+                    {bookDetail.description}
+                  </p>
+                  {bookDetail.description.length > 250 && (
                     <button
                       className="text-xs text-primary-light mt-2"
                       onClick={() => alert('전체 내용 보기 기능은 개발 중입니다.')}
@@ -141,12 +129,6 @@ const ISBNScanResultPage: React.FC = () => {
 
               {/* 버튼 */}
               <div className="space-y-3">
-                <button
-                  onClick={handleAddBook}
-                  className="w-full py-3 bg-primary-light text-white rounded-lg font-semibold hover:bg-primary-accent transition"
-                >
-                  <Check size={18} className="inline mr-2" />내 서재에 추가하기
-                </button>
                 <button
                   onClick={handleScanAgain}
                   className="w-full py-3 border border-light-text-muted/40 text-light-text-secondary rounded-lg hover:bg-light-bg-shade transition"
