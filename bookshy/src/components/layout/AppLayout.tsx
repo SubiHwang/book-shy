@@ -24,6 +24,7 @@ import BookInfoTab from '@/pages/mylibrary/tabs/BookInfoTab';
 import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
 import ISBNScanResultPage from '@/pages/mylibrary/AddBook/ISBNScanResultPage';
 import MyBookNotesPage from '@/pages/mybooknote/MyBookNotesPage';
+import BookNoteDetailPage from '@/pages/mybooknote/BookNoteDetailPage';
 import Login from '@/pages/auth/Login';
 import PrivateRoute from '@/components/layout/PrivateRoute';
 
@@ -51,7 +52,9 @@ const AppLayout: FC = () => {
           <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
           <Route path="matching/search-wish-books" element={<SearchWishBooks />} />
           <Route path="/chat" element={<div>채팅</div>} />
+
           <Route path="/booknote" element={<MyBookNotesPage />} />
+          <Route path="/booknotes/detail/:bookId" element={<BookNoteDetailPage />} />
 
           {/* 보호된 라우트 - 로그인해야만 접근 가능 */}
           <Route
@@ -100,7 +103,6 @@ const AppLayout: FC = () => {
 
                   {/* 채팅과 독서기록 페이지 */}
                   <Route path="/chat" element={<div>채팅</div>} />
-                  <Route path="/booknote" element={<div>독서 기록</div>} />
 
                   {/* ✅ 마이페이지 라우팅 */}
                   <Route path="/mypage" element={<MyPage />}>
