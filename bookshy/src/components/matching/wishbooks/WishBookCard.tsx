@@ -3,6 +3,7 @@ import { Heart } from 'lucide-react';
 import { FC } from 'react';
 
 const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
+  const { isLiked = false } = wishBook;
   return (
     <div className="card flex items-center justify-between p-4 mb-4 w-full">
       {/* Book Image */}
@@ -33,7 +34,7 @@ const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
       <div className="flex-shrink-0 ml-4">
         <button className="p-2 rounded-full bg-light-bg-shade">
           <Heart
-            className={`w-6 h-6 text-primary ${wishBook.isLiked ? 'fill-primary' : ''}`}
+            className={`w-6 h-6 text-primary ${isLiked ? 'fill-primary' : ''}`}
             strokeWidth={1}
           />
         </button>
