@@ -52,6 +52,7 @@ public class KafkaProducer {
      * 💬 채팅 메시지 이벤트 발행
      */
     public void sendChatMessage(ChatMessageKafkaDto event) {
+        log.info("📤 [KafkaProducer] Sending chat message to topic '{}': {}", TOPIC_CHAT_MESSAGE, event);
         send(TOPIC_CHAT_MESSAGE, event, "💬 ChatMessageEvent");
     }
 
