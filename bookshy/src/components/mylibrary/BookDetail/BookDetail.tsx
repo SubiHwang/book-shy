@@ -1,3 +1,4 @@
+// src/components/mylibrary/BookDetail/BookDetail.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { LibraryBook } from '@/types/book';
@@ -16,7 +17,7 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
 
   // 탭 페이지 설정
   const pages = [
-    { path: `/bookshelf/books/${bookId}/info`, label: '정보' },
+    { path: `/bookshelf/books/${bookId}`, label: '정보' },
     { path: `/bookshelf/books/${bookId}/notes`, label: '내 독서 기록' },
   ];
 
