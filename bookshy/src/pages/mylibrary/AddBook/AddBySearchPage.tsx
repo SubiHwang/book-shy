@@ -2,12 +2,12 @@ import { useState, FC, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search } from 'lucide-react';
 import BookSearchItem from '@/components/mylibrary/BookAdd/BookSearchItem';
-import { Book } from '@/types/book'; // ✅ Book 타입으로 변경
+import { Book } from '@/types/book';
 
 const AddBySearchPage: FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [books, setBooks] = useState<Book[]>([]); // ✅ Book 타입 사용
+  const [books, setBooks] = useState<Book[]>([]);
 
   const navigate = useNavigate();
 
@@ -105,9 +105,9 @@ const AddBySearchPage: FC = () => {
       const selectedBook = books.find((book) => book.bookId === bookId);
       if (!selectedBook) return;
 
-      const newBook: Book = {
-        ...selectedBook,
-      };
+      // const newBook: Book = {
+      //   ...selectedBook,
+      // };
 
       // 나중에 실제로 DB 저장 API 호출 가능
       navigate('/bookshelf');

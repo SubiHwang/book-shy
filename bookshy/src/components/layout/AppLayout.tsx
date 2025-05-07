@@ -11,12 +11,17 @@ import WishBooks from '@/pages/matching/wishbook/WishBooks';
 import NeighborBookshelfPage from '@/pages/matching/neighborbookshelf/NeighborBookshelfPage';
 import AddBySelfPage from '@/pages/mylibrary/AddBook/AddBySelfPage';
 import AddByTitlePage from '@/pages/mylibrary/AddBook/AddByTitlePage';
-import AddByISBNPage from '@/pages/mylibrary/AddBook/AddByISBNPage';
+import AddByBarcodePage from '@/pages/mylibrary/AddBook/AddByISBNPage';
+import AddISBNResultPage from '@/pages/mylibrary/AddBook/AddISBNResultPage';
 import AddBySearchPage from '@/pages/mylibrary/AddBook/AddBySearchPage';
 import OCRResultPage from '@/pages/mylibrary/AddBook/OCRResultPage';
 import AllMyBooksTab from '@/pages/mylibrary/tabs/AllBooksTab';
 import PublicMyBooksTab from '@/pages/mylibrary/tabs/PublicBooksTab';
 import SearchWishBooks from '@/pages/matching/wishbook/SearchWishBooks';
+import BookDetailPage from '@/pages/mylibrary/BookDetailPage';
+import BookInfoTab from '@/pages/mylibrary/tabs/BookInfoTab';
+import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
+import ISBNScanResultPage from '@/pages/mylibrary/AddBook/ISBNScanResultPage';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -39,21 +44,31 @@ const AppLayout: FC = () => {
             <Route path="all-my-books" element={<AllMyBooksTab />} />
             <Route path="public-my-books" element={<PublicMyBooksTab />} />
           </Route>
-
-          {/* 📚 책 추가 페이지들 - 별도 라우트로 분리 */}
+          {/* 책 상세 페이지 */}
+          <Route path="/bookshelf/books/:id" element={<BookDetailPage />}>
+            <Route path="info" element={<BookInfoTab />} />
+            <Route path="notes" element={<BookNotesTab />} />
+          </Route>
+          {/* 📚 책 추가 페이지 */}
           <Route path="/bookshelf/add/search" element={<AddBySearchPage />} />
           <Route path="/bookshelf/add/self" element={<AddBySelfPage />} />
           <Route path="/bookshelf/add/title" element={<AddByTitlePage />} />
-          <Route path="/bookshelf/add/isbn" element={<AddByISBNPage />} />
+          <Route path="/bookshelf/add/isbn" element={<AddByBarcodePage />} />
+          <Route path="/bookshelf/add/isbn-scan-result" element={<AddISBNResultPage />} />
+          {/* OCR, ISBN결과 페이지 */}
           <Route path="/bookshelf/add/ocr-result" element={<OCRResultPage />} />
+          <Route path="/bookshelf/add/isbn-result/:isbn" element={<ISBNScanResultPage />} />
+
+          {/* 📚 매칭 페이지 */}
           <Route path="/matching" element={<MatchingPage />}>
             <Route index element={<MatchingRecommend />} />
             <Route path="wish-books" element={<WishBooks />} />
           </Route>
           <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
-          <Route path='matching/search-wish-books' element={<SearchWishBooks/>}/>
+          <Route path="matching/search-wish-books" element={<SearchWishBooks />} />
           <Route path="/chat" element={<div>채팅</div>} />
           <Route path="/booknote" element={<div>독서 기록</div>} />
+
           {/* ✅ 마이페이지 라우팅 추가 */}
           <Route path="/mypage" element={<MyPage />}>
             <Route index element={<TradePromiseList />} />

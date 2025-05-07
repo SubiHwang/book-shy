@@ -1,14 +1,16 @@
 // src/pages/MyLibrary/MyLibraryPage.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/common/Header';
-import StatsCard from '@/components/MyLibrary/BookShelf/StatsCard';
-import AddBookDialog from '@/components/MyLibrary/BookAdd/AddBookDialog';
-import { useNavigate, Outlet, useLocation } from 'react-router-dom';
+import BannerCarousel from '@/components/mylibrary/BookShelf/BannerCarousel';
+import AddBookDialog from '@/components/mylibrary/BookAdd/AddBookDialog';
+import { useNavigate, Outlet } from 'react-router-dom';
 import TabNavBar from '@/components/common/TabNavBar';
+import { getHeightAchievementMessage } from '@/utils/achievementUtils';
+import { AllBannersData } from '@/types/mylibrary/components';
 
 const MyLibraryPage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
 
   // 탭 페이지 설정
   const pages = [
@@ -17,11 +19,66 @@ const MyLibraryPage: React.FC = () => {
   ];
 
   // 현재 활성화된 탭 결정
-  const currentPath = location.pathname;
-  const isPublicTab = currentPath.includes('public-my-books');
+  // const currentPath = location.pathname;
 
-  const [userRank, setUserRank] = useState<number>(1);
-  const [achievement, setAchievement] = useState<string>('전체 1등 독서 왕이 되었어요!');
+  // 배너 데이터 상태
+  const [bannerData, setBannerData] = useState<AllBannersData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 더미 데이터 생성 함수
+  const generateDummyBannerData = (): AllBannersData => {
+    // 테스트용 더미 데이터
+    const totalBooks = 33; // 테스트용 고정값
+
+    // 책 배너 데이터
+    const booksData = {
+      totalBooks,
+      achievement: getHeightAchievementMessage(totalBooks),
+    };
+
+    // 교환 배너 데이터
+    const exchangeData = {
+      exchangeCount: 12,
+      peopleCount: 5,
+      lastExchangeDate: '2023-05-15',
+    };
+
+    // 장르 배너 데이터
+    const genreData = {
+      favoriteGenre: '소설',
+      genreDescription: '이야기 속에서 다양한 감정과 인생을 경험하는 것을 즐기시는군요!',
+      matchingRate: 85,
+    };
+
+    return {
+      booksData,
+      exchangeData,
+      genreData,
+    };
+  };
+
+  // 데이터 초기화 (컴포넌트 마운트시 한 번만 실행)
+  useEffect(() => {
+    // 로딩 상태 시뮬레이션
+    setIsLoading(true);
+
+    // 1초 후에 더미 데이터 설정 (API 호출 지연 시뮬레이션)
+    const timer = setTimeout(() => {
+      try {
+        const dummyData = generateDummyBannerData();
+        setBannerData(dummyData);
+        setIsLoading(false);
+      } catch (err) {
+        console.error('더미 데이터 생성 중 오류 발생:', err);
+        setError('데이터를 불러오는데 실패했습니다.');
+        setIsLoading(false);
+      }
+    }, 1000);
+
+    // 타이머 정리
+    return () => clearTimeout(timer);
+  }, []);
 
   // 다이얼로그 상태 관리
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
@@ -53,12 +110,8 @@ const MyLibraryPage: React.FC = () => {
       {/* 스크롤 영역 */}
       <div className="pb-16 bg-light-bg flex-1">
         <div className="max-w-screen-md mx-auto px-4 py-4">
-          {/* 통계 카드 */}
-          <StatsCard
-            totalBooks={0} // 이 값은 자식 컴포넌트에서 업데이트
-            rank={userRank}
-            achievement={achievement}
-          />
+          {/* 배너 캐로셀 */}
+          <BannerCarousel data={bannerData} isLoading={isLoading} error={error} />
 
           {/* 탭 네비게이션 */}
           <TabNavBar pages={pages} />
