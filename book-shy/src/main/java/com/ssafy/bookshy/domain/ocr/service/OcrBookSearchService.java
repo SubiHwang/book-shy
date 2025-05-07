@@ -7,12 +7,14 @@ import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
 import com.ssafy.bookshy.external.aladin.AladinClient;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.similarity.LevenshteinDistance;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Comparator;
 import java.util.List;
 
+@Profile("!prod")
 @Service
 @RequiredArgsConstructor
 public class OcrBookSearchService {

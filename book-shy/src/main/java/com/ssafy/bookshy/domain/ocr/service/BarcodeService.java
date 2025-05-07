@@ -3,6 +3,7 @@ package com.ssafy.bookshy.domain.ocr.service;
 import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -10,6 +11,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+@Profile("!prod")
 @Service
 public class BarcodeService {
 
