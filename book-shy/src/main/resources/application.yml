@@ -44,6 +44,3 @@ management:
 
 file:
   upload-dir: /home/ubuntu/bookshy/images/coverImage
-
-
-
