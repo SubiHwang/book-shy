@@ -13,7 +13,7 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                         "http://k12d204.p.ssafy.io:80",
                         "http://localhost:5173",
-                        "http://k12d204.p.ssafy.io:8080/swagger-ui/index.html"
+                        "http://k12d204.p.ssafy.io:8080"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
