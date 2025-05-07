@@ -27,7 +27,9 @@ const SearchWishBooks = () => {
           읽고 싶은 책을 검색 해보세요.
         </p>
         <SearchBar onSearch={handleSearch} />
-        <PopularSearchTerm/>
+      </div>
+      <div className="bg-primary-light">
+        <PopularSearchTerm />
       </div>
     </div>
   );
