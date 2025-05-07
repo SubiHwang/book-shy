@@ -2,6 +2,7 @@ package com.ssafy.bookshy.domain.ocr.service;
 
 import com.ssafy.bookshy.domain.ocr.dto.OcrField;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Profile("!prod")
 @Service
 @RequiredArgsConstructor
 public class OcrIsbnExtractorService {
