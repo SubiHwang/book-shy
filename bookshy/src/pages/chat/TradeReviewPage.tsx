@@ -4,17 +4,19 @@ import { Star } from 'lucide-react';
 
 const TradeReviewPage = () => {
   const navigate = useNavigate();
-  const [ratings, setRatings] = useState({
+  type RatingKey = 'condition' | 'punctuality' | 'manner';
+
+  const [ratings, setRatings] = useState<Record<RatingKey, number>>({
     condition: 0,
     punctuality: 0,
     manner: 0,
   });
 
-  const handleRating = (key, value) => {
+  const handleRating = (key: RatingKey, value: number) => {
     setRatings({ ...ratings, [key]: value });
   };
 
-  const renderStars = (key) => {
+  const renderStars = (key: RatingKey) => {
     return [...Array(5)].map((_, i) => (
       <button key={i} onClick={() => handleRating(key, i + 1)}>
         <Star fill={i < ratings[key] ? '#E15F63' : 'none'} stroke="#E15F63" className="w-6 h-6" />
