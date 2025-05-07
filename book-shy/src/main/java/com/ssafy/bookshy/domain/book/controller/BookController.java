@@ -4,11 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.ssafy.bookshy.domain.book.dto.BookListTotalResponseDto;
 import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
 import com.ssafy.bookshy.domain.book.dto.BookSearchResponseDto;
+import com.ssafy.bookshy.domain.book.dto.WishRequestDto;
 import com.ssafy.bookshy.domain.book.entity.Book;
 import com.ssafy.bookshy.domain.book.service.BookService;
 import com.ssafy.bookshy.domain.ocr.service.OcrBookSearchService;
 import com.ssafy.bookshy.external.aladin.AladinClient;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -52,7 +56,7 @@ public class BookController {
     }
 
     @GetMapping("/search/list")
-    @Operation(summary = "🔍 도서 검색 목록", description = "제목 기반 검색 목록을 반환합니다. (페이지네이션 지원)")
+    @Operation(summary = "🔍 도서 검색 목록", description = "제목 기반 검색 목록을 반환합니다.")
     public ResponseEntity<BookListTotalResponseDto> searchList(@RequestParam String q) {
         int start = 1;
         return ResponseEntity.ok(aladinClient.searchListPreview(q, start));
@@ -72,4 +76,41 @@ public class BookController {
         return ResponseEntity.ok(aladinClient.searchByIsbn13(isbn13));
     }
 
+    @Operation(summary = "💖 읽고 싶은 책 등록", description = "도서 검색 결과에서 하트를 누르면 찜 도서로 등록합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "등록 성공"),
+            @ApiResponse(responseCode = "400", description = "중복 등록 또는 도서 정보 없음")
+    })
+    @PostMapping("/wish")
+    public ResponseEntity<Void> addWish(
+            @RequestParam @Parameter(description = "사용자 ID", example = "1") Long userId,
+            @RequestParam @Parameter(description = "알라딘 Item ID", example = "123456789") Long itemId
+    ) {
+        WishRequestDto dto = new WishRequestDto(userId, itemId);
+        bookService.addWish(dto);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "💖🔍 찜한 도서 목록 조회", description = "사용자가 찜한 도서 목록을 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공")
+    })
+    @GetMapping("/wish")
+    public ResponseEntity<BookListTotalResponseDto> getWishList(
+            @RequestParam @Parameter(description = "사용자 ID", example = "1") Long userId) {
+        return ResponseEntity.ok(bookService.getWishList(userId));
+    }
+
+    @Operation(summary = "💔 찜한 도서 삭제", description = "찜한 도서를 다시 눌러 삭제합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "삭제 성공"),
+            @ApiResponse(responseCode = "404", description = "찜한 도서를 찾을 수 없음")
+    })
+    @DeleteMapping("/wish/remove")
+    public ResponseEntity<Void> removeWish(
+            @RequestParam @Parameter(description = "사용자 ID", example = "1") Long userId,
+            @RequestParam @Parameter(description = "알라딘 Item ID", example = "123456789") Long itemId) {
+        bookService.removeWish(userId, itemId);
+        return ResponseEntity.ok().build();
+    }
 }
