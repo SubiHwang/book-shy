@@ -76,7 +76,7 @@ public class BookController {
         return ResponseEntity.ok(aladinClient.searchByIsbn13(isbn13));
     }
 
-    @Operation(summary = "💖 읽고 싶은 책 등록", description = "도서 검색 결과에서 하트를 누르면 찜 도서로 등록합니다.")
+    @Operation(summary = "💖 읽고 싶은 책 등록", description = "도서 검색 결과에서 하트를 누르면 읽고 싶은 책으로 등록합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "등록 성공"),
             @ApiResponse(responseCode = "400", description = "중복 등록 또는 도서 정보 없음")
@@ -91,7 +91,7 @@ public class BookController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "💖🔍 찜한 도서 목록 조회", description = "사용자가 찜한 도서 목록을 조회합니다.")
+    @Operation(summary = "💖🔍 읽고 싶은 책 목록 조회 목록 조회", description = "사용자가 읽고 싶은 책 목록을 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공")
     })
@@ -101,7 +101,7 @@ public class BookController {
         return ResponseEntity.ok(bookService.getWishList(userId));
     }
 
-    @Operation(summary = "💔 찜한 도서 삭제", description = "찜한 도서를 다시 눌러 삭제합니다.")
+    @Operation(summary = "💔 읽고 싶은 책 삭제", description = "하트를 다시 눌러 읽고 싶은 책을 삭제합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "삭제 성공"),
             @ApiResponse(responseCode = "404", description = "찜한 도서를 찾을 수 없음")
