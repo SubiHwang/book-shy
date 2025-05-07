@@ -136,7 +136,7 @@ const AddByBarcodePage: React.FC = () => {
       if (!scanning && cameraReady && !scanSuccess) {
         handleScan();
       }
-    }, 500);
+    }, 1000);
   };
 
   const stopAutoScan = () => {
