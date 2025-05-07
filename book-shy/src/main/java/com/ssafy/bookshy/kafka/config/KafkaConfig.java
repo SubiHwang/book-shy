@@ -1,6 +1,10 @@
 package com.ssafy.bookshy.kafka.config;
 
-import com.ssafy.bookshy.kafka.dto.*;
+import com.ssafy.bookshy.domain.recommend.dto.RecommendMessageKafkaDto;
+import com.ssafy.bookshy.kafka.dto.BookCreatedDto;
+import com.ssafy.bookshy.kafka.dto.ChatMessageKafkaDto;
+import com.ssafy.bookshy.kafka.dto.MatchSuccessDto;
+import com.ssafy.bookshy.kafka.dto.TradeSuccessDto;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -114,6 +118,11 @@ public class KafkaConfig {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, ChatMessageKafkaDto> chatListenerFactory() {
         return listenerFactory(ChatMessageKafkaDto.class, env.getProperty("spring.kafka.consumer.chat-group-id"));
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, RecommendMessageKafkaDto> recommendListenerFactory() {
+        return listenerFactory(RecommendMessageKafkaDto.class, env.getProperty("spring.kafka.consumer.recommend-group-id"));
     }
 
 }
