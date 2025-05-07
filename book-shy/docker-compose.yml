@@ -4,8 +4,8 @@ services:
     container_name: backend
     ports:
       - "8080:8080"
-#    env_file:
-#      - .env
+    #    env_file:
+    #      - .env
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - DB_URL=${DB_URL}
@@ -13,6 +13,11 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+
+      # JWT 설정 추가
+      - JWT_SECRET_KEY=${JWT_KEY}
+      - JWT_EXPIRATION_TIME=3600000
+      - ISSUER=bookshy-application
 
       # 로깅 관련 환경 변수 추가
       - LOGGING_LOGSTASH_HOST=logstash
