@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import type { BookNote } from '@/types/mybooknote/booknote';
 import Header from '@/components/common/Header';
 import TabNavBar from '@/components/common/TabNavBar';
 import BookCard from '@/components/booknote/BookCard';
+import type { BookNote } from '@/types/mybooknote/booknote';
 import { useState } from 'react';
 
 interface BookNotePetalPageProps {
@@ -12,7 +12,6 @@ interface BookNotePetalPageProps {
 const MyBookNotePetalPage: React.FC<BookNotePetalPageProps> = ({ bookNotes }) => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<'ALL' | 'X'>('ALL');
-  const [searchTerm, setSearchTerm] = useState('');
 
   const pages = [
     { path: '/booknote', label: '내 독서 기록 보기' },
@@ -21,14 +20,12 @@ const MyBookNotePetalPage: React.FC<BookNotePetalPageProps> = ({ bookNotes }) =>
 
   const filteredNotes = bookNotes.filter((book) => {
     const matchFilter = filter === 'ALL' || book.reviewId;
-    const matchSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchFilter && matchSearch;
+    return matchFilter;
   });
 
   return (
     <div className="bg-light-bg min-h-screen pb-28">
       <Header title="독서 기록" onBackClick={() => navigate(-1)} showBackButton showNotification />
-
       <TabNavBar pages={pages} />
 
       <div className="px-4 pt-4">
@@ -49,11 +46,11 @@ const MyBookNotePetalPage: React.FC<BookNotePetalPageProps> = ({ bookNotes }) =>
           {filteredNotes.map((book) => (
             <BookCard
               key={book.bookId}
-              card={{
-                title: book.title,
-                coverUrl: book.coverUrl || '/placeholder.jpg',
-                reviewId: book.reviewId,
-              }}
+              title={book.title}
+              coverUrl={book.coverUrl || '/placeholder.jpg'}
+              author={book.author}
+              quoteContent={book.quoteContent}
+              reviewContent={book.content}
             />
           ))}
         </div>

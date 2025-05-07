@@ -11,4 +11,6 @@ export interface BookNote {
   reviewId?: number;
   content: string;
   createdAt?: string;
+
+  quoteContent?: string;
 }
