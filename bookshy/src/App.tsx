@@ -6,6 +6,7 @@ import bookAnimation from '@assets/lottie/bookshy-splash.json';
 import { BrowserRouter } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import UpdatePrompt from './components/common/UpdatePrompt';
+import { AuthProvider } from './contexts/AuthContext';
 
 // 서비스 워커 등록 콜백 타입 정의
 interface RegisterSWCallbacks {
@@ -67,10 +68,12 @@ const App: FC = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AppLayout />
-        <UpdatePrompt needRefresh={needRefresh} updateServiceWorker={updateServiceWorker} />
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppLayout />
+          <UpdatePrompt needRefresh={needRefresh} updateServiceWorker={updateServiceWorker} />
+        </BrowserRouter>
+      </AuthProvider>
     </QueryClientProvider>
   );
 };

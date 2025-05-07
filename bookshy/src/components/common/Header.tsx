@@ -11,7 +11,7 @@ const Header: FC<HeaderProps> = ({
   extraButton = null,
   extraButtonIcon = null,
   onExtraButtonClick,
-  className = 'bg-light-bg',
+  className = 'bg-light-bg shadow-md',
 }) => {
   const location = useLocation();
 
@@ -27,7 +27,7 @@ const Header: FC<HeaderProps> = ({
   }
   return (
     <header
-      className={`sticky top-0 w-full shadow-md px-4 py-3 flex items-center justify-between z-50 ${className}`}
+      className={`sticky top-0 w-full px-4 py-3 flex items-center justify-between z-50 ${className}`}
     >
       <div className="flex items-center">
         {showBackButton && (
