@@ -1,5 +1,5 @@
-import PopularSearchTerm from '@/components/matching/wishbooks/PopularSearchTerm';
-import SearchBar from '@/components/matching/wishbooks/SearchBar';
+import PopularSearchTerm from '@/components/matching/searchwishbooks/PopularSearchTerm';
+import SearchBar from '@/components/matching/searchwishbooks/SearchBar';
 import { ArrowLeft } from 'lucide-react';
 import { useState, KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
