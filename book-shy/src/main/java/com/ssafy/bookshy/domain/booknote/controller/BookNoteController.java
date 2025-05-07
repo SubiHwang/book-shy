@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/notes")
@@ -69,5 +71,23 @@ public class BookNoteController {
             @PathVariable Long reviewId,
             @RequestBody BookNoteRequest request) {
         return ResponseEntity.ok(bookNoteService.update(reviewId, request));
+    }
+
+    @GetMapping
+    @Operation(
+            summary = "📘 나의 독서 기록 조회",
+            description = "나의 독후감(BookNote) 목록을 조회합니다.",
+            parameters = {
+                    @Parameter(name = "X-User-Id", description = "조회할 사용자 ID", required = true, example = "1")
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "✅ 조회 성공"),
+                    @ApiResponse(responseCode = "400", description = "❌ 유효하지 않은 사용자 ID"),
+                    @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
+            }
+    )
+    public ResponseEntity<List<BookNote>> getMyNotes(
+            @RequestHeader("X-User-Id") Long userId) {
+        return ResponseEntity.ok(bookNoteService.findByUserId(userId));
     }
 }

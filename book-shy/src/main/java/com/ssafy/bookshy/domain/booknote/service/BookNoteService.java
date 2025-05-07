@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -35,5 +36,16 @@ public class BookNoteService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 독후감이 존재하지 않습니다."));
         note.setContent(request.getContent());
         return note;
+    }
+
+    /**
+     * 📘 사용자 ID로 독후감 목록을 조회합니다.
+     * - 도서 ID를 기반으로 도서 정보(title, author 등)를 함께 조합해 반환할 수 있도록 준비합니다.
+     */
+    @Transactional(readOnly = true)
+    public List<BookNote> findByUserId(Long userId) {
+        return bookNoteRepository.findAll().stream()
+                .filter(note -> note.getUserId().equals(userId))
+                .toList();
     }
 }
