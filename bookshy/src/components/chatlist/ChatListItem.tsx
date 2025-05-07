@@ -10,7 +10,12 @@ function ChatListItem({ room }: Props) {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/chat/${room.id}`);
+    navigate(`/chat/${room.id}`, {
+      state: {
+        partnerName: room.partnerName,
+        partnerProfileImage: room.partnerProfileImage,
+      },
+    });
   };
 
   return (
