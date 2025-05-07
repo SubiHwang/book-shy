@@ -1,8 +1,8 @@
 // src/pages/MyLibrary/MyLibraryPage.tsx
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/common/Header';
-import BannerCarousel from '@/components/Mylibrary/BookShelf/BannerCarousel';
-import AddBookDialog from '@/components/Mylibrary/BookAdd/AddBookDialog';
+import BannerCarousel from '@/components/mylibrary/BookShelf/BannerCarousel';
+import AddBookDialog from '@/components/mylibrary/BookAdd/AddBookDialog';
 import { useNavigate, Outlet } from 'react-router-dom';
 import TabNavBar from '@/components/common/TabNavBar';
 import { getHeightAchievementMessage } from '@/utils/achievementUtils';
