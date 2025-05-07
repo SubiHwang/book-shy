@@ -1,10 +1,8 @@
 import { FC } from 'react';
-import { Routes, Route, Navigate, useNavigate, useLocation, matchPath } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, matchPath } from 'react-router-dom';
 import BottomTabBar from '../common/BottomTabBar';
 import MyLibraryPage from '../../pages/mylibrary/MyLibraryPage';
 import MatchingPage from '@/pages/matching/matching/MatchingPage';
-import ChatListPage from '@/pages/chat/ChatListPage';
-import ChatRoomPage from '@/pages/chat/ChatRoomPage';
 import MatchingRecommend from '@/pages/matching/matching/MatchingRecommend';
 import MyPage from '@/pages/mypage/MyPage';
 import TradePromiseList from '@/pages/mypage/TradePromiseList';
@@ -24,11 +22,12 @@ import BookDetailPage from '@/pages/mylibrary/BookDetailPage';
 import BookInfoTab from '@/pages/mylibrary/tabs/BookInfoTab';
 import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
 import ISBNScanResultPage from '@/pages/mylibrary/AddBook/ISBNScanResultPage';
+import ChatListPage from '@/pages/chat/ChatListPage';
+import ChatRoomPage from '@/pages/chat/ChatRoomPage';
 import TradeReviewPage from '@/pages/chat/TradeReviewPage';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   // 탭 변경 시 해당 경로로 이동
   const handleTabChange = (tabId: string): void => {
@@ -52,13 +51,22 @@ const AppLayout: FC = () => {
             <Route path="all-my-books" element={<AllMyBooksTab />} />
             <Route path="public-my-books" element={<PublicMyBooksTab />} />
           </Route>
-
-          {/* 📚 책 추가 페이지들 - 별도 라우트로 분리 */}
+          {/* 책 상세 페이지 */}
+          <Route path="/bookshelf/books/:id" element={<BookDetailPage />}>
+            <Route path="info" element={<BookInfoTab />} />
+            <Route path="notes" element={<BookNotesTab />} />
+          </Route>
+          {/* 📚 책 추가 페이지 */}
           <Route path="/bookshelf/add/search" element={<AddBySearchPage />} />
           <Route path="/bookshelf/add/self" element={<AddBySelfPage />} />
           <Route path="/bookshelf/add/title" element={<AddByTitlePage />} />
-          <Route path="/bookshelf/add/isbn" element={<AddByISBNPage />} />
+          <Route path="/bookshelf/add/isbn" element={<AddByBarcodePage />} />
+          <Route path="/bookshelf/add/isbn-scan-result" element={<AddISBNResultPage />} />
+          {/* OCR, ISBN결과 페이지 */}
           <Route path="/bookshelf/add/ocr-result" element={<OCRResultPage />} />
+          <Route path="/bookshelf/add/isbn-result/:isbn" element={<ISBNScanResultPage />} />
+
+          {/* 📚 매칭 페이지 */}
           <Route path="/matching" element={<MatchingPage />}>
             <Route index element={<MatchingRecommend />} />
             <Route path="wish-books" element={<WishBooks />} />
