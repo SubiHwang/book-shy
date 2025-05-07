@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class FcmTokenDto {
+public class RefreshDto {
+    private String refreshToken;
     private String fcmToken;
 }

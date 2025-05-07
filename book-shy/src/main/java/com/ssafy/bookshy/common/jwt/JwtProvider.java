@@ -10,6 +10,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,6 +26,7 @@ import java.util.Date;
 //JWT properties의 속성들을 기반으로 토큰 생성
 @Component
 @PropertySource("classpath:application.yml")
+@Slf4j
 public class JwtProvider {
     private final String secretKey;
     private final long expiration;
@@ -48,6 +50,9 @@ public class JwtProvider {
      * @return JWT 토큰
      */
     public String generateToken(String nickname, Long userId) {
+
+        log.info("💚 토큰 생성 시작");
+
         return io.jsonwebtoken.Jwts.builder()
                 .setSubject(nickname)
                 .claim("userId", userId)
@@ -66,18 +71,28 @@ public class JwtProvider {
      */
     public boolean validateToken(String token) {
         try {
-            // Bearer 검증
-            if (!token.substring(0, "BEARER ".length()).equalsIgnoreCase("BEARER ")) {
-                return false;
+            // 로그 추가: 입력 토큰 확인
+            log.info("validateToken - 입력 토큰: {}", token);
 
-
+            // Bearer 접두사 확인 및 제거
+            if (token.startsWith("Bearer ")) {
+                token = token.substring(7);
+                log.info("validateToken - Bearer 제거 후 토큰: {}", token);
             } else {
-                token = token.split(" ")[1].trim();
+                log.warn("validateToken - Bearer 접두사 없음");
             }
+
             Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(secretKey.getBytes()).build().parseClaimsJws(token);
+
+            // 토큰 만료 확인
+            boolean isExpired = claims.getBody().getExpiration().before(new Date());
+            log.info("validateToken - 토큰 만료 여부: {}", isExpired);
+
             // 만료되었을 시 false
-            return !claims.getBody().getExpiration().before(new Date());
+            return !isExpired;
         } catch (Exception e) {
+            // 로그 추가: 예외 상황 확인
+            log.error("validateToken - 예외 발생: {}: {}", e.getClass().getName(), e.getMessage());
             return false;
         }
     }
@@ -113,6 +128,14 @@ public class JwtProvider {
      * @return username
      */
     public String getNickname(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            throw new IllegalArgumentException("토큰 값이 없습니다.");
+        }
+
+        // Bearer 접두사 확인 및 제거
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey.getBytes())
                 .build()
@@ -125,6 +148,16 @@ public class JwtProvider {
      * JWT 토큰에서 userId를 가져오는 메소드
      */
     public Long getUserId(String token) {
+
+        if (token == null || token.trim().isEmpty()) {
+            throw new IllegalArgumentException("토큰 값이 없습니다.");
+        }
+
+        // Bearer 접두사 확인 및 제거
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey.getBytes())
                 .build()
@@ -157,8 +190,10 @@ public class JwtProvider {
      * @return accessToken
      */
     public String reissueAccessToken(String refreshToken) {
+        log.info("재발행을 위해 들어온 이전의 refreshToken: {}", refreshToken);
         String username = getNickname(refreshToken);
         Long userId = getUserId(refreshToken);
+        log.info("💚 재발행을 위한 username:{}, userId:{}", username, userId);
         Users user = userRepository.findByRefreshToken(refreshToken);
         if (user == null) {
             throw new GlobalException(JwtErrorCode.TOKEN_NOT_FOUND);
@@ -167,7 +202,10 @@ public class JwtProvider {
         if (!refreshToken.equals(user.getRefreshToken())) {
             throw new GlobalException(JwtErrorCode.REFRESH_NOT_VALID);
         }
-        return generateToken(username, userId);
+
+        String reToken = generateToken(username, userId);
+        log.info("💚retoken:{}", reToken);
+        return reToken;
     }
 
     /**

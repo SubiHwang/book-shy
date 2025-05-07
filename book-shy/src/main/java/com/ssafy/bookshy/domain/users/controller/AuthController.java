@@ -1,11 +1,12 @@
 package com.ssafy.bookshy.domain.users.controller;
 
-import com.ssafy.bookshy.common.jwt.JwtProvider;
-import com.ssafy.bookshy.domain.users.dto.FcmTokenDto;
 import com.ssafy.bookshy.domain.users.dto.JwtTokenDto;
 import com.ssafy.bookshy.domain.users.dto.OAuthTokenDto;
+import com.ssafy.bookshy.domain.users.dto.RefreshDto;
+import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.service.AuthService;
 import com.ssafy.bookshy.domain.users.service.AuthTokenService;
+import com.ssafy.bookshy.domain.users.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,20 +15,26 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Slf4j
 @Tag(name = "인증 API", description = "사용자 인증 관련 API")
 public class AuthController {
 
     private final AuthService authService;
     private final AuthTokenService authTokenService;
-    private final JwtProvider jwtProvider;
+    private final UserService userService;
 
 //    @PostMapping("/sign-up")
 //    @Operation(
@@ -73,12 +80,14 @@ public class AuthController {
                     content = @Content
             )
     })
-    public ResponseEntity<JwtTokenDto> reissueAccessToken(
-            @Parameter(description = "Refresh 토큰 (Bearer 포함)", required = true)
-            @RequestHeader("Authorization") String refreshToken,
+    public ResponseEntity<JwtTokenDto> reissueAccessToken(@Parameter(description = "FCM 토큰 및 리프레시 토큰 정보", required = true)
+                                                          @RequestBody RefreshDto refreshDto) {
 
-            @Parameter(description = "FCM 토큰 정보", required = true)
-            @RequestBody FcmTokenDto deviceTokenDto) {
+        // 이미 Bearer 접두사가 있는지 확인하고 없으면 추가
+        String refreshToken = refreshDto.getRefreshToken();
+        if (!refreshToken.startsWith("Bearer ")) {
+            refreshToken = "Bearer " + refreshToken;
+        }
 
         String newAccessToken = authTokenService.createNewAccessTokenByValidateRefreshToken(refreshToken);
         String newRefreshToken = authTokenService.createNewRefreshTokenByValidateRefreshToken(refreshToken);
@@ -88,7 +97,7 @@ public class AuthController {
                 .refreshToken(newRefreshToken)
                 .build();
 
-        authTokenService.create(jwtTokenDto, deviceTokenDto.getFcmToken());
+        authTokenService.create(jwtTokenDto, refreshDto.getFcmToken());
 
         return ResponseEntity.ok(jwtTokenDto);
     }
@@ -145,10 +154,16 @@ public class AuthController {
     })
     public ResponseEntity<?> signOut(
             @Parameter(description = "JWT 토큰이 포함된 요청", required = true)
-            HttpServletRequest request) {
+            Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            // UserDetails(Users)를 principal에서 가져옴
+            Users user = (Users) authentication.getPrincipal();
 
-        Long userId = jwtProvider.getUserId(jwtProvider.resolveToken(request).substring(7));
-        authService.signOut(userId);
-        return ResponseEntity.ok(null);
+            Long userId = user.getUserId(); // Users 엔티티에 getId 또는 getUserId 메서드가 있어야 함
+
+            authService.signOut(userId);
+            return ResponseEntity.ok("로그아웃 되었습니다.");
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }
