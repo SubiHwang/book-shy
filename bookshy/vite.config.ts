@@ -30,7 +30,8 @@ export default defineConfig({
         navigateFallbackDenylist: [
           /^\/jenkins\/.*/,
           /^\/sonarqube\/.*/,
-          /^\/api\/.*/
+          /^\/api\/.*/,
+          /^\/images\/.*/
         ],
       },
       manifest: {
