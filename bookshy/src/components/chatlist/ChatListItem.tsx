@@ -10,7 +10,7 @@ function ChatListItem({ room }: Props) {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/chat/${room.roomId}`);
+    navigate(`/chat/${room.id}`);
   };
 
   return (

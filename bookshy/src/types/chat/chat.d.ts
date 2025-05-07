@@ -1,5 +1,5 @@
 export interface ChatRoomSummary {
-  roomId: number;
+  id: number;
   partnerName: string;
   partnerProfileImage: string;
   lastMessage: string;
@@ -13,4 +13,5 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
   type?: 'notice' | 'info' | 'warning';
+  emoji?: string;
 }
