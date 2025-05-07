@@ -46,11 +46,9 @@ const MyBookNotePetalPage: React.FC<BookNotePetalPageProps> = ({ bookNotes }) =>
           {filteredNotes.map((book) => (
             <BookCard
               key={book.bookId}
+              bookId={book.bookId}
               title={book.title}
               coverUrl={book.coverUrl || '/placeholder.jpg'}
-              author={book.author}
-              quoteContent={book.quoteContent}
-              reviewContent={book.content}
             />
           ))}
         </div>
