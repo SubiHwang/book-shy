@@ -6,7 +6,7 @@ const SplashScreen = ({
   animationData,
   onFinish,
   minDisplayTime = 2000,
-  text = 'Loading...',
+  text = '북끄북끄',
 }: SplashScreenProps) => {
   const [isVisible, setIsVisible] = useState(true);
 
