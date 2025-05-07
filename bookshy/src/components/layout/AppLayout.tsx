@@ -73,7 +73,6 @@ const AppLayout: FC = () => {
           </Route>
           <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
           <Route path="matching/search-wish-books" element={<SearchWishBooks />} />
-          <Route path="/chat" element={<div>채팅</div>} />
           <Route path="/chat" element={<ChatListPage />} />
           <Route path="/chat/:roomId" element={<ChatRoomPage />} />
           <Route path="/chat/:roomId/review" element={<TradeReviewPage />} />
