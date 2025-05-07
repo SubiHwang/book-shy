@@ -10,14 +10,11 @@ const Login = () => {
         <div className="w-full mb-4 flex justify-center">
           <img src={Logo} alt="북끄북끄 로고" className="w-full max-w-[200px]" />
         </div>
-
         {/* 앱 이름 */}
         {text && <h1 className="text-2xl font-bold text-[#5e4b39] mt-2">{text}</h1>}
-
         {/* 간단한 설명 문구 */}
-        <p className="text-sm text-[#8a7b70] mt-2">
-          간편하게 로그인을 진행하고 북끄북끄를 사용해보세요.
-        </p>
+        <p className="text-sm text-[#8a7b70] mt-5">간편하게 로그인을 진행하고</p>
+        <p className="text-sm text-[#8a7b70] ">북끄북끄 서비스를 사용해보세요.</p>
 
         {/* 로그인 버튼들 */}
         <div className="mt-8 w-full">
