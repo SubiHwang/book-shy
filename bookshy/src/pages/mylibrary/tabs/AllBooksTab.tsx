@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LibraryBookshelfRow from '@/components/mylibrary/BookShelf/LibraryBookshelfRow';
-import { fetchUserLibrary } from '@/services/mylibrary/libraryApi';
+import { fetchUserAllLibrary } from '@/services/mylibrary/libraryApi';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Library } from '@/types/mylibrary/library';
 
@@ -21,7 +21,7 @@ const AllMyBooksTab: React.FC = () => {
         const userId = Number(user?.id) || 1; // 숫자로 처리
 
         // API 호출하여 책 데이터 가져오기
-        const libraryBooks = await fetchUserLibrary(userId);
+        const libraryBooks = await fetchUserAllLibrary(userId);
         setBooks(libraryBooks);
         setError(null);
       } catch (err) {
