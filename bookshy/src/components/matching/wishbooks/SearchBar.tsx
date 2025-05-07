@@ -2,8 +2,8 @@ import { useState, ChangeEvent, FC } from 'react';
 import { Search } from 'lucide-react';
 import { SearchBarProps } from '@/types/Matching';
 
-const SearchBar:FC<SearchBarProps> = ({onSearch}) => {
-    const [searchTerm, setSearchTerm] = useState<string>('');
+const SearchBar: FC<SearchBarProps> = ({ onSearch }) => {
+  const [searchTerm, setSearchTerm] = useState<string>('');
   return (
     <div className="relative flex items-center w-full">
       <input
