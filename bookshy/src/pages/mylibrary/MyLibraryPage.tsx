@@ -14,7 +14,7 @@ const MyLibraryPage: React.FC = () => {
 
   // 탭 페이지 설정
   const pages = [
-    { path: '/bookshelf/all-my-books', label: '내 전체 서재' },
+    { path: '/bookshelf', label: '내 전체 서재' },
     { path: '/bookshelf/public-my-books', label: '내 공개 서재' },
   ];
 
