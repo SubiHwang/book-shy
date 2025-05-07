@@ -1,5 +1,5 @@
-import { KeyboardEvent } from "react";
+import { KeyboardEvent } from 'react';
 
 export interface SearchBarProps {
-  onSearch: (e:KeyboardEvent<HTMLInputElement>) => void;
+  onSearch: (e: KeyboardEvent<HTMLInputElement>) => void;
 }
