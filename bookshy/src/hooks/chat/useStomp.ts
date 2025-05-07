@@ -4,10 +4,7 @@ import { CompatClient, Stomp } from '@stomp/stompjs';
 
 const SOCKET_URL = 'http://k12d204.p.ssafy.io:8080';
 
-export const useStomp = (
-  chatRoomId: number,
-  onMessage: (message: any) => void
-) => {
+export const useStomp = (chatRoomId: number, onMessage: (message: any) => void) => {
   const clientRef = useRef<CompatClient | null>(null);
 
   useEffect(() => {
@@ -27,7 +24,7 @@ export const useStomp = (
         console.log('Disconnected');
       });
     };
-  }, [chatRoomId]);
+  }, [chatRoomId, onMessage]);
 
   const sendMessage = (chatRoomId: number, senderId: number, content: string) => {
     if (!clientRef.current || !clientRef.current.connected) return;
