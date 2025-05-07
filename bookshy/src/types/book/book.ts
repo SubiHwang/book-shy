@@ -12,7 +12,7 @@ export interface Book {
 }
 
 export interface WishBook extends Book {
-  isLiked: boolean;
+  isLiked?: boolean;
 }
 
 export interface WishBookProps {
