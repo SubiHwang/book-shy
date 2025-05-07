@@ -6,11 +6,11 @@ import TabNavBar from '@/components/common/TabNavBar';
 const MatchingPage: FC = () => {
   const navigate = useNavigate();
   const pages = [
-    { path: '/matching/matching-recommendations', label: '매칭된 책' },
+    { path: '/matching', label: '매칭된 책' },
     { path: '/matching/wish-books', label: '읽고 싶은 책' },
   ];
   return (
-    <div className="matching-container bg-light-bg flex flex-col h-screen">
+    <div className="matching-container bg-light-bg flex flex-col">
       <Header
         title="매칭 추천"
         onBackClick={() => navigate(-1)}

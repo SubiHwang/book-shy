@@ -24,6 +24,15 @@ export default defineConfig({
         'icons/favicon-32x32.png',
         'icons/favicon-48x48.png',
       ],
+      // Workbox 설정 추가
+      workbox: {
+        // 특정 경로는 서비스 워커에서 제외
+        navigateFallbackDenylist: [
+          /^\/jenkins\/.*/,
+          /^\/sonarqube\/.*/,
+          /^\/api\/.*/
+        ],
+      },
       manifest: {
         name: '북끄북끄',
         short_name: '북끄북끄',
@@ -63,7 +72,7 @@ export default defineConfig({
       '@assets': path.resolve(__dirname, './src/assets'),
       '@types': path.resolve(__dirname, './src/types'),
       '@store': path.resolve(__dirname, './src/store'),
-      '@service': path.resolve(__dirname, './src/service'),
+      '@service': path.resolve(__dirname, './src/services'),
     },
   },
 });
