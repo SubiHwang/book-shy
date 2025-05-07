@@ -18,9 +18,6 @@ const AddByBarcodePage: React.FC = () => {
   const [scanAttempts, setScanAttempts] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
 
-  // 자동 스캔 모드만 사용
-  const autoScanMode = true;
-
   const navigate = useNavigate();
 
   // 콘솔 로깅 함수

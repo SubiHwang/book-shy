@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import bookAddService from '@/services/mylibrary/isbnresultservice';
+import bookAddService from '@/services/mylibrary/isbnresultService';
 import { ISBNSearchResponse } from '@/types/mylibrary/isbn';
 
 const ISBNScanResultPage: React.FC = () => {
