@@ -31,6 +31,7 @@ pipeline {
         ALADIN_BASE_URL = credentials('ALADIN_BASE_URL')
         NAVER_OCR_SECRET_KEY = credentials('NAVER_OCR_SECRET_KEY')
         NAVER_OCR_URL = credentials('NAVER_OCR_URL')
+        KAKAO_USER_INFO_URI = credentials('KAKAO_USER_INFO_URI')
     }
 
     stages {
@@ -201,6 +202,9 @@ pipeline {
 
                                     sed -i "s|\\${NAVER_OCR_URL}|${NAVER_OCR_URL}|g" docker-compose.yml
                                     echo "✅ docker-compose.yml OCR URL 치환 완료"
+
+                                    sed -i "s|\\${KAKAO_USER_INFO_URI}|${KAKAO_USER_INFO_URI}|g" docker-compose.yml
+                                    echo "✅ docker-compose.yml Kakao 정보 치환 완료"
 
                                     # ✅ 2. 서버에 전송
                                     ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
