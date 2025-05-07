@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import type { BookNote } from '@/types/booknote';
+import type { BookNote } from '@/types/mybooknote/booknote';
 
 interface BookNoteCardProps {
   note: BookNote;

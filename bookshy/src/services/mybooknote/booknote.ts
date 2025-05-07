@@ -1,5 +1,5 @@
 import { authAxiosInstance } from '@/services/axiosInstance';
-import type { BookNote } from '@/types/booknote';
+import type { BookNote } from '@/types/mybooknote/booknote';
 
 const userId = 1;
 

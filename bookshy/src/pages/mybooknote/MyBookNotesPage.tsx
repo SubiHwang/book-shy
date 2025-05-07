@@ -2,8 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import Header from '@/components/common/Header';
 import TabNavBar from '@/components/common/TabNavBar';
 import { useNavigate } from 'react-router-dom';
-import { fetchBookNotes } from '@/services/booknote/booknote';
-import type { BookNote } from '@/types/booknote';
+import { fetchBookNotes } from '@/services/mybooknote/booknote';
+import type { BookNote } from '@/types/mybooknote/booknote';
 import BookNoteCard from '@/components/booknote/BookNoteCard';
 
 const MyBookNotesPage = () => {
