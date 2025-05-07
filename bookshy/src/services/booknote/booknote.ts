@@ -11,7 +11,7 @@ type BookNoteListResponse = {
 export const fetchBookNotes = async (): Promise<BookNote[]> => {
   if (!userId) throw new Error('유저 ID가 없습니다.');
 
-  const res = (await authAxiosInstance.get('/books/notes', {
+  const res = (await authAxiosInstance.get('/notes', {
     headers: { 'X-User-Id': userId },
   })) as BookNoteListResponse;
 
@@ -20,7 +20,7 @@ export const fetchBookNotes = async (): Promise<BookNote[]> => {
 
 // 독후감 등록
 export const createBookNote = async (bookId: number, content: string): Promise<void> => {
-  await authAxiosInstance.post('/books/notes', {
+  await authAxiosInstance.post('/notes', {
     userId,
     bookId,
     content,
