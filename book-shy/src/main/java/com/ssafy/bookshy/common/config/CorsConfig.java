@@ -12,7 +12,8 @@ public class CorsConfig implements WebMvcConfigurer {
         registry.addMapping("/**") // 모든 경로에 대해
                 .allowedOrigins(
                         "http://k12d204.p.ssafy.io:80",
-                        "http://localhost:5173"
+                        "http://localhost:5173",
+                        "http://k12d204.p.ssafy.io:8080/swagger-ui/index.html"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
