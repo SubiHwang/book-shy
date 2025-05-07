@@ -25,7 +25,9 @@ public class SwaggerConfig {
                 .name("Authorization");
 
         return new OpenAPI()
-                .components(new Components().addSecuritySchemes("bearer-key", bearerAuth)) // 여기가 누락되었습니다
+                .components(new Components().addSecuritySchemes("bearer-key", bearerAuth))
+                // 전역 보안 요구사항 추가 - 모든 API에 인증 요구
+                .addSecurityItem(new io.swagger.v3.oas.models.security.SecurityRequirement().addList("bearer-key"))
                 .info(new Info()
                         .title("📚 북끄북끄 API")
                         .description("Spring Boot 기반 도서 교환 플랫폼 API 문서입니다.")
@@ -42,12 +44,17 @@ public class SwaggerConfig {
                 ));
     }
 
-
     @Bean
     public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
                 .group("v1-public")
                 .pathsToMatch("/api/**") // 문서화할 API 경로 지정
+                // 커스터마이저 추가 - 각 API 메서드에 보안 요구사항 추가
+                .addOpenApiCustomizer(openApi -> openApi.getPaths().values().stream()
+                        .flatMap(pathItem -> pathItem.readOperations().stream())
+                        .forEach(operation -> operation.addSecurityItem(
+                                new io.swagger.v3.oas.models.security.SecurityRequirement().addList("bearer-key")
+                        )))
                 .build();
     }
 }
