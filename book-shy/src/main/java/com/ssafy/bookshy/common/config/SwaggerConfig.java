@@ -1,8 +1,10 @@
 package com.ssafy.bookshy.common.config;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +17,15 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI openAPI() {
+        // Bearer 인증 스키마 설정
+        SecurityScheme bearerAuth = new SecurityScheme()
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("bearer")
+                .bearerFormat("JWT")
+                .name("Authorization");
+
         return new OpenAPI()
+                .components(new Components().addSecuritySchemes("bearer-key", bearerAuth)) // 여기가 누락되었습니다
                 .info(new Info()
                         .title("📚 북끄북끄 API")
                         .description("Spring Boot 기반 도서 교환 플랫폼 API 문서입니다.")
@@ -40,5 +50,4 @@ public class SwaggerConfig {
                 .pathsToMatch("/api/**") // 문서화할 API 경로 지정
                 .build();
     }
-
 }

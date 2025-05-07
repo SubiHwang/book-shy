@@ -1,9 +1,9 @@
 package com.ssafy.bookshy.domain.users.controller;
 
 import com.ssafy.bookshy.common.jwt.JwtProvider;
-import com.ssafy.bookshy.domain.users.dto.FcmTokenDto;
 import com.ssafy.bookshy.domain.users.dto.JwtTokenDto;
 import com.ssafy.bookshy.domain.users.dto.OAuthTokenDto;
+import com.ssafy.bookshy.domain.users.dto.RefreshDto;
 import com.ssafy.bookshy.domain.users.service.AuthService;
 import com.ssafy.bookshy.domain.users.service.AuthTokenService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,7 +17,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -73,12 +76,14 @@ public class AuthController {
                     content = @Content
             )
     })
-    public ResponseEntity<JwtTokenDto> reissueAccessToken(
-            @Parameter(description = "Refresh 토큰 (Bearer 포함)", required = true)
-            @RequestHeader("Authorization") String refreshToken,
+    public ResponseEntity<JwtTokenDto> reissueAccessToken(@Parameter(description = "FCM 토큰 및 리프레시 토큰 정보", required = true)
+                                                          @RequestBody RefreshDto refreshDto) {
 
-            @Parameter(description = "FCM 토큰 정보", required = true)
-            @RequestBody FcmTokenDto deviceTokenDto) {
+        // 이미 Bearer 접두사가 있는지 확인하고 없으면 추가
+        String refreshToken = refreshDto.getRefreshToken();
+        if (!refreshToken.startsWith("Bearer ")) {
+            refreshToken = "Bearer " + refreshToken;
+        }
 
         String newAccessToken = authTokenService.createNewAccessTokenByValidateRefreshToken(refreshToken);
         String newRefreshToken = authTokenService.createNewRefreshTokenByValidateRefreshToken(refreshToken);
@@ -88,7 +93,7 @@ public class AuthController {
                 .refreshToken(newRefreshToken)
                 .build();
 
-        authTokenService.create(jwtTokenDto, deviceTokenDto.getFcmToken());
+        authTokenService.create(jwtTokenDto, refreshDto.getFcmToken());
 
         return ResponseEntity.ok(jwtTokenDto);
     }

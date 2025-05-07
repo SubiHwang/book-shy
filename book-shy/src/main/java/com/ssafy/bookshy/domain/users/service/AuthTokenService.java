@@ -8,10 +8,12 @@ import com.ssafy.bookshy.domain.users.exception.UserErrorCode;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthTokenService {
 
     private final JwtProvider jwtProvider;
@@ -31,6 +33,7 @@ public class AuthTokenService {
     }
 
     public String createNewAccessTokenByValidateRefreshToken(String refreshToken) {
+        log.info("💚 AuthTokenService에서 엑세스 토큰 재발행을 위한 refreshToken: {}", refreshToken);
         if (jwtProvider.validateToken(refreshToken)) {
             refreshToken = refreshToken.substring(7);
             return jwtProvider.reissueAccessToken(refreshToken);
@@ -41,6 +44,7 @@ public class AuthTokenService {
     public String createNewRefreshTokenByValidateRefreshToken(String refreshToken) {
         if (jwtProvider.validateToken(refreshToken)) {
             refreshToken = refreshToken.substring(7);
+            return jwtProvider.reissueAccessToken(refreshToken);
         }
         return null;
     }
