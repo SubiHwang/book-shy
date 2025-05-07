@@ -74,7 +74,7 @@ const PopularSearchTerm = () => {
       </div>
 
       {isOpen && (
-        <div className="flex flex-col mt-2 space-y-1 pt-2 bg-white px-4 shadow-md">
+        <div className="flex flex-col mt-2 space-y-1 py-2 bg-white px-4 shadow-md">
           {dummyData.map((item) => (
             <div key={item.rank} className="flex items-center text-light-text py-1 px-1">
               <div className="w-8 text-center font-medium">{item.rank}</div>
