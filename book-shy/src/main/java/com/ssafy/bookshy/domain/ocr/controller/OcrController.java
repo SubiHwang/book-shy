@@ -6,6 +6,7 @@ import com.ssafy.bookshy.domain.ocr.service.NaverCLOVAOcrService;
 import com.ssafy.bookshy.domain.ocr.service.OcrIsbnExtractorService;
 import com.ssafy.bookshy.domain.ocr.util.BookInfoExtractor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.Map;
 
+@Profile("!prod")
 @Tag(name = "🔍 OCR API", description = "도서 표지·바코드 이미지에서 정보 추출")
 @RestController
 @RequestMapping("/api/ocr")
