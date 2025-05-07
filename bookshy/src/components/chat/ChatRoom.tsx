@@ -47,7 +47,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
     } else {
       setMessages(initialMessages);
     }
-  }, [initialMessages]);
+  }, [initialMessages, messages.length]);
 
   const { sendMessage } = useStomp(Number(chatRoomId), (newMessage: ChatMessage) => {
     setMessages((prev) => [...prev, newMessage]);
@@ -110,7 +110,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
     <div className="flex flex-col h-screen">
       <ChatRoomHeader partnerName={partnerName} partnerProfileImage={partnerProfileImage} />
       <div className="flex-1 overflow-y-auto bg-[#FFFCF9] px-3 py-2">
-        {messages.map((msg, index) => {
+        {messages.map((msg) => {
           const dateLabel = formatDateLabel(msg.timestamp);
           const showDate = dateLabel !== lastDateLabel;
           lastDateLabel = dateLabel;
