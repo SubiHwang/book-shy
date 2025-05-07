@@ -11,7 +11,7 @@ export interface ChatMessage {
   id: string;
   senderId: string;
   content: string;
-  timestamp: string;
+  sentAt: string;
   type?: 'notice' | 'info' | 'warning';
   emoji?: string;
 }

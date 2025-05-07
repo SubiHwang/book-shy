@@ -16,9 +16,7 @@ function ChatMessageItem({ message, isMyMessage }: Props) {
         >
           {message.content}
         </div>
-        <span className="text-[10px] text-gray-400 min-w-[35px] text-right">
-          {message.timestamp}
-        </span>
+        <span className="text-[10px] text-gray-400 min-w-[35px] text-right">{message.sentAt}</span>
       </div>
     </div>
   );

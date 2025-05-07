@@ -7,7 +7,7 @@ import ScheduleModal from './ScheduleModal.tsx';
 import SystemMessage from './SystemMessage.tsx';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchMessages } from '@/services/chat/chat.ts';
+import { fetchMessages, markMessagesAsRead } from '@/services/chat/chat.ts';
 import { useStomp } from '@/hooks/chat/useStomp.ts';
 
 interface Props {
@@ -17,18 +17,29 @@ interface Props {
 }
 
 function ChatRoom({ partnerName, partnerProfileImage }: Props) {
-  const { chatRoomId } = useParams();
+  const { roomId } = useParams();
+  const numericRoomId = Number(roomId);
+  const myUserId = 1; // 추후 로그인 사용자 ID로 교체 예정
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showOptions, setShowOptions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
 
   const { data: initialMessages = [] } = useQuery({
-    queryKey: ['chatMessages', chatRoomId],
-    queryFn: () => fetchMessages(Number(chatRoomId)),
-    enabled: !!chatRoomId,
+    queryKey: ['chatMessages', numericRoomId],
+    queryFn: () => fetchMessages(numericRoomId),
+    enabled: !isNaN(numericRoomId),
     retry: false,
   });
+
+  useEffect(() => {
+    if (!isNaN(numericRoomId)) {
+      markMessagesAsRead(numericRoomId, myUserId).catch((err) =>
+        console.error('❌ 읽음 처리 실패:', err),
+      );
+    }
+  }, [numericRoomId]);
 
   useEffect(() => {
     if (messages.length > 0) return;
@@ -40,7 +51,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
         senderId: 'system',
         content:
           '도서 교환은 공공장소에서 진행하고, 책 상태를 미리 확인하세요.\n과도한 개인정보 요청이나 외부 연락 유도는 주의하세요.\n도서 상호 대여 서비스 사용 시 반납 기한을 꼭 지켜주세요!\n안전하고 즐거운 독서 문화 함께 만들어가요!',
-        timestamp: now.toISOString(),
+        sentAt: now.toISOString(),
         type: 'notice',
       };
       setMessages([noticeMessage]);
@@ -49,7 +60,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
     }
   }, [initialMessages, messages.length]);
 
-  const { sendMessage } = useStomp(Number(chatRoomId), (newMessage: ChatMessage) => {
+  const { sendMessage } = useStomp(numericRoomId, (newMessage: ChatMessage) => {
     setMessages((prev) => [...prev, newMessage]);
   });
 
@@ -62,8 +73,8 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   };
 
   const handleSendMessage = (content: string) => {
-    if (!chatRoomId) return;
-    sendMessage(Number(chatRoomId), 1, content); // 나중에 senderId인 1은 로그인 한 ID로 교체
+    if (isNaN(numericRoomId)) return;
+    sendMessage(numericRoomId, myUserId, content);
   };
 
   const handleSendSystemMessage = (
@@ -75,7 +86,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
       id: String(Date.now()),
       senderId: 'system',
       content,
-      timestamp: now.toISOString(),
+      sentAt: now.toISOString(),
       type,
     };
     setMessages((prev) => [...prev, newMessage]);
@@ -111,7 +122,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
       <ChatRoomHeader partnerName={partnerName} partnerProfileImage={partnerProfileImage} />
       <div className="flex-1 overflow-y-auto bg-[#FFFCF9] px-3 py-2">
         {messages.map((msg) => {
-          const dateLabel = formatDateLabel(msg.timestamp);
+          const dateLabel = formatDateLabel(msg.sentAt);
           const showDate = dateLabel !== lastDateLabel;
           lastDateLabel = dateLabel;
 
@@ -140,8 +151,8 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
                 />
               ) : (
                 <ChatMessageItem
-                  message={{ ...msg, timestamp: formatTime(msg.timestamp) }}
-                  isMyMessage={msg.senderId === '1'} // 추후 로그인한 사용자 ID랑 비교하도록 변경
+                  message={{ ...msg, sentAt: formatTime(msg.sentAt) }}
+                  isMyMessage={Number(msg.senderId) === myUserId}
                 />
               )}
             </div>
