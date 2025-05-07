@@ -18,9 +18,6 @@ const AddByBarcodePage: React.FC = () => {
   const [scanAttempts, setScanAttempts] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
 
-  // 자동/수동 모드 설정 (기본값: 수동)
-  const [autoScanMode, setAutoScanMode] = useState(false);
-
   const navigate = useNavigate();
 
   // 콘솔 로깅 함수
@@ -103,10 +100,8 @@ const AddByBarcodePage: React.FC = () => {
               readerRef.current = new BrowserMultiFormatReader(hints);
               logDebug('바코드 리더 초기화 완료');
 
-              // 자동 스캔 모드가 활성화된 경우에만 자동 스캔 시작
-              if (autoScanMode) {
-                startAutoScan();
-              }
+              // 항상 자동 스캔 시작 (autoScanMode는 항상 true)
+              startAutoScan();
             } catch (err) {
               logDebug('비디오 재생 실패:', err);
               setError(
@@ -151,19 +146,6 @@ const AddByBarcodePage: React.FC = () => {
     }
   };
 
-  const toggleAutoScan = () => {
-    setAutoScanMode((prev) => {
-      const newMode = !prev;
-      if (newMode) {
-        startAutoScan();
-      } else {
-        stopAutoScan();
-      }
-      logDebug(`스캔 모드 변경: ${newMode ? '자동' : '수동'}`);
-      return newMode;
-    });
-  };
-
   const enhanceImageForBarcode = (
     context: CanvasRenderingContext2D,
     width: number,
@@ -192,17 +174,11 @@ const AddByBarcodePage: React.FC = () => {
     logDebug('이미지 품질 개선 처리 완료');
   };
 
-  // 수동 스캔 처리 함수
-  const handleManualScan = () => {
-    logDebug('수동 스캔 버튼 클릭');
-    setScanAttempts((prev) => prev + 1);
-    handleScan();
-  };
-
   const handleScan = async () => {
     if (scanning || scanSuccess) return;
     setScanning(true);
 
+    setScanAttempts((prev) => prev + 1);
     logDebug(`스캔 시도 #${scanAttempts + 1} 시작`);
 
     try {
@@ -299,10 +275,8 @@ const AddByBarcodePage: React.FC = () => {
     setLastError(null);
     setScanAttempts(0);
 
-    // 자동 모드인 경우에만 자동 스캔 시작
-    if (autoScanMode) {
-      startAutoScan();
-    }
+    // 항상 자동 스캔 시작
+    startAutoScan();
   };
 
   const handleBack = () => {
@@ -325,25 +299,12 @@ const AddByBarcodePage: React.FC = () => {
             ←
           </button>
         </div>
-        <div className="absolute top-4 right-4">
-          <button
-            onClick={toggleAutoScan}
-            className={`px-2 py-1 text-xs rounded-md ${autoScanMode ? 'bg-blue-500' : 'bg-gray-700'}`}
-          >
-            {autoScanMode ? '자동 스캔 ON' : '자동 스캔 OFF'}
-          </button>
-        </div>
         <h2 className="text-lg font-bold">
           {error || (scanSuccess ? '✅ ISBN 인식 성공!' : '등록할 책의 바코드를 찍어주세요')}
         </h2>
         {lastScannedData && <p className="text-sm text-green-400 mt-1">ISBN: {lastScannedData}</p>}
         {lastError && !scanSuccess && <p className="text-xs text-red-400 mt-1">{lastError}</p>}
-        {!autoScanMode && scanAttempts > 0 && !scanSuccess && !lastError && (
-          <p className="text-xs text-gray-400 mt-1">
-            바코드 스캔을 시도했으나 인식하지 못했습니다. 다시 시도해 주세요.
-          </p>
-        )}
-        {autoScanMode && scanAttempts > 0 && !scanSuccess && !lastError && (
+        {scanAttempts > 0 && !scanSuccess && !lastError && (
           <p className="text-xs text-gray-400 mt-1">
             바코드를 인식 중입니다... (시도: {scanAttempts})
           </p>
@@ -401,36 +362,18 @@ const AddByBarcodePage: React.FC = () => {
         )}
       </div>
 
-      {/* 하단 버튼 */}
-      <div className="absolute bottom-0 left-0 w-full h-40 bg-black z-10 flex flex-col items-center justify-center text-white">
-        {!error && !scanSuccess && <p>카메라를 바코드에 맞춰주세요</p>}
-        <div className="flex mt-2 space-x-2">
-          {error && (
-            <button className="px-4 py-2 bg-blue-500 rounded-md" onClick={handleRetry}>
-              다시 시도
-            </button>
-          )}
-          {cameraReady && !scanSuccess && !error && (
-            <>
-              {/* 수동 스캔 버튼 추가 */}
-              {!autoScanMode && (
-                <button
-                  className="px-4 py-2 bg-yellow-500 rounded-md"
-                  onClick={handleManualScan}
-                  disabled={scanning}
-                >
-                  {scanning ? '스캔 중...' : '지금 스캔'}
-                </button>
-              )}
-              <button className="px-4 py-2 bg-gray-700 rounded-md" onClick={handleRetry}>
-                카메라 재시작
-              </button>
-              <button className="px-4 py-2 bg-blue-500 rounded-md" onClick={handleManualEntry}>
-                직접 입력
-              </button>
-            </>
-          )}
-        </div>
+      {/* 하단 영역 - 직접 입력 버튼만 표시 */}
+      <div className="absolute bottom-0 left-0 w-full h-40 bg-black z-10 flex items-center justify-center text-white">
+        {error && (
+          <button className="px-4 py-2 bg-blue-500 rounded-md" onClick={handleRetry}>
+            다시 시도
+          </button>
+        )}
+        {cameraReady && !scanSuccess && !error && (
+          <button className="px-4 py-2 bg-blue-500 rounded-md" onClick={handleManualEntry}>
+            직접 입력
+          </button>
+        )}
       </div>
     </div>
   );
