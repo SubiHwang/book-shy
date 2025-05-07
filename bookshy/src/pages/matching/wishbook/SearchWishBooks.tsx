@@ -1,4 +1,5 @@
 import PopularSearchTerm from '@/components/matching/searchwishbooks/PopularSearchTerm';
+import RecommandedWishBookList from '@/components/matching/searchwishbooks/RecommandedWishBookList';
 import SearchBar from '@/components/matching/searchwishbooks/SearchBar';
 import { ArrowLeft } from 'lucide-react';
 import { useState, KeyboardEvent } from 'react';
@@ -31,6 +32,7 @@ const SearchWishBooks = () => {
       <div className="bg-primary-light">
         <PopularSearchTerm />
       </div>
+      <RecommandedWishBookList />
     </div>
   );
 };

@@ -17,15 +17,16 @@ const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
       {/* Book Info */}
       <div className="flex-grow">
         <h3 className="text-lg font-medium text-light-text mb-1 truncate">{wishBook.title}</h3>
-        <p className="text-sm font-light text-light-text-muted mb-1">저자: {wishBook.author}</p>
+        <p className="text-sm font-light text-light-text-muted mb-1">{wishBook.author}</p>
         {wishBook.translator && (
-          <p className="text-sm font-light text-light-text-muted mb-1">
-            번역: {wishBook.translator}
+          <p className="text-sm font-light text-light-text-muted mb-1">{wishBook.translator}</p>
+        )}
+        <p className="text-sm font-light text-light-text-muted mb-1">{wishBook.publisher}</p>
+        {wishBook.summary && (
+          <p className="text-sm font-light text-light-text-muted line-clamp-2 overflow-hidden mb-1">
+            {wishBook.summary}
           </p>
         )}
-        <p className="text-sm font-light text-light-text-muted mb-1">
-          출판사: {wishBook.publisher}
-        </p>
       </div>
 
       {/* Heart Button */}
