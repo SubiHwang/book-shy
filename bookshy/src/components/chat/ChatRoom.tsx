@@ -31,6 +31,8 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   });
 
   useEffect(() => {
+    if (messages.length > 0) return;
+
     if (initialMessages.length === 0) {
       const now = new Date();
       const noticeMessage: ChatMessage = {
