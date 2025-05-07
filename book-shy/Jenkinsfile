@@ -29,6 +29,8 @@ pipeline {
         JWT_KEY = credentials('JWT_KEY')
         ALADIN_TTB_KEY = credentials('ALADIN_TTB_KEY')
         ALADIN_BASE_URL = credentials('ALADIN_BASE_URL')
+        NAVER_OCR_SECRET_KEY = credentials('NAVER_OCR_SECRET_KEY')
+        NAVER_OCR_URL = credentials('NAVER_OCR_URL')
     }
 
     stages {
@@ -193,6 +195,12 @@ pipeline {
 
                                     sed -i "s|\\${ALADIN_BASE_URL}|${ALADIN_BASE_URL}|g" docker-compose.yml
                                     echo "✅ docker-compose.yml Aladin base-url 치환 완료"
+
+                                    sed -i "s|\\${NAVER_OCR_SECRET_KEY}|${NAVER_OCR_SECRET_KEY}|g" docker-compose.yml
+                                    echo "✅ docker-compose.yml OCR Secret Key 치환 완료"
+
+                                    sed -i "s|\\${NAVER_OCR_URL}|${NAVER_OCR_URL}|g" docker-compose.yml
+                                    echo "✅ docker-compose.yml OCR URL 치환 완료"
 
                                     # ✅ 2. 서버에 전송
                                     ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "

@@ -26,5 +26,10 @@ aladin:
   ttb:
     key: ${ALADIN_TTB_KEY}
 
+naver:
+  ocr:
+    secretKey: ${NAVER_OCR_SECRET_KEY}
+    url: ${NAVER_OCR_URL}
+
 server:
   port: 8080  # ✅ 운영용 포트
