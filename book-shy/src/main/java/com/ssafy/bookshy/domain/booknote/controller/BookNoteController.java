@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.booknote.controller;
 
 import com.ssafy.bookshy.domain.booknote.dto.BookNoteRequest;
+import com.ssafy.bookshy.domain.booknote.dto.BookNoteResponseDto;
 import com.ssafy.bookshy.domain.booknote.entity.BookNote;
 import com.ssafy.bookshy.domain.booknote.service.BookNoteService;
 import io.swagger.v3.oas.annotations.Operation;

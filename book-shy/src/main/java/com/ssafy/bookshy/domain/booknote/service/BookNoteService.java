@@ -3,6 +3,7 @@ package com.ssafy.bookshy.domain.booknote.service;
 import com.ssafy.bookshy.domain.book.entity.Book;
 import com.ssafy.bookshy.domain.book.repository.BookRepository;
 import com.ssafy.bookshy.domain.booknote.dto.BookNoteRequest;
+import com.ssafy.bookshy.domain.booknote.dto.BookNoteResponseDto;
 import com.ssafy.bookshy.domain.booknote.dto.BookQuoteRequest;
 import com.ssafy.bookshy.domain.booknote.entity.BookNote;
 import com.ssafy.bookshy.domain.booknote.entity.BookQuote;

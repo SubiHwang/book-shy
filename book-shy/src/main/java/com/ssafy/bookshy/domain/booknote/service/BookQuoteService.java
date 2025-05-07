@@ -4,6 +4,7 @@ import com.ssafy.bookshy.domain.book.entity.Book;
 import com.ssafy.bookshy.domain.book.repository.BookRepository;
 import com.ssafy.bookshy.domain.booknote.dto.BookNoteRequest;
 import com.ssafy.bookshy.domain.booknote.dto.BookQuoteRequest;
+import com.ssafy.bookshy.domain.booknote.dto.BookQuoteResponseDto;
 import com.ssafy.bookshy.domain.booknote.entity.BookNote;
 import com.ssafy.bookshy.domain.booknote.entity.BookQuote;
 import com.ssafy.bookshy.domain.booknote.repository.BookNoteRepository;
