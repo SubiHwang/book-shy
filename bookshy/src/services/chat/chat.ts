@@ -6,5 +6,9 @@ export async function fetchChatList(userId: number): Promise<ChatRoomSummary[]> 
 }
 
 export async function fetchMessages(chatRoomId: number): Promise<ChatMessage[]> {
-  return await authAxiosInstance.get(`/messages=${chatRoomId}`);
+  return await authAxiosInstance.get(`/messages?roomId=${chatRoomId}`);
+}
+
+export async function markMessagesAsRead(chatRoomId: number, userId: number): Promise<void> {
+  await authAxiosInstance.post(`/messages/${chatRoomId}/read?userId=${userId}`);
 }
