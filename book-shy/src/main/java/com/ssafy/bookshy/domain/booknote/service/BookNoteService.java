@@ -1,5 +1,7 @@
 package com.ssafy.bookshy.domain.booknote.service;
 
+import com.ssafy.bookshy.domain.book.entity.Book;
+import com.ssafy.bookshy.domain.book.repository.BookRepository;
 import com.ssafy.bookshy.domain.booknote.dto.BookNoteRequest;
 import com.ssafy.bookshy.domain.booknote.dto.BookQuoteRequest;
 import com.ssafy.bookshy.domain.booknote.entity.BookNote;
@@ -18,6 +20,7 @@ import java.util.List;
 public class BookNoteService {
 
     private final BookNoteRepository bookNoteRepository;
+    private final BookRepository bookRepository;
 
     @Transactional
     public BookNote create(BookNoteRequest request) {
@@ -43,9 +46,25 @@ public class BookNoteService {
      * - 도서 ID를 기반으로 도서 정보(title, author 등)를 함께 조합해 반환할 수 있도록 준비합니다.
      */
     @Transactional(readOnly = true)
-    public List<BookNote> findByUserId(Long userId) {
+    public List<BookNoteResponseDto> findNoteResponsesByUserId(Long userId) {
         return bookNoteRepository.findAll().stream()
                 .filter(note -> note.getUserId().equals(userId))
+                .map(note -> {
+                    Book book = bookRepository.findById(note.getBookId())
+                            .orElseThrow(() -> new IllegalArgumentException("도서 정보를 찾을 수 없습니다."));
+                    return BookNoteResponseDto.builder()
+                            .reviewId(note.getReviewId())
+                            .bookId(book.getId())
+                            .title(book.getTitle())
+                            .author(book.getAuthor())
+                            .description(book.getDescription())
+                            .publisher(book.getPublisher())
+                            .pubDate(book.getPubDate())
+                            .coverUrl(book.getCoverImageUrl())
+                            .content(note.getContent())
+                            .createdAt(note.getCreatedAt())
+                            .build();
+                })
                 .toList();
     }
 }

@@ -1,5 +1,7 @@
 package com.ssafy.bookshy.domain.booknote.service;
 
+import com.ssafy.bookshy.domain.book.entity.Book;
+import com.ssafy.bookshy.domain.book.repository.BookRepository;
 import com.ssafy.bookshy.domain.booknote.dto.BookNoteRequest;
 import com.ssafy.bookshy.domain.booknote.dto.BookQuoteRequest;
 import com.ssafy.bookshy.domain.booknote.entity.BookNote;
@@ -18,6 +20,7 @@ import java.util.List;
 public class BookQuoteService {
 
     private final BookQuoteRepository bookQuoteRepository;
+    private final BookRepository bookRepository;
 
     @Transactional
     public BookQuote create(BookQuoteRequest request) {
@@ -45,10 +48,26 @@ public class BookQuoteService {
      * - 있으면 해당 도서의 인용구만 필터링합니다.
      */
     @Transactional(readOnly = true)
-    public List<BookQuote> findByUserId(Long userId, Long bookId) {
+    public List<BookQuoteResponseDto> findQuoteResponsesByUserId(Long userId, Long bookId) {
         return bookQuoteRepository.findAll().stream()
                 .filter(q -> q.getUserId().equals(userId))
                 .filter(q -> bookId == null || q.getBookId().equals(bookId))
+                .map(q -> {
+                    Book book = bookRepository.findById(q.getBookId())
+                            .orElseThrow(() -> new IllegalArgumentException("도서 정보를 찾을 수 없습니다."));
+                    return BookQuoteResponseDto.builder()
+                            .quoteId(q.getQuoteId())
+                            .bookId(book.getId())
+                            .title(book.getTitle())
+                            .author(book.getAuthor())
+                            .description(book.getDescription())
+                            .publisher(book.getPublisher())
+                            .pubDate(book.getPubDate())
+                            .coverUrl(book.getCoverImageUrl())
+                            .content(q.getContent())
+                            .createdAt(q.getCreatedAt())
+                            .build();
+                })
                 .toList();
     }
 }
