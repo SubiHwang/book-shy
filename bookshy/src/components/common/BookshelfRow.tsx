@@ -1,5 +1,5 @@
-import { FC } from "react";
-import { BookshelfRowProps } from "@/types/book";
+import { FC } from 'react';
+import { BookshelfRowProps } from '@/types/book';
 
 const BookshelfRow: FC<BookshelfRowProps> = ({ books }) => {
   // 각 책장 열에 표시할 최대 책 수
