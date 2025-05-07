@@ -1,9 +1,15 @@
 import { WishBookProps } from '@/types/book';
 import { Heart } from 'lucide-react';
-import { FC } from 'react';
+import { FC, useState } from 'react';
 
 const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
   const { isLiked = false } = wishBook;
+  const [isBookInWishList, setIsBookInWishList] = useState<boolean>(isLiked);
+  const handleToggleLike = (isLiked: boolean) => {
+    const toggledLikeStatus = !isLiked;
+    console.log('Toggled like status:', toggledLikeStatus);
+    setIsBookInWishList(toggledLikeStatus);
+  };
   return (
     <div className="card flex items-center justify-between p-4 mb-4 w-full">
       {/* Book Image */}
@@ -32,9 +38,12 @@ const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
 
       {/* Heart Button */}
       <div className="flex-shrink-0 ml-4">
-        <button className="p-2 rounded-full bg-light-bg-shade">
+        <button
+          className="p-2 rounded-full bg-light-bg-shade"
+          onClick={() => handleToggleLike(isBookInWishList)}
+        >
           <Heart
-            className={`w-6 h-6 text-primary ${isLiked ? 'fill-primary' : ''}`}
+            className={`w-6 h-6 text-primary ${isBookInWishList ? 'fill-primary' : ''}`}
             strokeWidth={1}
           />
         </button>
