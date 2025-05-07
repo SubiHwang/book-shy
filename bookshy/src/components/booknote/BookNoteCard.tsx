@@ -22,7 +22,7 @@ const BookNoteCard: FC<BookNoteCardProps> = ({ note }) => {
         <h3 className="text-lg font-medium text-light-text mb-1 truncate">{note.title}</h3>
         <p className="text-sm font-light text-light-text-muted mb-1">작가: {note.author}</p>
         <p className="text-sm font-light text-light-text-muted mb-1">출판: {note.publisher}</p>
-        <p className="text-xs text-light-text-muted line-clamp-2 mt-1">{note.content}</p>
+        <p className="text-xs text-light-text-muted line-clamp-2 mt-1">{note.description}</p>
       </div>
     </div>
   );
