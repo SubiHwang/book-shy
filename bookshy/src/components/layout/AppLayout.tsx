@@ -22,6 +22,7 @@ import BookDetailPage from '@/pages/mylibrary/BookDetailPage';
 import BookInfoTab from '@/pages/mylibrary/tabs/BookInfoTab';
 import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
 import ISBNScanResultPage from '@/pages/mylibrary/AddBook/ISBNScanResultPage';
+import MyBookNotesPage from '@/pages/mybooknote/MyBookNotesPage';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -67,7 +68,7 @@ const AppLayout: FC = () => {
           <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
           <Route path="matching/search-wish-books" element={<SearchWishBooks />} />
           <Route path="/chat" element={<div>채팅</div>} />
-          <Route path="/booknote" element={<div>독서 기록</div>} />
+          <Route path="/booknote" element={<MyBookNotesPage />} />
 
           {/* ✅ 마이페이지 라우팅 추가 */}
           <Route path="/mypage" element={<MyPage />}>
