@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import BottomTabBar from '../common/BottomTabBar';
 import MyLibraryPage from '../../pages/mylibrary/MyLibraryPage';
 import MatchingPage from '@/pages/matching/matching/MatchingPage';
@@ -23,9 +24,11 @@ import BookInfoTab from '@/pages/mylibrary/tabs/BookInfoTab';
 import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
 import ISBNScanResultPage from '@/pages/mylibrary/AddBook/ISBNScanResultPage';
 import Login from '@/pages/auth/Login';
+import PrivateRoute from '@/components/layout/PrivateRoute';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
+  const { isLoading } = useAuth();
 
   // 탭 변경 시 해당 경로로 이동
   const handleTabChange = (tabId: string): void => {
@@ -36,51 +39,75 @@ const AppLayout: FC = () => {
     <div className="app-container">
       <div className="content">
         <Routes>
+          {/* 공개 라우트 - 로그인하지 않아도 접근 가능 */}
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Navigate to="/bookshelf" replace />} />
-          {/* 📚 서재 기본 페이지 */}
-          <Route path="/bookshelf" element={<MyLibraryPage />}>
-            {/* 기본 라우트는 모든 책 페이지로 리다이렉트 */}
-            <Route index element={<Navigate to="/bookshelf/all-my-books" replace />} />
-            {/* 책 보기 탭 */}
-            <Route path="all-my-books" element={<AllMyBooksTab />} />
-            <Route path="public-my-books" element={<PublicMyBooksTab />} />
-          </Route>
-          {/* 책 상세 페이지 */}
-          <Route path="/bookshelf/books/:id" element={<BookDetailPage />}>
-            <Route path="info" element={<BookInfoTab />} />
-            <Route path="notes" element={<BookNotesTab />} />
-          </Route>
-          {/* 📚 책 추가 페이지 */}
-          <Route path="/bookshelf/add/search" element={<AddBySearchPage />} />
-          <Route path="/bookshelf/add/self" element={<AddBySelfPage />} />
-          <Route path="/bookshelf/add/title" element={<AddByTitlePage />} />
-          <Route path="/bookshelf/add/isbn" element={<AddByBarcodePage />} />
-          <Route path="/bookshelf/add/isbn-scan-result" element={<AddISBNResultPage />} />
-          {/* OCR, ISBN결과 페이지 */}
-          <Route path="/bookshelf/add/ocr-result" element={<OCRResultPage />} />
-          <Route path="/bookshelf/add/isbn-result/:isbn" element={<ISBNScanResultPage />} />
 
-          {/* 📚 매칭 페이지 */}
-          <Route path="/matching" element={<MatchingPage />}>
-            <Route index element={<MatchingRecommend />} />
-            <Route path="wish-books" element={<WishBooks />} />
-          </Route>
-          <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
-          <Route path="matching/search-wish-books" element={<SearchWishBooks />} />
-          <Route path="/chat" element={<div>채팅</div>} />
-          <Route path="/booknote" element={<div>독서 기록</div>} />
+          {/* 보호된 라우트 - 로그인해야만 접근 가능 */}
+          <Route
+            path="/*"
+            element={
+              <PrivateRoute>
+                <Routes>
+                  {/* 기본 경로 리다이렉션 */}
+                  <Route path="/" element={<Navigate to="/bookshelf" replace />} />
 
-          {/* ✅ 마이페이지 라우팅 추가 */}
-          <Route path="/mypage" element={<MyPage />}>
-            <Route index element={<TradePromiseList />} />
-            <Route path="history" element={<TradeHistoryList />} />
-          </Route>
-          {/* 그 외 경로는 홈으로 리다이렉션 */}
-          <Route path="*" element={<Navigate to="/bookshelf" />} />
+                  {/* 📚 서재 기본 페이지 */}
+                  <Route path="/bookshelf" element={<MyLibraryPage />}>
+                    {/* 기본 라우트는 모든 책 페이지로 리다이렉트 */}
+                    <Route index element={<Navigate to="/bookshelf/all-my-books" replace />} />
+                    {/* 책 보기 탭 */}
+                    <Route path="all-my-books" element={<AllMyBooksTab />} />
+                    <Route path="public-my-books" element={<PublicMyBooksTab />} />
+                  </Route>
+
+                  {/* 책 상세 페이지 */}
+                  <Route path="/bookshelf/books/:id" element={<BookDetailPage />}>
+                    <Route path="info" element={<BookInfoTab />} />
+                    <Route path="notes" element={<BookNotesTab />} />
+                  </Route>
+
+                  {/* 📚 책 추가 페이지 */}
+                  <Route path="/bookshelf/add/search" element={<AddBySearchPage />} />
+                  <Route path="/bookshelf/add/self" element={<AddBySelfPage />} />
+                  <Route path="/bookshelf/add/title" element={<AddByTitlePage />} />
+                  <Route path="/bookshelf/add/isbn" element={<AddByBarcodePage />} />
+                  <Route path="/bookshelf/add/isbn-scan-result" element={<AddISBNResultPage />} />
+                  {/* OCR, ISBN결과 페이지 */}
+                  <Route path="/bookshelf/add/ocr-result" element={<OCRResultPage />} />
+                  <Route path="/bookshelf/add/isbn-result/:isbn" element={<ISBNScanResultPage />} />
+
+                  {/* 📚 매칭 페이지 */}
+                  <Route path="/matching" element={<MatchingPage />}>
+                    <Route index element={<MatchingRecommend />} />
+                    <Route path="wish-books" element={<WishBooks />} />
+                  </Route>
+                  <Route
+                    path="/matching/neigbors-bookshelf/:userId"
+                    element={<NeighborBookshelfPage />}
+                  />
+                  <Route path="/matching/search-wish-books" element={<SearchWishBooks />} />
+
+                  {/* 채팅과 독서기록 페이지 */}
+                  <Route path="/chat" element={<div>채팅</div>} />
+                  <Route path="/booknote" element={<div>독서 기록</div>} />
+
+                  {/* ✅ 마이페이지 라우팅 */}
+                  <Route path="/mypage" element={<MyPage />}>
+                    <Route index element={<TradePromiseList />} />
+                    <Route path="history" element={<TradeHistoryList />} />
+                  </Route>
+
+                  {/* 그 외 경로는 홈으로 리다이렉션 */}
+                  <Route path="*" element={<Navigate to="/bookshelf" />} />
+                </Routes>
+              </PrivateRoute>
+            }
+          />
         </Routes>
       </div>
-      <BottomTabBar onTabChange={handleTabChange} />
+
+      {/* 하단 탭 바 (로그인된 경우에만 표시) */}
+      {!isLoading && <BottomTabBar onTabChange={handleTabChange} />}
     </div>
   );
 };
