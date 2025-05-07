@@ -10,6 +10,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +20,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
+@Profile("!prod")
 @Service
 @RequiredArgsConstructor
 public class NaverCLOVAOcrService {
