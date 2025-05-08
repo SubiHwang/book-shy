@@ -2,9 +2,8 @@ import { User } from '@/types/auth/user';
 
 export interface AuthContextType {
   isLoggedIn: boolean;
-  user: User | null;
+  user?: User | null;
   isLoading: boolean;
-  login: (token: string, userData: User) => void;
+  login: (params: { token: string; fcmToken: string }) => void;
   logout: () => void;
-  kakaoLogin: (code: string) => void;
 }
