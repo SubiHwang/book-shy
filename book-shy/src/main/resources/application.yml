@@ -15,6 +15,14 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA.BOOTSTRAP-SERVERS}  # 🔗 Kafka 클러스터 주소
 
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        partitioner.class: org.apache.kafka.clients.producer.RoundRobinPartitioner  # 🔄 라운드 로빈 파티셔너
+        spring.json.add.type.headers: false  # ✅ 헤더 정보 생략
+        spring.json.trusted.packages: "*"  # ✅ DTO 역직렬화 허용 패키지
+
     consumer:
       group-id: ${KAFKA.CONSUMER.BOOK-GROUP-ID}  # 👥 Kafka 컨슈머 그룹 ID
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -22,10 +30,6 @@ spring:
       auto-offset-reset: earliest  # 🕒 최초 시작 시 earliest부터 읽음
       properties:
         spring.json.trusted.packages: "*"  # ✅ DTO 역직렬화 허용 패키지
-
-    producer:
-      properties:
-        partitioner.class: org.apache.kafka.clients.producer.RoundRobinPartitioner  # 🔄 라운드 로빈 파티셔너
 
     listener:
       ack-mode: manual_immediate  # 🎯 수동 커밋, 메시지 중복 처리 방지
@@ -48,3 +52,6 @@ management:
 
 file:
   upload-dir: /home/ubuntu/bookshy/images/coverImage
+
+
+

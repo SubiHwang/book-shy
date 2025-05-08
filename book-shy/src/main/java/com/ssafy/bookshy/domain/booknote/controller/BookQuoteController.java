@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.booknote.controller;
 
 import com.ssafy.bookshy.domain.booknote.dto.BookQuoteRequest;
+import com.ssafy.bookshy.domain.booknote.dto.BookQuoteResponseDto;
 import com.ssafy.bookshy.domain.booknote.entity.BookQuote;
 import com.ssafy.bookshy.domain.booknote.service.BookQuoteService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -69,5 +72,26 @@ public class BookQuoteController {
             @PathVariable Long quoteId,
             @RequestBody BookQuoteRequest request) {
         return ResponseEntity.ok(bookQuoteService.update(quoteId, request));
+    }
+
+    @GetMapping
+    @Operation(
+            summary = "📙 나의 인용구 조회",
+            description = "나의 도서 인용구(Quote) 목록을 조회합니다.",
+            parameters = {
+                    @Parameter(name = "X-User-Id", description = "조회할 사용자 ID", required = true, example = "1"),
+                    @Parameter(name = "bookId", description = "특정 도서의 인용구만 조회할 경우", example = "101")
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "✅ 조회 성공"),
+                    @ApiResponse(responseCode = "400", description = "❌ 유효하지 않은 사용자 ID"),
+                    @ApiResponse(responseCode = "404", description = "❗ 도서가 존재하지 않음"),
+                    @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
+            }
+    )
+    public ResponseEntity<List<BookQuoteResponseDto>> getMyQuotes(
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestParam(required = false) Long bookId) {
+        return ResponseEntity.ok(bookQuoteService.findQuoteResponsesByUserId(userId, bookId));
     }
 }

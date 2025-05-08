@@ -111,18 +111,21 @@ public class KafkaEventConsumer {
     public void listenChatMessage(ConsumerRecord<String, ChatMessageKafkaDto> record, Acknowledgment ack) {
         try {
             ChatMessageKafkaDto dto = record.value();
-            log.info("💬 Received ChatMessageKafkaDto: {}", dto);
+            log.info("📥 [KafkaConsumer] Received ChatMessageKafkaDto from topic '{}': {}", record.topic(), dto);
 
             // 💾 메시지를 DB에 저장
             ChatMessageResponseDto saved = chatMessageService.saveMessageFromKafka(dto);
+            log.info("💾 [KafkaConsumer] ChatMessage saved to DB: {}", saved);
 
             // 📢 해당 채팅방 구독자에게 메시지 전송
             String destination = "/topic/chat/" + dto.getChatRoomId();
             messagingTemplate.convertAndSend(destination, saved);
+            log.info("📢 [KafkaConsumer] ChatMessage sent to WebSocket destination '{}'", destination);
 
-            ack.acknowledge(); // ✅ 메시지 정상 처리 후 커밋
+            ack.acknowledge(); // ✅ 커밋
+            log.info("✅ [KafkaConsumer] Offset committed for topic '{}'", record.topic());
         } catch (Exception e) {
-            log.error("❌ Error in chat.message listener", e);
+            log.error("❌ [KafkaConsumer] Error while processing chat.message", e);
         }
     }
 

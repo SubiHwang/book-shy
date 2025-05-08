@@ -1,6 +1,8 @@
 package com.ssafy.bookshy.domain.library.controller;
 
 import com.ssafy.bookshy.domain.library.dto.LibraryResponseDto;
+import com.ssafy.bookshy.domain.library.dto.LibrarySearchAddRequestDto;
+import com.ssafy.bookshy.domain.library.dto.LibrarySelfAddRequestDto;
 import com.ssafy.bookshy.domain.library.service.LibraryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -8,8 +10,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -84,5 +88,46 @@ public class LibraryController {
     public ResponseEntity<Map<String, Long>> getCounts(
             @RequestParam @Parameter(description = "사용자 ID") Long userId) {
         return ResponseEntity.ok(libraryService.countLibrary(userId));
+    }
+
+    @Operation(summary = "➕ 검색 결과 도서 서재 등록", description = "검색된 도서 중 하나를 선택하여 서재에 추가합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "등록 성공"),
+            @ApiResponse(responseCode = "400", description = "중복 등록 또는 잘못된 요청"),
+            @ApiResponse(responseCode = "404", description = "도서 또는 사용자 없음")
+    })
+    @PostMapping("/search/add")
+    public ResponseEntity<LibraryResponseDto> addBookFromSearch(
+            @RequestParam @Parameter(description = "사용자 ID", example = "1") Long userId,
+            @RequestParam @Parameter(description = "알라딘 Item ID", example = "123456789") Long itemId
+    ) {
+        LibrarySearchAddRequestDto dto = new LibrarySearchAddRequestDto(userId, itemId);
+        return ResponseEntity.ok(libraryService.addBookFromSearch(dto));
+    }
+
+    @Operation(summary = "✍ 직접 도서 등록", description = "사용자가 표지 이미지와 책 정보를 입력하여 도서를 서재에 직접 등록합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "등록 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+    })
+    @PostMapping(value = "/self/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<LibraryResponseDto> addSelfBook(
+            @Parameter(description = "사용자 ID", example = "1") @RequestParam Long userId,
+            @Parameter(description = "도서 제목", example = "총 균 쇠") @RequestParam String title,
+            @Parameter(description = "저자", example = "제레드 다이아몬드") @RequestParam String author,
+            @Parameter(description = "출판사", example = "김영사") @RequestParam String publisher,
+            @Parameter(description = "표지 이미지 파일") @RequestPart MultipartFile coverImage,
+            @Parameter(description = "공개 여부", example = "false") @RequestParam boolean isPublic
+    ) {
+        LibrarySelfAddRequestDto dto = LibrarySelfAddRequestDto.builder()
+                .userId(userId)
+                .title(title)
+                .author(author)
+                .publisher(publisher)
+                .coverImage(coverImage)
+                .isPublic(isPublic)
+                .build();
+
+        return ResponseEntity.ok(libraryService.addSelfBook(dto));
     }
 }

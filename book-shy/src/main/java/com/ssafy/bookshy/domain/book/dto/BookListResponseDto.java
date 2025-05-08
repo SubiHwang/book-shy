@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.book.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.ssafy.bookshy.domain.book.entity.Book;
 import lombok.Builder;
 import lombok.Data;
 
@@ -25,4 +26,16 @@ public class BookListResponseDto {
                 .description(node.path("description").asText(null))
                 .build();
     }
+
+    public static BookListResponseDto from(Book book) {
+        return BookListResponseDto.builder()
+                .itemId(book.getAladinItemId())
+                .title(book.getTitle())
+                .author(book.getAuthor())
+                .publisher(book.getPublisher())
+                .coverImageUrl(book.getCoverImageUrl())
+                .description(book.getDescription())
+                .build();
+    }
+
 }

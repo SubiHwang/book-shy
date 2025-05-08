@@ -192,4 +192,18 @@ public class AladinClient {
             return BookResponseDto.builder().isbn13(isbn13).build();
         }
     }
+
+    public BookResponseDto searchByItemIdToDto(Long itemId) {
+        try {
+            JsonNode node = this.searchByItemId(itemId);
+            JsonNode item = node.path("item");
+            if (item.isArray() && item.size() > 0) {
+                return BookResponseDto.fromAladin(item.get(0));
+            }
+        } catch (Exception e) {
+            System.out.println("❌ ItemId 기반 BookResponseDto 변환 실패: " + e.getMessage());
+        }
+        return BookResponseDto.builder().build();
+    }
+
 }
