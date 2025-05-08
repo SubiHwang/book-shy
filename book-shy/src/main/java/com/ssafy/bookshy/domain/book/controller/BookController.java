@@ -1,10 +1,7 @@
 package com.ssafy.bookshy.domain.book.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.ssafy.bookshy.domain.book.dto.BookListTotalResponseDto;
-import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
-import com.ssafy.bookshy.domain.book.dto.BookSearchResponseDto;
-import com.ssafy.bookshy.domain.book.dto.WishRequestDto;
+import com.ssafy.bookshy.domain.book.dto.*;
 import com.ssafy.bookshy.domain.book.entity.Book;
 import com.ssafy.bookshy.domain.book.service.BookService;
 import com.ssafy.bookshy.domain.library.entity.Library;
@@ -123,12 +120,12 @@ public class BookController {
             @ApiResponse(responseCode = "404", description = "서재 항목이 존재하지 않음")
     })
     @GetMapping("/library/detail")
-    public ResponseEntity<BookResponseDto> getBookDetailByLibraryId(
+    public ResponseEntity<BookLibraryResponseDto> getBookDetailByLibraryId(
             @RequestParam Long libraryId
     ) {
         Library library = libraryRepository.findById(libraryId)
                 .orElseThrow(() -> new RuntimeException("서재 항목이 존재하지 않습니다."));
         Book book = library.getBook();
-        return ResponseEntity.ok(BookResponseDto.from(book, library.isPublic()));
+        return ResponseEntity.ok(BookLibraryResponseDto.from(book, library.isPublic()));
     }
 }
