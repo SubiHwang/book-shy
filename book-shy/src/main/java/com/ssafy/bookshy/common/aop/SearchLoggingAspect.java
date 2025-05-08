@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.common.aop;
 
 import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
+import com.ssafy.bookshy.domain.recommend.dto.ClientLogRequestDto;
 import com.ssafy.bookshy.domain.recommend.service.LoggingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Aspect
 @Component
@@ -47,6 +51,23 @@ public class SearchLoggingAspect {
                 responseDto != null ? responseDto.getAuthor() : "null",
                 responseDto != null ? responseDto.getTitle() : "null",
                 responseDto != null ? responseDto.getCategory() : "null");
+
+        Map<String, Object> logData = new HashMap<>();
+
+        if (responseDto != null) {
+            logData.put("userId", userId);
+            logData.put("title", responseDto.getTitle());
+            logData.put("author", responseDto.getAuthor());
+            logData.put("category", responseDto.getCategory());
+            logData.put("endpoint", "/api/book/search/detail");
+        }
+
+        // 3. 로깅 서비스를 통해 ELK로 데이터 전송
+        ClientLogRequestDto logDto = new ClientLogRequestDto();
+        logDto.setEventType("BOOK_DETAIL_SEARCH");
+        logDto.setEventData(logData);
+
+        loggingService.processClientLog(userId, logDto);
     }
 
     //위시리스트 + 상대 도서 조회
