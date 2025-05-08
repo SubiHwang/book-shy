@@ -39,7 +39,6 @@ public class KafkaConfig {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, env.getProperty("spring.kafka.bootstrap-servers"));
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false); // 타입 헤더 생략
         return props;
     }
@@ -49,9 +48,7 @@ public class KafkaConfig {
      */
     @Bean
     public <T> ProducerFactory<String, T> producerFactory() {
-        JsonSerializer<T> serializer = new JsonSerializer<>();
-        serializer.setAddTypeInfo(false);
-        return new DefaultKafkaProducerFactory<>(producerConfig(), new StringSerializer(), serializer);
+        return new DefaultKafkaProducerFactory<>(producerConfig());
     }
 
     /**

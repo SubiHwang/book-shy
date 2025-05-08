@@ -15,6 +15,12 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA.BOOTSTRAP-SERVERS}  # 🔗 Kafka 클러스터 주소
 
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false  # ✅ 헤더 정보 생략
+
     consumer:
       group-id: ${KAFKA.CONSUMER.BOOK-GROUP-ID}  # 👥 Kafka 컨슈머 그룹 ID
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
