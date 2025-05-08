@@ -22,7 +22,6 @@ public class BookResponseDto {
     private String pubDate;
     private String category;
     private Integer pageCount;
-    private Boolean isPublic;
 
     @Schema(description = "ISBN13 (13자리 국제 표준 도서번호)")
     private String isbn13;
@@ -77,7 +76,6 @@ public class BookResponseDto {
                 .category(book.getCategory())
                 .pageCount(book.getPageCount())
                 .isbn13(book.getIsbn())
-                .isPublic(isPublic)
                 .build();
     }
 }
