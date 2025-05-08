@@ -25,6 +25,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const [showOptions, setShowOptions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const hasInitialized = useRef(false);
 
   const { data: initialMessages = [] } = useQuery({
     queryKey: ['chatMessages', numericRoomId],
@@ -42,7 +43,8 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   }, [numericRoomId]);
 
   useEffect(() => {
-    if (messages.length > 0) return;
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
 
     if (initialMessages.length === 0) {
       const now = new Date();
@@ -58,7 +60,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
     } else {
       setMessages(initialMessages);
     }
-  }, [initialMessages, messages.length]);
+  }, [initialMessages]);
 
   const { sendMessage } = useStomp(numericRoomId, (newMessage: ChatMessage) => {
     setMessages((prev) => [...prev, newMessage]);
@@ -69,7 +71,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   }, [messages, showOptions]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
   };
 
   const handleSendMessage = (content: string) => {
