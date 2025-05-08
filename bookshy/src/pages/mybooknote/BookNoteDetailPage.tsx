@@ -11,7 +11,6 @@ const BookNoteDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const userId = 1;
 
-  // 📘 currentStage: 'quote' → 'review' → 'full'
   const [stage, setStage] = useState<'quote' | 'review'>('quote');
 
   const { data: bookNotes = [], isLoading: loadingNotes } = useQuery<BookNote[]>({
@@ -34,7 +33,7 @@ const BookNoteDetailPage: React.FC = () => {
     const newIdx = currentIndex + offset;
     if (bookNotes[newIdx]) {
       navigate(`/booknotes/detail/${bookNotes[newIdx].bookId}`);
-      setStage('quote'); // 다시 quote로 초기화
+      setStage('quote');
     }
   };
 
@@ -50,35 +49,32 @@ const BookNoteDetailPage: React.FC = () => {
 
   return (
     <div
-      className="relative h-screen flex items-center justify-center bg-white"
+      className="relative h-screen flex items-center justify-center bg-white overflow-hidden"
       onClick={handleClick}
     >
-      {/* 왼쪽 이전 책 커버 */}
       {bookNotes[currentIndex - 1] && (
-        <img
-          src={bookNotes[currentIndex - 1].coverUrl}
-          alt=""
-          className="absolute left-2 top-1/2 w-12 h-20 object-cover opacity-50 -translate-y-1/2"
-          onClick={(e) => {
-            e.stopPropagation();
-            goTo(-1);
-          }}
-        />
+        <div className="absolute left-0 top-1/2 w-[280px] h-[420px] -translate-y-1/2 scale-75 opacity-40 overflow-hidden rounded-2xl">
+          <img
+            src={bookNotes[currentIndex - 1].coverUrl || '/placeholder.jpg'}
+            alt=""
+            className="w-full h-full object-cover"
+            onClick={(e) => {
+              e.stopPropagation();
+              goTo(-1);
+            }}
+          />
+        </div>
       )}
 
       {/* 중앙 카드 */}
-      <div className="w-[280px] h-[420px] rounded-2xl shadow-xl relative overflow-hidden">
-        {/* 배경 이미지 */}
+      <div className="w-[280px] h-[420px] rounded-2xl shadow-xl relative overflow-hidden z-10">
         <img
           src={currentBook.coverUrl || '/placeholder.jpg'}
           alt={currentBook.title}
           className="absolute inset-0 w-full h-full object-cover z-0"
         />
-
-        {/* 흐림처리된 반투명 배경 */}
         <div className="absolute inset-0 bg-black/30 backdrop-blur-sm z-10" />
 
-        {/* 인용구 뷰 */}
         <div
           className={`absolute inset-0 z-20 w-full h-full flex flex-col justify-center items-center px-6 text-white text-center transition-opacity duration-300 ${
             stage === 'quote' ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -91,7 +87,6 @@ const BookNoteDetailPage: React.FC = () => {
           </p>
         </div>
 
-        {/* 독후감 뷰 */}
         <div
           className={`absolute inset-0 z-20 w-full h-full flex flex-col justify-center items-center px-6 text-white text-center transition-opacity duration-300 ${
             stage === 'review' ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -103,17 +98,18 @@ const BookNoteDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 오른쪽 다음 책 커버 */}
       {bookNotes[currentIndex + 1] && (
-        <img
-          src={bookNotes[currentIndex + 1].coverUrl}
-          alt=""
-          className="absolute right-2 top-1/2 w-12 h-20 object-cover opacity-50 -translate-y-1/2"
-          onClick={(e) => {
-            e.stopPropagation();
-            goTo(1);
-          }}
-        />
+        <div className="absolute right-0 top-1/2 w-[280px] h-[420px] -translate-y-1/2 scale-75 opacity-40 overflow-hidden rounded-2xl">
+          <img
+            src={bookNotes[currentIndex + 1].coverUrl || '/placeholder.jpg'}
+            alt=""
+            className="w-full h-full object-cover"
+            onClick={(e) => {
+              e.stopPropagation();
+              goTo(1);
+            }}
+          />
+        </div>
       )}
     </div>
   );
