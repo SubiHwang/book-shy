@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "인증 API", description = "사용자 인증 관련 API")
+@Tag(name = "🍙 인증 API", description = "사용자 인증 관련 API")
 public class AuthController {
 
     private final AuthService authService;
