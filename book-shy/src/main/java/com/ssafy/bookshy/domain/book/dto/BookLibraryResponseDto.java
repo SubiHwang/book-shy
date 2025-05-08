@@ -17,6 +17,7 @@ public class BookLibraryResponseDto {
     private String category;
     private Integer pageCount;
     private String isbn13;
+    private Boolean isLiked;
 
     @JsonProperty("isPublic")
     private boolean publicYn;
@@ -33,6 +34,22 @@ public class BookLibraryResponseDto {
                 .pageCount(book.getPageCount())
                 .isbn13(book.getIsbn())
                 .publicYn(isPublic)
+                .build();
+    }
+
+    public static BookLibraryResponseDto from(Book book, boolean isPublic, boolean isLiked) {
+        return BookLibraryResponseDto.builder()
+                .title(book.getTitle())
+                .author(book.getAuthor())
+                .publisher(book.getPublisher())
+                .coverImageUrl(book.getCoverImageUrl())
+                .description(book.getDescription())
+                .pubDate(book.getPubDate() != null ? book.getPubDate().toString() : null)
+                .category(book.getCategory())
+                .pageCount(book.getPageCount())
+                .isbn13(book.getIsbn())
+                .publicYn(isPublic)
+                .isLiked(isLiked)
                 .build();
     }
 }

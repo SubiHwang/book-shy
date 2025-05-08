@@ -94,7 +94,7 @@ public class BookService {
         List<Wish> wishList = wishRepository.findAllByUser(user);
 
         List<BookListResponseDto> books = wishList.stream()
-                .map(w -> BookListResponseDto.from(w.getBook()))
+                .map(w -> BookListResponseDto.from(w.getBook(), true))
                 .toList();
 
         return BookListTotalResponseDto.builder()
@@ -110,6 +110,25 @@ public class BookService {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public boolean isBookLiked(Long userId, Book book) {
+        Users user = userService.getUserById(userId);
+        return wishRepository.existsByUserAndBook(user, book);
+    }
+
+    public boolean isBookLiked(Long userId, Long itemId) {
+        Users user = userService.getUserById(userId);
+        return bookRepository.findByAladinItemId(itemId)
+                .map(book -> wishRepository.existsByUserAndBook(user, book))
+                .orElse(false);
+    }
+
+    public boolean isBookLiked(Long userId, String isbn13) {
+        Users user = userService.getUserById(userId);
+        return bookRepository.findByIsbn(isbn13)
+                .map(book -> wishRepository.existsByUserAndBook(user, book))
+                .orElse(false);
     }
 
 }

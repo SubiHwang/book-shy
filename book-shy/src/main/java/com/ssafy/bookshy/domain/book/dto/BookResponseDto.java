@@ -22,13 +22,17 @@ public class BookResponseDto {
     private String pubDate;
     private String category;
     private Integer pageCount;
+    private Boolean isLiked;
 
     @Schema(description = "ISBN13 (13자리 국제 표준 도서번호)")
     private String isbn13;
 
-    public static BookResponseDto fromAladin(JsonNode node) {
+    public static BookResponseDto fromAladin(JsonNode node, Boolean isLiked) {
+
         if (node == null || node.isNull()) {
-            return BookResponseDto.builder().build();  // 빈 객체 반환
+            return BookResponseDto.builder()
+                    .isLiked(isLiked)
+                    .build();
         }
 
         try {
@@ -53,6 +57,7 @@ public class BookResponseDto {
                     .category      (node.path("categoryName").asText(null))
                     .pageCount     (pages)
                     .isbn13        (node.path("isbn13").asText(null))
+                    .isLiked(isLiked)
                     .build();
         } catch (Exception e) {
             // 예외 발생 시 최소한의 정보만 추출해서 fallback
@@ -63,6 +68,10 @@ public class BookResponseDto {
                     .isbn13(node.path("isbn13").asText(null))
                     .build();
         }
+    }
+
+    public static BookResponseDto fromAladin(JsonNode node) {
+        return fromAladin(node, false);
     }
 
     public static BookResponseDto from(Book book, boolean isPublic) {
@@ -76,6 +85,21 @@ public class BookResponseDto {
                 .category(book.getCategory())
                 .pageCount(book.getPageCount())
                 .isbn13(book.getIsbn())
+                .build();
+    }
+
+    public static BookResponseDto from(Book book, boolean isPublic, boolean isLiked) {
+        return BookResponseDto.builder()
+                .title(book.getTitle())
+                .author(book.getAuthor())
+                .publisher(book.getPublisher())
+                .coverImageUrl(book.getCoverImageUrl())
+                .description(book.getDescription())
+                .pubDate(book.getPubDate() != null ? book.getPubDate().toString() : null)
+                .category(book.getCategory())
+                .pageCount(book.getPageCount())
+                .isbn13(book.getIsbn())
+                .isLiked(isLiked)
                 .build();
     }
 }

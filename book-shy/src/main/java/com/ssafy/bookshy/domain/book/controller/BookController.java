@@ -57,31 +57,47 @@ public class BookController {
 
     @GetMapping("/search/list")
     @Operation(summary = "🔍 도서 검색 목록", description = "제목, 저자, 출판사 기반으로 검색된 도서 목록을 반환합니다.")
-    public ResponseEntity<BookListTotalResponseDto> searchList(@RequestParam String q) {
+    public ResponseEntity<BookListTotalResponseDto> searchList(
+            @RequestParam String q,
+            @RequestParam Long userId
+    ) {
         int start = 1;
-        return ResponseEntity.ok(aladinClient.searchListPreview(q, start));
+        BookListTotalResponseDto response = aladinClient.searchListPreview(q, start);
+
+        // 각 도서에 대해 찜 여부 확인
+        for (BookListResponseDto dto : response.getBooks()) {
+            boolean isLiked = bookService.isBookLiked(userId, dto.getItemId());
+            dto.setIsLiked(isLiked);
+        }
+
+        return ResponseEntity.ok(response);
     }
+
 
     @GetMapping("/search/detail")
     @Operation(summary = "📘 도서 상세 정보", description = "itemId 기반 상세 정보를 반환합니다.")
-    public ResponseEntity<BookResponseDto> searchDetail(@RequestParam Long itemId) throws Exception {
+    public ResponseEntity<BookResponseDto> searchDetail(@RequestParam Long itemId, @RequestParam Long userId) throws Exception {
         JsonNode node = aladinClient.searchByItemId(itemId);
         JsonNode item = node.path("item").get(0);
-        return ResponseEntity.ok(BookResponseDto.fromAladin(item));
+        boolean isLiked = bookService.isBookLiked(userId, itemId);
+        return ResponseEntity.ok(BookResponseDto.fromAladin(item, isLiked));
     }
 
     @GetMapping("/search/isbn")
     @Operation(summary = "📘 ISBN 기반 도서 상세 검색", description = "ISBN 값으로 도서 정보를 조회합니다.")
-    public ResponseEntity<BookResponseDto> searchByIsbn13(@RequestParam String isbn13) {
-        return ResponseEntity.ok(aladinClient.searchByIsbn13(isbn13));
+    public ResponseEntity<BookResponseDto> searchByIsbn13(@RequestParam String isbn13, @RequestParam Long userId) {
+        BookResponseDto dto = aladinClient.searchByIsbn13(isbn13);
+        boolean isLiked = bookService.isBookLiked(userId, isbn13);
+        dto.setIsLiked(isLiked);
+        return ResponseEntity.ok(dto);
     }
 
+    @PostMapping("/wish")
     @Operation(summary = "💖 읽고 싶은 책 등록", description = "도서 검색 결과에서 하트를 누르면 읽고 싶은 책으로 등록합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "등록 성공"),
             @ApiResponse(responseCode = "400", description = "중복 등록 또는 도서 정보 없음")
     })
-    @PostMapping("/wish")
     public ResponseEntity<Void> addWish(
             @RequestParam @Parameter(description = "사용자 ID", example = "1") Long userId,
             @RequestParam @Parameter(description = "알라딘 Item ID", example = "123456789") Long itemId
@@ -91,22 +107,22 @@ public class BookController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/wish")
     @Operation(summary = "💖🔍 읽고 싶은 책 목록 조회", description = "사용자가 읽고 싶은 책 목록을 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공")
     })
-    @GetMapping("/wish")
     public ResponseEntity<BookListTotalResponseDto> getWishList(
             @RequestParam @Parameter(description = "사용자 ID", example = "1") Long userId) {
         return ResponseEntity.ok(bookService.getWishList(userId));
     }
 
+    @DeleteMapping("/wish/remove")
     @Operation(summary = "💔 읽고 싶은 책 삭제", description = "하트를 다시 눌러 읽고 싶은 책을 삭제합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "삭제 성공"),
             @ApiResponse(responseCode = "404", description = "찜한 도서를 찾을 수 없음")
     })
-    @DeleteMapping("/wish/remove")
     public ResponseEntity<Void> removeWish(
             @RequestParam @Parameter(description = "사용자 ID", example = "1") Long userId,
             @RequestParam @Parameter(description = "알라딘 Item ID", example = "123456789") Long itemId) {
@@ -114,18 +130,22 @@ public class BookController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/library/detail")
     @Operation(summary = "📘 내 서재(DB)에 있는 도서 상세 정보 조회", description = "libraryId 기반으로 도서 상세 정보를 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "서재 항목이 존재하지 않음")
     })
-    @GetMapping("/library/detail")
     public ResponseEntity<BookLibraryResponseDto> getBookDetailByLibraryId(
-            @RequestParam Long libraryId
+            @RequestParam Long libraryId,
+            @RequestParam Long userId // ✅ 추가
     ) {
         Library library = libraryRepository.findById(libraryId)
                 .orElseThrow(() -> new RuntimeException("서재 항목이 존재하지 않습니다."));
         Book book = library.getBook();
-        return ResponseEntity.ok(BookLibraryResponseDto.from(book, library.isPublic()));
+
+        boolean isLiked = bookService.isBookLiked(userId, book); // ✅ 찜 여부 판단
+        return ResponseEntity.ok(BookLibraryResponseDto.from(book, library.isPublic(), isLiked)); // ✅ 응답 생성
     }
+
 }

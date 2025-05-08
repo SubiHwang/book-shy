@@ -15,6 +15,7 @@ public class BookListResponseDto {
     private String publisher;
     private String coverImageUrl;
     private String description;
+    private Boolean isLiked;
 
     public static BookListResponseDto from(JsonNode node) {
         return BookListResponseDto.builder()
@@ -27,7 +28,7 @@ public class BookListResponseDto {
                 .build();
     }
 
-    public static BookListResponseDto from(Book book) {
+    public static BookListResponseDto from(Book book, Boolean isLiked) {
         return BookListResponseDto.builder()
                 .itemId(book.getAladinItemId())
                 .title(book.getTitle())
@@ -35,6 +36,7 @@ public class BookListResponseDto {
                 .publisher(book.getPublisher())
                 .coverImageUrl(book.getCoverImageUrl())
                 .description(book.getDescription())
+                .isLiked(isLiked)
                 .build();
     }
 
