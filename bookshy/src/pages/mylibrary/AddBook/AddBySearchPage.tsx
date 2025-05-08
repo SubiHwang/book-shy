@@ -3,7 +3,7 @@ import { useState, FC, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search } from 'lucide-react';
 import BookSearchItem from '@/components/mylibrary/BookAdd/BookSearchItem';
-import { searchBooksByKeyword, registerBookByItemId } from '@/services/mylibrary/bookSearchService';
+import { searchBooksByKeyword, addBookFromSearch } from '@/services/mylibrary/bookSearchService';
 import type { BookSearchItem as BookItemType } from '@/types/mylibrary/bookSearch';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -87,8 +87,8 @@ const AddBySearchPage: FC = () => {
       // 개발 중이므로 기본 사용자 ID 사용 (로그인 없이 테스트 가능)
       const userId = Number(user?.id) || 1;
 
-      // 알라딘 아이템 ID로 책 등록 API 호출
-      const registeredBook = await registerBookByItemId(userId, itemId, false);
+      // 검색 결과 책 등록 API 호출
+      const registeredBook = await addBookFromSearch(userId, itemId);
 
       console.log('책 등록 성공:', registeredBook);
 
@@ -133,7 +133,7 @@ const AddBySearchPage: FC = () => {
               <div className="flex items-center bg-white rounded-full px-4 py-2">
                 <input
                   type="text"
-                  placeholder="책 제목, 저자, 키워드"
+                  placeholder="책 제목을 입력해주세요"
                   className="bg-transparent w-full outline-none text-sm text-gray-700"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}

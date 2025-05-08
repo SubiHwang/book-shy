@@ -1,6 +1,7 @@
 // src/services/mylibrary/bookSearchService.ts
 import { authAxiosInstance } from '@/services/axiosInstance';
 import type { BookSearchResponse } from '@/types/mylibrary/bookSearch';
+import type { Library } from '@/types/mylibrary/library';
 
 // 책 검색 API 함수
 export const searchBooksByKeyword = async (keyword: string): Promise<BookSearchResponse> => {
@@ -23,24 +24,19 @@ export const searchBooksByKeyword = async (keyword: string): Promise<BookSearchR
   }
 };
 
-// 알라딘 아이템 ID로 책 등록 API
-export const registerBookByItemId = async (
-  userId: number,
-  itemId: number,
-  isPublic: boolean = false,
-): Promise<any> => {
+export const addBookFromSearch = async (userId: number, itemId: number): Promise<Library> => {
   try {
-    console.log(`알라딘 책 등록 요청: userId=${userId}, itemId=${itemId}, isPublic=${isPublic}`);
+    console.log(`검색 결과 책 등록 요청: userId=${userId}, itemId=${itemId}`);
 
     // API 호출
-    const response = await authAxiosInstance.post(
-      `/library/item?userId=${userId}&itemId=${itemId}&isPublic=${isPublic}`,
+    const response = await authAxiosInstance.post<Library>(
+      `/library/search/add?userId=${userId}&itemId=${itemId}`,
     );
 
-    console.log('알라딘 책 등록 성공:', response);
-    return response;
+    console.log('검색 결과 책 등록 성공:', response);
+    return response as unknown as Library;
   } catch (error) {
-    console.error('알라딘 책 등록 오류:', error);
+    console.error('검색 결과 책 등록 오류:', error);
     throw error;
   }
 };
