@@ -75,6 +75,34 @@ export const FirebaseProvider: FC<{ children: React.ReactNode }> = ({ children }
       // Firebase가 초기화되고 토큰이 없을 때만 요청
       if (isInitialized && messaging) {
         try {
+          // 서비스 워커 등록 확인 (추가)
+          if ('serviceWorker' in navigator) {
+            try {
+              const registrations = await navigator.serviceWorker.getRegistrations();
+              let swFound = false;
+
+              for (const reg of registrations) {
+                console.log('등록된 서비스 워커:', reg.scope);
+                // Firebase 메시징 서비스 워커 확인
+                if (
+                  reg.active &&
+                  (reg.scope.includes('/firebase-cloud-messaging-push-scope') ||
+                    reg.scope === `${window.location.origin}/`)
+                ) {
+                  swFound = true;
+                  break;
+                }
+              }
+
+              if (!swFound) {
+                console.warn('Firebase 메시징 서비스 워커가 등록되지 않았습니다.');
+                console.warn('public/firebase-messaging-sw.js 파일이 있는지 확인하세요.');
+              }
+            } catch (swError) {
+              console.error('서비스 워커 확인 오류:', swError);
+            }
+          }
+
           const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
           const token = await getToken(messaging, { vapidKey });
 
