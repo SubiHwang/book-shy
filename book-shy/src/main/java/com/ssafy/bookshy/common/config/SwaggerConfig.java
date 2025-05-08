@@ -39,7 +39,7 @@ public class SwaggerConfig {
                                 .url("http://localhost:8080")
                                 .description("🧪 로컬 개발 서버"),
                         new Server()
-                                .url("https://k12d204.p.ssafy.io/api")
+                                .url("http://k12d204.p.ssafy.io:8080")
                                 .description("🚀 배포 서버")
                 ));
     }
