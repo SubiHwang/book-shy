@@ -44,12 +44,14 @@ const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
       </div>
 
       {/* Book Info */}
-      <div className="flex-grow">
-        <h3 className="text-lg font-medium text-light-text mb-1 truncate">{wishBook.title}</h3>
-        <p className="text-sm font-light text-light-text-muted mb-1">{wishBook.author}</p>
-        <p className="text-sm font-light text-light-text-muted mb-1">{wishBook.publisher}</p>
+      <div className="flex-grow min-w-0 pr-2">
+        <h3 className="text-base font-medium text-gray-800 mb-1 truncate" title={wishBook.title}>
+          {wishBook.title}
+        </h3>
+        <p className="text-xs text-gray-600 mb-1 truncate">{wishBook.author}</p>
+        <p className="text-xs text-gray-500 mb-1 truncate">{wishBook.publisher}</p>
         {wishBook.description && (
-          <p className="text-sm font-light text-light-text-muted line-clamp-2 overflow-hidden mb-1">
+          <p className="text-xs text-gray-500 line-clamp-2 overflow-hidden mb-1" title={wishBook.description}>
             {wishBook.description}
           </p>
         )}
