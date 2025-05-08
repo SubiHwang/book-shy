@@ -41,6 +41,7 @@ const AppLayout: FC = () => {
         <Routes>
           {/* 공개 라우트 - 로그인하지 않아도 접근 가능 */}
           <Route path="/login" element={<Login />} />
+          <Route path="/oauth" element={<div>OAuth</div>} />
 
           {/* 보호된 라우트 - 로그인해야만 접근 가능 */}
           <Route
