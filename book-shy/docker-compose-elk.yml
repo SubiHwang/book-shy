@@ -43,6 +43,11 @@ services:
     depends_on:
       - elasticsearch
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1'
 
   # Kibana - 로그 시각화 도구
   kibana:
