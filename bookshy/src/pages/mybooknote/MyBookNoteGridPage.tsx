@@ -5,11 +5,11 @@ import BookCard from '@/components/booknote/BookCard';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import { useState } from 'react';
 
-interface BookNotePetalPageProps {
+interface BookGridPetalPageProps {
   bookNotes: BookNote[];
 }
 
-const MyBookNotePetalPage: React.FC<BookNotePetalPageProps> = ({ bookNotes }) => {
+const MyBookGridPetalPage: React.FC<BookGridPetalPageProps> = ({ bookNotes }) => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<'ALL' | 'X'>('ALL');
 
@@ -70,4 +70,4 @@ const MyBookNotePetalPage: React.FC<BookNotePetalPageProps> = ({ bookNotes }) =>
   );
 };
 
-export default MyBookNotePetalPage;
+export default MyBookGridPetalPage;

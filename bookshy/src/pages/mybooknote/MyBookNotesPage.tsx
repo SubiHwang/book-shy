@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchBookNotes } from '@/services/mybooknote/booknote';
 import { fetchBookQuotes } from '@/services/mybooknote/bookquote';
-import BookNotePetalPage from './MyBookNotePetalPage';
+import BookGridPetalPage from './MyBookNoteGridPage';
 import LibraryBookListPage from './LibraryBookListPage';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import type { BookQuote } from '@/types/mybooknote/bookquote';
@@ -30,7 +30,7 @@ const MyBookNotePage = () => {
   if (notesLoading || quotesLoading) return <p className="p-4">불러오는 중...</p>;
 
   return enrichedNotes.length > 0 ? (
-    <BookNotePetalPage bookNotes={enrichedNotes} />
+    <BookGridPetalPage bookNotes={enrichedNotes} />
   ) : (
     <LibraryBookListPage />
   );
