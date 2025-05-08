@@ -48,7 +48,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
 
       {/* 확장 기능 버튼 */}
       {showOptions && (
-        <div className="flex justify-around mt-4">
+        <div className="h-[25vh] mt-2 px-6 flex items-center justify-around transition-all duration-300">
           <OptionButton icon="📷" label="카메라" />
           <OptionButton icon="🖼️" label="앨범" />
           <OptionButton icon="📅" label="약속" onClick={onScheduleClick} />
