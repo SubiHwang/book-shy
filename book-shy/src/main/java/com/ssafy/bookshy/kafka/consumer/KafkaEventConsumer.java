@@ -107,7 +107,7 @@ public class KafkaEventConsumer {
      * - Kafka를 통해 전달된 채팅 메시지를 DB에 저장하고,
      * 해당 채팅방 구독자들에게 WebSocket으로 전달합니다.
      */
-    @KafkaListener(topics = "chat.message", containerFactory = "recommendListenerFactory")
+    @KafkaListener(topics = "chat.message", containerFactory = "chatListenerFactory")
     public void listenChatMessage(ConsumerRecord<String, ChatMessageKafkaDto> record, Acknowledgment ack) {
         try {
             ChatMessageKafkaDto dto = record.value();

@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/logs")
 @Slf4j
@@ -40,22 +38,6 @@ public class LogController {
             @RequestBody ClientLogRequestDto logDto) {
         String userId = getUserId();
         loggingService.processClientLog(userId, logDto);
-        return ResponseEntity.ok().build();
-    }
-
-    @Operation(summary = "배치 이벤트 로깅", description = "클라이언트에서 발생한 여러 이벤트를 일괄 로깅합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "로깅 성공"),
-            @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
-    })
-    @PostMapping("/client/batch")
-    public ResponseEntity<Void> logClientEvents(
-            @Parameter(description = "로깅할 이벤트 목록", required = true)
-            @RequestBody List<ClientLogRequestDto> logDtos) {
-        String userId = getUserId();
-        for (ClientLogRequestDto logDto : logDtos) {
-            loggingService.processClientLog(userId, logDto);
-        }
         return ResponseEntity.ok().build();
     }
 
