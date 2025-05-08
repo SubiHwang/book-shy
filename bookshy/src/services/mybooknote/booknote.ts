@@ -19,3 +19,10 @@ export const createBookNote = async (
     content,
   });
 };
+
+// 독후감 수정
+export const updateBookNote = async (reviewId: number, content: string): Promise<void> => {
+  await authAxiosInstance.put(`/books/notes/${reviewId}`, {
+    content,
+  });
+};

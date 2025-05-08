@@ -22,3 +22,10 @@ export const createBookQuote = async (bookId: number, content: string): Promise<
     { headers: { 'X-User-Id': userId } },
   );
 };
+
+// ✏️ 인용구 수정
+export const updateBookQuote = async (quoteId: number, content: string): Promise<void> => {
+  await authAxiosInstance.put(`/quotes/${quoteId}`, {
+    content,
+  });
+};
