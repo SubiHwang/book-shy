@@ -9,7 +9,7 @@ interface BookGridPetalPageProps {
   bookNotes: BookNote[];
 }
 
-const MyBookGridPetalPage: React.FC<BookGridPetalPageProps> = ({ bookNotes }) => {
+const MyBookNoteGridPage: React.FC<BookGridPetalPageProps> = ({ bookNotes }) => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<'ALL' | 'X'>('ALL');
 
@@ -42,7 +42,7 @@ const MyBookGridPetalPage: React.FC<BookGridPetalPageProps> = ({ bookNotes }) =>
           </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="w-fit mx-auto grid grid-cols-2 gap-12">
           {filteredNotes.map((book) => (
             <BookCard
               key={book.bookId}
@@ -70,4 +70,4 @@ const MyBookGridPetalPage: React.FC<BookGridPetalPageProps> = ({ bookNotes }) =>
   );
 };
 
-export default MyBookGridPetalPage;
+export default MyBookNoteGridPage;
