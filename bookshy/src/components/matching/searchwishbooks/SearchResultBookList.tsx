@@ -1,8 +1,22 @@
 import { FC } from 'react';
 import WishBookCard from '../wishbooks/WishBookCard';
 import { SearchResultListProps } from '@/types/Matching';
+import Loading from '@/components/common/Loading';
 
-const SearchResultBookList: FC<SearchResultListProps> = ({ resultList, searchTerm, total }) => {
+const SearchResultBookList: FC<SearchResultListProps> = ({
+  resultList,
+  searchTerm,
+  total,
+  isLoading,
+}) => {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loading loadingText={'도서 검색 중...'} />
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex flex-col text-light-text px-8 py-4">
@@ -10,7 +24,7 @@ const SearchResultBookList: FC<SearchResultListProps> = ({ resultList, searchTer
           <p className="text-lg font-medium">
             <span className="font-semibold text-primary-dark">{searchTerm} </span>의 검색 결과
           </p>
-          <p className='font-light'>검색 결과 수 : {total}</p>
+          <p className="font-light">검색 결과 수 : {total}</p>
         </div>
       </div>
       <div className="flex flex-col px-4">
