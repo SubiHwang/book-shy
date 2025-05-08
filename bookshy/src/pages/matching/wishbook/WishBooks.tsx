@@ -3,70 +3,51 @@ import { FC, useMemo, useState } from 'react';
 import { PlusCircle, Search, ChevronDown } from 'lucide-react';
 import WishBookCard from '@/components/matching/wishbooks/WishBookCard';
 import { useNavigate } from 'react-router-dom';
+import { useWishBooks } from '@/hooks/wishbook/useWishBooks';
+import Loading from '@/components/common/Loading';
 
 const WishBooks: FC = () => {
   const navigate = useNavigate();
-
-  const dummyData: WishBook[] = [
-    {
-      bookId: 1,
-      title: '어린 왕자',
-      author: '생택쥐페리',
-      publisher: '더스토리북',
-      translator: '이명식',
-      categories: '고전 문학',
-      bookImgUrl: 'imgurl',
-      isLiked: true,
-    },
-    {
-      bookId: 2,
-      title: '파과',
-      author: '구병모',
-      publisher: '창비',
-      translator: '',
-      categories: '한국 문학',
-      bookImgUrl: 'imgurl',
-      isLiked: true,
-    },
-    {
-      bookId: 3,
-      title: '사피엔스',
-      author: '유빌 하라리',
-      publisher: '더스토리북',
-      translator: '이명식',
-      categories: '사회과학',
-      isLiked: true,
-    },
-  ];
-
+  const userId = 1; // 임시 userId, 실제로는 로그인한 사용자의 ID를 사용해야 함
+  const { data, isLoading } = useWishBooks(userId); // 실제 API 호출을 위한 훅 사용
+  
   const [selectedFilter, setSelectedFilter] = useState<string>('전체 보기');
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  
+  if (isLoading || !data) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loading loadingText={'읽고 싶은 책 목록 불러오는 중...'} />
+      </div>
+    );
+  }
 
   const filterList = useMemo(() => {
     const categorySet = new Set<string>();
-    dummyData.forEach((book) => {
+    data.books.forEach((book: WishBook) => {
       if (book.categories) {
         categorySet.add(book.categories);
       }
     });
     return ['전체 보기', ...Array.from(categorySet)];
-  }, [dummyData]);
+  }, [data.books]);
 
   const filteredBooks = useMemo(() => {
     const categoryFiltered =
       selectedFilter === '전체 보기'
-        ? dummyData
-        : dummyData.filter((book) => book.categories === selectedFilter);
+        ? data.books
+        : data.books.filter((book: WishBook) => book.categories === selectedFilter);
 
     if (!searchTerm.trim()) return categoryFiltered;
 
     const term = searchTerm.toLowerCase().trim();
     return categoryFiltered.filter(
-      (book) =>
+      (book: WishBook) =>
         book.title?.toLowerCase().includes(term) || book.author?.toLowerCase().includes(term),
     );
-  }, [dummyData, selectedFilter, searchTerm]);
+  }, [data.books, selectedFilter, searchTerm]);
+
 
   return (
     <div className="relative pb-16 px-4 pt-4">
@@ -120,7 +101,7 @@ const WishBooks: FC = () => {
       <div>
         {filteredBooks.length > 0 ? (
           <div>
-            {filteredBooks.map((book) => (
+            {filteredBooks.map((book: WishBook) => (
               <WishBookCard wishBook={book} />
             ))}
           </div>

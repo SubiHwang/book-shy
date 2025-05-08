@@ -8,6 +8,7 @@ export interface Book {
   pages?: number;
   coverImageUrl?: string;
   bookImgUrl?: string;
+  categories?: string | null;
 }
 
 export interface WishBook extends Book {
