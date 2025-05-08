@@ -133,7 +133,7 @@ public class AladinClient {
     public BookListTotalResponseDto searchListPreview(String query, int start) {
         try {
             String url = String.format(
-                    "%s/ItemSearch.aspx?ttbkey=%s&Query=%s&QueryType=Title&MaxResults=20&Start=%d&OptResult=bookinfo&output=js",
+                    "%s/ItemSearch.aspx?ttbkey=%s&Query=%s&QueryType=Keyword&SearchTarget=Book&MaxResults=20&Start=%d&OptResult=bookinfo&output=js",
                     baseUrl, ttbKey, query, start
             );
 
@@ -147,16 +147,45 @@ public class AladinClient {
             JsonNode items = root.path("item");
 
             List<BookListResponseDto> result = new ArrayList<>();
+
+            // ✅ 특수문자 제거 후 소문자로 통일
+            String[] tokens = query
+                    .replaceAll("[,\\.\\-\\+\"'!@#$%^&*()\\[\\]{}]", " ")  // 쉼표 등 제거
+                    .toLowerCase()
+                    .trim()
+                    .split("\\s+");
+
             for (JsonNode it : items) {
-                result.add(BookListResponseDto.from(it));
+                String title = it.path("title").asText("").toLowerCase();
+                String author = it.path("author").asText("").toLowerCase();
+                String publisher = it.path("publisher").asText("").toLowerCase();
+
+                // ✅ 모든 토큰이 최소 한 필드에 포함될 경우만 포함
+                boolean allMatch = true;
+                for (String token : tokens) {
+                    if (!(title.contains(token) || author.contains(token) || publisher.contains(token))) {
+                        allMatch = false;
+                        break;
+                    }
+                }
+
+                if (allMatch) {
+                    result.add(BookListResponseDto.from(it));
+                }
             }
 
-            int pageItemCount = result.size(); // ✅ 현재 페이지에 포함된 도서 개수
+            // ✅ 정렬: 제목 시작 → 제목 포함 → 저자 → 출판사 기준으로 점수화
+            result.sort((a, b) -> {
+                int aScore = getRelevanceScore(a, tokens);
+                int bScore = getRelevanceScore(b, tokens);
+                return Integer.compare(bScore, aScore);
+            });
 
             return BookListTotalResponseDto.builder()
-                    .total(pageItemCount)
+                    .total(result.size())
                     .books(result)
                     .build();
+
         } catch (Exception e) {
             System.out.println("❌ 검색 목록 API 실패: " + e.getMessage());
             return BookListTotalResponseDto.builder()
@@ -164,6 +193,27 @@ public class AladinClient {
                     .books(new ArrayList<>())
                     .build();
         }
+    }
+
+    // ✅ 관련성 점수 계산 메서드
+    private int getRelevanceScore(BookListResponseDto book, String[] tokens) {
+        int score = 0;
+        String title = safeLower(book.getTitle());
+        String author = safeLower(book.getAuthor());
+        String publisher = safeLower(book.getPublisher());
+
+        for (String token : tokens) {
+            if (title.startsWith(token)) score += 10;
+            else if (title.contains(token)) score += 6;
+            if (author.contains(token)) score += 2;
+            if (publisher.contains(token)) score += 1;
+        }
+
+        return score;
+    }
+
+    private String safeLower(String s) {
+        return s == null ? "" : s.toLowerCase();
     }
 
     public BookResponseDto searchByIsbn13(String isbn13) {

@@ -59,7 +59,7 @@ public class BookController {
     }
 
     @GetMapping("/search/list")
-    @Operation(summary = "🔍 도서 검색 목록", description = "제목 기반 검색 목록을 반환합니다.")
+    @Operation(summary = "🔍 도서 검색 목록", description = "제목, 저자, 출판사 기반으로 검색된 도서 목록을 반환합니다.")
     public ResponseEntity<BookListTotalResponseDto> searchList(@RequestParam String q) {
         int start = 1;
         return ResponseEntity.ok(aladinClient.searchListPreview(q, start));
@@ -117,7 +117,7 @@ public class BookController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "📘 직접 등록한 도서 상세 정보 조회", description = "libraryId 기반으로 도서 상세 정보를 조회합니다.")
+    @Operation(summary = "📘 내 서재(DB)에 있는 도서 상세 정보 조회", description = "libraryId 기반으로 도서 상세 정보를 조회합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "서재 항목이 존재하지 않음")
@@ -129,6 +129,6 @@ public class BookController {
         Library library = libraryRepository.findById(libraryId)
                 .orElseThrow(() -> new RuntimeException("서재 항목이 존재하지 않습니다."));
         Book book = library.getBook();
-        return ResponseEntity.ok(BookResponseDto.from(book));
+        return ResponseEntity.ok(BookResponseDto.from(book, library.isPublic()));
     }
 }
