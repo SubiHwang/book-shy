@@ -36,8 +36,8 @@ naver:
 oauth:
   kakao:
     user-info-uri: ${KAKAO_USER_INFO_URI}
-    client-id: ${CLIENT_ID}
-    redirect-uri: ${REDIRECT_URI}
+    client-id: ${KAKAO_CLIENT_ID}
+    redirect-uri: ${KAKAO_REDIRECT_URI}
 
 server:
   port: 8080  # ✅ 운영용 포트

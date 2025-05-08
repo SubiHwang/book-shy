@@ -204,6 +204,9 @@ pipeline {
                                     echo "✅ docker-compose.yml OCR URL 치환 완료"
 
                                     sed -i "s|\\${KAKAO_USER_INFO_URI}|${KAKAO_USER_INFO_URI}|g" docker-compose.yml
+                                    sed -i "s|\\${KAKAO_CLIENT_ID}|${KAKAO_CLIENT_ID}|g" docker-compose.yml
+                                    sed -i "s|\\${KAKAO_REDIRECT_URI}|${KAKAO_REDIRECT_URI}|g" docker-compose.yml
+
                                     echo "✅ docker-compose.yml Kakao 정보 치환 완료"
 
                                     # ✅ 2. 서버에 전송
