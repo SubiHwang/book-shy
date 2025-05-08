@@ -25,6 +25,8 @@ import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
 import ISBNScanResultPage from '@/pages/mylibrary/AddBook/ISBNScanResultPage';
 import MyBookNotesPage from '@/pages/mybooknote/MyBookNotesPage';
 import BookNoteDetailPage from '@/pages/mybooknote/BookNoteDetailPage';
+import BookNoteFullPage from '@/pages/mybooknote/BookNoteFullPage';
+import BookNoteEditPage from '@/pages/mybooknote/BookNoteEditPage';
 import Login from '@/pages/auth/Login';
 import PrivateRoute from '@/components/layout/PrivateRoute';
 
@@ -55,6 +57,8 @@ const AppLayout: FC = () => {
 
           <Route path="/booknote" element={<MyBookNotesPage />} />
           <Route path="/booknotes/detail/:bookId" element={<BookNoteDetailPage />} />
+          <Route path="/booknotes/full/:bookId" element={<BookNoteFullPage />} />
+          <Route path="/booknotes/edit/:bookId" element={<BookNoteEditPage />} />
 
           {/* 보호된 라우트 - 로그인해야만 접근 가능 */}
           <Route

@@ -9,8 +9,10 @@ import type { BookQuote } from '@/types/mybooknote/bookquote';
 const BookNoteDetailPage: React.FC = () => {
   const { bookId } = useParams();
   const navigate = useNavigate();
-  const [showReview, setShowReview] = useState(false);
   const userId = 1;
+
+  // 📘 currentStage: 'quote' → 'review' → 'full'
+  const [stage, setStage] = useState<'quote' | 'review'>('quote');
 
   const { data: bookNotes = [], isLoading: loadingNotes } = useQuery<BookNote[]>({
     queryKey: ['my-booknotes', userId],
@@ -32,7 +34,15 @@ const BookNoteDetailPage: React.FC = () => {
     const newIdx = currentIndex + offset;
     if (bookNotes[newIdx]) {
       navigate(`/booknotes/detail/${bookNotes[newIdx].bookId}`);
-      setShowReview(false); // reset to quote
+      setStage('quote'); // 다시 quote로 초기화
+    }
+  };
+
+  const handleClick = () => {
+    if (stage === 'quote') {
+      setStage('review');
+    } else {
+      navigate(`/booknotes/full/${bookId}`);
     }
   };
 
@@ -41,7 +51,7 @@ const BookNoteDetailPage: React.FC = () => {
   return (
     <div
       className="relative h-screen flex items-center justify-center bg-white"
-      onClick={() => setShowReview((prev) => !prev)}
+      onClick={handleClick}
     >
       {/* 왼쪽 이전 책 커버 */}
       {bookNotes[currentIndex - 1] && (
@@ -71,7 +81,7 @@ const BookNoteDetailPage: React.FC = () => {
         {/* 인용구 뷰 */}
         <div
           className={`absolute inset-0 z-20 w-full h-full flex flex-col justify-center items-center px-6 text-white text-center transition-opacity duration-300 ${
-            showReview ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            stage === 'quote' ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         >
           <p className="text-xs mb-1">{currentBook.author}</p>
@@ -84,7 +94,7 @@ const BookNoteDetailPage: React.FC = () => {
         {/* 독후감 뷰 */}
         <div
           className={`absolute inset-0 z-20 w-full h-full flex flex-col justify-center items-center px-6 text-white text-center transition-opacity duration-300 ${
-            showReview ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            stage === 'review' ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         >
           <h2 className="font-bold text-lg mb-2">{currentBook.title}</h2>
