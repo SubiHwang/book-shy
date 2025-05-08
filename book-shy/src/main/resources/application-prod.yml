@@ -38,3 +38,7 @@ oauth:
 
 server:
   port: 8080  # ✅ 운영용 포트
+
+elasticsearch:
+  host: k12d204.p.ssafy.io
+  port: 9200
