@@ -32,7 +32,7 @@ const BookNoteDetailPage: React.FC = () => {
     const newIdx = currentIndex + offset;
     if (bookNotes[newIdx]) {
       navigate(`/booknotes/detail/${bookNotes[newIdx].bookId}`);
-      setShowReview(false);
+      setShowReview(false); // reset to quote
     }
   };
 
@@ -43,12 +43,12 @@ const BookNoteDetailPage: React.FC = () => {
       className="relative h-screen flex items-center justify-center bg-white"
       onClick={() => setShowReview((prev) => !prev)}
     >
-      {/* 좌측 책 */}
+      {/* 왼쪽 이전 책 커버 */}
       {bookNotes[currentIndex - 1] && (
         <img
           src={bookNotes[currentIndex - 1].coverUrl}
           alt=""
-          className="absolute left-2 top-1/2 w-12 h-20 object-cover opacity-50"
+          className="absolute left-2 top-1/2 w-12 h-20 object-cover opacity-50 -translate-y-1/2"
           onClick={(e) => {
             e.stopPropagation();
             goTo(-1);
@@ -57,30 +57,48 @@ const BookNoteDetailPage: React.FC = () => {
       )}
 
       {/* 중앙 카드 */}
-      <div className="w-[280px] h-[420px] rounded-2xl shadow-xl bg-white/80 backdrop-blur p-6 text-center">
-        {showReview ? (
-          <>
-            <h2 className="font-bold text-lg mb-2">{currentBook.title}</h2>
-            <p className="text-sm text-gray-800">{currentBook.content}</p>
-            <p className="text-right text-sm text-blue-600 mt-4">더 보기 →</p>
-          </>
-        ) : (
-          <>
-            <p className="text-xs text-gray-600 mb-1">{currentBook.author}</p>
-            <h2 className="font-bold text-lg mb-3">{currentBook.title} 중에서</h2>
-            <p className="text-base font-medium text-gray-700">
-              {currentQuote?.content || '등록된 인용구가 없습니다.'}
-            </p>
-          </>
-        )}
+      <div className="w-[280px] h-[420px] rounded-2xl shadow-xl relative overflow-hidden">
+        {/* 배경 이미지 */}
+        <img
+          src={currentBook.coverUrl || '/placeholder.jpg'}
+          alt={currentBook.title}
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        />
+
+        {/* 흐림처리된 반투명 배경 */}
+        <div className="absolute inset-0 bg-black/30 backdrop-blur-sm z-10" />
+
+        {/* 인용구 뷰 */}
+        <div
+          className={`absolute inset-0 z-20 w-full h-full flex flex-col justify-center items-center px-6 text-white text-center transition-opacity duration-300 ${
+            showReview ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+        >
+          <p className="text-xs mb-1">{currentBook.author}</p>
+          <h2 className="font-semibold text-sm mb-2">{currentBook.title} 중에서</h2>
+          <p className="text-sm leading-tight">
+            {currentQuote?.content || '등록된 인용구가 없습니다.'}
+          </p>
+        </div>
+
+        {/* 독후감 뷰 */}
+        <div
+          className={`absolute inset-0 z-20 w-full h-full flex flex-col justify-center items-center px-6 text-white text-center transition-opacity duration-300 ${
+            showReview ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
+        >
+          <h2 className="font-bold text-lg mb-2">{currentBook.title}</h2>
+          <p className="text-sm line-clamp-6">{currentBook.content}</p>
+          <p className="text-right text-xs text-white/80 mt-4 w-full">더 보기 →</p>
+        </div>
       </div>
 
-      {/* 우측 책 */}
+      {/* 오른쪽 다음 책 커버 */}
       {bookNotes[currentIndex + 1] && (
         <img
           src={bookNotes[currentIndex + 1].coverUrl}
           alt=""
-          className="absolute right-2 top-1/2 w-12 h-20 object-cover opacity-50"
+          className="absolute right-2 top-1/2 w-12 h-20 object-cover opacity-50 -translate-y-1/2"
           onClick={(e) => {
             e.stopPropagation();
             goTo(1);
