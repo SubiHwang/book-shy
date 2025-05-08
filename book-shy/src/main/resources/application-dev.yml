@@ -22,6 +22,7 @@ spring:
       match-group-id: ${KAFKA.CONSUMER.MATCH-GROUP-ID}
       trade-group-id: ${KAFKA.CONSUMER.TRADE-GROUP-ID}
       chat-group-id: ${KAFKA.CONSUMER.CHAT-GROUP-ID}
+      recommend-group-id: ${KAFKA.CONSUMER.RECOMMEND-GROUP-ID}
 
 server:
   port: 8080  # ✅ 개발용 포트

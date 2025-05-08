@@ -19,6 +19,7 @@ spring:
       match-group-id: match-consumer-group
       trade-group-id: trade-consumer-group
       chat-group-id: chat-consumer-group
+      recommend-group-id: recommend-consumer-group
 
 aladin:
   api:

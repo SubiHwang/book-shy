@@ -1,9 +1,6 @@
 package com.ssafy.bookshy.kafka.producer;
 
-import com.ssafy.bookshy.kafka.dto.BookCreatedDto;
-import com.ssafy.bookshy.kafka.dto.ChatMessageKafkaDto;
-import com.ssafy.bookshy.kafka.dto.MatchSuccessDto;
-import com.ssafy.bookshy.kafka.dto.TradeSuccessDto;
+import com.ssafy.bookshy.kafka.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -19,13 +16,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class KafkaProducer {
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
-
     // ✅ 토픽 이름 상수 정의
     private static final String TOPIC_BOOK_CREATED = "book.created";
     private static final String TOPIC_MATCH_SUCCESS = "match.success";
     private static final String TOPIC_TRADE_SUCCESS = "trade.success";
     private static final String TOPIC_CHAT_MESSAGE = "chat.message";
+    private static final String TOPIC_RECOMMEND_EVENT = "recommend.event";
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     /**
      * 📘 책 등록 이벤트 발행
@@ -55,6 +52,14 @@ public class KafkaProducer {
         log.info("📤 [KafkaProducer] Sending chat message to topic '{}': {}", TOPIC_CHAT_MESSAGE, event);
         send(TOPIC_CHAT_MESSAGE, event, "💬 ChatMessageEvent");
     }
+
+    /**
+     * 💚 로깅 메시지 이벤트 발행
+     */
+    public void sendRecommendEvent(RecommendMessageKafkaDto event) {
+        send(TOPIC_RECOMMEND_EVENT, event, "💬 RecommendEvent");
+    }
+
 
     /**
      * 🛠 공통 메시지 발행 메서드

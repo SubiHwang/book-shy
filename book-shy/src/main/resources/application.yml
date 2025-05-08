@@ -19,7 +19,9 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
+        partitioner.class: org.apache.kafka.clients.producer.RoundRobinPartitioner  # 🔄 라운드 로빈 파티셔너
         spring.json.add.type.headers: false  # ✅ 헤더 정보 생략
+        spring.json.trusted.packages: "*"  # ✅ DTO 역직렬화 허용 패키지
 
     consumer:
       group-id: ${KAFKA.CONSUMER.BOOK-GROUP-ID}  # 👥 Kafka 컨슈머 그룹 ID
@@ -50,3 +52,6 @@ management:
 
 file:
   upload-dir: /home/ubuntu/bookshy/images/coverImage
+
+
+

@@ -114,4 +114,12 @@ public class KafkaConfig {
         return listenerFactory(ChatMessageKafkaDto.class, env.getProperty("spring.kafka.consumer.chat-group-id"));
     }
 
+    //recommend 그룹을 생성함
+    //"RecommendMessageKafkaDto 메시지를 주고받음"
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, RecommendMessageKafkaDto> recommendListenerFactory() {
+        //env.getProperty("spring.kafka.consumer.recommend-group-id")에서 그룹 ID를 가져옴
+        return listenerFactory(RecommendMessageKafkaDto.class, env.getProperty("spring.kafka.consumer.recommend-group-id"));
+    }
+
 }
