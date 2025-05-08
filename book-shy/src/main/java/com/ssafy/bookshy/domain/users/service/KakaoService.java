@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -107,7 +108,7 @@ public class KakaoService {
         return fieldElement != null ? fieldElement.getAsString() : null;
     }
 
-    public String getKakaoAccessToken(String authorizationCode) {
+    public String getKakaoAccessTokenForUser(String authorizationCode) {
         log.info("카카오 액세스 토큰 발급 시작 - 인가 코드: {}", authorizationCode);
 
         try {
@@ -126,11 +127,12 @@ public class KakaoService {
             params.append("grant_type=authorization_code");
             params.append("&client_id=").append(kakaoConfig.getClientId());
             params.append("&redirect_uri=").append(kakaoConfig.getRedirectUri());
+            log.info("💚 kakao_redirect_uri : {}", kakaoConfig.getRedirectUri());
             params.append("&code=").append(authorizationCode);
 
             // 클라이언트 시크릿이 있다면 추가
-            if (kakaoConfig.getClientSecret() != null && !kakaoConfig.getClientSecret().isEmpty()) {
-                params.append("&client_secret=").append(kakaoConfig.getClientSecret());
+            if (kakaoConfig.getClientId() != null && !kakaoConfig.getClientId().isEmpty()) {
+                params.append("&client_secret=").append(kakaoConfig.getClientId());
             }
 
             // 요청 본문 작성
@@ -172,13 +174,7 @@ public class KakaoService {
 
             log.info("발급된 액세스 토큰: {}", accessToken);
 
-            return OAuthTokenDto.builder()
-                    .token(accessToken)
-                    .refreshToken(refreshToken)
-                    .tokenType(tokenType)
-                    .expiresIn(expiresIn)
-                    .build();
-
+            return accessToken;
         } catch (MalformedURLException e) {
             log.error("잘못된 URL 형식: {}", e.getMessage(), e);
             throw new GlobalException(GlobalErrorCode.UNDEFINED_URL);
@@ -187,4 +183,5 @@ public class KakaoService {
             throw new GlobalException(GlobalErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
+
 }
