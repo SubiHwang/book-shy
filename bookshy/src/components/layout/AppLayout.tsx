@@ -25,6 +25,7 @@ import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
 import ISBNScanResultPage from '@/pages/mylibrary/AddBook/ISBNScanResultPage';
 import Login from '@/pages/auth/Login';
 import PrivateRoute from '@/components/layout/PrivateRoute';
+import KaKaoOauth from '@/pages/auth/KaKaoOauth';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ const AppLayout: FC = () => {
         <Routes>
           {/* 공개 라우트 - 로그인하지 않아도 접근 가능 */}
           <Route path="/login" element={<Login />} />
-          <Route path="/oauth" element={<div>OAuth</div>} />
+          <Route path="/oauth" element={<KaKaoOauth />} />
 
           {/* 보호된 라우트 - 로그인해야만 접근 가능 */}
           <Route
