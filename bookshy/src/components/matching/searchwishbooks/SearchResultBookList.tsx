@@ -2,15 +2,15 @@ import { FC } from 'react';
 import WishBookCard from '../wishbooks/WishBookCard';
 import { SearchResultListProps } from '@/types/Matching';
 
-const SearchResultBookList: FC<SearchResultListProps> = ({ resultList, searchTerm }) => {
-  //   const dummyData = [{ bookId: 1, title: '책 제목 1', author: '저자 1', summary: '책 요약 1 ' }];
+const SearchResultBookList: FC<SearchResultListProps> = ({ resultList, searchTerm, total }) => {
   return (
     <div>
       <div className="flex flex-col text-light-text px-8 py-4">
-        <div className="flex gap-2 justify-start items-center mb-1">
+        <div className="flex gap-2 justify-between items-center mb-1">
           <p className="text-lg font-medium">
-            <span className='font-semibold text-primary-dark'>{searchTerm} </span>의 검색 결과
+            <span className="font-semibold text-primary-dark">{searchTerm} </span>의 검색 결과
           </p>
+          <p className='font-light'>검색 결과 수 : {total}</p>
         </div>
       </div>
       <div className="flex flex-col px-4">
