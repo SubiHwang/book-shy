@@ -21,6 +21,8 @@ export const kakaoLogin = async ({
       fcmToken: fcmToken,
     });
 
+    console.log('카카오 로그인 응답:', response);
+
     // 응답 데이터 반환
     return response.data;
   } catch (error) {
