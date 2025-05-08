@@ -1,38 +1,52 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchBookNotes, createBookNote } from '@/services/mybooknote/booknote';
-import { fetchBookQuotes, createBookQuote } from '@/services/mybooknote/bookquote';
-import type { BookNote } from '@/types/mybooknote/booknote';
-import type { BookQuote } from '@/types/mybooknote/bookquote';
+import { fetchLibraryBooks } from '@/services/mybooknote/library';
+import { fetchBookDetailByItemId } from '@/services/book/search';
+import { createBookNote } from '@/services/mybooknote/booknote';
+import { createBookQuote } from '@/services/mybooknote/bookquote';
+import BookNoteForm from '@/components/booknote/BookNoteForm';
+import type { LibraryBook } from '@/types/mybooknote/library';
+import { useState } from 'react';
 
 const BookNoteCreatePage: React.FC = () => {
-  const { bookId } = useParams();
   const navigate = useNavigate();
   const userId = 1;
+  const [params] = useSearchParams();
 
-  const { data: notes = [] } = useQuery<BookNote[], Error>({
-    queryKey: ['my-booknotes', userId],
-    queryFn: () => fetchBookNotes(userId),
+  const bookIdParam = params.get('bookId');
+  const libraryId = bookIdParam ? Number(bookIdParam) : null;
+
+  const { data: libraryBooks = [] } = useQuery<LibraryBook[], Error>({
+    queryKey: ['library-books'],
+    queryFn: () => fetchLibraryBooks(userId),
+    enabled: !!libraryId, // ✅ libraryId 있을 때만 실행
   });
 
-  const { data: quotes = [] } = useQuery<BookQuote[], Error>({
-    queryKey: ['my-bookquotes'],
-    queryFn: fetchBookQuotes,
+  const targetBook = libraryId
+    ? libraryBooks.find((book) => book.libraryId === libraryId)
+    : undefined;
+
+  const itemId = targetBook?.aladinItemId;
+
+  const { data: bookDetail } = useQuery({
+    queryKey: ['book-detail', targetBook?.aladinItemId],
+    queryFn: () => fetchBookDetailByItemId(itemId as number),
+    enabled: !!targetBook?.aladinItemId,
   });
 
-  const book = notes.find((b) => b.bookId === Number(bookId));
-  const quote = quotes.find((q) => q.bookId === Number(bookId));
+  const [quoteText, setQuoteText] = useState('');
+  const [reviewText, setReviewText] = useState('');
 
-  const [quoteText, setQuoteText] = useState(quote?.content ?? '');
-  const [reviewText, setReviewText] = useState(book?.content ?? '');
-
-  const handleSave = async () => {
-    if (!bookId) return;
-    await createBookQuote(Number(bookId), quoteText);
-    await createBookNote(Number(bookId), reviewText, userId);
-    navigate(`/booknotes/detail/${bookId}`);
+  const handleCreate = async () => {
+    if (!targetBook) return;
+    await createBookQuote(targetBook.libraryId, quoteText);
+    await createBookNote(targetBook.libraryId, reviewText, userId);
+    navigate('/booknote');
   };
+
+  // ❗조건에 따라 렌더링만 분기
+  if (!libraryId) return <p className="p-4">잘못된 접근입니다.</p>;
+  if (!targetBook) return <p className="p-4">해당 책이 서재에 없습니다.</p>;
 
   return (
     <div className="min-h-screen bg-[#f9f4ec] px-4 py-6">
@@ -42,47 +56,29 @@ const BookNoteCreatePage: React.FC = () => {
 
       <div className="flex items-center gap-4 mb-6">
         <img
-          src={book?.coverUrl || '/placeholder.jpg'}
-          alt={book?.title}
+          src={bookDetail?.coverImageUrl || '/placeholder.jpg'}
+          alt={bookDetail?.title}
           className="w-20 h-28 rounded-md object-cover"
         />
         <div>
-          <h1 className="font-bold text-lg">{book?.title}</h1>
-          {book?.author && <p className="text-sm text-gray-600">작가 : {book.author}</p>}
-          {book?.publisher && <p className="text-sm text-gray-600">출판사 : {book.publisher}</p>}
+          <h1 className="font-bold text-lg">{bookDetail?.title}</h1>
+          {bookDetail?.author && (
+            <p className="text-sm text-gray-600">작가 : {bookDetail.author}</p>
+          )}
+          {bookDetail?.publisher && (
+            <p className="text-sm text-gray-600">출판사 : {bookDetail.publisher}</p>
+          )}
         </div>
       </div>
 
-      <section className="mb-6">
-        <h2 className="text-red-500 text-sm font-semibold mb-1">✍️ 인용구</h2>
-        <textarea
-          value={quoteText}
-          onChange={(e) => setQuoteText(e.target.value)}
-          rows={3}
-          maxLength={1000}
-          className="w-full p-3 text-sm rounded-lg shadow bg-white"
-        />
-        <p className="text-xs text-right mt-1">{quoteText.length}/1000</p>
-      </section>
-
-      <section className="mb-6">
-        <h2 className="text-red-500 text-sm font-semibold mb-1">💬 감상 기록</h2>
-        <textarea
-          value={reviewText}
-          onChange={(e) => setReviewText(e.target.value)}
-          rows={6}
-          maxLength={3000}
-          className="w-full p-3 text-sm rounded-lg shadow bg-white"
-        />
-        <p className="text-xs text-right mt-1">{reviewText.length}/3000</p>
-      </section>
-
-      <button
-        onClick={handleSave}
-        className="w-full py-3 text-white bg-pink-500 rounded-lg text-sm font-semibold shadow"
-      >
-        수정하기
-      </button>
+      <BookNoteForm
+        quoteText={quoteText}
+        reviewText={reviewText}
+        setQuoteText={setQuoteText}
+        setReviewText={setReviewText}
+        onSubmit={handleCreate}
+        submitLabel="등록하기"
+      />
     </div>
   );
 };
