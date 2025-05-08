@@ -1,10 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchBookNotes, createBookNote } from '@/services/mybooknote/booknote';
-import { fetchBookQuotes, createBookQuote } from '@/services/mybooknote/bookquote';
+import { fetchBookNotes, updateBookNote } from '@/services/mybooknote/booknote';
+import { fetchBookQuotes, updateBookQuote } from '@/services/mybooknote/bookquote';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import type { BookQuote } from '@/types/mybooknote/bookquote';
+import BookNoteForm from '@/components/booknote/BookNoteForm';
 
 const BookNoteEditPage: React.FC = () => {
   const { bookId } = useParams();
@@ -28,9 +29,9 @@ const BookNoteEditPage: React.FC = () => {
   const [reviewText, setReviewText] = useState(book?.content ?? '');
 
   const handleSave = async () => {
-    if (!bookId) return;
-    await createBookQuote(Number(bookId), quoteText);
-    await createBookNote(Number(bookId), reviewText, userId);
+    if (!bookId || !book?.reviewId || !quote?.quoteId) return;
+    await updateBookQuote(quote.quoteId, quoteText);
+    await updateBookNote(book.reviewId, reviewText);
     navigate(`/booknotes/detail/${bookId}`);
   };
 
@@ -53,36 +54,14 @@ const BookNoteEditPage: React.FC = () => {
         </div>
       </div>
 
-      <section className="mb-6">
-        <h2 className="text-red-500 text-sm font-semibold mb-1">✍️ 인용구</h2>
-        <textarea
-          value={quoteText}
-          onChange={(e) => setQuoteText(e.target.value)}
-          rows={3}
-          maxLength={1000}
-          className="w-full p-3 text-sm rounded-lg shadow bg-white"
-        />
-        <p className="text-xs text-right mt-1">{quoteText.length}/1000</p>
-      </section>
-
-      <section className="mb-6">
-        <h2 className="text-red-500 text-sm font-semibold mb-1">💬 감상 기록</h2>
-        <textarea
-          value={reviewText}
-          onChange={(e) => setReviewText(e.target.value)}
-          rows={6}
-          maxLength={3000}
-          className="w-full p-3 text-sm rounded-lg shadow bg-white"
-        />
-        <p className="text-xs text-right mt-1">{reviewText.length}/3000</p>
-      </section>
-
-      <button
-        onClick={handleSave}
-        className="w-full py-3 text-white bg-pink-500 rounded-lg text-sm font-semibold shadow"
-      >
-        수정하기
-      </button>
+      <BookNoteForm
+        quoteText={quoteText}
+        reviewText={reviewText}
+        setQuoteText={setQuoteText}
+        setReviewText={setReviewText}
+        onSubmit={handleSave}
+        submitLabel="수정하기"
+      />
     </div>
   );
 };
