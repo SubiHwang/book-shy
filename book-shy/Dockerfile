@@ -7,4 +7,4 @@ COPY build/libs/*.jar /app/app.jar
 
 COPY build/libs/book-shy-0.0.1-SNAPSHOT.jar app.jar
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Xmx512m", "-Xms256m", "-jar", "app.jar"]
