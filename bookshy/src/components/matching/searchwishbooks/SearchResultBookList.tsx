@@ -9,7 +9,7 @@ const SearchResultBookList: FC<SearchResultListProps> = ({ resultList, searchTer
       <div className="flex flex-col text-light-text px-8 py-4">
         <div className="flex gap-2 justify-start items-center mb-1">
           <p className="text-lg font-medium">
-            <span>{searchTerm}</span>의 검색 결과
+            <span className='font-semibold text-primary-dark'>{searchTerm} </span>의 검색 결과
           </p>
         </div>
       </div>
