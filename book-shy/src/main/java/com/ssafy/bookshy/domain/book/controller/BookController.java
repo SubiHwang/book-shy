@@ -7,6 +7,8 @@ import com.ssafy.bookshy.domain.book.dto.BookSearchResponseDto;
 import com.ssafy.bookshy.domain.book.dto.WishRequestDto;
 import com.ssafy.bookshy.domain.book.entity.Book;
 import com.ssafy.bookshy.domain.book.service.BookService;
+import com.ssafy.bookshy.domain.library.entity.Library;
+import com.ssafy.bookshy.domain.library.repository.LibraryRepository;
 import com.ssafy.bookshy.domain.ocr.service.OcrBookSearchService;
 import com.ssafy.bookshy.external.aladin.AladinClient;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,6 +33,7 @@ public class BookController {
     private final BookService bookService;
     private final AladinClient aladinClient;
     private final OcrBookSearchService ocrSearchService;
+    private final LibraryRepository libraryRepository;
 
     @PatchMapping("/{bookId}/status")
     @Operation(summary = "🔄 도서 상태 변경", description = "도서의 상태(AVAILABLE 등)를 변경합니다.")
@@ -112,5 +115,20 @@ public class BookController {
             @RequestParam @Parameter(description = "알라딘 Item ID", example = "123456789") Long itemId) {
         bookService.removeWish(userId, itemId);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "📘 직접 등록한 도서 상세 정보 조회", description = "libraryId 기반으로 도서 상세 정보를 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "404", description = "서재 항목이 존재하지 않음")
+    })
+    @GetMapping("/library/detail")
+    public ResponseEntity<BookResponseDto> getBookDetailByLibraryId(
+            @RequestParam Long libraryId
+    ) {
+        Library library = libraryRepository.findById(libraryId)
+                .orElseThrow(() -> new RuntimeException("서재 항목이 존재하지 않습니다."));
+        Book book = library.getBook();
+        return ResponseEntity.ok(BookResponseDto.from(book));
     }
 }
