@@ -1,4 +1,4 @@
-import { publicAxiosInstance } from '../axiosInstance';
+import { publicAxiosInstance, authAxiosInstance } from '../axiosInstance';
 
 interface KakaoLoginRequest {
   token: string;
@@ -30,6 +30,17 @@ export const kakaoLogin = async ({
     return res;
   } catch (error) {
     console.error('카카오 로그인 오류:', error);
+    throw error;
+  }
+};
+
+export const logoutfetch = async () => {
+  try {
+    const res = await authAxiosInstance.post('/auth/sign-out');
+    console.log('로그아웃 응답:', res);
+    return res;
+  } catch (error) {
+    console.error('로그아웃 오류:', error);
     throw error;
   }
 };
