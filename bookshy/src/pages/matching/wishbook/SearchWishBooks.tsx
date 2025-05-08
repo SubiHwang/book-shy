@@ -4,7 +4,7 @@ import SearchBar from '@/components/matching/searchwishbooks/SearchBar';
 import SearchResultBookList from '@/components/matching/searchwishbooks/SearchResultBookList';
 import { getSearchResult } from '@/services/matching/wishbooks';
 import { WishBook } from '@/types/book';
-import { SearchResultResponse } from '@/types/Matching';
+import { WishBooksResponse } from '@/types/Matching';
 import { ArrowLeft } from 'lucide-react';
 import { useState, KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -22,11 +22,11 @@ const SearchWishBooks = () => {
     if (e.key === 'Enter') {
       const params = searchTerm.trim(); // 검색어 앞뒤 공백 제거
       if (!params) return;
-      
+
       setIsLoading(true); // 로딩 시작
       try {
         console.log('검색어:', params);
-        const res: SearchResultResponse = await getSearchResult(params);
+        const res: WishBooksResponse = await getSearchResult(params);
         setResultList(res.books);
         setTotal(res.total);
         setIsResult(true);
@@ -53,11 +53,7 @@ const SearchWishBooks = () => {
         <p className="text-xl font-light text-white text-center mb-3">
           읽고 싶은 책을 검색 해보세요.
         </p>
-        <SearchBar 
-          onSearch={handleSearch} 
-          value={searchTerm} 
-          onChange={setSearchTerm} 
-        />
+        <SearchBar onSearch={handleSearch} value={searchTerm} onChange={setSearchTerm} />
       </div>
       <div className="bg-primary-light">
         <PopularSearchTerm />

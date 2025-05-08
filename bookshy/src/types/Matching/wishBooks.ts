@@ -14,7 +14,7 @@ export interface SearchResultListProps {
   isLoading: boolean;
 }
 
-export interface SearchResultResponse {
+export interface WishBooksResponse {
   total: number;
   books: WishBook[];
 }
