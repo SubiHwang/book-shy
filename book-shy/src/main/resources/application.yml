@@ -23,6 +23,10 @@ spring:
       properties:
         spring.json.trusted.packages: "*"  # ✅ DTO 역직렬화 허용 패키지
 
+    producer:
+      properties:
+        partitioner.class: org.apache.kafka.clients.producer.RoundRobinPartitioner  # 🔄 라운드 로빈 파티셔너
+
     listener:
       ack-mode: manual_immediate  # 🎯 수동 커밋, 메시지 중복 처리 방지
 
@@ -44,6 +48,3 @@ management:
 
 file:
   upload-dir: /home/ubuntu/bookshy/images/coverImage
-
-
-
