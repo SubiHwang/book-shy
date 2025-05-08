@@ -1,0 +1,16 @@
+import { SearchResultResponse } from '@/types/Matching/wishBooks';
+import { authAxiosInstance } from '../axiosInstance';
+
+
+export const getSearchResult = async (searchTerm: string): Promise<SearchResultResponse> => {
+  try {
+    const response = await authAxiosInstance.get<string, SearchResultResponse>(
+      `book/search/list?q=${searchTerm}`,
+    );
+    console.log('읽고 싶은 책 검색 API 응답:', response);
+    return response;
+  } catch (error) {
+    console.error('읽고 싶은 책 검색 API 호출 중 오류 발생:', error);
+    throw error; // 오류를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  }
+};
