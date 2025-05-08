@@ -34,7 +34,7 @@ public class SearchLoggingAspect {
      * searchList 메서드가 정상적으로 실행 완료된 후에 실행되는 어드바이스
      *
      * @param joinPoint AOP의 기본 객체로 메서드 정보에 접근 가능
-     * @param q         메서드에 전달된 검색어 파라미터 (args(q)로 바인딩)
+     * @param itemId    메서드에 전달된 검색어 파라미터 (args(q)로 바인딩)
      * @param result    메서드 실행 결과값 (returning="result"로 바인딩)
      */
     @AfterReturning(
