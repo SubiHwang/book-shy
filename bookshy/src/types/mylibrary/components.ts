@@ -1,0 +1,48 @@
+// src/types/mylibrary/components.ts
+
+// 책 읽은 수 배너 데이터
+export interface BooksBannerData {
+  totalBooks: number;
+  achievement?: string;
+}
+
+// 교환 배너 데이터
+export interface ExchangeBannerData {
+  exchangeCount: number; // 교환 횟수
+  peopleCount: number; // 교환한 사람 수
+  lastExchangeDate?: string; // 마지막 교환 날짜
+}
+
+// 장르 배너 데이터
+export interface GenreBannerData {
+  favoriteGenre: string; // 선호 장르
+  genreDescription: string; // 장르 설명
+  matchingRate: number; // 장르 일치율 (0-100)
+}
+
+// 모든 배너 데이터를 포함하는 타입
+export interface AllBannersData {
+  booksData: BooksBannerData;
+  exchangeData: ExchangeBannerData;
+  genreData: GenreBannerData;
+}
+
+// 배너 카드 프롭스
+export interface BannerCardProps {
+  type: 'books' | 'exchange' | 'genre';
+  data: BooksBannerData | ExchangeBannerData | GenreBannerData;
+  className?: string;
+}
+
+// 배너 캐로셀 프롭스
+export interface BannerCarouselProps {
+  data: AllBannersData;
+  isLoading: boolean;
+  error: string | null;
+}
+
+// 기존 StatsCard 프롭스 (이전 코드와의 호환성)
+export interface StatsCardProps {
+  totalBooks: number;
+  achievement?: string;
+}

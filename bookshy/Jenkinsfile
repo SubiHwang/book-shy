@@ -1,0 +1,182 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "frontend"
+        DOCKER_IMAGE = "subihwang/frontend"
+        DOCKER_TAG = "latest"
+
+        // 원격 서버 정보
+        REMOTE_USER = credentials('remote-server-credentials')  // 원격 서버 접속용 사용자 이름/비밀번호
+        DEV_SERVER = "k12d204.p.ssafy.io"
+
+        // 환경 변수
+        VITE_BASE_URL = credentials('VITE_BASE_URL')
+        
+        // 프로젝트 경로 변수 추가
+        PROJECT_PATH = "${env.WORKSPACE}/bookshy" // 프로젝트 경로 설정
+    }
+
+    stages {
+        // gitLab 저장소에서 front 브랜치의 코드를 가져온 후 gitlab 자격 증명을 활용해 코드를 checkout
+        stage('Checkout Code') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: 'front']],  // front 브랜치로 변경
+                    userRemoteConfigs: [[
+                        url: 'https://lab.ssafy.com/s12-final/S12P31D204.git',
+                        credentialsId: 'lab-token'
+                    ]]
+                ])
+                sh 'echo "✅ 코드 체크아웃 완료"'
+            }
+        }
+        
+        // 프로젝트 구조 확인 단계 추가
+        stage('Check Project Structure') {
+            steps {
+                script {
+                    try {
+                        // 프로젝트 구조 확인
+                        sh '''
+                            echo "===== 전체 프로젝트 구조 확인 ====="
+                            find ${WORKSPACE} -type d -maxdepth 3 | sort
+                            
+                            echo "===== Dockerfile 찾기 ====="
+                            find ${WORKSPACE} -name "Dockerfile" | sort
+                            
+                            echo "===== book-shy-frontend 디렉토리 내용 ====="
+                            ls -la ${WORKSPACE}/book-shy-frontend || echo "디렉토리가 없습니다!"
+                            
+                            echo "===== bookshy 디렉토리 내용 ====="
+                            ls -la ${WORKSPACE}/book-shy-frontend/bookshy || echo "디렉토리가 없습니다!"
+                        '''
+                    } catch (Exception e) {
+                        echo "❌ 프로젝트 구조 확인 실패: ${e.message}"
+                        // 구조 확인 실패라도 다음 단계로 진행
+                    }
+                }
+            }
+        }
+
+        // Dockerfile을 사용하여 애플리케이션 빌드 및 이미지 생성
+        stage('Build Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_HUB_PSW', usernameVariable: 'DOCKER_HUB_USR')]) {
+                    dir("${PROJECT_PATH}") {  // 정확한 디렉토리로 변경
+                        script {
+                            try {
+                                // 환경 변수 파일 생성
+                                sh """
+                                    echo "VITE_BASE_URL=${VITE_BASE_URL}" > .env
+                                    cat .env
+                                """
+                                
+                                // Docker 이미지 빌드
+                                sh """
+                                    set -e
+                                    echo "✅ Docker 이미지 빌드 시작 (현재 디렉토리: ${PROJECT_PATH})"
+                                    ls -la  # 현재 디렉토리 내용 확인
+                                    echo "Dockerfile 내용:"
+                                    cat Dockerfile || echo "Dockerfile이 여전히 없습니다!"
+                                    docker build -t ${DOCKER_HUB_USR}/${IMAGE_NAME}:latest .
+                                    echo "✅ Docker 이미지 빌드 완료"
+                                """
+                            } catch (Exception e) {
+                                echo "❌ Docker 이미지 빌드 실패: ${e.message}"
+                                error "Build failed: ${e.message}"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 빌드된 Docker 이미지를 Docker Hub에 업로드하는 단계
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_HUB_PSW', usernameVariable: 'DOCKER_HUB_USR')]) {
+                    sh 'echo $DOCKER_HUB_PSW | docker login -u $DOCKER_HUB_USR --password-stdin'
+                    sh 'docker push ${DOCKER_HUB_USR}/${IMAGE_NAME}:latest'
+                }
+            }
+        }
+
+        stage('Deploy'){
+            steps{
+                script{
+                    try{
+                        // 직접 배포 방식으로 변경
+                        sshagent(credentials: ['remote-server-credentials']) {
+                            // 원격 서버에 배포 디렉토리 생성 및 설정
+                            sh '''
+                                ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
+                                mkdir -p /home/ubuntu/frontend
+                                "
+                                
+                                # docker-compose.yml 파일 복사
+                                scp -o StrictHostKeyChecking=no ${PROJECT_PATH}/docker-compose.yml ubuntu@${DEV_SERVER}:/home/ubuntu/frontend/
+                                
+                                # 애플리케이션 배포 및 실행
+                                ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
+                                cd /home/ubuntu/frontend && 
+                                docker-compose pull &&
+                                docker-compose up -d
+                                "
+                                
+                                echo "✅ 배포 완료"
+                            '''
+                        }
+                    } catch (Exception e) {
+                        // 오류 발생 시 파이프라인 중단
+                        error "❌ 배포 실패: ${e.getMessage()}"
+                    }
+                }
+            }
+        }
+
+        // 성공적인 배포 후 이전 버전을 정리하는 단계
+        stage('Cleanup Old Deployment'){
+            steps {
+                // 이전 컨테이너 및 이미지 정리
+                sshagent(credentials: ['remote-server-credentials']) {
+                    sh '''
+                        # 사용하지 않는 컨테이너 정리
+                        ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} 'docker container prune -f'
+
+                        # 태그가 없는 이미지 정리
+                        ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} 'docker image prune -f'
+
+                        echo "✅ 이전 배포 정리 완료"
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                try {
+                    // 작업 공간 정리
+                    cleanWs()
+                } catch (Exception e) {
+                    echo "작업 공간 정리 중 오류 발생: ${e.message}"
+                }
+            }
+        }
+        success {
+            echo '✅ 파이프라인이 성공!'
+        }
+        failure{
+            // 실패 시 알림
+            echo '❌ 파이프라인 실패'
+            emailext (
+                subject: "실패: 파이프라인 '${currentBuild.fullDisplayName}'",
+                body: "파이프라인이 실패했습니다. 빌드 URL: ${env.BUILD_URL}",
+                to: 'ghkdtnql@gmail.com'
+            )
+        }
+    }
+}

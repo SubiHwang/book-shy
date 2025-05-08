@@ -1,0 +1,15 @@
+services:
+  frontend:
+    image: subihwang/frontend:latest
+    container_name: frontend
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+    restart: always
+    networks:
+      - shy
+
+networks:
+  shy:
+    external: true
