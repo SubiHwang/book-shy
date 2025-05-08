@@ -43,16 +43,27 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
   // 로그인 뮤테이션
   const { mutate: login } = useMutation({
     mutationFn: async ({ token, fcmToken }: { token: string; fcmToken: string }) => {
-      // 로그인 API 호출
-      const response = await kakaoLogin({ token, fcmToken });
-      const { accessToken, refreshToken } = response;
+      try {
+        const response = await kakaoLogin({ token, fcmToken });
+        const { accessToken, refreshToken } = response;
 
-      localStorage.setItem('auth_token', accessToken);
-      localStorage.setItem('refresh_token', refreshToken);
+        localStorage.setItem('auth_token', accessToken);
+        localStorage.setItem('refresh_token', refreshToken);
+
+        return accessToken;
+      } catch (error) {
+        console.error('로그인 실패:', error);
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('refresh_token');
+        throw error;
+      }
     },
-    onSuccess: (userData) => {
-      // 사용자 정보 캐시 업데이트
-      queryClient.setQueryData(['auth-user'], userData);
+    onSuccess: (accessToken) => {
+      queryClient.setQueryData(['auth-user'], accessToken);
+    },
+    onError: (error) => {
+      console.error('로그인 뮤테이션 에러:', error);
+      queryClient.setQueryData(['auth-user'], null);
     },
   });
 
