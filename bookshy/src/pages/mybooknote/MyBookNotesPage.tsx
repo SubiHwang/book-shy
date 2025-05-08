@@ -7,7 +7,7 @@ import type { BookNote } from '@/types/mybooknote/booknote';
 import type { BookQuote } from '@/types/mybooknote/bookquote';
 
 const MyBookNotePage = () => {
-  const userId = 1;
+  const userId = 2;
 
   const { data: notes = [], isLoading: notesLoading } = useQuery<BookNote[], Error>({
     queryKey: ['my-booknotes', userId],
