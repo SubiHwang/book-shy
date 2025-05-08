@@ -25,7 +25,6 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const [showOptions, setShowOptions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const hasInitialized = useRef(false);
 
   const { data: initialMessages = [] } = useQuery({
     queryKey: ['chatMessages', numericRoomId],
@@ -43,10 +42,9 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   }, [numericRoomId]);
 
   useEffect(() => {
-    if (hasInitialized.current) return;
-    hasInitialized.current = true;
-
-    if (initialMessages.length === 0) {
+    if (initialMessages.length > 0 && messages.length === 0) {
+      setMessages(initialMessages);
+    } else if (initialMessages.length === 0 && messages.length === 0) {
       const now = new Date();
       const noticeMessage: ChatMessage = {
         id: 'notice-' + Date.now(),
@@ -57,21 +55,28 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
         type: 'notice',
       };
       setMessages([noticeMessage]);
-    } else {
-      setMessages(initialMessages);
     }
-  }, [initialMessages]);
+  }, [initialMessages, messages.length]);
 
   const { sendMessage } = useStomp(numericRoomId, (newMessage: ChatMessage) => {
     setMessages((prev) => [...prev, newMessage]);
   });
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, showOptions]);
+    scrollToBottom(messages.length === 1);
+  }, [messages]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+  const scrollToBottom = (smooth = true) => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: smooth ? 'smooth' : 'auto',
+    });
+  };
+
+  const isScrolledToBottom = (): boolean => {
+    const container = messagesEndRef.current?.parentElement;
+    if (!container) return false;
+    const threshold = 100;
+    return container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
   };
 
   const handleSendMessage = (content: string) => {
@@ -95,7 +100,11 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   };
 
   const toggleOptions = () => {
+    const shouldScroll = isScrolledToBottom();
     setShowOptions((prev) => !prev);
+    setTimeout(() => {
+      if (shouldScroll) scrollToBottom(true);
+    }, 0);
   };
 
   const formatDateLabel = (isoTimestamp: string) => {
