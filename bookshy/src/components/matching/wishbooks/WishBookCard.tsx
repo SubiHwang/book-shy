@@ -15,7 +15,7 @@ const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
       {/* Book Image */}
       <div className="flex-shrink-0 w-24 h-32 mr-4">
         <img
-          src={wishBook.bookImgUrl}
+          src={wishBook.coverImageUrl}
           alt={wishBook.title}
           className="w-full h-full object-cover rounded-md shadow-sm"
         />
@@ -25,13 +25,10 @@ const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
       <div className="flex-grow">
         <h3 className="text-lg font-medium text-light-text mb-1 truncate">{wishBook.title}</h3>
         <p className="text-sm font-light text-light-text-muted mb-1">{wishBook.author}</p>
-        {wishBook.translator && (
-          <p className="text-sm font-light text-light-text-muted mb-1">{wishBook.translator}</p>
-        )}
         <p className="text-sm font-light text-light-text-muted mb-1">{wishBook.publisher}</p>
-        {wishBook.summary && (
+        {wishBook.description && (
           <p className="text-sm font-light text-light-text-muted line-clamp-2 overflow-hidden mb-1">
-            {wishBook.summary}
+            {wishBook.description}
           </p>
         )}
       </div>
