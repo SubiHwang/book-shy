@@ -31,7 +31,6 @@ pipeline {
         ALADIN_BASE_URL = credentials('ALADIN_BASE_URL')
         NAVER_OCR_SECRET_KEY = credentials('NAVER_OCR_SECRET_KEY')
         NAVER_OCR_URL = credentials('NAVER_OCR_URL')
-        KAKAO_USER_INFO_URI = credentials('KAKAO_USER_INFO_URI')
 
         KAKAO_USER_INFO_URI = credentials('KAKAO_USER_INFO_URI')
         KAKAO_CLIENT_ID = credentials('KAKAO_CLIENT_ID')        // 추가
