@@ -12,4 +12,10 @@ public class KakaoConfig {
     @Value("${oauth.kakao.user-info-uri}")
     private String userInfoUri;
 
+    @Value("${oauth.kakao.client-id}")
+    private String clientId;
+
+    @Value("${oauth.kakao.redirect-uri}")
+    private String redirectUri;
+
 }
