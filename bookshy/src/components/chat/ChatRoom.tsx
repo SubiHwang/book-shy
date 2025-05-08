@@ -26,7 +26,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
 
-  const { data: initialMessages = [] } = useQuery({
+  const { data: initialMessages = [], isSuccess } = useQuery({
     queryKey: ['chatMessages', numericRoomId],
     queryFn: () => fetchMessages(numericRoomId),
     enabled: !isNaN(numericRoomId),
@@ -42,6 +42,8 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   }, [numericRoomId]);
 
   useEffect(() => {
+    if (!isSuccess) return;
+
     if (initialMessages.length > 0 && messages.length === 0) {
       setMessages(initialMessages);
     } else if (initialMessages.length === 0 && messages.length === 0) {
@@ -56,7 +58,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
       };
       setMessages([noticeMessage]);
     }
-  }, [initialMessages, messages.length]);
+  }, [initialMessages, isSuccess, messages.length]);
 
   const { sendMessage } = useStomp(numericRoomId, (newMessage: ChatMessage) => {
     setMessages((prev) => [...prev, newMessage]);
