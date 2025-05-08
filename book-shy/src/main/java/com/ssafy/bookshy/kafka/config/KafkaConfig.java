@@ -1,10 +1,6 @@
 package com.ssafy.bookshy.kafka.config;
 
-import com.ssafy.bookshy.domain.recommend.dto.RecommendMessageKafkaDto;
-import com.ssafy.bookshy.kafka.dto.BookCreatedDto;
-import com.ssafy.bookshy.kafka.dto.ChatMessageKafkaDto;
-import com.ssafy.bookshy.kafka.dto.MatchSuccessDto;
-import com.ssafy.bookshy.kafka.dto.TradeSuccessDto;
+import com.ssafy.bookshy.kafka.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -53,9 +49,9 @@ public class KafkaConfig {
      */
     @Bean
     public <T> ProducerFactory<String, T> producerFactory() {
-        JsonSerializer<T> serializer = new JsonSerializer<>();
-        serializer.setAddTypeInfo(false);
-        return new DefaultKafkaProducerFactory<>(producerConfig(), new StringSerializer(), serializer);
+//        JsonSerializer<T> serializer = new JsonSerializer<>();
+//        serializer.setAddTypeInfo(false);
+        return new DefaultKafkaProducerFactory<>(producerConfig());
     }
 
     /**
@@ -120,8 +116,11 @@ public class KafkaConfig {
         return listenerFactory(ChatMessageKafkaDto.class, env.getProperty("spring.kafka.consumer.chat-group-id"));
     }
 
+    //recommend 그룹을 생성함
+    //"RecommendMessageKafkaDto 메시지를 주고받음"
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, RecommendMessageKafkaDto> recommendListenerFactory() {
+        //env.getProperty("spring.kafka.consumer.recommend-group-id")에서 그룹 ID를 가져옴
         return listenerFactory(RecommendMessageKafkaDto.class, env.getProperty("spring.kafka.consumer.recommend-group-id"));
     }
 

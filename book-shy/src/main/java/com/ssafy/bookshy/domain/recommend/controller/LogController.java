@@ -1,6 +1,6 @@
 package com.ssafy.bookshy.domain.recommend.controller;
 
-import com.ssafy.bookshy.domain.recommend.dto.RecommendMessageKafkaDto;
+import com.ssafy.bookshy.domain.recommend.dto.ClientLogRequestDto;
 import com.ssafy.bookshy.domain.recommend.service.LoggingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,7 +37,7 @@ public class LogController {
     @PostMapping("/client")
     public ResponseEntity<Void> logClientEvent(
             @Parameter(description = "로깅할 이벤트 정보", required = true)
-            @RequestBody RecommendMessageKafkaDto logDto) {
+            @RequestBody ClientLogRequestDto logDto) {
         String userId = getUserId();
         loggingService.processClientLog(userId, logDto);
         return ResponseEntity.ok().build();
@@ -51,9 +51,9 @@ public class LogController {
     @PostMapping("/client/batch")
     public ResponseEntity<Void> logClientEvents(
             @Parameter(description = "로깅할 이벤트 목록", required = true)
-            @RequestBody List<RecommendMessageKafkaDto> logDtos) {
+            @RequestBody List<ClientLogRequestDto> logDtos) {
         String userId = getUserId();
-        for (RecommendMessageKafkaDto logDto : logDtos) {
+        for (ClientLogRequestDto logDto : logDtos) {
             loggingService.processClientLog(userId, logDto);
         }
         return ResponseEntity.ok().build();
