@@ -45,8 +45,6 @@ export default defineConfig({
           },
         ],
       },
-      // Firebase 메시징 서비스 워커 설정 추가
-      strategies: 'injectManifest',
       manifest: {
         name: '북끄북끄',
         short_name: '북끄북끄',
