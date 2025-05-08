@@ -1,13 +1,12 @@
 export interface Book {
-  bookId: number;
+  itemId: number;
   title?: string;
   author?: string;
-  translator?: string;
   publisher?: string;
-  summary?: string;
+  description?: string;
   publishDate?: string;
   pages?: number;
-  categories?: string;
+  coverImageUrl?: string;
   bookImgUrl?: string;
 }
 
