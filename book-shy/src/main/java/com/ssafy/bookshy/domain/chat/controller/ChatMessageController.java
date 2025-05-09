@@ -3,11 +3,13 @@ package com.ssafy.bookshy.domain.chat.controller;
 import com.ssafy.bookshy.domain.chat.dto.AddEmojiRequestDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatMessageResponseDto;
 import com.ssafy.bookshy.domain.chat.service.ChatMessageService;
+import com.ssafy.bookshy.domain.users.entity.Users;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -51,8 +53,8 @@ public class ChatMessageController {
     @PostMapping("/{chatRoomId}/read")
     public void markMessagesAsRead(
             @PathVariable Long chatRoomId,
-            @RequestParam Long userId
+            @AuthenticationPrincipal Users user
     ) {
-        chatMessageService.markMessagesAsRead(chatRoomId, userId);
+        chatMessageService.markMessagesAsRead(chatRoomId, user.getUserId());
     }
 }
