@@ -1,41 +1,40 @@
 import { useEffect, useRef } from 'react';
-import SockJS from 'sockjs-client';
-import { CompatClient, Stomp } from '@stomp/stompjs';
+import { useWebSocket } from '@/contexts/WebSocketProvider';
+import type { ChatMessage } from '@/types/chat/chat.ts';
+import { IMessage } from '@stomp/stompjs';
 
-const SOCKET_URL = 'http://k12d204.p.ssafy.io:8080';
+export const useStomp = (roomId: number, onMessage: (msg: ChatMessage) => void) => {
+  const { subscribeRoom, unsubscribe, sendMessage: sendWS, isConnected } = useWebSocket();
 
-export const useStomp = (chatRoomId: number, onMessage: (message: any) => void) => {
-  const clientRef = useRef<CompatClient | null>(null);
+  const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
 
   useEffect(() => {
-    const socket = new SockJS(SOCKET_URL);
-    const stompClient = Stomp.over(socket);
-    clientRef.current = stompClient;
+    if (!isConnected || !roomId) return;
 
-    stompClient.connect({}, () => {
-      stompClient.subscribe(`/topic/chat/${chatRoomId}`, (message) => {
-        const payload = JSON.parse(message.body);
+    const sub = subscribeRoom(roomId, (frame: IMessage) => {
+      try {
+        const payload = JSON.parse(frame.body) as ChatMessage;
         onMessage(payload);
-      });
+      } catch (e) {
+        console.error('❌ STOMP 메시지 파싱 실패', e);
+      }
     });
 
+    subscriptionRef.current = sub;
+
     return () => {
-      stompClient.disconnect(() => {
-        console.log('Disconnected');
-      });
+      unsubscribe(subscriptionRef.current);
+      subscriptionRef.current = null;
     };
-  }, [chatRoomId, onMessage]);
+  }, [roomId, isConnected, subscribeRoom, unsubscribe, onMessage]);
 
-  const sendMessage = (chatRoomId: number, senderId: number, content: string) => {
-    if (!clientRef.current || !clientRef.current.connected) return;
-
-    const payload = {
-      chatRoomId,
-      senderId,
-      content,
-    };
-
-    clientRef.current.send('/app/chat.send', {}, JSON.stringify(payload));
+  const sendMessage = (
+    roomId: number,
+    senderId: number,
+    content: string,
+    type: string = 'chat',
+  ) => {
+    sendWS(roomId, senderId, content, type);
   };
 
   return { sendMessage };
