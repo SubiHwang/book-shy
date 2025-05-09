@@ -16,5 +16,8 @@ FROM nginx:alpine
 # vite 프로젝트는 dist 폴더에 빌드 결과물이 생성됨
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# 중요: public 디렉토리 내용도 복사
+COPY --from=build /app/public /usr/share/nginx/html
+
 CMD ["nginx", "-g", "daemon off;"]
 EXPOSE 80
