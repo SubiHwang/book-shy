@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { ChatMessage } from '@/types/chat/chat.ts';
 import ChatMessageItem from './ChatMessageItem.tsx';
 import ChatInput from './ChatInput.tsx';
@@ -6,7 +6,7 @@ import ChatRoomHeader from './ChatRoomHeader.tsx';
 import ScheduleModal from './ScheduleModal.tsx';
 import SystemMessage from './SystemMessage.tsx';
 import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchMessages, markMessagesAsRead } from '@/services/chat/chat.ts';
 import { useStomp } from '@/hooks/chat/useStomp.ts';
 
@@ -19,14 +19,20 @@ interface Props {
 function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const { roomId } = useParams();
   const numericRoomId = Number(roomId);
-  const myUserId = 1; // 추후 로그인 사용자 ID로 교체 예정
+  const myUserId = 4; // 로그인 유저 id로 바꿔야함
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showOptions, setShowOptions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
 
-  const { data: initialMessages = [], isSuccess } = useQuery({
+  const queryClient = useQueryClient();
+
+  const {
+    data: initialMessages = [],
+    isSuccess,
+    refetch,
+  } = useQuery({
     queryKey: ['chatMessages', numericRoomId],
     queryFn: () => fetchMessages(numericRoomId),
     enabled: !isNaN(numericRoomId),
@@ -35,34 +41,58 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
 
   useEffect(() => {
     if (!isNaN(numericRoomId)) {
-      markMessagesAsRead(numericRoomId, myUserId).catch((err) =>
-        console.error('❌ 읽음 처리 실패:', err),
-      );
+      markMessagesAsRead(numericRoomId, myUserId)
+        .then(() => refetch())
+        .catch((err) => console.error('❌ 읽음 처리 실패:', err));
     }
-  }, [numericRoomId]);
+  }, [numericRoomId, myUserId, refetch]);
 
   useEffect(() => {
-    if (!isSuccess) return;
-
-    if (initialMessages.length > 0 && messages.length === 0) {
+    if (isSuccess) {
       setMessages(initialMessages);
-    } else if (initialMessages.length === 0 && messages.length === 0) {
-      const now = new Date();
-      const noticeMessage: ChatMessage = {
-        id: 'notice-' + Date.now(),
-        senderId: 'system',
-        content:
-          '도서 교환은 공공장소에서 진행하고, 책 상태를 미리 확인하세요.\n과도한 개인정보 요청이나 외부 연락 유도는 주의하세요.\n도서 상호 대여 서비스 사용 시 반납 기한을 꼭 지켜주세요!\n안전하고 즐거운 독서 문화 함께 만들어가요!',
-        sentAt: now.toISOString(),
-        type: 'notice',
-      };
-      setMessages([noticeMessage]);
     }
-  }, [initialMessages, isSuccess, messages.length]);
+  }, [initialMessages, isSuccess]);
 
-  const { sendMessage } = useStomp(numericRoomId, (newMessage: ChatMessage) => {
-    setMessages((prev) => [...prev, newMessage]);
-  });
+  useEffect(() => {
+    if (!isNaN(numericRoomId)) {
+      markMessagesAsRead(numericRoomId, myUserId)
+        .then(() => {
+          refetch();
+
+          queryClient.setQueryData(['chatList', myUserId], (prev: any) => {
+            if (!Array.isArray(prev)) return prev;
+            return prev.map((room: any) =>
+              room.id === numericRoomId ? { ...room, unreadCount: 0 } : room,
+            );
+          });
+        })
+        .catch((err) => console.error('❌ 읽음 처리 실패:', err));
+    }
+  }, [numericRoomId, myUserId, refetch, queryClient]);
+
+  const onMessage = useCallback(
+    (newMessage: ChatMessage) => {
+      setMessages((prev) => {
+        const exists = prev.some((m) => m.id === newMessage.id);
+        return exists ? prev : [...prev, newMessage];
+      });
+
+      queryClient.setQueryData(['chatList', myUserId], (prev: any) => {
+        return prev.map((room: any) =>
+          room.id === newMessage.chatRoomId
+            ? {
+                ...room,
+                lastMessage: newMessage.content,
+                lastMessageTime: newMessage.sentAt,
+              }
+            : room,
+        );
+      });
+    },
+    [queryClient, myUserId],
+  );
+
+  const { sendMessage } = useStomp(numericRoomId, onMessage);
 
   useEffect(() => {
     scrollToBottom(messages.length === 1);
@@ -92,13 +122,15 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   ) => {
     const now = new Date();
     const newMessage: ChatMessage = {
-      id: String(Date.now()),
-      senderId: 'system',
+      id: `system-${Date.now()}`,
+      senderId: -1,
+      chatRoomId: numericRoomId,
       content,
       sentAt: now.toISOString(),
       type,
     };
     setMessages((prev) => [...prev, newMessage]);
+    sendMessage(numericRoomId, -1, content, type);
   };
 
   const toggleOptions = () => {
@@ -139,7 +171,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
           const showDate = dateLabel !== lastDateLabel;
           lastDateLabel = dateLabel;
 
-          const isSystem = msg.senderId === 'system';
+          const isSystem = msg.senderId === -1;
 
           return (
             <div key={msg.id}>
@@ -160,12 +192,16 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
                         : undefined
                   }
                   content={msg.content}
-                  variant={msg.type ?? 'info'}
+                  variant={
+                    msg.type === 'notice' || msg.type === 'info' || msg.type === 'warning'
+                      ? msg.type
+                      : undefined
+                  }
                 />
               ) : (
                 <ChatMessageItem
                   message={{ ...msg, sentAt: formatTime(msg.sentAt) }}
-                  isMyMessage={Number(msg.senderId) === myUserId}
+                  isMyMessage={msg.senderId === myUserId}
                 />
               )}
             </div>
