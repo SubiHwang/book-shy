@@ -9,7 +9,7 @@ const LibraryBookListPage = () => {
   const navigate = useNavigate();
   const { data = [] } = useQuery<LibraryBook[]>({
     queryKey: ['library-books'],
-    queryFn: () => fetchLibraryBooks(1),
+    queryFn: () => fetchLibraryBooks(),
   });
 
   const [filter, setFilter] = useState<'ALL' | 'X'>('ALL');

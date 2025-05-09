@@ -18,7 +18,7 @@ const BookNoteCreatePage: React.FC = () => {
 
   const { data: libraryBooks = [] } = useQuery<LibraryBook[], Error>({
     queryKey: ['library-books'],
-    queryFn: () => fetchLibraryBooks(userId),
+    queryFn: () => fetchLibraryBooks(),
     enabled: bookId !== null,
   });
 
