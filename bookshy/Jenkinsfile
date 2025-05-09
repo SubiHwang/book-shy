@@ -79,7 +79,7 @@ pipeline {
                             try {
                                 // 환경 변수 파일 생성
                                 sh """
-                                    echo "VITE_BASE_URL=${VITE_BASE_URL}" > .env
+                                    echo "VITE_BASE_URL=${VITE_BASE_URL}" >> .env
                                     echo "VITE_KAKAO_CLIENT_ID=${VITE_KAKAO_CLIENT_ID}" >> .env
                                     echo "VITE_KAKAO_REDIRECT_URI=${VITE_KAKAO_REDIRECT_URI}" >> .env
                                     echo "VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}" >> .env
