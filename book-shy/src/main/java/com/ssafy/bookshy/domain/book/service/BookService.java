@@ -38,9 +38,9 @@ public class BookService {
     }
 
     @Transactional
-    public void addWish(WishRequestDto dto) {
-        Users user = userService.getUserById(dto.getUserId());
+    public void addWish(Long userId, WishRequestDto dto) {
 
+        Users user = userService.getUserById(userId);
         Book book = bookRepository.findByAladinItemId(dto.getItemId())
                 .orElseGet(() -> {
                     BookResponseDto response = aladinClient.searchByItemIdToDto(dto.getItemId());
@@ -80,6 +80,7 @@ public class BookService {
 
     @Transactional
     public void removeWish(Long userId, Long itemId) {
+
         Users user = userService.getUserById(userId);
         Book book = bookRepository.findByAladinItemId(itemId)
                 .orElseThrow(() -> new RuntimeException("도서 없음"));
@@ -90,6 +91,7 @@ public class BookService {
     }
 
     public BookListTotalResponseDto getWishList(Long userId) {
+
         Users user = userService.getUserById(userId);
         List<Wish> wishList = wishRepository.findAllByUser(user);
 
@@ -113,11 +115,13 @@ public class BookService {
     }
 
     public boolean isBookLiked(Long userId, Book book) {
+
         Users user = userService.getUserById(userId);
         return wishRepository.existsByUserAndBook(user, book);
     }
 
     public boolean isBookLiked(Long userId, Long itemId) {
+
         Users user = userService.getUserById(userId);
         return bookRepository.findByAladinItemId(itemId)
                 .map(book -> wishRepository.existsByUserAndBook(user, book))
@@ -125,6 +129,7 @@ public class BookService {
     }
 
     public boolean isBookLiked(Long userId, String isbn13) {
+
         Users user = userService.getUserById(userId);
         return bookRepository.findByIsbn(isbn13)
                 .map(book -> wishRepository.existsByUserAndBook(user, book))

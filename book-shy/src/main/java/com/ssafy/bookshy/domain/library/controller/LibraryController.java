@@ -4,6 +4,7 @@ import com.ssafy.bookshy.domain.library.dto.LibraryResponseDto;
 import com.ssafy.bookshy.domain.library.dto.LibrarySearchAddRequestDto;
 import com.ssafy.bookshy.domain.library.dto.LibrarySelfAddRequestDto;
 import com.ssafy.bookshy.domain.library.service.LibraryService;
+import com.ssafy.bookshy.domain.users.entity.Users;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,11 +36,12 @@ public class LibraryController {
     })
     @PostMapping("/isbn")
     public ResponseEntity<LibraryResponseDto> registerByIsbn(
-            @RequestParam @Parameter(description = "사용자 ID", example = "1") Long userId,
+            @AuthenticationPrincipal Users user,
             @RequestParam @Parameter(description = "ISBN13", example = "9788934951711") String isbn13,
             @RequestParam(required = false, defaultValue = "false")
             @Parameter(description = "공개 여부 (기본값: false)") Boolean isPublic
     ) {
+        Long userId = user.getUserId();
         return ResponseEntity.ok(libraryService.registerByIsbn(userId, isbn13, isPublic));
     }
 
@@ -72,21 +75,24 @@ public class LibraryController {
     @Operation(summary = "📗 전체 서재 조회", description = "특정 사용자의 전체 서재 도서를 조회합니다.")
     @GetMapping
     public ResponseEntity<List<LibraryResponseDto>> getLibrary(
-            @RequestParam @Parameter(description = "사용자 ID") Long userId) {
+            @AuthenticationPrincipal Users user) {
+        Long userId = user.getUserId();
         return ResponseEntity.ok(libraryService.findLibraryByUser(userId));
     }
 
     @Operation(summary = "📗 공개 서재 조회", description = "특정 사용자의 공개된 도서만 조회합니다.")
     @GetMapping("/public")
     public ResponseEntity<List<LibraryResponseDto>> getPublicLibrary(
-            @RequestParam @Parameter(description = "사용자 ID") Long userId) {
+            @AuthenticationPrincipal Users user) {
+        Long userId = user.getUserId();
         return ResponseEntity.ok(libraryService.findPublicLibraryByUser(userId));
     }
 
     @Operation(summary = "📊 서재 통계 조회", description = "사용자의 전체 등록 도서 수 및 공개 도서 수를 반환합니다.")
     @GetMapping("/count")
     public ResponseEntity<Map<String, Long>> getCounts(
-            @RequestParam @Parameter(description = "사용자 ID") Long userId) {
+            @AuthenticationPrincipal Users user) {
+        Long userId = user.getUserId();
         return ResponseEntity.ok(libraryService.countLibrary(userId));
     }
 
@@ -98,9 +104,10 @@ public class LibraryController {
     })
     @PostMapping("/search/add")
     public ResponseEntity<LibraryResponseDto> addBookFromSearch(
-            @RequestParam @Parameter(description = "사용자 ID", example = "1") Long userId,
+            @AuthenticationPrincipal Users user,
             @RequestParam @Parameter(description = "알라딘 Item ID", example = "123456789") Long itemId
     ) {
+        Long userId = user.getUserId();
         LibrarySearchAddRequestDto dto = new LibrarySearchAddRequestDto(userId, itemId);
         return ResponseEntity.ok(libraryService.addBookFromSearch(dto));
     }
@@ -112,13 +119,14 @@ public class LibraryController {
     })
     @PostMapping(value = "/self/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<LibraryResponseDto> addSelfBook(
-            @Parameter(description = "사용자 ID", example = "1") @RequestParam Long userId,
+            @AuthenticationPrincipal Users user,
             @Parameter(description = "도서 제목", example = "총 균 쇠") @RequestParam String title,
             @Parameter(description = "저자", example = "제레드 다이아몬드") @RequestParam String author,
             @Parameter(description = "출판사", example = "김영사") @RequestParam String publisher,
             @Parameter(description = "표지 이미지 파일") @RequestPart MultipartFile coverImage,
             @Parameter(description = "공개 여부", example = "false") @RequestParam boolean isPublic
     ) {
+        Long userId = user.getUserId();
         LibrarySelfAddRequestDto dto = LibrarySelfAddRequestDto.builder()
                 .userId(userId)
                 .title(title)
