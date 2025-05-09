@@ -1,98 +1,112 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Book } from '@/types/book';
+// src/components/mylibrary/BookDetail/BookInfoTab.tsx
+import React from 'react';
+import { useOutletContext } from 'react-router-dom';
+import { BookDetailResponse } from '@/services/mylibrary/bookDetailService';
+
+interface BookDetailContext {
+  bookDetail: BookDetailResponse & { libraryId: number; isPublic: boolean };
+}
 
 const BookInfoTab: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const [book, setBook] = useState<Book | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { bookDetail } = useOutletContext<BookDetailContext>();
 
-  useEffect(() => {
-    // 데이터 가져오기
-    const fetchBookDetail = async () => {
-      if (!id) return;
-
-      try {
-        setLoading(true);
-
-        // 실제 API 호출로 대체 필요
-        setTimeout(() => {
-          const mockBook: Book = {
-            bookId: parseInt(id),
-            title: '어린왕자',
-            author: '생텍쥐페리',
-            publisher: '더스토리북',
-            description:
-              "어린 시절부터 어른이 된 지금까지 전 세계인의 사랑을 받는 가장 위대한 이야기. 생텍쥐페리의 '어린 왕자'는 사막에 불시착한 조종사가 어린 왕자를 만나면서 펼쳐지는 환상적인 이야기로, 어린이와 어른 모두에게 참의 본질과 사랑의 의미를 일깨워주는 작품입니다.",
-            publishDate: '2014년 8월 15일',
-            pages: 138,
-            categories: '소설 > 고전문학',
-            bookImgUrl: 'https://image.aladin.co.kr/product/11990/17/cover/8952766989_1.jpg',
-          };
-          setBook(mockBook);
-          setLoading(false);
-        }, 300);
-      } catch (error) {
-        console.error('책 정보를 가져오는 중 오류 발생:', error);
-        setLoading(false);
-      }
-    };
-
-    fetchBookDetail();
-  }, [id]);
-
-  if (loading || !book) {
-    return (
-      <div className="flex justify-center py-6">
-        <div className="w-8 h-8 border-4 border-gray-200 border-t-red-500 rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  if (!bookDetail) return null;
 
   return (
-    <div className="m-5">
-      <h3 className="text-lg font-medium mb-4">도서 정보</h3>
-
-      <div className="mb-4 ">
-        <div className="flex items-center mb-2 ">
-          <div className="w-6 h-6 text-red-300 mr-2">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v12a3 3 0 01-3 3H5.25a3 3 0 01-3-3v-12a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" />
-            </svg>
-          </div>
-          <span className="text-gray-400">출간일</span>
-          <span className="ml-auto">{book.publishDate}</span>
-        </div>
-
-        <div className="flex items-center mb-2">
-          <div className="w-6 h-6 text-red-300 mr-2">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M11.25 4.533A9.707 9.707 0 006 3a9.735 9.735 0 00-3.25.555.75.75 0 00-.5.707v14.25a.75.75 0 001 .707A8.237 8.237 0 016 18.75c1.995 0 3.823.707 5.25 1.886V4.533zM12.75 20.636A8.214 8.214 0 0118 18.75c.966 0 1.89.166 2.75.47a.75.75 0 001-.708V4.262a.75.75 0 00-.5-.707A9.735 9.735 0 0018 3a9.707 9.707 0 00-5.25 1.533v16.103z" />
-            </svg>
-          </div>
-          <span className="text-gray-400">페이지</span>
-          <span className="ml-auto">{book.pages}쪽</span>
-        </div>
-
-        <div className="flex items-center mb-2">
-          <div className="w-6 h-6 text-red-300 mr-2">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+    <div className="px-4 py-5">
+      <h2 className="text-xl font-bold mb-4">도서 정보</h2>
+      <div className="bg-light-bg-secondary rounded-lg mb-4 shadow-sm">
+        <div className="flex items-center p-4 border-b border-gray-100">
+          {/* 달력 아이콘 - 원형 배경 추가 */}
+          <div className="w-8 h-8 mr-3 flex-shrink-0 rounded-full bg-red-100 flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-red-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
               <path
-                fillRule="evenodd"
-                d="M5.25 2.25a3 3 0 00-3 3v4.318a3 3 0 00.879 2.121l9.58 9.581c.92.92 2.39.92 3.31 0l4.569-4.57a2.25 2.25 0 000-3.18l-9.58-9.581a3 3 0 00-2.121-.879H5.25zM6.375 7.5a1.125 1.125 0 100-2.25 1.125 1.125 0 000 2.25z"
-                clipRule="evenodd"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
           </div>
-          <span className="text-gray-400">카테고리</span>
-          <span className="ml-auto">{book.categories}</span>
+          <div className="w-20 flex-shrink-0">
+            <p className="text-sm text-gray-500">출간일</p>
+          </div>
+          <div className="flex-grow text-right">
+            <p className="text-sm text-gray-700 font-medium">{bookDetail.pubDate || '정보 없음'}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center p-4 border-b border-gray-100">
+          {/* 책 페이지 아이콘 - 원형 배경 추가 */}
+          <div className="w-8 h-8 mr-3 flex-shrink-0 rounded-full bg-red-100 flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-red-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+              />
+            </svg>
+          </div>
+          <div className="w-20 flex-shrink-0">
+            <p className="text-sm text-gray-500">페이지</p>
+          </div>
+          <div className="flex-grow text-right">
+            <p className="text-sm text-gray-700 font-medium">
+              {bookDetail.pageCount ? `${bookDetail.pageCount}쪽` : '정보 없음'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center p-4">
+          {/* 태그 아이콘 - 원형 배경 추가 */}
+          <div className="w-8 h-8 mr-3 flex-shrink-0 rounded-full bg-red-100 flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-red-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+              />
+            </svg>
+          </div>
+          <div className="w-20 flex-shrink-0">
+            <p className="text-sm text-gray-500">카테고리</p>
+          </div>
+          <div className="flex-grow text-right">
+            <p className="text-sm text-gray-700 font-medium">
+              {bookDetail.category || '정보 없음'}
+            </p>
+          </div>
         </div>
       </div>
 
-      <h3 className="text-lg font-medium mb-2 mt-10">책 소개</h3>
-      <p className="text-sm leading-relaxed whitespace-pre-line">
-        {book.description || '책 소개가 없습니다.'}
-      </p>
+      <h2 className="text-xl font-bold mb-3">책 소개</h2>
+      <div className="bg-light-bg-secondary rounded-lg mb-6 shadow-sm">
+        <div className="p-4">
+          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+            {bookDetail.description || '책 소개 정보가 없습니다.'}
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
