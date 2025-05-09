@@ -25,6 +25,7 @@ pipeline {
 
         // Kafka
         KAFKA_BOOTSTRAP_SERVERS = credentials('KAFKA_BOOTSTRAP_SERVERS')
+        ELK_URL = credentials('ELK_URL')
 
         JWT_KEY = credentials('JWT_KEY')
         ALADIN_TTB_KEY = credentials('ALADIN_TTB_KEY')
