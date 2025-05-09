@@ -7,6 +7,7 @@ import com.ssafy.bookshy.domain.book.service.BookService;
 import com.ssafy.bookshy.domain.library.entity.Library;
 import com.ssafy.bookshy.domain.library.repository.LibraryRepository;
 import com.ssafy.bookshy.domain.ocr.service.OcrBookSearchService;
+import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.external.aladin.AladinClient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -59,8 +61,9 @@ public class BookController {
     @Operation(summary = "🔍 도서 검색 목록", description = "제목, 저자, 출판사 기반으로 검색된 도서 목록을 반환합니다.")
     public ResponseEntity<BookListTotalResponseDto> searchList(
             @RequestParam String q,
-            @RequestParam Long userId
+            @AuthenticationPrincipal Users user
     ) {
+        Long userId = user.getUserId();
         int start = 1;
         BookListTotalResponseDto response = aladinClient.searchListPreview(q, start);
 
@@ -76,7 +79,12 @@ public class BookController {
 
     @GetMapping("/search/detail")
     @Operation(summary = "📘 도서 상세 정보", description = "itemId 기반 상세 정보를 반환합니다.")
-    public ResponseEntity<BookResponseDto> searchDetail(@RequestParam Long itemId, @RequestParam Long userId) throws Exception {
+    public ResponseEntity<BookResponseDto> searchDetail(
+            @RequestParam Long itemId,
+            @AuthenticationPrincipal Users user
+    ) throws Exception {
+
+        Long userId = user.getUserId();
         JsonNode node = aladinClient.searchByItemId(itemId);
         JsonNode item = node.path("item").get(0);
         boolean isLiked = bookService.isBookLiked(userId, itemId);
@@ -85,7 +93,11 @@ public class BookController {
 
     @GetMapping("/search/isbn")
     @Operation(summary = "📘 ISBN 기반 도서 상세 검색", description = "ISBN 값으로 도서 정보를 조회합니다.")
-    public ResponseEntity<BookResponseDto> searchByIsbn13(@RequestParam String isbn13, @RequestParam Long userId) {
+    public ResponseEntity<BookResponseDto> searchByIsbn13(
+            @RequestParam String isbn13,
+            @AuthenticationPrincipal Users user
+    ) {
+        Long userId = user.getUserId();
         BookResponseDto dto = aladinClient.searchByIsbn13(isbn13);
         boolean isLiked = bookService.isBookLiked(userId, isbn13);
         dto.setIsLiked(isLiked);
@@ -99,11 +111,12 @@ public class BookController {
             @ApiResponse(responseCode = "400", description = "중복 등록 또는 도서 정보 없음")
     })
     public ResponseEntity<Void> addWish(
-            @RequestParam @Parameter(description = "사용자 ID", example = "1") Long userId,
-            @RequestParam @Parameter(description = "알라딘 Item ID", example = "123456789") Long itemId
+            @AuthenticationPrincipal Users user,
+            @RequestParam @Parameter(description = "알라딘 Item ID", example = "316294397") Long itemId
     ) {
-        WishRequestDto dto = new WishRequestDto(userId, itemId);
-        bookService.addWish(dto);
+        Long userId = user.getUserId();
+        WishRequestDto dto = new WishRequestDto(itemId);
+        bookService.addWish(userId, dto);
         return ResponseEntity.ok().build();
     }
 
@@ -113,7 +126,8 @@ public class BookController {
             @ApiResponse(responseCode = "200", description = "조회 성공")
     })
     public ResponseEntity<BookListTotalResponseDto> getWishList(
-            @RequestParam @Parameter(description = "사용자 ID", example = "1") Long userId) {
+            @AuthenticationPrincipal Users user) {
+        Long userId = user.getUserId();
         return ResponseEntity.ok(bookService.getWishList(userId));
     }
 
@@ -124,8 +138,10 @@ public class BookController {
             @ApiResponse(responseCode = "404", description = "찜한 도서를 찾을 수 없음")
     })
     public ResponseEntity<Void> removeWish(
-            @RequestParam @Parameter(description = "사용자 ID", example = "1") Long userId,
-            @RequestParam @Parameter(description = "알라딘 Item ID", example = "123456789") Long itemId) {
+            @AuthenticationPrincipal Users user,
+            @RequestParam @Parameter(description = "알라딘 Item ID", example = "316294397") Long itemId) {
+
+        Long userId = user.getUserId();
         bookService.removeWish(userId, itemId);
         return ResponseEntity.ok().build();
     }
@@ -138,14 +154,16 @@ public class BookController {
     })
     public ResponseEntity<BookLibraryResponseDto> getBookDetailByLibraryId(
             @RequestParam Long libraryId,
-            @RequestParam Long userId // ✅ 추가
+            @AuthenticationPrincipal Users user
     ) {
+
+        Long userId = user.getUserId();
         Library library = libraryRepository.findById(libraryId)
                 .orElseThrow(() -> new RuntimeException("서재 항목이 존재하지 않습니다."));
         Book book = library.getBook();
 
-        boolean isLiked = bookService.isBookLiked(userId, book); // ✅ 찜 여부 판단
-        return ResponseEntity.ok(BookLibraryResponseDto.from(book, library.isPublic(), isLiked)); // ✅ 응답 생성
+        boolean isLiked = bookService.isBookLiked(userId, book);
+        return ResponseEntity.ok(BookLibraryResponseDto.from(book, library.isPublic(), isLiked));
     }
 
 }
