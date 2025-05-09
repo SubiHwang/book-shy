@@ -23,15 +23,26 @@ export default defineConfig({
         'icons/favicon-16x16.png',
         'icons/favicon-32x32.png',
         'icons/favicon-48x48.png',
+        'firebase-messaging-sw.js',
       ],
       // Workbox 설정 추가
       workbox: {
         // 특정 경로는 서비스 워커에서 제외
+        // Firebase 메시징 SW 파일을 캐시하지 않도록 설정
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,gif}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         navigateFallbackDenylist: [
           /^\/jenkins\/.*/,
           /^\/sonarqube\/.*/,
           /^\/api\/.*/,
-          /^\/images\/.*/
+          /^\/images\/.*/,
+        ],
+        // Firebase 서비스 워커 파일 제외
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/www\.gstatic\.com\/firebasejs\/.*$/,
+            handler: 'NetworkFirst',
+          },
         ],
       },
       manifest: {

@@ -26,3 +26,6 @@ dist-ssr
 *.sw?
 .env
 .vite/
+
+# Firebase 서비스 워커 (민감한 API 키 포함)
+public/firebase-messaging-sw.js
