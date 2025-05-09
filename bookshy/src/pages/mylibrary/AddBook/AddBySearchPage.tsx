@@ -14,7 +14,7 @@ const AddBySearchPage: FC = () => {
   const [totalResults, setTotalResults] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState<boolean>(false);
-  const [addingItemId, setAddingItemId] = useState<number | null>(null);
+  // const [setAddingItemId] = useState<number | null>(null);
 
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -74,7 +74,7 @@ const AddBySearchPage: FC = () => {
 
     try {
       setIsAdding(true);
-      setAddingItemId(itemId);
+      // setAddingItemId(itemId);
 
       const selectedBook = books.find((book) => book.itemId === itemId);
       if (!selectedBook) {
@@ -100,7 +100,7 @@ const AddBySearchPage: FC = () => {
       alert('책 추가에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsAdding(false);
-      setAddingItemId(null);
+      // setAddingItemId(null);
     }
   };
 
