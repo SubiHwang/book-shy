@@ -1,21 +1,16 @@
 package com.ssafy.bookshy.domain.chat.controller;
 
 import com.ssafy.bookshy.domain.chat.dto.ChatMessageRequestDto;
-import com.ssafy.bookshy.domain.chat.dto.ChatMessageResponseDto;
-import com.ssafy.bookshy.domain.chat.service.ChatMessageService;
 import com.ssafy.bookshy.kafka.dto.ChatMessageKafkaDto;
 import com.ssafy.bookshy.kafka.producer.KafkaProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 @Controller
 @RequiredArgsConstructor
 public class ChatWebSocketController {
 
-    private final ChatMessageService chatMessageService;
-    private final SimpMessagingTemplate messagingTemplate;
     private final KafkaProducer kafkaProducer;
 
     /**

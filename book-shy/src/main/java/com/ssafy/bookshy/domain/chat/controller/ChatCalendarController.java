@@ -4,6 +4,7 @@ import com.ssafy.bookshy.domain.chat.dto.ChatCalendarCreateRequestDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatCalendarCreateResponseDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatCalendarEventDto;
 import com.ssafy.bookshy.domain.chat.service.ChatCalendarService;
+import com.ssafy.bookshy.domain.users.entity.Users;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -42,9 +44,9 @@ public class ChatCalendarController {
     )
     @GetMapping
     public ResponseEntity<List<ChatCalendarEventDto>> getChatCalendar(
-            @RequestParam Long userId,
+            @AuthenticationPrincipal Users user,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return ResponseEntity.ok(chatCalendarService.getCalendarEventsByDate(userId, date));
+        return ResponseEntity.ok(chatCalendarService.getCalendarEventsByDate(user.getUserId(), date));
     }
 
     @Operation(

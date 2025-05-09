@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.users.controller;
 
 import com.ssafy.bookshy.domain.users.dto.UserProfileResponseDto;
+import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -8,8 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,8 +36,8 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류 또는 데이터 조회 실패 ❌")
     })
     @GetMapping("/profile")
-    public ResponseEntity<UserProfileResponseDto> getProfile(@RequestHeader("X-User-Id") Long userId) {
-        return ResponseEntity.ok(userService.getUserProfile(userId));
+    public ResponseEntity<UserProfileResponseDto> getProfile(@AuthenticationPrincipal Users user) {
+        return ResponseEntity.ok(userService.getUserProfile(user.getUserId()));
     }
 
 

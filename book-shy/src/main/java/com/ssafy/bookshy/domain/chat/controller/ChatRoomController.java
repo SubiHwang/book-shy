@@ -1,13 +1,13 @@
 package com.ssafy.bookshy.domain.chat.controller;
 
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomDto;
-import com.ssafy.bookshy.domain.chat.dto.CreateChatRoomRequestDto;
 import com.ssafy.bookshy.domain.chat.service.ChatRoomService;
+import com.ssafy.bookshy.domain.users.entity.Users;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,8 +23,8 @@ public class ChatRoomController {
     @Operation(summary = "📑 채팅방 목록 조회", description = "🔍 사용자 ID로 자신이 참여 중인 채팅방 목록을 가져옵니다.")
     @GetMapping
     public ResponseEntity<List<ChatRoomDto>> getChatRooms(
-            @Parameter(description = "👤 사용자 ID") @RequestParam(required = false) Long userId) {
-        return ResponseEntity.ok(chatRoomService.getChatRooms(userId));
+            @AuthenticationPrincipal Users user) {
+        return ResponseEntity.ok(chatRoomService.getChatRooms(user.getUserId()));
     }
 
 }
