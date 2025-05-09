@@ -51,7 +51,7 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
         setBookDetail({
           ...response,
           libraryId: bookId,
-          isPublic: false, // 초기값, 실제로는 API에서 받아와야 함
+          // isPublic: false, // 초기값, 실제로는 API에서 받아와야 함
         });
 
         console.log('책 상세 정보 로드 완료:', response);
