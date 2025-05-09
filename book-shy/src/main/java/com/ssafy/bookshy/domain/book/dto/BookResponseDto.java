@@ -54,13 +54,12 @@ public class BookResponseDto {
                     .coverImageUrl (node.path("cover").asText(null))
                     .description   (node.path("description").asText(null))
                     .pubDate       (node.path("pubDate").asText(null))
-                    .category      (node.path("categoryName").asText(null))
+                    .category      (extractMiddleCategory(node.path("categoryName").asText(null))) // ✅ 수정됨
                     .pageCount     (pages)
                     .isbn13        (node.path("isbn13").asText(null))
                     .isLiked(isLiked)
                     .build();
         } catch (Exception e) {
-            // 예외 발생 시 최소한의 정보만 추출해서 fallback
             System.out.println("❌ fromAladin 파싱 실패: " + e.getMessage());
             return BookResponseDto.builder()
                     .title(node.path("title").asText(null))
@@ -101,5 +100,11 @@ public class BookResponseDto {
                 .isbn13(book.getIsbn())
                 .isLiked(isLiked)
                 .build();
+    }
+
+    private static String extractMiddleCategory(String category) {
+        if (category == null || !category.contains(">")) return null;
+        String[] parts = category.split(">");
+        return parts.length >= 3 ? parts[1] : (parts.length == 2 ? parts[1] : null);
     }
 }
