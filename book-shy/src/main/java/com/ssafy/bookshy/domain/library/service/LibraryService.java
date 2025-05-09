@@ -5,6 +5,7 @@ import com.ssafy.bookshy.common.exception.GlobalException;
 import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
 import com.ssafy.bookshy.domain.book.entity.Book;
 import com.ssafy.bookshy.domain.book.repository.BookRepository;
+import com.ssafy.bookshy.domain.book.repository.WishRepository;
 import com.ssafy.bookshy.domain.library.dto.LibraryResponseDto;
 import com.ssafy.bookshy.domain.library.dto.LibrarySearchAddRequestDto;
 import com.ssafy.bookshy.domain.library.dto.LibrarySelfAddRequestDto;
@@ -37,6 +38,7 @@ public class LibraryService {
     private final BookRepository bookRepository;
     private final UserService userService;
     private final AladinClient aladinClient;
+    private final WishRepository wishRepository;
 
     @Value("${file.upload-dir}")
     private String uploadPath;
@@ -75,6 +77,8 @@ public class LibraryService {
         if (libraryRepository.existsByUserAndBook(user, book)) {
             throw new GlobalException(GlobalErrorCode.INVALID_INPUT_VALUE);
         }
+
+        wishRepository.deleteByUserAndBook(user, book);
 
         Library library = Library.builder()
                 .user(user)
@@ -169,6 +173,8 @@ public class LibraryService {
             throw new RuntimeException("이미 서재에 등록된 도서입니다.");
         }
 
+        wishRepository.deleteByUserAndBook(user, book);
+
         Library library = Library.builder()
                 .user(user)
                 .book(book)
@@ -210,6 +216,8 @@ public class LibraryService {
                 .build();
 
         bookRepository.save(book);
+
+        wishRepository.deleteByUserAndBook(user, book);
 
         // 3. Library 등록
         Library library = Library.builder()
