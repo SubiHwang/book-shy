@@ -10,20 +10,15 @@ const WishBooks: FC = () => {
   const navigate = useNavigate();
   const userId = 1; // 임시 userId, 실제로는 로그인한 사용자의 ID를 사용해야 함
   const { data, isLoading } = useWishBooks(userId); // 실제 API 호출을 위한 훅 사용
-  
+
   const [selectedFilter, setSelectedFilter] = useState<string>('전체 보기');
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  
-  if (isLoading || !data) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loading loadingText={'읽고 싶은 책 목록 불러오는 중...'} />
-      </div>
-    );
-  }
 
+  // 모든 useMemo hooks를 조건문 전에 호출 (data가 없을 경우 대비)
   const filterList = useMemo(() => {
+    if (!data || !data.books) return ['전체 보기'];
+
     const categorySet = new Set<string>();
     data.books.forEach((book: WishBook) => {
       if (book.categories) {
@@ -31,9 +26,11 @@ const WishBooks: FC = () => {
       }
     });
     return ['전체 보기', ...Array.from(categorySet)];
-  }, [data.books]);
+  }, [data]);
 
   const filteredBooks = useMemo(() => {
+    if (!data || !data.books) return [];
+
     const categoryFiltered =
       selectedFilter === '전체 보기'
         ? data.books
@@ -46,8 +43,15 @@ const WishBooks: FC = () => {
       (book: WishBook) =>
         book.title?.toLowerCase().includes(term) || book.author?.toLowerCase().includes(term),
     );
-  }, [data.books, selectedFilter, searchTerm]);
+  }, [data, selectedFilter, searchTerm]);
 
+  if (isLoading || !data) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loading loadingText={'읽고 싶은 책 목록 불러오는 중...'} />
+      </div>
+    );
+  }
 
   return (
     <div className="relative pb-16 px-4 pt-4">
@@ -102,7 +106,7 @@ const WishBooks: FC = () => {
         {filteredBooks.length > 0 ? (
           <div>
             {filteredBooks.map((book: WishBook) => (
-              <WishBookCard wishBook={book} />
+              <WishBookCard key={book.itemId} wishBook={book} />
             ))}
           </div>
         ) : (
