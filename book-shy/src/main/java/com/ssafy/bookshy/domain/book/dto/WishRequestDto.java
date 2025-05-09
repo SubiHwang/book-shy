@@ -7,6 +7,5 @@ import lombok.Getter;
 @Getter
 public class WishRequestDto {
 
-    private Long userId;
     private Long itemId; // Aladin 도서 고유 ID
 }
