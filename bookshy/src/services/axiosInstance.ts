@@ -42,6 +42,8 @@ const publicAxiosInstance: AxiosInstance = axios.create({
 publicAxiosInstance.interceptors.request.use(
   (config) => {
     // 토큰 필요 없음
+    // 토큰 추가 로직
+    console.log('baseurl', API_BASE_URL);
     return config;
   },
   (error: AxiosError) => {
