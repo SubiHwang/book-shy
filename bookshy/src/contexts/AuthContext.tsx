@@ -1,7 +1,7 @@
 import { createContext, FC, useContext } from 'react';
 import { AuthContextType } from '@/types/auth';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { kakaoLogin } from '@/services/auth/login';
+import { kakaoLogin, logoutfetch } from '@/services/auth/auth';
 
 const AuthContext = createContext<AuthContextType>({
   isLoggedIn: false,
@@ -70,6 +70,14 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
   // 로그아웃 뮤테이션
   const { mutate: logout } = useMutation({
     mutationFn: async () => {
+      try {
+        await logoutfetch();
+        
+      } catch (error) {
+        console.error('로그아웃 오류:', error);
+        throw error;
+        
+      }
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user');
       return null;
