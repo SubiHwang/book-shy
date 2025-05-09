@@ -77,7 +77,7 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
     try {
       const newPublicStatus = !bookDetail.isPublic;
 
-      // API를 통해 책 공개 상태 변경 (이 함수 내용은 수정되었음)
+      // API를 통해 책 공개 상태 변경
       await updateBookVisibility(bookDetail.libraryId, newPublicStatus);
 
       // 상태 업데이트
@@ -103,11 +103,10 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
     if (!bookDetail) return null;
 
     return (
-      <div className="m-5">
+      <div className="px-4 py-5">
         <h2 className="text-xl font-bold mb-4">도서 정보</h2>
-
-        <div className="bg-light-bg-secondary rounded-lg mb-4">
-          <div className="flex items-center p-3 border-b border-gray-100">
+        <div className="bg-light-bg-secondary rounded-lg mb-4 shadow-sm">
+          <div className="flex items-center p-4 border-b border-gray-100">
             {/* 달력 아이콘 - 원형 배경 추가 */}
             <div className="w-8 h-8 mr-3 flex-shrink-0 rounded-full bg-red-100 flex items-center justify-center">
               <svg
@@ -125,13 +124,17 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
                 />
               </svg>
             </div>
-            <div className="flex-grow">
+            <div className="w-20 flex-shrink-0">
               <p className="text-sm text-gray-500">출간일</p>
             </div>
-            <div className="text-sm text-gray-700">{bookDetail.pubDate}</div>
+            <div className="flex-grow text-right">
+              <p className="text-sm text-gray-700 font-medium">
+                {bookDetail.pubDate || '정보 없음'}
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center p-3 border-b border-gray-100">
+          <div className="flex items-center p-4 border-b border-gray-100">
             {/* 책 페이지 아이콘 - 원형 배경 추가 */}
             <div className="w-8 h-8 mr-3 flex-shrink-0 rounded-full bg-red-100 flex items-center justify-center">
               <svg
@@ -149,13 +152,17 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
                 />
               </svg>
             </div>
-            <div className="flex-grow">
+            <div className="w-20 flex-shrink-0">
               <p className="text-sm text-gray-500">페이지</p>
             </div>
-            <div className="text-sm text-gray-700">{bookDetail.pageCount}쪽</div>
+            <div className="flex-grow text-right">
+              <p className="text-sm text-gray-700 font-medium">
+                {bookDetail.pageCount ? `${bookDetail.pageCount}쪽` : '정보 없음'}
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center p-3">
+          <div className="flex items-center p-4">
             {/* 태그 아이콘 - 원형 배경 추가 */}
             <div className="w-8 h-8 mr-3 flex-shrink-0 rounded-full bg-red-100 flex items-center justify-center">
               <svg
@@ -173,17 +180,23 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
                 />
               </svg>
             </div>
-            <div className="flex-grow">
+            <div className="w-20 flex-shrink-0">
               <p className="text-sm text-gray-500">카테고리</p>
             </div>
-            <div className="text-sm text-gray-700">{bookDetail.category}</div>
+            <div className="flex-grow text-right">
+              <p className="text-sm text-gray-700 font-medium">
+                {bookDetail.category || '정보 없음'}
+              </p>
+            </div>
           </div>
         </div>
 
         <h2 className="text-xl font-bold mb-3">책 소개</h2>
-        <div className="bg-light-bg-secondary rounded-lg mb-4">
+        <div className="bg-light-bg-secondary rounded-lg mb-6 shadow-sm">
           <div className="p-4">
-            <p className="text-sm text-gray-700 leading-relaxed">{bookDetail.description}</p>
+            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+              {bookDetail.description || '책 소개 정보가 없습니다.'}
+            </p>
           </div>
         </div>
       </div>
@@ -213,9 +226,9 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
   }
 
   return (
-    <div className="bookshelf-container flex flex-col h-screen">
+    <div className="bookshelf-container flex flex-col min-h-screen">
       {/* 헤더 부분 - 그라데이션 적용 */}
-      <div className="bg-gradient-to-r from-[#FCF6D4] to-[#F4E8B8] p-4 flex items-center justify-between">
+      <div className="bg-gradient-to-r from-[#FCF6D4] to-[#F4E8B8] p-4 flex items-center justify-between flex-shrink-0">
         <button onClick={handleBack} className="text-gray-700">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -236,28 +249,32 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
         <div className="w-6 h-6">{/* 간격 맞춤을 위한 빈 div */}</div>
       </div>
 
-      {/* 책 정보 섹션 - 그라데이션 적용 */}
-      <div className="bg-gradient-to-r from-[#FCF6D4] to-[#F4E8B8] px-4 pt-4 pb-5 mb-1">
-        <div className="flex">
-          <div className="w-28 h-36 ml-6 mr-6">
+      {/* 책 정보 섹션 - 그라데이션 적용, 레이아웃 개선 */}
+      <div className="bg-gradient-to-r from-[#FCF6D4] to-[#F4E8B8] p-4  flex-shrink-0">
+        <div className="flex flex-row items-start">
+          {/* 책 표지 이미지 - 고정 크기 유지 */}
+          <div className="w-26 h-36 flex-shrink-0 mr-4 rounded-md overflow-hidden shadow-md">
             <img
               src={bookDetail.coverImageUrl || '/placeholder-book.jpg'}
               alt={bookDetail.title}
-              className="w-full h-full object-cover rounded-sm shadow-sm"
+              className="w-full h-full object-cover"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = '/placeholder-book.jpg';
               }}
             />
           </div>
-          <div className="flex-grow">
-            <h2 className="text-xl font-bold mb-1 mt-1">{bookDetail.title}</h2>
-            <p className="text-sm ">작가 : {bookDetail.author}</p>
-            <p className="text-sm mb-1">출판사 : {bookDetail.publisher}</p>
-            <p className="text-xs text-gray-600">ISBN: {bookDetail.isbn13}</p>
+
+          {/* 책 정보 - 제목이 길어도 전체 표시 */}
+          <div className="flex-1 min-w-0 flex flex-col min-h-36 justify-between">
+            <div>
+              <h2 className="text-xl font-bold mb-2 break-words">{bookDetail.title}</h2>
+              <p className="text-sm mb-1 truncate">작가: {bookDetail.author || '정보 없음'}</p>
+              <p className="text-sm mb-1 truncate">출판사: {bookDetail.publisher || '정보 없음'}</p>
+            </div>
 
             <button
-              className="mt-3 py-1.5 px-4 rounded-full bg-white text-gray-700 shadow-ml hover:bg-gray-50 text-sm"
+              className="mt-3 py-1.5 px-4 rounded-full bg-white text-gray-700 shadow-sm hover:bg-gray-50 text-sm font-medium transition-colors self-start"
               onClick={togglePublicStatus}
             >
               {bookDetail.isPublic ? '공개 서재에서 숨기기' : '공개 서재에 추가'}
@@ -266,14 +283,14 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
         </div>
       </div>
 
-      {/* 기존 탭 네비게이션 */}
-      <div className="bg-light-bg">
+      {/* 탭 네비게이션 */}
+      <div className="bg-light-bg flex-shrink-0 border-b border-gray-200">
         <TabNavBar pages={pages} />
       </div>
 
-      {/* 중첩 라우트 컨텐츠*/}
-      <div className="bg-light-bg flex-1 overflow-auto">
-        <div className="max-w-screen-md mx-auto px-4">
+      {/* 중첩 라우트 컨텐츠 - overflow 설정으로 스크롤 가능 */}
+      <div className="bg-light-bg flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="max-w-screen-md mx-auto">
           {location.pathname === `/bookshelf/books/${bookId}` ? <BookInfoContent /> : <Outlet />}
         </div>
       </div>
