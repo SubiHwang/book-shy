@@ -12,6 +12,7 @@ export interface BookDetailResponse {
   category: string;
   pageCount: number;
   isbn13: string;
+  isPublic: boolean;
 }
 
 // 책 상세 정보 조회 API
@@ -37,8 +38,8 @@ export const updateBookVisibility = async (libraryId: number, isPublic: boolean)
   try {
     console.log(`책 공개 상태 변경 요청: libraryId=${libraryId}, isPublic=${isPublic}`);
 
-    // API 호출
-    await authAxiosInstance.put(`/library/${libraryId}/visibility?isPublic=${isPublic}`);
+    // API 호출 - 새로운 엔드포인트 및 HTTP 메서드 사용
+    await authAxiosInstance.patch(`/library/${libraryId}/public?isPublic=${isPublic}`);
 
     console.log('책 공개 상태 변경 성공');
   } catch (error) {

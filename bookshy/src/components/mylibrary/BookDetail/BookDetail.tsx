@@ -77,7 +77,7 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookId }) => {
     try {
       const newPublicStatus = !bookDetail.isPublic;
 
-      // API를 통해 책 공개 상태 변경
+      // API를 통해 책 공개 상태 변경 (이 함수 내용은 수정되었음)
       await updateBookVisibility(bookDetail.libraryId, newPublicStatus);
 
       // 상태 업데이트
