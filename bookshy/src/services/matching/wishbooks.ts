@@ -43,7 +43,7 @@ export const addWishBook = async (userId: number, itemId: number): Promise<boole
 export const deleteWishBook = async (userId: number, itemId: number): Promise<boolean> => {
   try {
     const response = await authAxiosInstance.delete<string, boolean>(
-      `/book/wish?userId=${userId}&itemId=${itemId}`,
+      `/book/wish/remove?userId=${userId}&itemId=${itemId}`,
     );
     console.log('읽고 싶은 책 삭제 API 응답:', response);
     return response;
