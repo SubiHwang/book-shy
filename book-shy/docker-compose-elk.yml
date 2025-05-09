@@ -10,7 +10,7 @@ services:
       - cluster.name=shy-elk-cluster
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"  # 512m에서 256m으로 더 줄임
       - xpack.security.enabled=false
     ulimits:
       memlock:
@@ -26,8 +26,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
-          cpus: '1'
+          memory: 512M  # 1G에서 512M으로 줄임
+          cpus: '0.5'   # 1에서 0.5로 줄임
 
   # Logstash - 로그 수집 및 처리
   logstash:
@@ -42,7 +42,7 @@ services:
       - "5000:5000/udp"
       - "9600:9600"
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      LS_JAVA_OPTS: "-Xmx128m -Xms128m"  # Logstash의 JVM 옵션 (ES_JAVA_OPTS가 아님)
     networks:
       - shy
     depends_on:
@@ -51,8 +51,8 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
-          cpus: '1'
+          memory: 512M  # 1G에서 512M으로 줄임
+          cpus: '0.5'   # 1에서 0.5로 줄임
 
   # Kibana - 로그 시각화 도구
   kibana:
@@ -62,11 +62,17 @@ services:
       - "5601:5601"
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - NODE_OPTIONS="--max-old-space-size=256"  # Kibana Node.js 메모리 제한 추가
     networks:
       - shy
     depends_on:
       - elasticsearch
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M  # 메모리 제한 추가
+          cpus: '0.5'   # CPU 제한 추가
 
 networks:
   shy:
