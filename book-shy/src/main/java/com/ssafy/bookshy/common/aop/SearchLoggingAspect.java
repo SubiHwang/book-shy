@@ -30,6 +30,11 @@ public class SearchLoggingAspect {
     public void bookSearchDetailListPointcut() {
     }
 
+    // Add a new pointcut for the addWish method
+    @Pointcut("execution(* com.ssafy.bookshy.domain.book.controller.BookController.addWish(..))")
+    public void bookAddWishPointcut() {
+    }
+
     /**
      * searchList 메서드가 정상적으로 실행 완료된 후에 실행되는 어드바이스
      *
@@ -70,7 +75,33 @@ public class SearchLoggingAspect {
         loggingService.processClientLog(userId, logDto);
     }
 
-    //위시리스트 + 상대 도서 조회
+    /**
+     * addWish 메서드가 정상적으로 실행 완료된 후에 실행되는 어드바이스
+     *
+     * @param joinPoint AOP의 기본 객체로 메서드 정보에 접근 가능
+     * @param userId    사용자 ID 파라미터
+     * @param itemId    도서 ID 파라미터
+     * @param result    메서드 실행 결과값
+     */
+    @AfterReturning(
+            pointcut = "bookAddWishPointcut() && args(userId, itemId)",
+            returning = "result"
+    )
+    public void logAddWish(JoinPoint joinPoint, Long userId, Long itemId, ResponseEntity<Void> result) {
+        log.info("위시리스트 추가 - 사용자: {}, 도서 ID: {}", userId, itemId);
+
+        Map<String, Object> logData = new HashMap<>();
+        logData.put("userId", userId.toString());
+        logData.put("bookId", itemId);
+        logData.put("endpoint", "/api/book/wish");
+
+        // 로깅 서비스를 통해 ELK로 데이터 전송
+        ClientLogRequestDto logDto = new ClientLogRequestDto();
+        logDto.setEventType("BOOK_WISH_ADD");
+        logDto.setEventData(logData);
+
+        loggingService.processClientLog(userId.toString(), logDto);
+    }
 
     /**
      * 현재 인증된 사용자의 ID를 가져오는 유틸리티 메서드
@@ -85,5 +116,4 @@ public class SearchLoggingAspect {
         }
         return "anonymous";
     }
-
 }
