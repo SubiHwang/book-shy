@@ -72,6 +72,7 @@ public class ChatMessageService {
                 .senderId(request.getSenderId())
                 .content(request.getContent())
                 .timestamp(LocalDateTime.now())
+                .type(request.getType())
                 .build();
 
         ChatMessage saved = chatMessageRepository.save(message);
@@ -104,6 +105,7 @@ public class ChatMessageService {
                 .senderId(dto.getSenderId())
                 .content(dto.getContent())
                 .timestamp(LocalDateTime.now()) // Kafka 메시지에는 timestamp가 없을 수 있으므로 현재 시간
+                .type(dto.getType())
                 .build();
 
         ChatMessage saved = chatMessageRepository.save(message);
