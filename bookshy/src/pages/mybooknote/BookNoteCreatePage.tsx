@@ -14,24 +14,24 @@ const BookNoteCreatePage: React.FC = () => {
   const [params] = useSearchParams();
 
   const bookIdParam = params.get('bookId');
-  const libraryId = bookIdParam ? Number(bookIdParam) : null;
+  const bookId = bookIdParam ? Number(bookIdParam) : null;
 
   const { data: libraryBooks = [] } = useQuery<LibraryBook[], Error>({
     queryKey: ['library-books'],
     queryFn: () => fetchLibraryBooks(userId),
-    enabled: !!libraryId, // ✅ libraryId 있을 때만 실행
+    enabled: bookId !== null,
   });
 
-  const targetBook = libraryId
-    ? libraryBooks.find((book) => book.libraryId === libraryId)
-    : undefined;
+  // 🔄 수정: bookId 기준으로 서재 도서 찾기
+  const targetBook =
+    bookId !== null ? libraryBooks.find((book) => book.bookId === bookId) : undefined;
 
   const itemId = targetBook?.aladinItemId;
 
   const { data: bookDetail } = useQuery({
-    queryKey: ['book-detail', targetBook?.aladinItemId],
+    queryKey: ['book-detail', itemId],
     queryFn: () => fetchBookDetailByItemId(itemId as number),
-    enabled: !!targetBook?.aladinItemId,
+    enabled: typeof itemId === 'number',
   });
 
   const [quoteText, setQuoteText] = useState('');
@@ -44,8 +44,7 @@ const BookNoteCreatePage: React.FC = () => {
     navigate('/booknote');
   };
 
-  // ❗조건에 따라 렌더링만 분기
-  if (!libraryId) return <p className="p-4">잘못된 접근입니다.</p>;
+  if (!bookId) return <p className="p-4">잘못된 접근입니다.</p>;
   if (!targetBook) return <p className="p-4">해당 책이 서재에 없습니다.</p>;
 
   return (

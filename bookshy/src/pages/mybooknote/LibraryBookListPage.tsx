@@ -47,9 +47,9 @@ const LibraryBookListPage = () => {
         <div className="space-y-4">
           {filteredBooks.map((book) => (
             <div
-              key={book.libraryId}
+              key={book.bookId}
               className="bg-white p-4 rounded-xl shadow flex gap-4 cursor-pointer"
-              onClick={() => navigate(`/booknotes/create?bookId=${book.libraryId}`)}
+              onClick={() => navigate(`/booknotes/create?bookId=${book.bookId}`)}
             >
               <img
                 src={book.coverImageUrl}
