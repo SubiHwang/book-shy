@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { NotFoundException, DecodeHintType, BarcodeFormat } from '@zxing/library';
+import './AddByISBNPage.css'; // CSS 파일 추가 필요
 
 const AddByBarcodePage: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -21,7 +22,7 @@ const AddByBarcodePage: React.FC = () => {
 
   const navigate = useNavigate();
 
-  // 콘솔 로깅 함수수
+  // 콘솔 로깅 함수
   const logDebug = (message: string, data?: any) => {
     const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
     console.log(`[ISBN Scanner ${timestamp}] ${message}`, data || '');
@@ -124,7 +125,7 @@ const AddByBarcodePage: React.FC = () => {
   const startAutoScan = () => {
     if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
 
-    // 500ms마다 스캔을 시도하는 타이머 설정
+    // 1000ms마다 스캔을 시도하는 타이머 설정
     scanIntervalRef.current = setInterval(() => {
       if (!scanning && cameraReady && !scanSuccess) {
         handleScan();
@@ -154,15 +155,6 @@ const AddByBarcodePage: React.FC = () => {
       data[i] = factor * (avg - 128) + 128; // R
       data[i + 1] = factor * (avg - 128) + 128; // G
       data[i + 2] = factor * (avg - 128) + 128; // B
-    }
-
-    for (let i = 0; i < data.length; i += 4) {
-      const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-      const contrast = 1.5;
-      const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-      data[i] = factor * (avg - 128) + 128;
-      data[i + 1] = factor * (avg - 128) + 128;
-      data[i + 2] = factor * (avg - 128) + 128;
     }
 
     context.putImageData(imageData, 0, 0);
@@ -250,6 +242,7 @@ const AddByBarcodePage: React.FC = () => {
     }
     navigate(`/bookshelf/add/isbn-result/9788934972464`);
   };
+
   const handleRetry = () => {
     setScanSuccess(false);
     setLastScannedData(null);
@@ -270,42 +263,59 @@ const AddByBarcodePage: React.FC = () => {
     <div className="fixed inset-0 bg-black">
       <canvas ref={canvasRef} className="hidden" />
 
-      <div className="absolute top-0 left-0 w-full h-32 z-10 text-white bg-black flex flex-col items-center justify-center">
-        <div className="absolute top-4 left-4">
-          <button onClick={handleBack} className="text-xl text-white">
+      <div className="absolute top-0 left-0 w-full z-10 pt-8 pb-4 text-white bg-black bg-opacity-70 flex flex-col items-center justify-center">
+        <div className="absolute top-8 left-4">
+          <button onClick={handleBack} className="text-2xl text-white">
             ←
           </button>
         </div>
-        <h2 className="text-lg font-bold">
-          {error || (scanSuccess ? '✅ ISBN 인식 성공!' : '등록할 책의 바코드를 찍어주세요')}
+        <h2 className="text-xl font-bold">
+          {error || (scanSuccess ? '✅ ISBN 인식 성공!' : '바코드 스캔 중...')}
         </h2>
         {lastScannedData && <p className="text-sm text-green-400 mt-1">ISBN: {lastScannedData}</p>}
         {lastError && !scanSuccess && <p className="text-xs text-red-400 mt-1">{lastError}</p>}
         {!scanSuccess && (
-          <p className="text-xs text-gray-400 mt-1">
-            바코드를 인식 중입니다... (시도: {scanAttempts})
+          <p className="text-xs text-gray-300 mt-1">
+            바코드를 네모 칸에 맞춰주세요 (시도: {scanAttempts})
           </p>
         )}
       </div>
 
-      <div className="absolute top-32 bottom-24 inset-x-0">
+      <div className="absolute inset-0">
         <video
           ref={videoRef}
           playsInline
           className={`w-full h-full object-cover ${scanSuccess ? 'opacity-50' : ''}`}
         />
+
         {!cameraReady && !error && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-12 h-12 border-t-2 border-b-2 border-white rounded-full animate-spin" />
           </div>
         )}
-        {cameraReady && (
+
+        {cameraReady && !scanSuccess && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div
-              className={`w-64 h-24 border-4 ${scanSuccess ? 'border-green-400 animate-pulse' : scanning ? 'border-yellow-400 animate-pulse' : 'border-white'} rounded-lg opacity-80`}
-            />
+            {/* 새로운 스캔 영역 디자인 - 이미지와 유사한 네모 칸 */}
+            <div className="relative">
+              {/* 스캔 영역 프레임 - 흰색 테두리 네모 */}
+              <div className="w-64 h-48 border-2 border-white rounded-md relative overflow-hidden">
+                {/* 모서리 표시 - 좌상단 */}
+                <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-white" />
+                {/* 모서리 표시 - 우상단 */}
+                <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-white" />
+                {/* 모서리 표시 - 좌하단 */}
+                <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-white" />
+                {/* 모서리 표시 - 우하단 */}
+                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-white" />
+
+                {/* 스캔 라인 - 순수 CSS로 애니메이션 적용 */}
+                <div className="scan-line" />
+              </div>
+            </div>
           </div>
         )}
+
         {scanSuccess && (
           <div className="absolute inset-0 bg-green-500 bg-opacity-20 flex items-center justify-center">
             <div className="bg-green-500 rounded-full p-4 animate-bounce">
@@ -328,15 +338,18 @@ const AddByBarcodePage: React.FC = () => {
         )}
       </div>
 
-      {/* 하단 영역 - 직접 입력 버튼만 표시 */}
-      <div className="absolute bottom-0 left-0 w-full h-40 bg-black z-10 flex items-center justify-center text-white">
+      {/* 하단 영역 - 직접 입력 버튼 */}
+      <div className="absolute bottom-0 left-0 w-full py-8 bg-black bg-opacity-70 z-10 flex items-center justify-center text-white">
         {error && (
-          <button className="px-4 py-2 bg-blue-500 rounded-md" onClick={handleRetry}>
+          <button className="px-6 py-3 bg-blue-500 rounded-md font-medium" onClick={handleRetry}>
             다시 시도
           </button>
         )}
         {cameraReady && !scanSuccess && !error && (
-          <button className="px-4 py-2 bg-blue-500 rounded-md" onClick={handleManualEntry}>
+          <button
+            className="px-6 py-3 bg-blue-500 rounded-md font-medium"
+            onClick={handleManualEntry}
+          >
             직접 입력
           </button>
         )}

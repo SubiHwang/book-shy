@@ -5,6 +5,7 @@ import LibraryBookshelfRow from '@/components/mylibrary/BookShelf/LibraryBookshe
 import { fetchUserPublicLibrary } from '@/services/mylibrary/libraryApi';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Library } from '@/types/mylibrary/library';
+import Loading from '@/components/common/Loading';
 
 const PublicBooksTab: React.FC = () => {
   const [books, setBooks] = useState<Library[]>([]);
@@ -42,11 +43,8 @@ const PublicBooksTab: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center py-10">
-        <div className="flex flex-col items-center">
-          <div className="w-10 h-10 border-4 border-gray-200 border-t-red-500 rounded-full animate-spin mb-3"></div>
-          <p className="text-gray-500 text-sm">공개 책을 불러오는 중...</p>
-        </div>
+      <div className="relative" style={{ transform: 'translateY(-150px)' }}>
+        <Loading loadingText="책을 불러오는 중..." />
       </div>
     );
   }
