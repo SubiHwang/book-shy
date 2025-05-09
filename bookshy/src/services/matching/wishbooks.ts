@@ -27,10 +27,10 @@ export const getWishBookList = async (): Promise<WishBooksResponse> => {
   }
 };
 
-export const addWishBook = async (userId: number, itemId: number): Promise<boolean> => {
+export const addWishBook = async (itemId: number): Promise<boolean> => {
   try {
     const response = await authAxiosInstance.post<string, boolean>(
-      `/book/wish?userId=${userId}&itemId=${itemId}`,
+      `/book/wish?itemId=${itemId}`,
     );
     console.log('읽고 싶은 책 추가 API 응답:', response);
     return response;
@@ -40,10 +40,10 @@ export const addWishBook = async (userId: number, itemId: number): Promise<boole
   }
 };
 
-export const deleteWishBook = async (userId: number, itemId: number): Promise<boolean> => {
+export const deleteWishBook = async (itemId: number): Promise<boolean> => {
   try {
     const response = await authAxiosInstance.delete<string, boolean>(
-      `/book/wish/remove?userId=${userId}&itemId=${itemId}`,
+      `/book/wish/remove?itemId=${itemId}`,
     );
     console.log('읽고 싶은 책 삭제 API 응답:', response);
     return response;
