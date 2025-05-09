@@ -53,5 +53,5 @@ management:
 file:
   upload-dir: /home/ubuntu/bookshy/images/coverImage
 
-
-
+elasticsearch:
+  url: ${ELK_URL}
