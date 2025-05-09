@@ -30,6 +30,7 @@ import BookNoteEditPage from '@/pages/mybooknote/BookNoteEditPage';
 import BookNoteCreatePage from '@/pages/mybooknote/BookNoteCreatePage';
 import Login from '@/pages/auth/Login';
 import PrivateRoute from '@/components/layout/PrivateRoute';
+import KaKaoOauth from '@/pages/auth/KaKaoOauth';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ const AppLayout: FC = () => {
         <Routes>
           {/* 공개 라우트 - 로그인하지 않아도 접근 가능 */}
           <Route path="/login" element={<Login />} />
+          <Route path="/oauth" element={<KaKaoOauth />} />
 
           {/* 📚 매칭 페이지 */}
           <Route path="/matching" element={<MatchingPage />}>
@@ -73,16 +75,13 @@ const AppLayout: FC = () => {
 
                   {/* 📚 서재 기본 페이지 */}
                   <Route path="/bookshelf" element={<MyLibraryPage />}>
-                    {/* 기본 라우트는 모든 책 페이지로 리다이렉트 */}
-                    <Route index element={<Navigate to="/bookshelf/all-my-books" replace />} />
-                    {/* 책 보기 탭 */}
-                    <Route path="all-my-books" element={<AllMyBooksTab />} />
-                    <Route path="public-my-books" element={<PublicMyBooksTab />} />
+                    <Route index element={<AllMyBooksTab />} />
+                    <Route path="/bookshelf/public-my-books" element={<PublicMyBooksTab />} />
                   </Route>
 
                   {/* 책 상세 페이지 */}
                   <Route path="/bookshelf/books/:id" element={<BookDetailPage />}>
-                    <Route path="info" element={<BookInfoTab />} />
+                    <Route index element={<BookInfoTab />} />
                     <Route path="notes" element={<BookNotesTab />} />
                   </Route>
 

@@ -4,9 +4,11 @@ import { useRegisterSW } from 'virtual:pwa-register/react';
 import SplashScreen from '@components/splash/SplashScreen';
 import bookAnimation from '@assets/lottie/bookshy-splash.json';
 import { BrowserRouter } from 'react-router-dom';
-import AppLayout from './components/layout/AppLayout';
-import UpdatePrompt from './components/common/UpdatePrompt';
-import { AuthProvider } from './contexts/AuthContext';
+import AppLayout from '@/components/layout/AppLayout';
+import UpdatePrompt from '@/components/common/UpdatePrompt';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { FirebaseProvider } from '@/contexts/FirebaseContext';
+import NotificationInitializer from './components/common/NotificationInitializer';
 
 // 서비스 워커 등록 콜백 타입 정의
 interface RegisterSWCallbacks {
@@ -68,12 +70,16 @@ const App: FC = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BrowserRouter>
-          <AppLayout />
-          <UpdatePrompt needRefresh={needRefresh} updateServiceWorker={updateServiceWorker} />
-        </BrowserRouter>
-      </AuthProvider>
+      <FirebaseProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <NotificationInitializer />
+            {/* 알림 초기화 컴포넌트 */}
+            <AppLayout />
+            <UpdatePrompt needRefresh={needRefresh} updateServiceWorker={updateServiceWorker} />
+          </BrowserRouter>
+        </AuthProvider>
+      </FirebaseProvider>
     </QueryClientProvider>
   );
 };
