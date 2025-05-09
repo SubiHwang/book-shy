@@ -12,3 +12,7 @@ export async function fetchMessages(chatRoomId: number): Promise<ChatMessage[]> 
 export async function markMessagesAsRead(chatRoomId: number, userId: number): Promise<void> {
   await authAxiosInstance.post(`/messages/${chatRoomId}/read?userId=${userId}`);
 }
+
+export async function sendEmoji(messageId: number, emoji: string) {
+  await authAxiosInstance.post(`/api/messages/${messageId}/emoji`, { emoji });
+}
