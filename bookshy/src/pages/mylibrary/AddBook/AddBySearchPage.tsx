@@ -1,84 +1,51 @@
+// src/pages/mylibrary/AddBook/AddBySearchPage.tsx
 import { useState, FC, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search } from 'lucide-react';
 import BookSearchItem from '@/components/mylibrary/BookAdd/BookSearchItem';
-import { Book } from '@/types/book';
+import { searchBooksByKeyword, addBookFromSearch } from '@/services/mylibrary/bookSearchService';
+import type { BookSearchItem as BookItemType } from '@/types/mylibrary/bookSearch';
+import { useAuth } from '@/contexts/AuthContext';
 
 const AddBySearchPage: FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [books, setBooks] = useState<Book[]>([]);
+  const [books, setBooks] = useState<BookItemType[]>([]);
+  const [totalResults, setTotalResults] = useState<number>(0);
+  const [error, setError] = useState<string | null>(null);
+  const [isAdding, setIsAdding] = useState<boolean>(false);
+  const [addingItemId, setAddingItemId] = useState<number | null>(null);
 
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // 책 검색 함수
   const searchBooks = async (query: string) => {
     if (!query.trim()) {
       setBooks([]);
+      setTotalResults(0);
       return;
     }
 
     setIsSearching(true);
+    setError(null);
 
-    // 더미 데이터
-    setTimeout(() => {
-      const dummyBooks: Book[] = [
-        {
-          bookId: 1,
-          title: '총, 균, 쇠',
-          author: '제레드 다이아몬드',
-          publisher: '김진준',
-          translator: '이명식',
-          categories: '고전 문학',
-          bookImgUrl: '/api/placeholder/100/150',
-        },
-        {
-          bookId: 2,
-          title: '총, 균, 쇠 (양장판)',
-          author: '제레드 다이아몬드',
-          publisher: '김진준',
-          translator: '이명식',
-          categories: '고전 문학',
-          bookImgUrl: '/api/placeholder/100/150',
-        },
-        {
-          bookId: 3,
-          title: '사피엔스',
-          author: '유발 하라리',
-          publisher: '김영사',
-          translator: '이명식',
-          categories: '고전 문학',
-          bookImgUrl: '/api/placeholder/100/150',
-        },
-        {
-          bookId: 4,
-          title: '호모 데우스',
-          author: '유발 하라리',
-          translator: '이명식',
-          categories: '고전 문학',
-          publisher: '김영사',
-          bookImgUrl: '/api/placeholder/100/150',
-        },
-        {
-          bookId: 5,
-          title: '21세기를 위한 21가지 제언',
-          author: '유발 하라리',
-          translator: '이명식',
-          categories: '고전 문학',
-          publisher: '김영사',
-          bookImgUrl: '/api/placeholder/100/150',
-        },
-      ];
+    try {
+      // API 호출하여 책 검색
+      const response = await searchBooksByKeyword(query);
 
-      const filteredBooks = dummyBooks.filter(
-        (book) =>
-          book.title?.toLowerCase().includes(query.toLowerCase()) ||
-          book.author?.toLowerCase().includes(query.toLowerCase()),
-      );
+      setBooks(response.books);
+      setTotalResults(response.total);
 
-      setBooks(filteredBooks);
+      console.log(`검색 결과: ${response.total}개의 책 중 ${response.books.length}개 표시`);
+    } catch (err) {
+      console.error('책 검색 중 오류 발생:', err);
+      setError('책 검색에 실패했습니다. 다시 시도해주세요.');
+      setBooks([]);
+      setTotalResults(0);
+    } finally {
       setIsSearching(false);
-    }, 800);
+    }
   };
 
   // 검색 폼 제출 핸들러
@@ -96,23 +63,44 @@ const AddBySearchPage: FC = () => {
       return () => clearTimeout(debounceTimer);
     } else {
       setBooks([]);
+      setTotalResults(0);
     }
   }, [searchQuery]);
 
   // 책 추가 핸들러
-  const handleAddBook = async (bookId: number) => {
+  const handleAddBook = async (itemId: number) => {
+    // 이미 추가 중이면 중복 요청 방지
+    if (isAdding) return;
+
     try {
-      const selectedBook = books.find((book) => book.bookId === bookId);
-      if (!selectedBook) return;
+      setIsAdding(true);
+      setAddingItemId(itemId);
 
-      // const newBook: Book = {
-      //   ...selectedBook,
-      // };
+      const selectedBook = books.find((book) => book.itemId === itemId);
+      if (!selectedBook) {
+        console.error('선택한 책을 찾을 수 없습니다.');
+        return;
+      }
 
-      // 나중에 실제로 DB 저장 API 호출 가능
+      console.log('선택한 책:', selectedBook);
+
+      // 개발 중이므로 기본 사용자 ID 사용 (로그인 없이 테스트 가능)
+      const userId = Number(user?.id) || 1;
+
+      // 검색 결과 책 등록 API 호출
+      const registeredBook = await addBookFromSearch(userId, itemId);
+
+      console.log('책 등록 성공:', registeredBook);
+
+      // 성공 알림 및 서재 페이지로 이동
+      alert('책이 성공적으로 등록되었습니다!');
       navigate('/bookshelf');
     } catch (error) {
       console.error('책 추가 중 오류 발생:', error);
+      alert('책 추가에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsAdding(false);
+      setAddingItemId(null);
     }
   };
 
@@ -145,19 +133,43 @@ const AddBySearchPage: FC = () => {
               <div className="flex items-center bg-white rounded-full px-4 py-2">
                 <input
                   type="text"
-                  placeholder="책 제목, 저자, 키워드"
+                  placeholder="책 제목을 입력해주세요"
                   className="bg-transparent w-full outline-none text-sm text-gray-700"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <Search size={16} className="text-gray-400 ml-2" />
+                <button type="submit" className="ml-2">
+                  <Search size={16} className="text-gray-400" />
+                </button>
               </div>
             </form>
           </div>
         </div>
 
+        {/* 검색 결과 정보 */}
+        {searchQuery.trim() && !isSearching && !error && (
+          <div className="bg-white p-3 border-b border-gray-200">
+            <p className="text-sm text-gray-600">
+              '{searchQuery}' 검색 결과: {totalResults}개
+            </p>
+          </div>
+        )}
+
+        {/* 오류 메시지 */}
+        {error && (
+          <div className="bg-red-50 p-4 text-center">
+            <p className="text-red-600">{error}</p>
+            <button
+              onClick={() => searchBooks(searchQuery)}
+              className="mt-2 px-4 py-2 bg-red-100 text-red-700 rounded-md"
+            >
+              다시 시도
+            </button>
+          </div>
+        )}
+
         {/* 책 목록 */}
-        <div className="bg-white p-4 flex-1 flex flex-col gap-4 min-h-[calc(100vh-180px)] pb-16 bg-light-bg">
+        <div className="bg-light-bg p-4 flex-1 flex flex-col gap-4 min-h-[calc(100vh-180px)] pb-20">
           {isSearching ? (
             <div className="flex justify-center py-10">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-pink-300"></div>
@@ -170,15 +182,25 @@ const AddBySearchPage: FC = () => {
               <p className="text-light-text-muted text-center mb-8">직접 등록 해보세요!</p>
               <button
                 onClick={handleSelfRegister}
-                className="px-10 py-3 bg-light-bg border border-light-text-muted/30 text-light-text-secondary rounded-md hover:bg-light-bg-shade transition-colors"
+                className="px-10 py-3 bg-white border border-light-text-muted/30 text-light-text-secondary rounded-md hover:bg-light-bg-shade transition-colors"
               >
                 직접 등록하기
               </button>
             </div>
           ) : (
             books.map((book) => (
-              <BookSearchItem key={book.bookId} book={book} onAddBook={handleAddBook} />
+              <BookSearchItem key={book.itemId} book={book} onAddBook={handleAddBook} />
             ))
+          )}
+
+          {/* 로딩 중일 때 보여줄 오버레이 */}
+          {isAdding && (
+            <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-light mx-auto mb-4"></div>
+                <p>책을 등록하는 중입니다...</p>
+              </div>
+            </div>
           )}
         </div>
       </div>

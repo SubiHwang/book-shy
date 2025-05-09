@@ -1,3 +1,4 @@
+// src/pages/mylibrary/BookDetailPage.tsx
 import { useParams } from 'react-router-dom';
 import BookDetail from '@/components/mylibrary/BookDetail/BookDetail';
 
