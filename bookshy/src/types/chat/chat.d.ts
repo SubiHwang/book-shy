@@ -17,3 +17,14 @@ export interface ChatMessage {
   type?: 'notice' | 'info' | 'warning' | 'text';
   emoji?: string;
 }
+
+export interface RegisterSchedulePayload {
+  roomId: number;
+  requestId: number;
+  type: 'EXCHANGE' | 'RENTAL';
+  title: string;
+  description?: string;
+  eventDate?: string;
+  startDate?: string;
+  endDate?: string;
+}

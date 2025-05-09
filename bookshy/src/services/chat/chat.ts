@@ -1,4 +1,4 @@
-import { ChatMessage, ChatRoomSummary } from '@/types/chat/chat';
+import { ChatMessage, ChatRoomSummary, RegisterSchedulePayload } from '@/types/chat/chat';
 import { authAxiosInstance } from '@/services/axiosInstance';
 
 export async function fetchChatList(userId: number): Promise<ChatRoomSummary[]> {
@@ -14,5 +14,9 @@ export async function markMessagesAsRead(chatRoomId: number, userId: number): Pr
 }
 
 export async function sendEmoji(messageId: number, emoji: string) {
-  await authAxiosInstance.post(`/api/messages/${messageId}/emoji`, { emoji });
+  await authAxiosInstance.post(`/messages/${messageId}/emoji`, { emoji });
+}
+
+export async function registerSchedule(payload: RegisterSchedulePayload): Promise<void> {
+  await authAxiosInstance.post('/chats/calendar', payload);
 }
