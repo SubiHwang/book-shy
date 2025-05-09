@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.chat.entity;
 
 import com.ssafy.bookshy.common.entity.TimeStampEntity;
+import com.ssafy.bookshy.domain.chat.dto.ChatCalendarItemDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,4 +31,5 @@ public class ChatCalendar extends TimeStampEntity {
     private ChatRoom chatRoom;
 
     private Long requestId;
+
 }
