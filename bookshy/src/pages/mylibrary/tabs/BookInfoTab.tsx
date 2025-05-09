@@ -21,9 +21,8 @@ const BookInfoTab: React.FC = () => {
             bookId: parseInt(id),
             title: '어린왕자',
             author: '생텍쥐페리',
-            translator: '김경식',
             publisher: '더스토리북',
-            summary:
+            description:
               "어린 시절부터 어른이 된 지금까지 전 세계인의 사랑을 받는 가장 위대한 이야기. 생텍쥐페리의 '어린 왕자'는 사막에 불시착한 조종사가 어린 왕자를 만나면서 펼쳐지는 환상적인 이야기로, 어린이와 어른 모두에게 참의 본질과 사랑의 의미를 일깨워주는 작품입니다.",
             publishDate: '2014년 8월 15일',
             pages: 138,
@@ -92,7 +91,7 @@ const BookInfoTab: React.FC = () => {
 
       <h3 className="text-lg font-medium mb-2 mt-10">책 소개</h3>
       <p className="text-sm leading-relaxed whitespace-pre-line">
-        {book.summary || '책 소개가 없습니다.'}
+        {book.description || '책 소개가 없습니다.'}
       </p>
     </div>
   );
