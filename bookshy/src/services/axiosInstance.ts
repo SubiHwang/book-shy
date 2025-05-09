@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string; // .env 파일에서 가져온 API 기본 URL
+const API_BASE_URL = import.meta.env.VITE_BASE_URL as string; // .env 파일에서 가져온 API 기본 URL
 const API_TIMEOUT = 30000;
 
 // member만 접근 가능한 api 사용을 위한 기본 인스턴스 생성
@@ -14,6 +14,7 @@ const authAxiosInstance: AxiosInstance = axios.create({
 authAxiosInstance.interceptors.request.use(
   (config) => {
     // 토큰 추가 로직
+    console.log('baseurl', API_BASE_URL);
     return config;
   },
   (error: AxiosError) => {
@@ -41,6 +42,8 @@ const publicAxiosInstance: AxiosInstance = axios.create({
 publicAxiosInstance.interceptors.request.use(
   (config) => {
     // 토큰 필요 없음
+    // 토큰 추가 로직
+    console.log('baseurl', API_BASE_URL);
     return config;
   },
   (error: AxiosError) => {

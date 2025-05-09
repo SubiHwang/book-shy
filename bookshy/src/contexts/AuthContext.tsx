@@ -72,11 +72,9 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
     mutationFn: async () => {
       try {
         await logoutfetch();
-        
       } catch (error) {
         console.error('로그아웃 오류:', error);
         throw error;
-        
       }
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user');

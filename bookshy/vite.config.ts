@@ -36,6 +36,7 @@ export default defineConfig({
           /^\/sonarqube\/.*/,
           /^\/api\/.*/,
           /^\/images\/.*/,
+          /^\/firebase-messaging-sw\.js$/, // Firebase 메시징 SW 파일 제외
         ],
         // Firebase 서비스 워커 파일 제외
         runtimeCaching: [

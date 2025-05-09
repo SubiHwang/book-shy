@@ -13,6 +13,11 @@ const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
   const userId = 1; // 임시 userId, 실제로는 로그인한 사용자의 ID를 사용해야 함
 
   const handleToggleLike = async (isLiked: boolean) => {
+    // itemId가 없으면 함수 실행을 중단
+    if (wishBook.itemId === undefined) {
+      console.error('Book ID is missing');
+      return;
+    }
     setIsLoading(true);
     try {
       let response;
