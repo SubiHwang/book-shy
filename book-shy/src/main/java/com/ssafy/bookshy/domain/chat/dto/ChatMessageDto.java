@@ -16,4 +16,5 @@ public class ChatMessageDto {
     private String content;
     private String timestamp;
     private String emoji;
+    private String type;
 }

@@ -16,4 +16,5 @@ public class ChatMessageRequestDto {
     private Long chatRoomId;   // 채팅방 ID
     private Long senderId;     // 보낸 사람 ID
     private String content;    // 메시지 본문
+    private String type;    // 메시지 타입
 }

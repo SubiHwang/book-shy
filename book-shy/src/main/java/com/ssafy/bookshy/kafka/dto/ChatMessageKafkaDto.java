@@ -21,4 +21,7 @@ public class ChatMessageKafkaDto {
 
     @Schema(description = "메시지 내용", example = "안녕하세요!")
     private String content;
+
+    @Schema(description = "메시지 타입", example = "chat")
+    private String type;
 }

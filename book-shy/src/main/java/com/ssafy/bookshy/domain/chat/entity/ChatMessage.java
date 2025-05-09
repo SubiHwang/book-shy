@@ -27,6 +27,7 @@ public class ChatMessage extends TimeStampEntity {
     private Long senderId;
     private String content;
     private LocalDateTime timestamp;
+    private String type;
 
     @Column(nullable = false)
     private boolean isRead = false; // ✅ 읽음 여부 필드 추가
@@ -35,12 +36,13 @@ public class ChatMessage extends TimeStampEntity {
     private List<String> emojis = new ArrayList<>();
 
     @Builder
-    public ChatMessage(ChatRoom chatRoom, Long senderId, String content, LocalDateTime timestamp) {
+    public ChatMessage(ChatRoom chatRoom, Long senderId, String content, LocalDateTime timestamp, String type) {
         this.chatRoom = chatRoom;
         this.senderId = senderId;
         this.content = content;
         this.timestamp = timestamp != null ? timestamp : LocalDateTime.now();
         this.isRead = false; // 메시지 생성 시 기본값 false
+        this.type = type;
     }
 
     public void addEmoji(String emoji) {

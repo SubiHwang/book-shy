@@ -21,6 +21,7 @@ public class ChatMessageResponseDto {
     private Long senderId;         // 보낸 사람 ID
     private String senderNickname; // 보낸 사람 닉네임
     private String content;        // 메시지 본문
+    private String type;        // 메시지 타입
     private LocalDateTime sentAt;  // 보낸 시간
 
     public static ChatMessageResponseDto from(ChatMessage message, String senderNickname) {
@@ -31,6 +32,7 @@ public class ChatMessageResponseDto {
                 .senderNickname(senderNickname)
                 .content(message.getContent())
                 .sentAt(message.getTimestamp())
+                .type(message.getType())
                 .build();
     }
 }
