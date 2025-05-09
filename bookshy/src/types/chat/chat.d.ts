@@ -9,9 +9,11 @@ export interface ChatRoomSummary {
 
 export interface ChatMessage {
   id: string;
-  senderId: string;
+  chatRoomId?: number;
+  senderId: number;
+  senderNickname?: string;
   content: string;
   sentAt: string;
-  type?: 'notice' | 'info' | 'warning';
+  type?: 'notice' | 'info' | 'warning' | 'text';
   emoji?: string;
 }
