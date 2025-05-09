@@ -3,13 +3,12 @@ package com.ssafy.bookshy.domain.chat.controller;
 import com.ssafy.bookshy.domain.chat.dto.ChatCalendarCreateRequestDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatCalendarCreateResponseDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatCalendarEventDto;
-import com.ssafy.bookshy.domain.chat.dto.ChatCalendarItemDto;
 import com.ssafy.bookshy.domain.chat.service.ChatCalendarService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.parameters.RequestBody; // ✅ Swagger용 (문서 설명용)
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -33,12 +32,12 @@ public class ChatCalendarController {
             description = "📆 사용자가 등록한 특정 날짜의 교환/대여 일정을 조회합니다.",
             parameters = {
                     @Parameter(name = "userId", description = "👤 사용자 ID", required = true, example = "1"),
-                    @Parameter(name = "date", description = "📅 조회할 날짜 (ISO 형식: yyyy-MM-dd)", example = "2025-05-02", required = true)
+                    @Parameter(name = "date", description = "📅 조회할 날짜 (ISO 형식: yyyy-MM-dd)", required = true, example = "2025-05-02")
             },
             responses = {
-                    @ApiResponse(responseCode = "200", description = "일정 목록 조회 성공", content = @Content(schema = @Schema(implementation = ChatCalendarEventDto.class))),
-                    @ApiResponse(responseCode = "400", description = "잘못된 요청 또는 날짜 형식 오류"),
-                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+                    @ApiResponse(responseCode = "200", description = "✅ 일정 목록 조회 성공", content = @Content(schema = @Schema(implementation = ChatCalendarEventDto.class))),
+                    @ApiResponse(responseCode = "400", description = "❌ 잘못된 요청 또는 날짜 형식 오류"),
+                    @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
             }
     )
     @GetMapping
@@ -60,13 +59,12 @@ public class ChatCalendarController {
                     @ApiResponse(responseCode = "200", description = "✅ 일정 등록 성공", content = @Content(schema = @Schema(implementation = ChatCalendarCreateResponseDto.class))),
                     @ApiResponse(responseCode = "400", description = "❌ 입력값 오류 또는 날짜 누락"),
                     @ApiResponse(responseCode = "404", description = "❌ 존재하지 않는 교환 요청 ID"),
-                    @ApiResponse(responseCode = "500", description = "🔥 서버 내부 오류")
+                    @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
             }
     )
     @PostMapping
     public ResponseEntity<ChatCalendarCreateResponseDto> createCalendar(
-            @RequestBody ChatCalendarCreateRequestDto dto) {
+            @org.springframework.web.bind.annotation.RequestBody ChatCalendarCreateRequestDto dto) { // ✅ 실제 동작용 RequestBody
         return ResponseEntity.ok(chatCalendarService.createCalendar(dto));
     }
-
 }
