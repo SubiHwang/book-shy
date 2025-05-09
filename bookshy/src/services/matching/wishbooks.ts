@@ -14,10 +14,10 @@ export const getSearchResult = async (searchTerm: string): Promise<WishBooksResp
   }
 };
 
-export const getWishBookList = async (userId: number): Promise<WishBooksResponse> => {
+export const getWishBookList = async (): Promise<WishBooksResponse> => {
   try {
     const response = await authAxiosInstance.get<string, WishBooksResponse>(
-      `/book/wish?userId=${userId}`,
+      `/book/wish`,
     );
     console.log('읽고 싶은 책 목록 API 응답:', response);
     return response;
