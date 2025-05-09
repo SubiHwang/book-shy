@@ -47,4 +47,27 @@ public class BookNoteQuoteService {
                 .message("독후감과 인용구가 성공적으로 등록되었습니다.")
                 .build();
     }
+
+    @Transactional
+    public BookNoteQuoteResponse updateNoteAndQuote(Long reviewId, Long quoteId, BookNoteQuoteUpdateRequest request) {
+        // 1. 독후감 수정
+        BookNoteRequest noteUpdate = BookNoteRequest.builder()
+                .content(request.getReviewContent())
+                .build();
+        BookNote updatedNote = bookNoteService.update(reviewId, noteUpdate);
+
+        // 2. 인용구 수정
+        BookQuoteRequest quoteUpdate = BookQuoteRequest.builder()
+                .content(request.getQuoteContent())
+                .build();
+        BookQuote updatedQuote = bookQuoteService.update(quoteId, quoteUpdate);
+
+        return BookNoteQuoteResponse.builder()
+                .reviewId(updatedNote.getReviewId())
+                .quoteId(updatedQuote.getQuoteId())
+                .status("SUCCESS")
+                .message("독후감과 인용구가 성공적으로 수정되었습니다.")
+                .build();
+    }
+
 }
