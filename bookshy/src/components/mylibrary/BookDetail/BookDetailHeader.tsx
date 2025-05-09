@@ -1,38 +1,20 @@
-// src/components/mylibrary/BookDetail/BookDetail.tsx
+// src/components/mylibrary/BookDetail/BookDetailHeader.tsx
 import React from 'react';
 import { BookDetailResponse } from '@/services/mylibrary/bookDetailService';
+// 공통 Header 컴포넌트 import
 
-interface BookDetailProps {
+interface BookDetailHeaderProps {
   bookDetail: BookDetailResponse & { libraryId: number; isPublic: boolean };
   onBack: () => void;
   onTogglePublicStatus: () => void;
 }
 
-const BookDetail: React.FC<BookDetailProps> = ({ bookDetail, onBack, onTogglePublicStatus }) => {
+const BookDetailHeader: React.FC<BookDetailHeaderProps> = ({
+  bookDetail,
+  onTogglePublicStatus,
+}) => {
   return (
     <>
-      {/* 헤더 부분 - 그라데이션 적용 */}
-      <div className="bg-gradient-to-r from-[#FCF6D4] to-[#F4E8B8] p-4 flex items-center justify-between flex-shrink-0">
-        <button onClick={onBack} className="text-gray-700">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
-        <h1 className="text-center text-lg font-medium text-gray-800">도서 상세 보기</h1>
-        <div className="w-6 h-6">{/* 간격 맞춤을 위한 빈 div */}</div>
-      </div>
-
       {/* 책 정보 섹션 - 그라데이션 적용, 레이아웃 개선 */}
       <div className="bg-gradient-to-r from-[#FCF6D4] to-[#F4E8B8] p-4 flex-shrink-0">
         <div className="flex flex-row items-start">
@@ -70,4 +52,4 @@ const BookDetail: React.FC<BookDetailProps> = ({ bookDetail, onBack, onTogglePub
   );
 };
 
-export default BookDetail;
+export default BookDetailHeader;
