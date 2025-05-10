@@ -8,8 +8,7 @@ import Loading from '@/components/common/Loading';
 
 const WishBooks: FC = () => {
   const navigate = useNavigate();
-  const userId = 1; // 임시 userId, 실제로는 로그인한 사용자의 ID를 사용해야 함
-  const { data, isLoading } = useWishBooks(userId); // 실제 API 호출을 위한 훅 사용
+  const { data, isLoading } = useWishBooks(); // 실제 API 호출을 위한 훅 사용
 
   const [selectedFilter, setSelectedFilter] = useState<string>('전체 보기');
   const [filterOpen, setFilterOpen] = useState<boolean>(false);

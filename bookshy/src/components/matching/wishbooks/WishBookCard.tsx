@@ -10,7 +10,6 @@ const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
   const [_isLoading, setIsLoading] = useState<boolean>(false);
 
   const queryClient = useQueryClient();
-  const userId = 1; // 임시 userId, 실제로는 로그인한 사용자의 ID를 사용해야 함
 
   const handleToggleLike = async (isLiked: boolean) => {
     // itemId가 없으면 함수 실행을 중단
@@ -24,18 +23,18 @@ const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
 
       if (isLiked) {
         // 좋아요 취소
-        response = await deleteWishBook(userId, wishBook.itemId);
+        response = await deleteWishBook(wishBook.itemId);
         console.log('Book removed from wishlist:', response);
       } else {
         // 좋아요 추가
-        response = await addWishBook(userId, wishBook.itemId);
+        response = await addWishBook(wishBook.itemId);
         console.log('Book added to wishlist:', response);
       }
       // 서버 응답에 따라 상태 업데이트
       setIsBookInWishList(!isLiked);
 
       // 쿼리 무효화 (서버에서 데이터가 변경되었으므로)
-      queryClient.invalidateQueries({ queryKey: ['wishBooks', userId] });
+      queryClient.invalidateQueries({ queryKey: ['wishBooks'] });
     } catch (error) {
       console.error('Error toggling wishlist status:', error);
     } finally {

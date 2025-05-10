@@ -7,6 +7,9 @@ const API_TIMEOUT = 30000;
 const authAxiosInstance: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 // 요청 인터셉터
@@ -14,7 +17,13 @@ const authAxiosInstance: AxiosInstance = axios.create({
 authAxiosInstance.interceptors.request.use(
   (config) => {
     // 토큰 추가 로직
-    console.log('baseurl', API_BASE_URL);
+    // console.log('baseurl', API_BASE_URL);
+
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+
     return config;
   },
   (error: AxiosError) => {
