@@ -1,9 +1,9 @@
-//src/pages/mylibrary/AddBook/AddByISBNPage.tsx
+// src/pages/mylibrary/AddBook/AddByISBNPage.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { NotFoundException, DecodeHintType, BarcodeFormat } from '@zxing/library';
-import './AddByISBNPage.css'; // CSS 파일 추가 필요
+import './AddByISBNPage.css';
 
 const AddByBarcodePage: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -55,84 +55,6 @@ const AddByBarcodePage: React.FC = () => {
     return false;
   };
 
-  useEffect(() => {
-    const initCamera = async () => {
-      try {
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach((track) => track.stop());
-        }
-
-        const constraints = {
-          video: {
-            facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-        };
-
-        logDebug('카메라 접근 요청', constraints);
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        streamRef.current = stream;
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-
-          videoRef.current.onloadedmetadata = async () => {
-            try {
-              await videoRef.current?.play();
-              setCameraReady(true);
-
-              // 바코드 형식 힌트 설정
-              const hints = new Map();
-              hints.set(DecodeHintType.POSSIBLE_FORMATS, [
-                BarcodeFormat.EAN_13,
-                BarcodeFormat.EAN_8,
-                BarcodeFormat.CODE_39,
-                BarcodeFormat.CODE_128,
-              ]);
-
-              readerRef.current = new BrowserMultiFormatReader(hints);
-              logDebug('바코드 리더 초기화 완료');
-
-              // 자동 스캔 시작
-              startAutoScan();
-            } catch (err) {
-              logDebug('비디오 재생 실패:', err);
-              setError(
-                err instanceof Error ? `비디오 재생 실패: ${err.message}` : '비디오 재생 오류',
-              );
-            }
-          };
-        }
-      } catch (err) {
-        logDebug('카메라 접근 오류:', err);
-        setError(err instanceof Error ? `카메라 접근 오류: ${err.message}` : '카메라 사용 불가');
-      }
-    };
-
-    initCamera();
-
-    return () => {
-      logDebug('컴포넌트 언마운트 - 리소스 정리');
-      if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, []);
-
-  // 자동 스캔을 주기적으로 계속 실행하도록 보장
-  const startAutoScan = () => {
-    if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
-
-    // 1000ms마다 스캔을 시도하는 타이머 설정
-    scanIntervalRef.current = setInterval(() => {
-      if (!scanning && cameraReady && !scanSuccess) {
-        handleScan();
-      }
-    }, 1000);
-  };
-
   const enhanceImageForBarcode = (
     context: CanvasRenderingContext2D,
     width: number,
@@ -161,16 +83,150 @@ const AddByBarcodePage: React.FC = () => {
     logDebug('이미지 품질 개선 처리 완료');
   };
 
+  // 자동 스캔을 주기적으로 계속 실행하도록 보장
+  const startAutoScan = () => {
+    logDebug('자동 스캔 시작 함수 호출됨');
+
+    if (scanIntervalRef.current) {
+      logDebug('기존 스캔 타이머 정리');
+      clearInterval(scanIntervalRef.current);
+    }
+
+    logDebug('새 스캔 타이머 설정');
+    scanIntervalRef.current = setInterval(() => {
+      logDebug(
+        `타이머 틱: scanning=${scanning}, cameraReady=${cameraReady}, scanSuccess=${scanSuccess}`,
+      );
+
+      if (!scanning && cameraReady && !scanSuccess) {
+        logDebug('handleScan 호출 조건 충족');
+        handleScan();
+      } else {
+        logDebug('handleScan 호출 조건 미충족');
+      }
+    }, 1000);
+
+    logDebug('자동 스캔 타이머 설정 완료');
+  };
+
+  useEffect(() => {
+    // 컴포넌트 마운트 시 상태 초기화
+    setScanning(false);
+    setScanSuccess(false);
+    setLastScannedData(null);
+    setLastError(null);
+    setScanAttempts(0);
+
+    logDebug('컴포넌트 마운트 - 카메라 초기화 시작');
+
+    const initCamera = async () => {
+      try {
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((track) => track.stop());
+        }
+
+        const constraints = {
+          video: {
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+        };
+
+        logDebug('카메라 접근 요청', constraints);
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        streamRef.current = stream;
+        logDebug('카메라 스트림 받음', stream.id);
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          logDebug('비디오 요소에 스트림 할당');
+
+          videoRef.current.onloadedmetadata = async () => {
+            try {
+              logDebug('비디오 메타데이터 로드됨, 재생 시작 시도');
+              await videoRef.current?.play();
+              logDebug('비디오 재생 시작됨');
+
+              setCameraReady(true);
+              logDebug('카메라 준비 상태 설정: true');
+
+              // 바코드 형식 힌트 설정
+              const hints = new Map();
+              hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+                BarcodeFormat.EAN_13,
+                BarcodeFormat.EAN_8,
+                BarcodeFormat.CODE_39,
+                BarcodeFormat.CODE_128,
+              ]);
+
+              readerRef.current = new BrowserMultiFormatReader(hints);
+              logDebug('바코드 리더 초기화 완료');
+
+              // 즉시 첫 스캔 시도 후 자동 스캔 시작
+              logDebug('첫 스캔 시도');
+              handleScan();
+              logDebug('자동 스캔 시작');
+              startAutoScan();
+            } catch (err) {
+              logDebug('비디오 재생 실패:', err);
+              setError(
+                err instanceof Error ? `비디오 재생 실패: ${err.message}` : '비디오 재생 오류',
+              );
+            }
+          };
+        }
+      } catch (err) {
+        logDebug('카메라 접근 오류:', err);
+        setError(err instanceof Error ? `카메라 접근 오류: ${err.message}` : '카메라 사용 불가');
+      }
+    };
+
+    initCamera();
+
+    return () => {
+      logDebug('컴포넌트 언마운트 - 리소스 정리');
+      if (scanIntervalRef.current) {
+        clearInterval(scanIntervalRef.current);
+        scanIntervalRef.current = null;
+      }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+    };
+  }, []);
+
+  // cameraReady 상태가 변경될 때 스캔을 시작하도록 별도의 useEffect 추가
+  useEffect(() => {
+    if (cameraReady && !scanSuccess && !scanning) {
+      logDebug('카메라 준비됨 - 자동 스캔 시작 (상태 변경 감지)');
+      startAutoScan();
+    }
+  }, [cameraReady, scanSuccess, scanning]);
+
   // 스캔이 끝나면 자동 스캔을 다시 시작
   const handleScan = async () => {
-    if (scanning || scanSuccess) return;
+    logDebug(`스캔 시도: scanning=${scanning}, scanSuccess=${scanSuccess}`);
+
+    // 이미 스캔 중이거나 성공했다면 스킵
+    if (scanning || scanSuccess) {
+      logDebug('이미 스캔 중이거나 성공 상태로 스캔 중단');
+      return;
+    }
+
     setScanning(true);
     setScanAttempts((prev) => prev + 1);
+    logDebug(`스캔 시도 횟수 증가: ${scanAttempts + 1}`);
 
     try {
       if (!videoRef.current || !canvasRef.current || !readerRef.current) {
         setLastError('스캔 준비가 완료되지 않았습니다.');
-        logDebug('스캔 준비 미완료 - 참조 누락');
+        logDebug('스캔 준비 미완료 - 참조 누락', {
+          videoRef: !!videoRef.current,
+          canvasRef: !!canvasRef.current,
+          readerRef: !!readerRef.current,
+        });
         return;
       }
 
@@ -219,18 +275,26 @@ const AddByBarcodePage: React.FC = () => {
           }, 1000);
         } else {
           setLastError('유효한 ISBN 형식이 아닙니다. 다시 시도해주세요.');
+          logDebug('유효하지 않은 ISBN 형식:', isbn);
         }
       } catch (err) {
         if (err instanceof NotFoundException) {
           setLastError('바코드를 찾지 못했습니다.');
+          logDebug('바코드 찾지 못함');
         } else {
           setLastError(err instanceof Error ? `스캔 오류: ${err.message}` : '스캔 중 오류');
+          logDebug('스캔 오류:', err);
         }
       }
     } finally {
+      logDebug('스캔 완료, 스캔 상태 해제');
       setScanning(false);
+
       // 스캔이 끝나면 자동으로 다시 스캔을 시작하도록 보장
-      startAutoScan();
+      if (!scanSuccess) {
+        logDebug('스캔 미성공 - 자동 스캔 재시작');
+        startAutoScan();
+      }
     }
   };
 
@@ -244,6 +308,7 @@ const AddByBarcodePage: React.FC = () => {
   };
 
   const handleRetry = () => {
+    logDebug('재시도 버튼 클릭');
     setScanSuccess(false);
     setLastScannedData(null);
     setLastError(null);
@@ -252,6 +317,7 @@ const AddByBarcodePage: React.FC = () => {
   };
 
   const handleBack = () => {
+    logDebug('뒤로가기 버튼 클릭');
     if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
