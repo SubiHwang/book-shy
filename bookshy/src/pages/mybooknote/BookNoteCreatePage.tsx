@@ -9,7 +9,6 @@ import { useState } from 'react';
 
 const BookNoteCreatePage: React.FC = () => {
   const navigate = useNavigate();
-  const userId = 1;
   const [params] = useSearchParams();
 
   const bookIdParam = params.get('bookId');
@@ -24,8 +23,6 @@ const BookNoteCreatePage: React.FC = () => {
   // 🔄 수정: bookId 기준으로 서재 도서 찾기
   const targetBook =
     bookId !== null ? libraryBooks.find((book) => book.bookId === bookId) : undefined;
-
-  const itemId = targetBook?.aladinItemId;
 
   const { data: bookDetail } = useQuery({
     queryKey: ['book-detail', bookId],
