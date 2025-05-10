@@ -55,19 +55,19 @@ authAxiosInstance.interceptors.response.use(
     originalRequest.headers = headers;
 
     // 토큰 만료로 인한 401 에러인지 확인
-    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+    if (error.response && error.response.status === 500 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
         // localStorage나 다른 저장소에서 refresh token 가져오기
-        const refresh_token = localStorage.getItem('refreshToken');
+        const refresh_token = localStorage.getItem('refresh_token');
         const fcmToken = localStorage.getItem('firebase_token');
 
         if (!refresh_token) {
           // refresh token이 없으면 로그인 페이지로 리다이렉트
           window.location.href = '/login';
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('refresh_token');
+          // localStorage.removeItem('auth_token');
+          // localStorage.removeItem('refresh_token');
           return Promise.reject(error);
         }
 
@@ -94,8 +94,8 @@ authAxiosInstance.interceptors.response.use(
         return authAxiosInstance(originalRequest);
       } catch (refreshError) {
         // 토큰 갱신 실패 시 로그인 페이지로 리다이렉트
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }
