@@ -4,6 +4,7 @@ import com.ssafy.bookshy.domain.booknote.dto.BookQuoteRequest;
 import com.ssafy.bookshy.domain.booknote.dto.BookQuoteResponseDto;
 import com.ssafy.bookshy.domain.booknote.entity.BookQuote;
 import com.ssafy.bookshy.domain.booknote.service.BookQuoteService;
+import com.ssafy.bookshy.domain.users.entity.Users;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,7 +47,11 @@ public class BookQuoteController {
             }
     )
     @PostMapping
-    public ResponseEntity<BookQuote> create(@RequestBody BookQuoteRequest request) {
+    public ResponseEntity<BookQuote> create(
+            @RequestBody BookQuoteRequest request,
+            @AuthenticationPrincipal Users user
+    ) {
+        request.setUserId(user.getUserId());
         return ResponseEntity.ok(bookQuoteService.create(request));
     }
 
@@ -70,7 +76,10 @@ public class BookQuoteController {
     @PutMapping("/{quoteId}")
     public ResponseEntity<BookQuote> update(
             @PathVariable Long quoteId,
-            @RequestBody BookQuoteRequest request) {
+            @RequestBody BookQuoteRequest request,
+            @AuthenticationPrincipal Users user
+    ) {
+        request.setUserId(user.getUserId());
         return ResponseEntity.ok(bookQuoteService.update(quoteId, request));
     }
 
@@ -90,8 +99,9 @@ public class BookQuoteController {
             }
     )
     public ResponseEntity<List<BookQuoteResponseDto>> getMyQuotes(
-            @RequestHeader("X-User-Id") Long userId,
-            @RequestParam(required = false) Long bookId) {
-        return ResponseEntity.ok(bookQuoteService.findQuoteResponsesByUserId(userId, bookId));
+            @RequestParam(required = false) Long bookId,
+            @AuthenticationPrincipal Users user
+    ) {
+        return ResponseEntity.ok(bookQuoteService.findQuoteResponsesByUserId(user.getUserId(), bookId));
     }
 }

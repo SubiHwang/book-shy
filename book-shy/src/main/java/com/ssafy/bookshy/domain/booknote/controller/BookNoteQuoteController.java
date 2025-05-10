@@ -4,6 +4,7 @@ import com.ssafy.bookshy.domain.booknote.dto.BookNoteQuoteRequest;
 import com.ssafy.bookshy.domain.booknote.dto.BookNoteQuoteResponse;
 import com.ssafy.bookshy.domain.booknote.dto.BookNoteQuoteUpdateRequest;
 import com.ssafy.bookshy.domain.booknote.service.BookNoteQuoteService;
+import com.ssafy.bookshy.domain.users.entity.Users;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -56,7 +58,9 @@ public class BookNoteQuoteController {
                     @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
             }
     )
-    public ResponseEntity<BookNoteQuoteResponse> createNoteAndQuote(@RequestBody BookNoteQuoteRequest request) {
+    public ResponseEntity<BookNoteQuoteResponse> createNoteAndQuote(@RequestBody BookNoteQuoteRequest request,
+                                                                    @AuthenticationPrincipal Users user) {
+        request.setUserId(user.getUserId()); // ✅ 인증된 사용자 ID 설정
         BookNoteQuoteResponse response = bookNoteQuoteService.registerNoteAndQuote(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
