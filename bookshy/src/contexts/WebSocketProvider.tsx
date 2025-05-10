@@ -10,7 +10,7 @@ interface WebSocketContextValue {
     onMessage: (msg: IMessage) => void,
   ) => { unsubscribe: () => void } | null;
   unsubscribe: (sub: { unsubscribe: () => void } | null) => void;
-  sendMessage: (roomId: number, senderId: number, content: string, type: string) => void;
+  sendMessage: (roomId: number, content: string, type: string) => void;
   isConnected: boolean;
 }
 
@@ -83,21 +83,17 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ c
     if (sub) sub.unsubscribe();
   }, []);
 
-  const sendMessage = useCallback(
-    (roomId: number, senderId: number, content: string, type = 'chat') => {
-      if (!clientRef.current?.connected) return;
+  const sendMessage = useCallback((roomId: number, content: string, type = 'chat') => {
+    if (!clientRef.current?.connected) return;
 
-      const payload = {
-        chatRoomId: roomId,
-        senderId,
-        content,
-        type,
-      };
+    const payload = {
+      chatRoomId: roomId,
+      content,
+      type,
+    };
 
-      clientRef.current.send('/app/chat.send', {}, JSON.stringify(payload));
-    },
-    [],
-  );
+    clientRef.current.send('/app/chat.send', {}, JSON.stringify(payload));
+  }, []);
 
   return (
     <WebSocketContext.Provider value={{ subscribeRoom, unsubscribe, sendMessage, isConnected }}>

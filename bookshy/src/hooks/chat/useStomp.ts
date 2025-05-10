@@ -30,11 +30,10 @@ export const useStomp = (roomId: number, onMessage: (msg: ChatMessage) => void) 
 
   const sendMessage = (
     roomId: number,
-    senderId: number,
     content: string,
     type: string = 'chat',
   ) => {
-    sendWS(roomId, senderId, content, type);
+    sendWS(roomId, content, type);
   };
 
   return { sendMessage };

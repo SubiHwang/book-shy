@@ -19,8 +19,6 @@ interface Props {
 function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const { roomId } = useParams();
   const numericRoomId = Number(roomId);
-  const myUserId = 4; // 로그인 유저 id로 바꿔야함
-
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showOptions, setShowOptions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -41,25 +39,10 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
 
   useEffect(() => {
     if (!isNaN(numericRoomId)) {
-      markMessagesAsRead(numericRoomId, myUserId)
-        .then(() => refetch())
-        .catch((err) => console.error('❌ 읽음 처리 실패:', err));
-    }
-  }, [numericRoomId, myUserId, refetch]);
-
-  useEffect(() => {
-    if (isSuccess) {
-      setMessages(initialMessages);
-    }
-  }, [initialMessages, isSuccess]);
-
-  useEffect(() => {
-    if (!isNaN(numericRoomId)) {
-      markMessagesAsRead(numericRoomId, myUserId)
+      markMessagesAsRead(numericRoomId)
         .then(() => {
           refetch();
-
-          queryClient.setQueryData(['chatList', myUserId], (prev: any) => {
+          queryClient.setQueryData(['chatList'], (prev: any) => {
             if (!Array.isArray(prev)) return prev;
             return prev.map((room: any) =>
               room.id === numericRoomId ? { ...room, unreadCount: 0 } : room,
@@ -68,7 +51,13 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
         })
         .catch((err) => console.error('❌ 읽음 처리 실패:', err));
     }
-  }, [numericRoomId, myUserId, refetch, queryClient]);
+  }, [numericRoomId, refetch, queryClient]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      setMessages(initialMessages);
+    }
+  }, [initialMessages, isSuccess]);
 
   const onMessage = useCallback(
     (newMessage: ChatMessage) => {
@@ -77,7 +66,8 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
         return exists ? prev : [...prev, newMessage];
       });
 
-      queryClient.setQueryData(['chatList', myUserId], (prev: any) => {
+      queryClient.setQueryData(['chatList'], (prev: any) => {
+        if (!Array.isArray(prev)) return prev;
         return prev.map((room: any) =>
           room.id === newMessage.chatRoomId
             ? {
@@ -89,7 +79,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
         );
       });
     },
-    [queryClient, myUserId],
+    [queryClient],
   );
 
   const { sendMessage } = useStomp(numericRoomId, onMessage);
@@ -113,7 +103,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
 
   const handleSendMessage = (content: string) => {
     if (isNaN(numericRoomId)) return;
-    sendMessage(numericRoomId, myUserId, content);
+    sendMessage(numericRoomId, content, 'chat');
   };
 
   const handleSendSystemMessage = (
@@ -130,7 +120,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
       type,
     };
     setMessages((prev) => [...prev, newMessage]);
-    sendMessage(numericRoomId, -1, content, type);
+    sendMessage(numericRoomId, content, type);
   };
 
   const toggleOptions = () => {
@@ -201,7 +191,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
               ) : (
                 <ChatMessageItem
                   message={{ ...msg, sentAt: formatTime(msg.sentAt) }}
-                  isMyMessage={msg.senderId === myUserId}
+                  isMyMessage={msg.senderId !== -1}
                 />
               )}
             </div>
