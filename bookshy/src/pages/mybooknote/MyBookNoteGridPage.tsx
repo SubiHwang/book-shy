@@ -60,12 +60,15 @@ const MyBookNoteGridPage: React.FC<BookGridPetalPageProps> = ({ bookNotes }) => 
         )}
       </div>
 
-      <button
-        onClick={() => navigate('/booknotes/create')}
-        className="fixed bottom-20 right-6 w-12 h-12 bg-pink-500 text-white rounded-full shadow-lg text-2xl"
-      >
-        +
-      </button>
+      {/* 책 추가 플로팅 액션 버튼 */}
+      <div className="fixed bottom-28 right-5 md:right-10">
+        <button
+          className="bg-primary hover:bg-primary-dark text-light-text-inverted rounded-full p-3 shadow-lg transition-colors"
+          onClick={() => navigate('/booknotes/create')}
+        >
+          <img src="/icons/camera-upload.svg" alt="카메라 업로드" className="w-10 h-10" />
+        </button>
+      </div>
     </div>
   );
 };
