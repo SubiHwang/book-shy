@@ -55,3 +55,8 @@ file:
 
 elasticsearch:
   url: ${ELK_URL}
+
+# 개발자 식별자 설정 추가
+app:
+  developer:
+    id: ${DEV_ID}
