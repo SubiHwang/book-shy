@@ -55,7 +55,7 @@ public class LibraryService {
             }
 
             Book newBook = Book.builder()
-                    .aladinItemId(Long.parseLong(response.getIsbn13()))
+                    .itemId(response.getItemId())
                     .isbn(response.getIsbn13())
                     .title(response.getTitle())
                     .author(response.getAuthor())
@@ -107,14 +107,16 @@ public class LibraryService {
 
     public List<LibraryResponseDto> findLibraryByUser(Long userId) {
         Users user = userService.getUserById(userId);
-        return libraryRepository.findByUser(user).stream()
+        return libraryRepository.findAllByUserOrderByRegisteredAtDesc(user)
+                .stream()
                 .map(LibraryResponseDto::from)
                 .toList();
     }
 
     public List<LibraryResponseDto> findPublicLibraryByUser(Long userId) {
         Users user = userService.getUserById(userId);
-        return libraryRepository.findByUserAndIsPublicTrue(user).stream()
+        return libraryRepository.findByUserAndIsPublicTrueOrderByRegisteredAtDesc(user)
+                .stream()
                 .map(LibraryResponseDto::from)
                 .toList();
     }
@@ -140,7 +142,7 @@ public class LibraryService {
         Users user = userService.getUserById(dto.getUserId());
 
         // 이미 존재하는 도서인지 확인
-        Book book = bookRepository.findByAladinItemId(dto.getItemId())
+        Book book = bookRepository.findByitemId(dto.getItemId())
                 .orElseGet(() -> {
                     BookResponseDto response = aladinClient.searchByItemIdToDto(dto.getItemId());
 
@@ -149,7 +151,7 @@ public class LibraryService {
                     }
 
                     Book newBook = Book.builder()
-                            .aladinItemId(dto.getItemId())
+                            .itemId(response.getItemId())
                             .isbn(response.getIsbn13())
                             .title(response.getTitle())
                             .author(response.getAuthor())
