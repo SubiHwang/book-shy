@@ -65,7 +65,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     log.error("인증 과정에서 예외 발생: {}: {}", e.getClass().getName(), e.getMessage());
                 }
             } else {
+
                 log.warn("유효하지 않은 토큰");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setCharacterEncoding("utf-8");
+                response.setContentType("application/json");
+                response.getWriter().write(objectMapper.writeValueAsString("Access Token이 만료되었거나 유효하지 않습니다."));
             }
         } else {
             log.info("토큰이 없음");

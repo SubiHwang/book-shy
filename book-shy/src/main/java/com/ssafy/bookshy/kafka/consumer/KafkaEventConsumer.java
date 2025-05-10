@@ -1,11 +1,12 @@
 package com.ssafy.bookshy.kafka.consumer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.bookshy.domain.chat.dto.ChatMessageResponseDto;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.service.ChatMessageService;
 import com.ssafy.bookshy.domain.chat.service.ChatRoomService;
-import com.ssafy.bookshy.kafka.dto.*;
+import com.ssafy.bookshy.kafka.dto.BookCreatedDto;
+import com.ssafy.bookshy.kafka.dto.MatchSuccessDto;
+import com.ssafy.bookshy.kafka.dto.RecommendMessageKafkaDto;
+import com.ssafy.bookshy.kafka.dto.TradeSuccessDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -14,6 +15,7 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.xcontent.XContentType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -31,20 +33,23 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class KafkaEventConsumer {
 
-    private final ObjectMapper objectMapper;
     private final ChatMessageService chatMessageService;
     private final ChatRoomService chatRoomService;
     private final SimpMessagingTemplate messagingTemplate;
-
     private final RestHighLevelClient elasticsearchClient;
 
+    @Value("${app.developer.id}")
+    private String developerId;
+
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
 
     /**
      * 📘 책 등록 이벤트 수신 처리
      * - 토픽: book.created
      * - 도서 등록 관련 이벤트를 수신하고 처리하는 자리입니다.
      */
-    @KafkaListener(topics = "book.created", containerFactory = "bookListenerFactory")
+    @KafkaListener(topics = "#{@kafkaTopicResolver.getBookCreatedTopic()}", containerFactory = "bookListenerFactory")
     public void listenBookCreated(ConsumerRecord<String, BookCreatedDto> record, Acknowledgment ack) {
         try {
             BookCreatedDto event = record.value();
@@ -63,7 +68,7 @@ public class KafkaEventConsumer {
      * - 토픽: match.success
      * - 책 교환 매칭이 성사되었을 때 후처리를 위한 Consumer입니다.
      */
-    @KafkaListener(topics = "match.success", containerFactory = "matchListenerFactory")
+    @KafkaListener(topics = "#{@kafkaTopicResolver.getMatchSuccessTopic()}", containerFactory = "matchListenerFactory")
     public void listenMatchSuccess(ConsumerRecord<String, MatchSuccessDto> record, Acknowledgment ack) {
         try {
             MatchSuccessDto event = record.value();
@@ -81,13 +86,12 @@ public class KafkaEventConsumer {
         }
     }
 
-
     /**
      * 📦 교환 완료 이벤트 수신 처리
      * - 토픽: trade.success
      * - 실제 책 교환이 완료되었을 때 발생하는 이벤트 처리
      */
-    @KafkaListener(topics = "trade.success", containerFactory = "tradeListenerFactory")
+    @KafkaListener(topics = "#{@kafkaTopicResolver.getTradeSuccessTopic()}", containerFactory = "tradeListenerFactory")
     public void listenTradeSuccess(ConsumerRecord<String, TradeSuccessDto> record, Acknowledgment ack) {
         try {
             TradeSuccessDto event = record.value();
@@ -102,38 +106,10 @@ public class KafkaEventConsumer {
     }
 
     /**
-     * 💬 실시간 채팅 메시지 수신 처리
-     * - 토픽: chat.message
-     * - Kafka를 통해 전달된 채팅 메시지를 DB에 저장하고,
-     * 해당 채팅방 구독자들에게 WebSocket으로 전달합니다.
-     */
-    @KafkaListener(topics = "chat.message", containerFactory = "chatListenerFactory")
-    public void listenChatMessage(ConsumerRecord<String, ChatMessageKafkaDto> record, Acknowledgment ack) {
-        try {
-            ChatMessageKafkaDto dto = record.value();
-            log.info("📥 [KafkaConsumer] Received ChatMessageKafkaDto from topic '{}': {}", record.topic(), dto);
-
-            // 💾 메시지를 DB에 저장
-            ChatMessageResponseDto saved = chatMessageService.saveMessageFromKafka(dto);
-            log.info("💾 [KafkaConsumer] ChatMessage saved to DB: {}", saved);
-
-            // 📢 해당 채팅방 구독자에게 메시지 전송
-            String destination = "/topic/chat/" + dto.getChatRoomId();
-            messagingTemplate.convertAndSend(destination, saved);
-            log.info("📢 [KafkaConsumer] ChatMessage sent to WebSocket destination '{}'", destination);
-
-            ack.acknowledge(); // ✅ 커밋
-            log.info("✅ [KafkaConsumer] Offset committed for topic '{}'", record.topic());
-        } catch (Exception e) {
-            log.error("❌ [KafkaConsumer] Error while processing chat.message", e);
-        }
-    }
-
-    /**
      * 💬 실시간 로깅 메시지 수신 처리
-     * - 토픽: recommend.event
+     * - 토픽: {developerId}-recommend.event
      */
-    @KafkaListener(topics = "recommend.event", containerFactory = "recommendListenerFactory")
+    @KafkaListener(topics = "#{@kafkaTopicResolver.getChatMessageTopic()}", containerFactory = "chatListenerFactory")
     public void listenRecommendEvent(ConsumerRecord<String, RecommendMessageKafkaDto> record, Acknowledgment ack) {
         try {
             String topic = record.topic();
@@ -144,21 +120,22 @@ public class KafkaEventConsumer {
             logData.put("eventType", logDto.getEventType());
             logData.put("eventData", logDto.getEventData());
             logData.put("timestamp", logDto.getTimestamp());
-            logData.put("userId", record.key()); // userId는 key로 전송됨
 
-            // 인덱스 이름 결정 (토픽 이름에서 추출)
+            // 인덱스 이름 결정
             String indexName = topic.replace("bookshy-", "").replace("-logs", "");
 
-            log.debug("로그 소비 시작: topic={}, key={}", topic, record.key());
-
-            // 인덱스 요청 생성
-            IndexRequest indexRequest = new IndexRequest(indexName)
-                    .source(logData, XContentType.JSON);
+            // 단순한 문서 ID 생성 - 타임스탬프만 사용 (프로덕션에서는 이 정도면 충분)
+            String docId = logDto.getEventType() + "-" + System.currentTimeMillis();
 
             try {
                 // Elasticsearch에 저장
+                IndexRequest indexRequest = new IndexRequest(indexName)
+                        .id(docId)
+                        .source(logData, XContentType.JSON);
+
                 IndexResponse response = elasticsearchClient.index(indexRequest, RequestOptions.DEFAULT);
                 log.debug("ES에 로그 저장 성공: id={}, index={}", response.getId(), indexName);
+
                 // 처리 완료 후 ack (중요!)
                 ack.acknowledge();
             } catch (IOException e) {

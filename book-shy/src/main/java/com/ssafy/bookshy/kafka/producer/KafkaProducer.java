@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.kafka.producer;
 
+import com.ssafy.bookshy.kafka.config.KafkaTopicResolver;
 import com.ssafy.bookshy.kafka.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,12 +17,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class KafkaProducer {
 
-    // ✅ 토픽 이름 상수 정의
+    // ✅ 토픽 이름 상수 정의 (주석 해제하고 다시 사용)
     private static final String TOPIC_BOOK_CREATED = "book.created";
     private static final String TOPIC_MATCH_SUCCESS = "match.success";
     private static final String TOPIC_TRADE_SUCCESS = "trade.success";
     private static final String TOPIC_CHAT_MESSAGE = "chat.message";
     private static final String TOPIC_RECOMMEND_EVENT = "recommend.event";
+
+    private final KafkaTopicResolver kafkaTopicResolver;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     /**
@@ -49,7 +52,8 @@ public class KafkaProducer {
      * 💬 채팅 메시지 이벤트 발행
      */
     public void sendChatMessage(ChatMessageKafkaDto event) {
-        log.info("📤 [KafkaProducer] Sending chat message to topic '{}': {}", TOPIC_CHAT_MESSAGE, event);
+        String topicName = kafkaTopicResolver.getChatMessageTopic();
+        log.info("📤 [KafkaProducer] Sending chat message to topic '{}': {}", topicName, event);
         send(TOPIC_CHAT_MESSAGE, event, "💬 ChatMessageEvent");
     }
 
@@ -60,16 +64,40 @@ public class KafkaProducer {
         send(TOPIC_RECOMMEND_EVENT, event, "💬 RecommendEvent");
     }
 
-
     /**
      * 🛠 공통 메시지 발행 메서드
      */
-    private void send(String topic, Object message, String eventName) {
+    private void send(String baseTopic, Object message, String eventName) {
         try {
-            kafkaTemplate.send(topic, message);
-            log.info("{} Sent: {}", eventName, message);
+            // 토픽 이름 결정 (kafkaTopicResolver 사용)
+            String topicName;
+
+            switch (baseTopic) {
+                case TOPIC_BOOK_CREATED:
+                    topicName = kafkaTopicResolver.getBookCreatedTopic();
+                    break;
+                case TOPIC_MATCH_SUCCESS:
+                    topicName = kafkaTopicResolver.getMatchSuccessTopic();
+                    break;
+                case TOPIC_TRADE_SUCCESS:
+                    topicName = kafkaTopicResolver.getTradeSuccessTopic();
+                    break;
+                case TOPIC_CHAT_MESSAGE:
+                    topicName = kafkaTopicResolver.getChatMessageTopic();
+                    break;
+                case TOPIC_RECOMMEND_EVENT:
+                    topicName = kafkaTopicResolver.getRecommendEventTopic();
+                    break;
+                default:
+                    topicName = baseTopic;
+            }
+
+            // 동적 토픽 이름으로 메시지 발송
+            kafkaTemplate.send(topicName, message);
+
+            log.info("{} Sent to topic '{}': {}", eventName, topicName, message);
         } catch (Exception e) {
-            log.error("❌ Failed to send {}", eventName, e);
+            log.error("❌ Failed to send {} to topic", eventName, e);
         }
     }
 }
