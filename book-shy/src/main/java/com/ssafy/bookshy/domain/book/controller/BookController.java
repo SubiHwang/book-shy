@@ -166,4 +166,24 @@ public class BookController {
         return ResponseEntity.ok(BookLibraryResponseDto.from(book, library.isPublic(), isLiked));
     }
 
+    @GetMapping("/detail")
+    @Operation(
+            summary = "📕 bookId 기반 도서 상세 정보 조회",
+            description = "bookId를 이용해 사용자의 서재에 등록된 도서의 상세 정보를 조회합니다.",
+            parameters = {
+                    @Parameter(name = "bookId", description = "도서 ID", required = true, example = "42"),
+                    @Parameter(name = "userId", description = "사용자 ID", required = true, example = "1")
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "📘 도서 상세 정보 반환"),
+                    @ApiResponse(responseCode = "404", description = "❌ 도서를 찾을 수 없음")
+            }
+    )
+    public ResponseEntity<BookResponseDto> getBookDetailById(
+            @RequestParam Long bookId,
+            @RequestParam Long userId
+    ) {
+        return ResponseEntity.ok(bookService.getBookDetailById(bookId, userId));
+    }
+
 }
