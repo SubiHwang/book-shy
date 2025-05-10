@@ -39,6 +39,9 @@ public class KafkaEventConsumer {
     @Value("${app.developer.id}")
     private String developerId;
 
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
+
 
     /**
      * 📘 책 등록 이벤트 수신 처리
@@ -156,8 +159,8 @@ public class KafkaEventConsumer {
             String docId = logDto.getEventType() + "-" + System.currentTimeMillis();
 
             try {
-                // 개발자 ID가 'subi'인 경우에만 Elasticsearch에 저장
-                if ("subi".equals(developerId)) {
+                // 개발자 ID가 'subi'이거나 서버 환경일 경우에는
+                if ("subi".equals(developerId) || "prod".equals(activeProfile)) {
                     // Elasticsearch에 저장
                     IndexRequest indexRequest = new IndexRequest(indexName)
                             .id(docId)
