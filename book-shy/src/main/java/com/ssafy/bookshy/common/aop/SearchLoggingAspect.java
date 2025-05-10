@@ -72,6 +72,8 @@ public class SearchLoggingAspect {
         logDto.setEventType("BOOK_DETAIL_SEARCH");
         logDto.setEventData(logData);
 
+        log.info("📢 독서 조회 기록을 위한 kafka 호출");
+
         loggingService.processClientLog(logDto);
     }
 
@@ -103,6 +105,7 @@ public class SearchLoggingAspect {
         ClientLogRequestDto logDto = new ClientLogRequestDto();
         logDto.setEventType("BOOK_WISH_ADD");
         logDto.setEventData(logData);
+        log.info("📢 찜하기 기록을 위한 kafka 호출");
         loggingService.processClientLog(logDto);
     }
 
