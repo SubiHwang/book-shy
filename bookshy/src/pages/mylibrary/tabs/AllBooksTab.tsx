@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LibraryBookshelfRow from '@/components/mylibrary/BookShelf/LibraryBookshelfRow';
-import { fetchUserAllLibrary } from '@/services/mylibrary/bookshelfService';
+import { fetchUserAllLibrary } from '@/services/mylibrary/libraryApi';
 import Loading from '@/components/common/Loading';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Library } from '@/types/mylibrary/library';
