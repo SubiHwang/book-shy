@@ -4,6 +4,7 @@ import { useParams, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import BookDetailHeader from '@/components/mylibrary/BookDetail/BookDetailHeader';
 import TabNavBar from '@/components/common/TabNavBar';
 import {
+  deleteLibraryBook,
   fetchBookDetail,
   updateBookVisibility,
   BookDetailResponse,
@@ -39,6 +40,21 @@ const BookDetailPage: React.FC = () => {
       navigate(`/bookshelf/books/${bookId}`, { replace: true });
     }
   }, [bookId, location.pathname, navigate, isValidId]);
+
+  const handleDeleteBook = async () => {
+    if (!bookDetail) return;
+
+    if (window.confirm('정말로 이 책을 삭제하시겠습니까?')) {
+      try {
+        await deleteLibraryBook(bookDetail.libraryId);
+        alert('책이 성공적으로 삭제되었습니다.');
+        navigate('/bookshelf'); // 서재 페이지로 이동
+      } catch (error) {
+        console.error('책 삭제 중 오류 발생:', error);
+        alert('책 삭제 중 오류가 발생했습니다.');
+      }
+    }
+  };
 
   // 서재 책 정보 로드
   useEffect(() => {
@@ -148,6 +164,7 @@ const BookDetailPage: React.FC = () => {
         <BookDetailHeader
           bookDetail={bookDetail}
           onBack={handleBack}
+          onDelete={handleDeleteBook}
           onTogglePublicStatus={togglePublicStatus}
         />
 

@@ -47,3 +47,18 @@ export const updateBookVisibility = async (libraryId: number, isPublic: boolean)
     throw error;
   }
 };
+
+// 내 서재 책 삭제 API
+export const deleteLibraryBook = async (libraryId: number): Promise<void> => {
+  try {
+    console.log(`책 삭제 요청: libraryId=${libraryId}`);
+
+    // API 호출
+    await authAxiosInstance.delete(`/library/${libraryId}`);
+
+    console.log('책 삭제 성공');
+  } catch (error) {
+    console.error('책 삭제 오류:', error);
+    throw error;
+  }
+};
