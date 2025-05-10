@@ -6,6 +6,8 @@ import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
 import com.ssafy.bookshy.domain.book.entity.Book;
 import com.ssafy.bookshy.domain.book.repository.BookRepository;
 import com.ssafy.bookshy.domain.book.repository.WishRepository;
+import com.ssafy.bookshy.domain.booknote.entity.BookNote;
+import com.ssafy.bookshy.domain.booknote.repository.BookNoteRepository;
 import com.ssafy.bookshy.domain.library.dto.LibraryResponseDto;
 import com.ssafy.bookshy.domain.library.dto.LibrarySearchAddRequestDto;
 import com.ssafy.bookshy.domain.library.dto.LibrarySelfAddRequestDto;
@@ -28,7 +30,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +43,7 @@ public class LibraryService {
     private final UserService userService;
     private final AladinClient aladinClient;
     private final WishRepository wishRepository;
+    private final BookNoteRepository bookNoteRepository;
 
     @Value("${file.upload-dir}")
     private String uploadPath;
@@ -232,6 +237,29 @@ public class LibraryService {
         libraryRepository.save(library);
 
         return LibraryResponseDto.from(library);
+    }
+
+    /**
+     * 📘✏️ 사용자의 서재 중 아직 독후감이 작성되지 않은 도서 목록을 반환합니다.
+     *
+     * - 모든 서재 항목을 조회
+     * - 각 항목의 bookId가 book_reviews 테이블(BookNote)에 존재하지 않는 경우만 필터링
+     * - 책의 상세 정보(title, author, cover 등)와 함께 DTO로 반환
+     */
+    @Transactional(readOnly = true)
+    public List<LibraryResponseDto> findUnwrittenNotesByUserId(Long userId) {
+        Users user = userService.getUserById(userId);
+
+        List<Library> libraries = libraryRepository.findByUser(user);
+        Set<Long> writtenBookIds = bookNoteRepository.findAll().stream()
+                .filter(note -> note.getUserId().equals(userId))
+                .map(BookNote::getBookId)
+                .collect(Collectors.toSet());
+
+        return libraries.stream()
+                .filter(lib -> !writtenBookIds.contains(lib.getBook().getId()))
+                .map(LibraryResponseDto::from)
+                .toList();
     }
 
 }
