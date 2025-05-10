@@ -24,7 +24,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      */
     boolean existsByIdAndStatus(Long id, Book.Status status);
 
-    Optional<Book> findByAladinItemId(Long aladinItemId);
+    Optional<Book> findByitemId(Long itemId);
 
     Optional<Book> findByIsbn(String isbn13);
 }

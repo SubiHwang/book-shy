@@ -22,7 +22,7 @@ public class Book {
     @Column(name = "book_id")
     private Long id;
 
-    private Long aladinItemId;
+    private Long itemId;
 
     @Column(nullable = false)
     private String isbn;

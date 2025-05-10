@@ -10,6 +10,8 @@ import java.util.List;
 public interface LibraryRepository extends JpaRepository<Library, Long> {
     List<Library> findByUser(Users user);
     List<Library> findByUserAndIsPublicTrue(Users user);
+    List<Library> findAllByUserOrderByRegisteredAtDesc(Users user); // 전체 서재
+    List<Library> findByUserAndIsPublicTrueOrderByRegisteredAtDesc(Users user); // 공개 서재
     long countByUser(Users user);
     long countByUserAndIsPublicTrue(Users user);
     boolean existsByUserAndBook(Users user, Book book);

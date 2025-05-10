@@ -30,7 +30,7 @@ public class BookListResponseDto {
 
     public static BookListResponseDto from(Book book, Boolean isLiked) {
         return BookListResponseDto.builder()
-                .itemId(book.getAladinItemId())
+                .itemId(book.getItemId())
                 .title(book.getTitle())
                 .author(book.getAuthor())
                 .publisher(book.getPublisher())

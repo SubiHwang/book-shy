@@ -56,7 +56,8 @@ public class AladinClient {
             JsonNode root = objectMapper.readTree(clean);
             JsonNode itemArray = root.path("item");
             if (itemArray.isArray() && itemArray.size() > 0) {
-                return BookResponseDto.fromAladin(itemArray.get(0));
+                JsonNode item = itemArray.get(0);
+                return BookResponseDto.fromAladin(item, false);
             }
 
             return BookResponseDto.builder().isbn13(isbn13).build();
