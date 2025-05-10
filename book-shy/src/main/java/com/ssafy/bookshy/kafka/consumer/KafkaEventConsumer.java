@@ -137,8 +137,8 @@ public class KafkaEventConsumer {
 
     /**
      * 💬 실시간 로깅 메시지 수신 처리
-     * - 토픽: {developerId}-recommend.event
-     * 배포환경에서는 recommend.event
+     * - 프로덕션 환경(prod)이거나 developerId가 비어있으면 "recommend.event" 토픽을 사용
+     * 그렇지 않으면 "{developerId}-recommend.event" 형식으로 토픽 이름 생성
      */
     @KafkaListener(topics = "#{@kafkaTopicResolver.getRecommendEventTopic()}", containerFactory = "recommendListenerFactory")
     public void listenRecommendEvent(ConsumerRecord<String, RecommendMessageKafkaDto> record, Acknowledgment ack) {
