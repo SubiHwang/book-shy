@@ -4,6 +4,7 @@ import com.ssafy.bookshy.domain.booknote.dto.BookNoteRequest;
 import com.ssafy.bookshy.domain.booknote.dto.BookNoteResponseDto;
 import com.ssafy.bookshy.domain.booknote.entity.BookNote;
 import com.ssafy.bookshy.domain.booknote.service.BookNoteService;
+import com.ssafy.bookshy.domain.users.entity.Users;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,7 +47,11 @@ public class BookNoteController {
             }
     )
     @PostMapping
-    public ResponseEntity<BookNote> create(@RequestBody BookNoteRequest request) {
+    public ResponseEntity<BookNote> create(
+            @RequestBody BookNoteRequest request,
+            @AuthenticationPrincipal Users user
+    ) {
+        request.setUserId(user.getUserId());
         return ResponseEntity.ok(bookNoteService.create(request));
     }
 
@@ -70,7 +76,10 @@ public class BookNoteController {
     @PutMapping("/{reviewId}")
     public ResponseEntity<BookNote> update(
             @PathVariable Long reviewId,
-            @RequestBody BookNoteRequest request) {
+            @RequestBody BookNoteRequest request,
+            @AuthenticationPrincipal Users user
+    ) {
+        request.setUserId(user.getUserId());
         return ResponseEntity.ok(bookNoteService.update(reviewId, request));
     }
 
@@ -88,7 +97,8 @@ public class BookNoteController {
             }
     )
     public ResponseEntity<List<BookNoteResponseDto>> getMyNotes(
-            @RequestHeader("X-User-Id") Long userId) {
-        return ResponseEntity.ok(bookNoteService.findNoteResponsesByUserId(userId));
+            @AuthenticationPrincipal Users user
+    ) {
+        return ResponseEntity.ok(bookNoteService.findNoteResponsesByUserId(user.getUserId()));
     }
 }
