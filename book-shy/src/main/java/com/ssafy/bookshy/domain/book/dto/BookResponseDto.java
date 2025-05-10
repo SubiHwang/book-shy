@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class BookResponseDto {
 
-
+    private Long itemId;
     private String title;
     private String author;
     private String publisher;
@@ -49,6 +49,7 @@ public class BookResponseDto {
             }
 
             return BookResponseDto.builder()
+                    .itemId        (node.path("itemId").asLong())
                     .title         (node.path("title").asText(null))
                     .author        (node.path("author").asText(null))
                     .publisher     (node.path("publisher").asText(null))

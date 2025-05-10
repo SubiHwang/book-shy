@@ -12,8 +12,8 @@ import lombok.*;
 public class LibraryResponseDto {
 
     private Long libraryId;
-    private Long bookId; // ✅ 추가
-    private Long aladinItemId;
+    private Long bookId;
+    private Long itemId;
     private String isbn13;
     private String title;
     private String author;
@@ -24,8 +24,8 @@ public class LibraryResponseDto {
         Book book = lib.getBook();
         return LibraryResponseDto.builder()
                 .libraryId(lib.getId())
-                .bookId(book.getId()) // ✅ 매핑 추가
-                .aladinItemId(book.getAladinItemId())
+                .bookId(book.getId())
+                .itemId(book.getItemId())
                 .isbn13(book.getIsbn())
                 .title(book.getTitle())
                 .author(book.getAuthor())
