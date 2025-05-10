@@ -22,7 +22,7 @@ export const fetchBookDetail = async (libraryId: number): Promise<BookDetailResp
 
     // API 호출
     const response = await authAxiosInstance.get<BookDetailResponse>(
-      `/book/library/detail?libraryId=${libraryId}&userId=1`,
+      `/book/library/detail?libraryId=${libraryId}`,
     );
 
     console.log('책 상세 정보 조회 성공:', response);

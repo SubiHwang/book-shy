@@ -13,7 +13,7 @@ export const searchBooksByKeyword = async (keyword: string): Promise<BookSearchR
 
     // API 호출
     const response = await authAxiosInstance.get<BookSearchResponse>(
-      `/book/search/list?q=${encodedKeyword}&userId=1`,
+      `/book/search/list?q=${encodedKeyword}`,
     );
 
     console.log('책 검색 성공:', response);
