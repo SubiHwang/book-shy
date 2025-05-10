@@ -85,11 +85,11 @@ public class SearchLoggingAspect {
      * @param result 메서드 실행 결과값
      */
     @AfterReturning(
-            pointcut = "bookAddWishPointcut() && args(user, itemId)",
-            argNames = "user,itemId,result",
+            pointcut = "bookAddWishPointcut() && args(itemId, user)",
+            argNames = "itemId,user,result",
             returning = "result"
     )
-    public void logAddWish(Users user, Long itemId, ResponseEntity<Void> result) {
+    public void logAddWish(Long itemId, Users user, ResponseEntity<Void> result) {
         // 사용자 ID 추출
         Long userId = user.getUserId();
 
