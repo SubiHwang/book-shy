@@ -18,11 +18,8 @@ const PublicBooksTab: React.FC = () => {
     const loadBooks = async () => {
       setIsLoading(true);
       try {
-        // 개발 중이므로 기본 사용자 ID 사용 (로그인 없이 테스트 가능)
-        const userId = Number(user?.id) || 1; // 숫자로 처리
-
         // API 호출하여 공개 책 데이터 가져오기
-        const publicBooks = await fetchUserPublicLibrary(userId);
+        const publicBooks = await fetchUserPublicLibrary();
         setBooks(publicBooks);
         setError(null);
       } catch (err) {
