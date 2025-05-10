@@ -35,12 +35,20 @@ const BookNoteCreatePage: React.FC = () => {
 
   const handleCreate = async () => {
     if (!bookId) return;
-    await createNoteWithQuote({
-      bookId,
-      reviewContent: reviewText,
-      quoteContent: quoteText,
-    });
-    navigate('/booknotes');
+
+    try {
+      await createNoteWithQuote({
+        bookId,
+        reviewContent: reviewText,
+        quoteContent: quoteText,
+      });
+
+      alert('📚 독서기록 등록이 완료되었습니다.');
+      navigate('/mybooknote');
+    } catch (error) {
+      console.error('등록 실패:', error);
+      alert('❌ 등록에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   if (!bookId) return <p className="p-4">잘못된 접근입니다.</p>;
