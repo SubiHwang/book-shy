@@ -58,7 +58,7 @@ const AppLayout: FC = () => {
           <Route path="matching/search-wish-books" element={<SearchWishBooks />} />
           <Route path="/chat" element={<div>채팅</div>} />
 
-          <Route path="/booknote" element={<MyBookNotesPage />} />
+          <Route path="/booknotes" element={<MyBookNotesPage />} />
           <Route path="/booknotes/detail/:bookId" element={<BookNoteDetailPage />} />
           <Route path="/booknotes/full/:bookId" element={<BookNoteFullPage />} />
           <Route path="/booknotes/edit/:bookId" element={<BookNoteEditPage />} />

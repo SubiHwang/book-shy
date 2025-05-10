@@ -43,7 +43,7 @@ const BookNoteCreatePage: React.FC = () => {
       reviewContent: reviewText,
       quoteContent: quoteText,
     });
-    navigate('/booknote');
+    navigate('/booknotes');
   };
 
   if (!bookId) return <p className="p-4">잘못된 접근입니다.</p>;
