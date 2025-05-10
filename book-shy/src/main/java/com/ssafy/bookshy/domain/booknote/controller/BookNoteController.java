@@ -28,15 +28,23 @@ public class BookNoteController {
 
     @Operation(
             summary = "✏️ 독후감 등록",
-            description = "사용자가 특정 도서에 대해 독후감을 작성합니다.",
+            description = """
+                🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 독후감을 작성합니다.<br>
+                - 도서 ID와 내용만 전달하면 됩니다.
+            """,
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "작성자 ID, 도서 ID, 내용 포함",
+                    description = "도서 ID, 내용 포함",
                     required = true,
                     content = @Content(
                             mediaType = "application/json",
                             examples = @ExampleObject(
                                     name = "독후감 예시",
-                                    value = "{\n  \"userId\": 1,\n  \"bookId\": 101,\n  \"content\": \"이 책은 내 인생을 바꿨어요! 😊\"\n}"
+                                    value = """
+                                            {
+                                              "bookId": 101,
+                                              "content": "이 책은 내 인생을 바꿨어요! 😊"
+                                            }
+                                            """
                             )
                     )
             ),
@@ -68,7 +76,11 @@ public class BookNoteController {
                             mediaType = "application/json",
                             examples = @ExampleObject(
                                     name = "수정 예시",
-                                    value = "{\n  \"content\": \"다시 읽어보니 더 많은 것을 느꼈어요.\" \n}"
+                                    value = """
+                                            {
+                                              "content": "다시 읽어보니 더 많은 것을 느꼈어요."
+                                            }
+                                            """
                             )
                     )
             )
@@ -86,13 +98,11 @@ public class BookNoteController {
     @GetMapping
     @Operation(
             summary = "📘 나의 독서 기록 조회",
-            description = "나의 독후감(BookNote) 목록을 조회합니다.",
-            parameters = {
-                    @Parameter(name = "X-User-Id", description = "조회할 사용자 ID", required = true, example = "1")
-            },
+            description = """
+                🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 내가 작성한 독후감 목록을 조회합니다.
+            """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "✅ 조회 성공"),
-                    @ApiResponse(responseCode = "400", description = "❌ 유효하지 않은 사용자 ID"),
                     @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
             }
     )

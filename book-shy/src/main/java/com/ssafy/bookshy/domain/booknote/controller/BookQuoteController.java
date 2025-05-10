@@ -28,15 +28,22 @@ public class BookQuoteController {
 
     @Operation(
             summary = "💡 인용구 등록",
-            description = "책에서 인상 깊었던 문장을 인용구로 등록합니다.",
+            description = """
+                🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 인상 깊었던 문장을 인용구로 등록합니다.
+            """,
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "작성자 ID, 도서 ID, 인용구 내용 포함",
+                    description = "도서 ID와 인용구 내용 포함",
                     required = true,
                     content = @Content(
                             mediaType = "application/json",
                             examples = @ExampleObject(
                                     name = "인용구 예시",
-                                    value = "{\n  \"userId\": 1,\n  \"bookId\": 101,\n  \"content\": \"진짜 여행은 새로운 풍경을 보는 것이 아니라 새로운 시선을 갖는 것이다.\" \n}"
+                                    value = """
+                                            {
+                                              "bookId": 101,
+                                              "content": "진짜 여행은 새로운 풍경을 보는 것이 아니라 새로운 시선을 갖는 것이다."
+                                            }
+                                            """
                             )
                     )
             ),
@@ -68,7 +75,11 @@ public class BookQuoteController {
                             mediaType = "application/json",
                             examples = @ExampleObject(
                                     name = "수정 예시",
-                                    value = "{\n  \"content\": \"읽는다는 것은 곧 새로운 삶을 만나는 것이다.\" \n}"
+                                    value = """
+                                            {
+                                              "content": "읽는다는 것은 곧 새로운 삶을 만나는 것이다."
+                                            }
+                                            """
                             )
                     )
             )
@@ -86,14 +97,15 @@ public class BookQuoteController {
     @GetMapping
     @Operation(
             summary = "📙 나의 인용구 조회",
-            description = "나의 도서 인용구(Quote) 목록을 조회합니다.",
+            description = """
+                🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 나의 인용구 목록을 조회합니다.<br>
+                - bookId를 지정하면 특정 도서의 인용구만 조회됩니다.
+            """,
             parameters = {
-                    @Parameter(name = "X-User-Id", description = "조회할 사용자 ID", required = true, example = "1"),
-                    @Parameter(name = "bookId", description = "특정 도서의 인용구만 조회할 경우", example = "101")
+                    @Parameter(name = "bookId", description = "📕 도서 ID (선택)", example = "101")
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "✅ 조회 성공"),
-                    @ApiResponse(responseCode = "400", description = "❌ 유효하지 않은 사용자 ID"),
                     @ApiResponse(responseCode = "404", description = "❗ 도서가 존재하지 않음"),
                     @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
             }
