@@ -89,7 +89,12 @@ public class KafkaConfig {
     private <T> ConcurrentKafkaListenerContainerFactory<String, T> listenerFactory(Class<T> clazz, String groupId) {
         ConcurrentKafkaListenerContainerFactory<String, T> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory(clazz, groupId));
-        factory.setConcurrency(3);
+        // 환경에 따라 concurrency 값 조정
+        if ("prod".equals(env.getProperty("spring.profiles.active"))) {
+            factory.setConcurrency(1);  // 프로덕션 환경에서는 1개만 사용
+        } else {
+            factory.setConcurrency(3);  // 개발 환경에서는 3개 사용 (기존과 동일)
+        }
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         return factory;
     }

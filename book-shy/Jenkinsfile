@@ -36,6 +36,8 @@ pipeline {
         KAKAO_USER_INFO_URI = credentials('KAKAO_USER_INFO_URI')
         KAKAO_CLIENT_ID = credentials('KAKAO_CLIENT_ID')        // 추가
         KAKAO_REDIRECT_URI = credentials('KAKAO_REDIRECT_URI')  // 추가
+
+
     }
 
     stages {

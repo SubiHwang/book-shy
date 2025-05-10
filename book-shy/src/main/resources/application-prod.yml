@@ -44,3 +44,7 @@ server:
 
 elasticsearch:
   url: ${ELK_URL}
+
+app:
+  developer:
+    id: ""  # 비워둠

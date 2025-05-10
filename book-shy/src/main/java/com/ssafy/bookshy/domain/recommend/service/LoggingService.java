@@ -16,23 +16,17 @@ public class LoggingService {
 
     private final KafkaProducer kafkaProducer;
 
-    public void processClientLog(String userId, ClientLogRequestDto logDto) {
+    public void processClientLog(ClientLogRequestDto logDto) {
         try {
             // 타임스탬프 처리
             if (logDto.getTimestamp() == null) {
                 logDto.setTimestamp(LocalDateTime.now().toString());
             }
 
-            // 사용자 ID 추가 (필요하다면)
-            if (logDto.getEventData() != null) {
-                logDto.getEventData().put("userId", userId);
-            }
-
             // KafkaProducer 사용해서 이벤트 발행
             kafkaProducer.sendRecommendEvent(logDto.toKafkaDto());
 
-            log.debug("로그 메시지 전송 요청 성공: userId={}, eventType={}",
-                    userId, logDto.getEventType());
+            log.debug("로그 메시지 전송 요청 성공: eventType={}", logDto.getEventType());
 
         } catch (Exception e) {
             log.error("Failed to process client log: {}", logDto.getEventType(), e);

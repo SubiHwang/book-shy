@@ -3,15 +3,13 @@ package com.ssafy.bookshy.common.aop;
 import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
 import com.ssafy.bookshy.domain.recommend.dto.ClientLogRequestDto;
 import com.ssafy.bookshy.domain.recommend.service.LoggingService;
+import com.ssafy.bookshy.domain.users.entity.Users;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -36,19 +34,19 @@ public class SearchLoggingAspect {
     }
 
     /**
-     * searchList 메서드가 정상적으로 실행 완료된 후에 실행되는 어드바이스
+     * searchDetail 메서드가 정상적으로 실행 완료된 후에 실행되는 어드바이스
      *
-     * @param joinPoint AOP의 기본 객체로 메서드 정보에 접근 가능
-     * @param itemId    메서드에 전달된 검색어 파라미터 (args(q)로 바인딩)
-     * @param result    메서드 실행 결과값 (returning="result"로 바인딩)
+     * @param itemId 도서 ID 파라미터
+     * @param result 메서드 실행 결과값
      */
     @AfterReturning(
-            pointcut = "bookSearchDetailListPointcut() && args(itemId)", // itemId로 수정
+            pointcut = "bookSearchDetailListPointcut() && args(itemId, user)",
+            argNames = "itemId,user,result",
             returning = "result"
     )
-    public void logBookSearch(JoinPoint joinPoint, Long itemId, ResponseEntity<BookResponseDto> result) { // Long 타입으로 수정
-        // 현재 인증된 사용자 ID 가져오기
-        String userId = getUserId();
+    public void logBookSearch(Long itemId, Users user, ResponseEntity<BookResponseDto> result) {
+        // 사용자 ID 가져오기
+        Long userId = user.getUserId();
 
         // 검색 결과에서 필요한 정보 추출
         BookResponseDto responseDto = result.getBody();
@@ -61,59 +59,54 @@ public class SearchLoggingAspect {
 
         if (responseDto != null) {
             logData.put("userId", userId);
+            logData.put("itemId", itemId);
             logData.put("title", responseDto.getTitle());
             logData.put("author", responseDto.getAuthor());
             logData.put("category", responseDto.getCategory());
             logData.put("endpoint", "/api/book/search/detail");
+            logData.put("status", result.getStatusCodeValue()); // HTTP 상태 코드 추가
         }
 
-        // 3. 로깅 서비스를 통해 ELK로 데이터 전송
+        // 로깅 서비스를 통해 ELK로 데이터 전송
         ClientLogRequestDto logDto = new ClientLogRequestDto();
         logDto.setEventType("BOOK_DETAIL_SEARCH");
         logDto.setEventData(logData);
 
-        loggingService.processClientLog(userId, logDto);
+        log.info("📢 독서 조회 기록을 위한 kafka 호출");
+
+        loggingService.processClientLog(logDto);
     }
 
     /**
      * addWish 메서드가 정상적으로 실행 완료된 후에 실행되는 어드바이스
      *
-     * @param joinPoint AOP의 기본 객체로 메서드 정보에 접근 가능
-     * @param userId    사용자 ID 파라미터
-     * @param itemId    도서 ID 파라미터
-     * @param result    메서드 실행 결과값
+     * @param user   인증된 사용자 객체
+     * @param itemId 도서 ID 파라미터
+     * @param result 메서드 실행 결과값
      */
     @AfterReturning(
-            pointcut = "bookAddWishPointcut() && args(userId, itemId)",
+            pointcut = "bookAddWishPointcut() && args(itemId, user)",
+            argNames = "itemId,user,result",
             returning = "result"
     )
-    public void logAddWish(JoinPoint joinPoint, Long userId, Long itemId, ResponseEntity<Void> result) {
+    public void logAddWish(Long itemId, Users user, ResponseEntity<Void> result) {
+        // 사용자 ID 추출
+        Long userId = user.getUserId();
+
         log.info("위시리스트 추가 - 사용자: {}, 도서 ID: {}", userId, itemId);
 
         Map<String, Object> logData = new HashMap<>();
-        logData.put("userId", userId.toString());
+        logData.put("userId", userId);
         logData.put("bookId", itemId);
         logData.put("endpoint", "/api/book/wish");
+        logData.put("status", result.getStatusCode().value()); // 최신 버전 호환 방식으로 상태 코드 추가
 
         // 로깅 서비스를 통해 ELK로 데이터 전송
         ClientLogRequestDto logDto = new ClientLogRequestDto();
         logDto.setEventType("BOOK_WISH_ADD");
         logDto.setEventData(logData);
-
-        loggingService.processClientLog(userId.toString(), logDto);
+        log.info("📢 찜하기 기록을 위한 kafka 호출");
+        loggingService.processClientLog(logDto);
     }
 
-    /**
-     * 현재 인증된 사용자의 ID를 가져오는 유틸리티 메서드
-     * 인증된 사용자가 없는 경우 "anonymous" 반환
-     *
-     * @return 사용자 ID 또는 "anonymous"
-     */
-    private String getUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            return authentication.getName();
-        }
-        return "anonymous";
-    }
 }
