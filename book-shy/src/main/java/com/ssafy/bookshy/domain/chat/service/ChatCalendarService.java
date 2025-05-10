@@ -68,7 +68,7 @@ public class ChatCalendarService {
                 .chatRoomId(dto.getRoomId())
                 .senderId(0L)  // 0 또는 시스템 ID
                 .content(systemMessage)
-                .type("INFO")
+                .type("info")
                 .build());
 
         // ✅ 응답 반환
