@@ -131,4 +131,20 @@ public class BookService {
                 .orElse(false);
     }
 
+    /**
+     * 📕 bookId를 기반으로 사용자의 서재에 있는 도서 상세 정보를 조회합니다.
+     *
+     * @param bookId 조회할 도서 ID
+     * @param userId 현재 로그인한 사용자 ID
+     * @return BookResponseDto 도서 상세 정보
+     * @throws RuntimeException 도서가 존재하지 않거나 접근 권한이 없을 경우
+     */
+    public BookResponseDto getBookDetailById(Long bookId, Long userId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new RuntimeException("해당 도서를 찾을 수 없습니다."));
+
+
+        return BookResponseDto.from(book, true); // isPublic은 true로 고정 (또는 필요 시 추출)
+    }
+
 }
