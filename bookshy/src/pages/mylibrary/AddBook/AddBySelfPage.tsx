@@ -65,13 +65,17 @@ const AddBySelfPage: FC = () => {
 
       // 내 서재 페이지로 이동
       navigate('/bookshelf');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('책 등록 중 오류 발생:', error);
-      setError(error.message || '책 등록에 실패했습니다. 다시 시도해주세요.');
+
+      // 에러 메시지 추출을 위한 타입 가드
+      const errorMessage =
+        error instanceof Error ? error.message : '책 등록에 실패했습니다. 다시 시도해주세요.';
+
+      setError(errorMessage);
       setIsSubmitting(false);
     }
   };
-
   // 공개 여부 토글 처리
   const handleTogglePublic = () => {
     setIsPublic(!isPublic);
