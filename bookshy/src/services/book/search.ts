@@ -1,5 +1,6 @@
 // @/services/book/search.ts
 import { authAxiosInstance } from '@/services/axiosInstance';
+import type { Book } from '@/types/book/book';
 
 export interface BookDetail {
   title: string;
@@ -17,6 +18,14 @@ export interface BookDetail {
 export const fetchBookDetailByItemId = async (itemId: number): Promise<BookDetail> => {
   const response = await authAxiosInstance.get(`/book/search/detail`, {
     params: { itemId },
+  });
+  return response.data;
+};
+
+// 📘 bookId 기반 도서 상세 정보 조회
+export const fetchBookDetailByBookId = async (bookId: number): Promise<Book> => {
+  const response = await authAxiosInstance.get(`/book/detail`, {
+    params: { bookId },
   });
   return response.data;
 };

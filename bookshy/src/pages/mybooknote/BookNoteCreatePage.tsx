@@ -1,9 +1,8 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLibraryBooks } from '@/services/mybooknote/library';
-import { fetchBookDetailByItemId } from '@/services/book/search';
-import { createBookNote } from '@/services/mybooknote/booknote';
-import { createBookQuote } from '@/services/mybooknote/bookquote';
+import { fetchBookDetailByBookId } from '@/services/book/search';
+import { createNoteWithQuote } from '@/services/mybooknote/booknotequote';
 import BookNoteForm from '@/components/booknote/BookNoteForm';
 import type { LibraryBook } from '@/types/mybooknote/library';
 import { useState } from 'react';
@@ -29,18 +28,21 @@ const BookNoteCreatePage: React.FC = () => {
   const itemId = targetBook?.aladinItemId;
 
   const { data: bookDetail } = useQuery({
-    queryKey: ['book-detail', itemId],
-    queryFn: () => fetchBookDetailByItemId(itemId as number),
-    enabled: typeof itemId === 'number',
+    queryKey: ['book-detail', bookId],
+    queryFn: () => fetchBookDetailByBookId(bookId as number),
+    enabled: typeof bookId === 'number',
   });
 
   const [quoteText, setQuoteText] = useState('');
   const [reviewText, setReviewText] = useState('');
 
   const handleCreate = async () => {
-    if (!targetBook) return;
-    await createBookQuote(targetBook.libraryId, quoteText);
-    await createBookNote(targetBook.libraryId, reviewText, userId);
+    if (!bookId) return;
+    await createNoteWithQuote({
+      bookId,
+      reviewContent: reviewText,
+      quoteContent: quoteText,
+    });
     navigate('/booknote');
   };
 
