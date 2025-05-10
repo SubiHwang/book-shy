@@ -18,12 +18,13 @@ const PublicBooksTab: React.FC = () => {
     const loadBooks = async () => {
       setIsLoading(true);
       try {
-        // 개발 중이므로 기본 사용자 ID 사용 (로그인 없이 테스트 가능)
-        const userId = Number(user?.id) || 1; // 숫자로 처리
-
         // API 호출하여 공개 책 데이터 가져오기
-        const publicBooks = await fetchUserPublicLibrary(userId);
-        setBooks(publicBooks);
+        const publicBooks = await fetchUserPublicLibrary();
+
+        // libraryId 기준으로 오름차순 정렬
+        const sortedBooks = [...publicBooks].sort((a, b) => a.libraryId - b.libraryId);
+
+        setBooks(sortedBooks);
         setError(null);
       } catch (err) {
         console.error('공개 서재 목록을 불러오는 중 오류가 발생했습니다:', err);
