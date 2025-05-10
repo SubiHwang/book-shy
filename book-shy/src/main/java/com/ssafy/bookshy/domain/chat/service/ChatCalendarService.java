@@ -1,9 +1,6 @@
 package com.ssafy.bookshy.domain.chat.service;
 
-import com.ssafy.bookshy.domain.chat.dto.ChatCalendarCreateRequestDto;
-import com.ssafy.bookshy.domain.chat.dto.ChatCalendarCreateResponseDto;
-import com.ssafy.bookshy.domain.chat.dto.ChatCalendarEventDto;
-import com.ssafy.bookshy.domain.chat.dto.ChatCalendarItemDto;
+import com.ssafy.bookshy.domain.chat.dto.*;
 import com.ssafy.bookshy.domain.chat.entity.ChatCalendar;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatCalendarRepository;
@@ -22,6 +19,7 @@ import java.util.stream.Collectors;
 public class ChatCalendarService {
 
     private final ChatCalendarRepository chatCalendarRepository;
+    private final ChatMessageService chatMessageService;
 
     /**
      * 📆 특정 날짜에 해당하는 사용자의 거래 일정을 조회합니다.
@@ -63,6 +61,15 @@ public class ChatCalendarService {
                 .build();
 
         ChatCalendar saved = chatCalendarRepository.save(calendar);
+
+        // ✅ 일정 등록 알림 메시지 전송
+        String systemMessage = String.format("📌 일정 등록됨: %s", dto.getTitle());
+        chatMessageService.saveMessage(ChatMessageRequestDto.builder()
+                .chatRoomId(dto.getRoomId())
+                .senderId(0L)  // 0 또는 시스템 ID
+                .content(systemMessage)
+                .type("INFO")
+                .build());
 
         // ✅ 응답 반환
         return ChatCalendarCreateResponseDto.builder()
