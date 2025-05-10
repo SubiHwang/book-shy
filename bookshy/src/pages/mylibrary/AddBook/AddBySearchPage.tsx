@@ -5,7 +5,6 @@ import { ArrowLeft, Search } from 'lucide-react';
 import BookSearchItem from '@/components/mylibrary/BookAdd/BookSearchItem';
 import { searchBooksByKeyword, addBookFromSearch } from '@/services/mylibrary/bookSearchService';
 import type { BookSearchItem as BookItemType } from '@/types/mylibrary/bookSearch';
-import { useAuth } from '@/contexts/AuthContext';
 
 const AddBySearchPage: FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -17,7 +16,6 @@ const AddBySearchPage: FC = () => {
   // const [setAddingItemId] = useState<number | null>(null);
 
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   // 책 검색 함수
   const searchBooks = async (query: string) => {
@@ -84,11 +82,8 @@ const AddBySearchPage: FC = () => {
 
       console.log('선택한 책:', selectedBook);
 
-      // 개발 중이므로 기본 사용자 ID 사용 (로그인 없이 테스트 가능)
-      const userId = Number(user?.id) || 1;
-
       // 검색 결과 책 등록 API 호출
-      const registeredBook = await addBookFromSearch(userId, itemId);
+      const registeredBook = await addBookFromSearch(itemId);
 
       console.log('책 등록 성공:', registeredBook);
 

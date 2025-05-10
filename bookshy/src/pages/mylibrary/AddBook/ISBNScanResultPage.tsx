@@ -4,12 +4,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { fetchBookDetailsByISBN, registerBookByISBN } from '@/services/mylibrary/isbnresultService';
 import { ISBNSearchResponse } from '@/types/mylibrary/isbn';
-import { useAuth } from '@/contexts/AuthContext';
 
 const ISBNScanResultPage: React.FC = () => {
   const { isbn } = useParams<{ isbn: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [bookDetail, setBookDetail] = useState<ISBNSearchResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -91,11 +89,8 @@ const ISBNScanResultPage: React.FC = () => {
       setIsRegistering(true);
       setRegistrationError(null);
 
-      // 개발 중이므로 기본 사용자 ID 사용 (로그인 없이 테스트 가능)
-      const userId = Number(user?.id) || 1;
-
       // 서재에 책 등록 API 호출
-      const registeredBook = await registerBookByISBN(userId, isbn, isPublic);
+      const registeredBook = await registerBookByISBN(isbn, isPublic);
       console.log('책 등록 성공:', registeredBook);
 
       // 알림 표시 후 서재 페이지로 이동

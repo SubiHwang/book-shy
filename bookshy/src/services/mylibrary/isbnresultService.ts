@@ -27,15 +27,14 @@ export const fetchBookDetailsByISBN = async (isbn: string): Promise<ISBNSearchRe
 
 // ISBN으로 책 등록
 export const registerBookByISBN = async (
-  userId: number,
   isbn13: string,
   isPublic: boolean = false,
 ): Promise<Library> => {
   try {
-    console.log(`도서 등록 요청: userId=${userId}, isbn13=${isbn13}, isPublic=${isPublic}`);
+    console.log(`도서 등록 요청: isbn13=${isbn13}, isPublic=${isPublic}`);
 
     const response = await authAxiosInstance.post<Library>(
-      `/library/isbn?userId=${userId}&isbn13=${isbn13}&isPublic=${isPublic}`,
+      `/library/isbn?isbn13=${isbn13}&isPublic=${isPublic}`,
     );
 
     console.log('도서 등록 성공:', response);
