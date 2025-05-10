@@ -1,8 +1,8 @@
 import { ChatMessage, ChatRoomSummary, RegisterSchedulePayload } from '@/types/chat/chat';
 import { authAxiosInstance } from '@/services/axiosInstance';
 
-export async function fetchChatList(userId: number): Promise<ChatRoomSummary[]> {
-  return await authAxiosInstance.get(`/chats?userId=${userId}`);
+export async function fetchChatList(): Promise<ChatRoomSummary[]> {
+  return await authAxiosInstance.get(`/chats`);
 }
 
 export async function fetchMessages(chatRoomId: number): Promise<ChatMessage[]> {

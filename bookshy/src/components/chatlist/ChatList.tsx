@@ -6,13 +6,12 @@ import { useEffect } from 'react';
 import type { ChatMessage } from '@/types/chat/chat';
 
 function ChatList() {
-  const userId = 4;
   const queryClient = useQueryClient();
   const { subscribeRoom, unsubscribe } = useWebSocket();
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['chatList', userId],
-    queryFn: () => fetchChatList(userId),
+    queryKey: ['chatList'],
+    queryFn: () => fetchChatList(),
   });
 
   useEffect(() => {
@@ -20,7 +19,7 @@ function ChatList() {
       try {
         const msg: ChatMessage = JSON.parse(frame.body);
 
-        queryClient.setQueryData(['chatList', userId], (prev: any) => {
+        queryClient.setQueryData(['chatList'], (prev: any) => {
           if (!Array.isArray(prev)) return prev;
 
           return prev.map((room: any) =>
@@ -43,7 +42,7 @@ function ChatList() {
     });
 
     return () => unsubscribe(subscription);
-  }, [queryClient, subscribeRoom, unsubscribe, userId]);
+  }, [queryClient, subscribeRoom, unsubscribe]);
 
   if (isLoading) return <div className="p-4">불러오는 중...</div>;
   if (isError || !data) return <div className="p-4">채팅 목록을 불러올 수 없습니다.</div>;
