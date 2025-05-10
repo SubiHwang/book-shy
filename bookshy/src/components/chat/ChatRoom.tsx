@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { ChatMessage } from '@/types/chat/chat.ts';
+import { ChatMessage, RegisterSchedulePayload } from '@/types/chat/chat.ts';
 import ChatMessageItem from './ChatMessageItem.tsx';
 import ChatInput from './ChatInput.tsx';
 import ChatRoomHeader from './ChatRoomHeader.tsx';
@@ -7,8 +7,9 @@ import ScheduleModal from './ScheduleModal.tsx';
 import SystemMessage from './SystemMessage.tsx';
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchMessages, markMessagesAsRead } from '@/services/chat/chat.ts';
+import { fetchMessages, markMessagesAsRead, registerSchedule } from '@/services/chat/chat.ts';
 import { useStomp } from '@/hooks/chat/useStomp.ts';
+import { getUserIdFromToken } from '@/utils/jwt.ts';
 
 interface Props {
   partnerName: string;
@@ -19,6 +20,8 @@ interface Props {
 function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const { roomId } = useParams();
   const numericRoomId = Number(roomId);
+  const myUserId = getUserIdFromToken();
+  if (myUserId === null) return;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showOptions, setShowOptions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -54,10 +57,24 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   }, [numericRoomId, refetch, queryClient]);
 
   useEffect(() => {
-    if (isSuccess) {
+    if (!isSuccess) return;
+
+    if (initialMessages.length > 0 && messages.length === 0) {
       setMessages(initialMessages);
+    } else if (initialMessages.length === 0 && messages.length === 0) {
+      const now = new Date();
+      const noticeMessage: ChatMessage = {
+        id: 'notice-' + Date.now(),
+        senderId: -1,
+        chatRoomId: numericRoomId,
+        content:
+          '도서 교환은 공공장소에서 진행하고, 책 상태를 미리 확인하세요.\n과도한 개인정보 요청이나 외부 연락 유도는 주의하세요.\n도서 상호 대여 서비스 사용 시 반납 기한을 꼭 지켜주세요!\n안전하고 즐거운 독서 문화 함께 만들어가요!',
+        sentAt: now.toISOString(),
+        type: 'notice',
+      };
+      setMessages([noticeMessage]);
     }
-  }, [initialMessages, isSuccess]);
+  }, [initialMessages, messages.length, isSuccess, numericRoomId]);
 
   const onMessage = useCallback(
     (newMessage: ChatMessage) => {
@@ -103,7 +120,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
 
   const handleSendMessage = (content: string) => {
     if (isNaN(numericRoomId)) return;
-    sendMessage(numericRoomId, content, 'chat');
+    sendMessage(numericRoomId, myUserId, content, 'chat');
   };
 
   const handleSendSystemMessage = (
@@ -120,7 +137,17 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
       type,
     };
     setMessages((prev) => [...prev, newMessage]);
-    sendMessage(numericRoomId, content, type);
+    sendMessage(numericRoomId, myUserId, content, type);
+  };
+
+  const registerScheduleAndNotify = async (message: string, payload: RegisterSchedulePayload) => {
+    try {
+      await registerSchedule(payload);
+      handleSendSystemMessage(message, 'info');
+    } catch (error) {
+      console.error('❌ 일정 등록 실패:', error);
+      // handleSendSystemMessage('일정 등록에 실패했습니다. 다시 시도해주세요.', 'warning');
+    }
   };
 
   const toggleOptions = () => {
@@ -179,7 +206,9 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
                       ? '거래 시 주의해주세요!'
                       : msg.type === 'info'
                         ? '약속이 등록되었습니다!'
-                        : undefined
+                        : msg.type === 'warning'
+                          ? '알림'
+                          : undefined
                   }
                   content={msg.content}
                   variant={
@@ -191,7 +220,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
               ) : (
                 <ChatMessageItem
                   message={{ ...msg, sentAt: formatTime(msg.sentAt) }}
-                  isMyMessage={msg.senderId !== -1}
+                  isMyMessage={msg.senderId === myUserId}
                 />
               )}
             </div>
@@ -210,8 +239,10 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
         <ScheduleModal
           partnerName={partnerName}
           partnerProfileImage={partnerProfileImage}
+          roomId={numericRoomId}
+          requestId={Number(0)}
           onClose={() => setShowScheduleModal(false)}
-          onConfirm={(msg) => handleSendSystemMessage(msg, 'info')}
+          onConfirm={registerScheduleAndNotify}
         />
       )}
     </div>

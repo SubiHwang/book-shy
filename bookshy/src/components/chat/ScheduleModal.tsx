@@ -1,15 +1,25 @@
 import { FC, useState } from 'react';
 import { X } from 'lucide-react';
 import TimePickerModal from './TimePickerModal';
+import { RegisterSchedulePayload } from '@/types/chat/chat';
 
 interface Props {
   partnerName: string;
   partnerProfileImage: string;
+  roomId: number;
+  requestId: number;
   onClose: () => void;
-  onConfirm: (message: string) => void;
+  onConfirm: (message: string, payload: RegisterSchedulePayload) => void;
 }
 
-const ScheduleModal: FC<Props> = ({ partnerName, partnerProfileImage, onClose, onConfirm }) => {
+const ScheduleModal: FC<Props> = ({
+  partnerName,
+  partnerProfileImage,
+  onClose,
+  onConfirm,
+  roomId,
+  requestId,
+}) => {
   const today = new Date();
   const [tab, setTab] = useState<'대여' | '교환'>('대여');
   const [startDate, setStartDate] = useState<string | null>(null);
@@ -60,7 +70,10 @@ const ScheduleModal: FC<Props> = ({ partnerName, partnerProfileImage, onClose, o
   };
 
   const handleComplete = () => {
-    if (!startDate || !borrowTime) return;
+    if (!startDate || !borrowTime || (tab === '대여' && (!returnTime || !endDate))) {
+      alert('날짜와 시간을 모두 선택해주세요');
+      return;
+    }
 
     const formatFullDate = (day: string) => {
       const date = new Date(year, month, parseInt(day));
@@ -70,11 +83,49 @@ const ScheduleModal: FC<Props> = ({ partnerName, partnerProfileImage, onClose, o
         day: 'numeric',
       });
     };
+    console.log('[약속 시간 정하기]', startDate, endDate, borrowTime, returnTime, year, month);
+    const toISOString = (day: string, time: string): string => {
+      const regex = /(오전|오후)\s(\d{2})시\s(\d{2})분/;
+      const match = time.match(regex);
+      if (!match) throw new Error('Invalid time format');
 
-    const dateString = formatFullDate(startDate);
-    const msg = `${dateString} ${borrowTime}`;
+      let hour = parseInt(match[2], 10);
+      const minute = parseInt(match[3], 10);
+      if (match[1] === '오후' && hour !== 12) hour += 12;
+      if (match[1] === '오전' && hour === 12) hour = 0;
 
-    onConfirm(msg);
+      const date = new Date(year, month, parseInt(day), hour, minute);
+
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const dd = String(date.getDate()).padStart(2, '0');
+      const hh = String(date.getHours()).padStart(2, '0');
+      const mi = String(date.getMinutes()).padStart(2, '0');
+
+      return `${yyyy}-${mm}-${dd}T${hh}:${mi}:00`;
+    };
+
+    const msg = `${formatFullDate(startDate)} ${borrowTime}`;
+    const payload: RegisterSchedulePayload =
+      tab === '교환'
+        ? {
+            roomId,
+            requestId,
+            type: 'EXCHANGE' as const,
+            title: '책 교환 약속',
+            eventDate: toISOString(startDate, borrowTime),
+          }
+        : {
+            roomId,
+            requestId,
+            type: 'RENTAL' as const,
+            title: '책 대여 기간',
+            startDate: toISOString(startDate, borrowTime),
+            endDate: toISOString(endDate!, returnTime!),
+          };
+
+    console.log('일정 등록 payload', payload);
+    onConfirm(msg, payload);
     onClose();
   };
 
