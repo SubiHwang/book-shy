@@ -20,7 +20,11 @@ const AllMyBooksTab: React.FC = () => {
       try {
         // API 호출하여 책 데이터 가져오기
         const libraryBooks = await fetchUserAllLibrary();
-        setBooks(libraryBooks);
+
+        // libraryId 기준으로 오름차순 정렬
+        const sortedBooks = [...libraryBooks].sort((a, b) => a.libraryId - b.libraryId);
+
+        setBooks(sortedBooks);
         setError(null);
       } catch (err) {
         console.error('서재 목록을 불러오는 중 오류가 발생했습니다:', err);

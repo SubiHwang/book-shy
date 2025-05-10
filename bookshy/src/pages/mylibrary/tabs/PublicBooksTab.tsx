@@ -20,7 +20,11 @@ const PublicBooksTab: React.FC = () => {
       try {
         // API 호출하여 공개 책 데이터 가져오기
         const publicBooks = await fetchUserPublicLibrary();
-        setBooks(publicBooks);
+
+        // libraryId 기준으로 오름차순 정렬
+        const sortedBooks = [...publicBooks].sort((a, b) => a.libraryId - b.libraryId);
+
+        setBooks(sortedBooks);
         setError(null);
       } catch (err) {
         console.error('공개 서재 목록을 불러오는 중 오류가 발생했습니다:', err);
