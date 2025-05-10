@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { fetchUnwrittenBooks } from '@/services/mybooknote/library';
 import type { UnwrittenLibraryBook } from '@/types/mybooknote/library';
+import BookSelectCard from '@/components/booknote/BookSelectCard';
 
 const BookNoteSelectPage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,29 +28,7 @@ const BookNoteSelectPage: React.FC = () => {
 
       <div className="px-4 mt-4 space-y-4">
         {books.map((book) => (
-          <div
-            key={book.bookId}
-            className="bg-white p-3 rounded-lg shadow-md flex items-center justify-between"
-          >
-            <div className="flex gap-3">
-              <img
-                src={book.coverImageUrl}
-                alt={book.title}
-                className="w-16 h-24 object-cover rounded"
-              />
-              <div>
-                <h2 className="font-bold text-lg">{book.title}</h2>
-                <p className="text-sm text-gray-600">작가: {book.author}</p>
-                <p className="text-sm text-gray-500 line-clamp-2">{book.description}</p>
-              </div>
-            </div>
-            <button
-              onClick={() => navigate(`/booknotes/create?bookId=${book.bookId}`)}
-              className="p-2"
-            >
-              <img src="/icons/plus-circle.svg" alt="추가" className="w-8 h-8" />
-            </button>
-          </div>
+          <BookSelectCard key={book.bookId} book={book} />
         ))}
       </div>
     </div>
