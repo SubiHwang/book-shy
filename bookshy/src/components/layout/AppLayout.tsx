@@ -28,6 +28,7 @@ import BookNoteDetailPage from '@/pages/mybooknote/BookNoteDetailPage';
 import BookNoteFullPage from '@/pages/mybooknote/BookNoteFullPage';
 import BookNoteEditPage from '@/pages/mybooknote/BookNoteEditPage';
 import BookNoteCreatePage from '@/pages/mybooknote/BookNoteCreatePage';
+import BookNoteSelectPage from '@/pages/mybooknote/BookNoteSelectPage';
 import Login from '@/pages/auth/Login';
 import PrivateRoute from '@/components/layout/PrivateRoute';
 import KaKaoOauth from '@/pages/auth/KaKaoOauth';
@@ -63,6 +64,7 @@ const AppLayout: FC = () => {
           <Route path="/booknotes/full/:bookId" element={<BookNoteFullPage />} />
           <Route path="/booknotes/edit/:bookId" element={<BookNoteEditPage />} />
           <Route path="/booknotes/create" element={<BookNoteCreatePage />} />
+          <Route path="/booknotes/select" element={<BookNoteSelectPage />} />
 
           {/* 보호된 라우트 - 로그인해야만 접근 가능 */}
           <Route

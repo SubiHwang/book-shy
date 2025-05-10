@@ -64,7 +64,7 @@ const MyBookNoteGridPage: React.FC<BookGridPetalPageProps> = ({ bookNotes }) => 
       <div className="fixed bottom-28 right-5 md:right-10">
         <button
           className="bg-primary hover:bg-primary-dark text-light-text-inverted rounded-full p-3 shadow-lg transition-colors"
-          onClick={() => navigate('/booknotes/create')}
+          onClick={() => navigate('/booknotes/select')}
         >
           <img src="/icons/camera-upload.svg" alt="카메라 업로드" className="w-10 h-10" />
         </button>

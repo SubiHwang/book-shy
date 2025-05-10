@@ -8,3 +8,15 @@ export interface LibraryBook {
   coverImageUrl: string;
   public: boolean;
 }
+
+export interface UnwrittenLibraryBook {
+  libraryId: number;
+  bookId: number;
+  aladinItemId: number;
+  isbn13: string;
+  title: string;
+  author: string;
+  coverImageUrl: string;
+  description: string;
+  public: boolean;
+}
