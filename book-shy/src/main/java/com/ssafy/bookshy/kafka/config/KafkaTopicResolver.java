@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class KafkaTopicResolver {
 
-    @Value("${app.developer.id:unknown}")
+    @Value("${app.developer.id}")
     private String developerId;
 
-    @Value("${spring.profiles.active:unknown}")
+    @Value("${spring.profiles.active}")
     private String activeProfile;
 
     /**

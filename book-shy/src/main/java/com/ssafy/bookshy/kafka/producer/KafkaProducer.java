@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class KafkaProducer {
 
-    // ✅ 토픽 이름 상수 정의 (주석 해제하고 다시 사용)
+    // ✅ 토픽 이름 상수 정의
     private static final String TOPIC_BOOK_CREATED = "book.created";
     private static final String TOPIC_MATCH_SUCCESS = "match.success";
     private static final String TOPIC_TRADE_SUCCESS = "trade.success";
