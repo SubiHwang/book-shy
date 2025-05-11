@@ -5,11 +5,12 @@ export interface Book {
   author?: string;
   publisher?: string;
   description?: string;
-  publishDate?: string;
-  pages?: number;
+  pubDate?: string;
+  pageCount?: number;
   coverImageUrl?: string;
   bookImgUrl?: string;
-  categories?: string | null;
+  category?: string | null;
+  isbn13?: string;
 }
 
 export interface WishBook extends Book {
@@ -29,4 +30,8 @@ export interface LibraryBook extends Book {
 export interface BookSearchItemProps {
   book: Book;
   onAddBook: (bookId: number) => void;
+}
+
+export interface BookDetailPageProps extends WishBook {
+  isLoading?: boolean;
 }
