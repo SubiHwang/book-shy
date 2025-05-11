@@ -6,11 +6,11 @@ import com.ssafy.bookshy.domain.book.dto.BookListResponseDto;
 import com.ssafy.bookshy.domain.book.dto.BookListTotalResponseDto;
 import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.apache.commons.text.StringEscapeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,14 +19,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AladinClient {
 
-    @Value("${aladin.ttb.key}")
-    private String ttbKey;
-
-    @Value("${aladin.api.base-url}")
-    private String baseUrl;
-
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
+    @Value("${aladin.ttb.key}")
+    private String ttbKey;
+    @Value("${aladin.api.base-url}")
+    private String baseUrl;
 
     public JsonNode searchByItemId(Long itemId) throws Exception {
         String url = UriComponentsBuilder
@@ -42,6 +40,7 @@ public class AladinClient {
         String clean = preprocessResponse(raw);
         return objectMapper.readTree(clean);
     }
+
 
     public BookResponseDto searchByIsbn13(String isbn13) {
         try {
@@ -151,6 +150,7 @@ public class AladinClient {
         }
     }
 
+
     private String preprocessResponse(String raw) {
         return StringEscapeUtils.unescapeHtml4(raw)
                 .replace("\\'", "'")
@@ -164,4 +164,105 @@ public class AladinClient {
                 .trim()
                 .split("\\s+");
     }
+
+    /**
+     * 카테고리를 기반으로 책을 추천하는 메소드
+     * 특정 카테고리의 책 중에서 인기도순으로 정렬하여 지정된 개수만큼 반환해
+     *
+     * @param category 책 카테고리 (예: 소설, 경제경영 등)
+     * @param count    추천받을 책 개수 (기본값 3)
+     * @return 추천된 책 목록
+     */
+    public List<BookResponseDto> getRecommendationsByCategory(String category, int count) {
+        // 기본값 설정 (count가 0 이하면 3으로 설정)
+        if (count <= 0) {
+            count = 3;
+        }
+
+        try {
+            // 알라딘 API URL 구성 - 기존 AladinClient 패턴을 따라 구현
+            String url = String.format(
+                    "%s/ItemSearch.aspx?ttbkey=%s&Query=%s&QueryType=Keyword&SearchTarget=Book&MaxResults=%d&Start=1&Sort=SalesPoint&output=js&OptResult=bookinfo",
+                    baseUrl, ttbKey, category, Math.min(count * 2, 50)
+            );
+
+            // API 호출 및 전처리
+            String raw = restTemplate.getForObject(url, String.class);
+            String clean = preprocessResponse(raw);
+
+            // JSON 파싱
+            JsonNode root = objectMapper.readTree(clean);
+            JsonNode items = root.path("item");
+
+            // 결과 저장할 리스트
+            List<BookResponseDto> recommendedBooks = new ArrayList<>();
+
+            // 책이 충분히 있는지 확인
+            if (items.isArray() && items.size() > 0) {
+                // 각 항목을 BookResponseDto로 변환하여 리스트에 추가
+                for (JsonNode item : items) {
+                    // 이미 추가되지 않은 책만 추가 (중복 방지)
+                    BookResponseDto book = BookResponseDto.fromAladin(item);
+
+                    // ISBN이 비어있지 않은 유효한 책만 추가
+                    if (book.getIsbn13() != null && !book.getIsbn13().isEmpty()) {
+                        recommendedBooks.add(book);
+
+                        // 요청한 개수만큼 모았으면 중단
+                        if (recommendedBooks.size() >= count) {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return recommendedBooks;
+
+        } catch (Exception e) {
+            System.out.println("❌ 카테고리 기반 추천 실패: " + e.getMessage());
+            return new ArrayList<>(); // 오류 시 빈 리스트 반환
+        }
+    }
+
+    /**
+     * 베스트셀러 또는 신간 등 기본 추천 책 목록을 가져오는 메소드
+     *
+     * @param count 추천받을 책 개수
+     * @return 추천된 책 목록
+     */
+    public List<BookResponseDto> getBestSellerRecommendations(int count) {
+        try {
+            // 베스트셀러 API 호출
+            String url = String.format(
+                    "%s/ItemList.aspx?ttbkey=%s&QueryType=Bestseller&MaxResults=%d&SearchTarget=Book&output=js&OptResult=bookinfo",
+                    baseUrl, ttbKey, count
+            );
+
+            String raw = restTemplate.getForObject(url, String.class);
+            String clean = preprocessResponse(raw);
+
+            JsonNode root = objectMapper.readTree(clean);
+            JsonNode items = root.path("item");
+
+            List<BookResponseDto> recommendedBooks = new ArrayList<>();
+
+            for (JsonNode item : items) {
+                BookResponseDto book = BookResponseDto.fromAladin(item);
+                recommendedBooks.add(book);
+
+                // 요청한 개수만큼 모았으면 중단
+                if (recommendedBooks.size() >= count) {
+                    break;
+                }
+            }
+
+            return recommendedBooks;
+
+        } catch (Exception e) {
+            System.out.println("❌ 베스트셀러 추천 실패: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+
 }
