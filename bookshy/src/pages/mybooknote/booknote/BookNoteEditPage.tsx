@@ -1,9 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
-import { fetchBookNote } from '@/services/mybooknote/booknote';
-import { fetchBookQuote } from '@/services/mybooknote/bookquote';
-import { updateNoteWithQuote } from '@/services/mybooknote/booknotequote';
+import { fetchBookNote } from '@/services/mybooknote/booknote/booknote';
+import { fetchBookQuote } from '@/services/mybooknote/booknote/bookquote';
+import { updateNoteWithQuote } from '@/services/mybooknote/booknote/booknotequote';
 import BookNoteForm from '@/components/mybooknote/booknote/BookNoteForm';
 import BookNoteHeaderCard from '@/components/mybooknote/booknote/BookNoteHeaderCard';
 import BookNoteLayout from '@/components/mybooknote/booknote/BookNoteLayout';

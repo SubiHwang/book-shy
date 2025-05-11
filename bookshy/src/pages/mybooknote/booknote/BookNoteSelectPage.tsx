@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { fetchUnwrittenBooks } from '@/services/mybooknote/library';
+import { fetchUnwrittenBooks } from '@/services/mybooknote/booknote/library';
 import type { UnwrittenLibraryBook } from '@/types/mybooknote/library';
 import BookSelectCard from '@/components/mybooknote/booknote/BookSelectCard';
 

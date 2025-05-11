@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchBookNote } from '@/services/mybooknote/booknote';
-import { fetchBookQuote } from '@/services/mybooknote/bookquote';
+import { fetchBookNote } from '@/services/mybooknote/booknote/booknote';
+import { fetchBookQuote } from '@/services/mybooknote/booknote/bookquote';
 import BookNoteHeaderCard from '@/components/mybooknote/booknote/BookNoteHeaderCard';
 import BookNoteLayout from '@/components/mybooknote/booknote/BookNoteLayout';
 import BookNoteView from '@/components/mybooknote/booknote/BookNoteView';

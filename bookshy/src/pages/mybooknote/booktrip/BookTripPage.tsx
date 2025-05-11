@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchLibraryBooks } from '@/services/mybooknote/library';
+import { fetchLibraryBooks } from '@/services/mybooknote/booknote/library';
 import type { LibraryBook } from '@/types/mybooknote/library';
 import Header from '@/components/common/Header';
 import TabNavBar from '@/components/common/TabNavBar';
