@@ -16,7 +16,7 @@ const SearchBar: FC<SearchBarProps> = ({ onSearch, value, onChange }) => {
     <div className="relative flex items-center w-full">
       <input
         type="text"
-        placeholder="책 제목, 출판사..."
+        placeholder="책 제목, 저자, 출판사..."
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
