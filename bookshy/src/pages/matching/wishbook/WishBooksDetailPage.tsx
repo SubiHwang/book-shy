@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getWishBookDetail } from '@/services/matching/wishbooks';
 import { WishBook } from '@/types/book';
+import WishBooksDetailInfoBody from '@/components/matching/wishbooks/WishBooksDetailInfoBody';
 
 const WishBooksDetailPage = () => {
   const navigate = useNavigate();
@@ -55,6 +56,13 @@ const WishBooksDetailPage = () => {
             />
             <div className="bg-light-bg flex-1 overflow-y-auto overflow-x-hidden">
               <div className="max-w-screen-md mx-auto">
+                <WishBooksDetailInfoBody
+                  pubDate={bookDetail.pubDate}
+                  pageCount={bookDetail.pageCount}
+                  category={bookDetail.category}
+                  description={bookDetail.description}
+                  isLoading={isLoading}
+                  />
               </div>
             </div>
           </>
