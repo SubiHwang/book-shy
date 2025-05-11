@@ -21,9 +21,10 @@ public class UserProfileResponseDto {
     private String address;
     private int age;
     private Users.Gender gender;
+    private Double latitude;   // 추가
+    private Double longitude;  // 추가
 
     public static UserProfileResponseDto from(Users user) {
-
         return UserProfileResponseDto.builder()
                 .nickname(user.getNickname())
                 .bookShyScore(user.getTemperature() != null ? user.getTemperature() : 0)
@@ -32,8 +33,11 @@ public class UserProfileResponseDto {
                 .address(user.getAddress())
                 .age(user.getAge())
                 .gender(user.getGender())
+                .latitude(user.getLatitude())      // 추가
+                .longitude(user.getLongitude())    // 추가
                 .build();
     }
 }
+
 
 

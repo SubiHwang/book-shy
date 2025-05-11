@@ -61,6 +61,13 @@ public class Users extends TimeStampEntity implements UserDetails {
     @Column(name = "fcm_token")
     private String fcmToken;
 
+    @Column(name = "latitude", precision = 12, scale = 8)
+    private Double latitude;
+
+    @Column(name = "longitude", precision = 12, scale = 8)
+    private Double longitude;
+
+
     public void updateTokens(String refreshToken, String fcmToken) {
         this.refreshToken = refreshToken;
         this.fcmToken = fcmToken;
@@ -69,7 +76,8 @@ public class Users extends TimeStampEntity implements UserDetails {
     @Builder
     public Users(String email, String nickname, String profileImageUrl,
                  String address, int age, Gender gender, Float temperature,
-                 String badges, String refreshToken, String fcmToken) {
+                 String badges, String refreshToken, String fcmToken,
+                 Double latitude, Double longitude) {
         this.email = email;
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
@@ -80,7 +88,10 @@ public class Users extends TimeStampEntity implements UserDetails {
         this.badges = badges != null ? badges : "북끄북끄 입문자";
         this.refreshToken = refreshToken;
         this.fcmToken = fcmToken;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
