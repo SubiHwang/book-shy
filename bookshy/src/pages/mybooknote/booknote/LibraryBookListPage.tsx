@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { fetchLibraryBooks } from '@/services/mybooknote/booknote/library';
-import type { LibraryBook } from '@/types/mybooknote/library';
+import type { LibraryBook } from '@/types/mybooknote/booknote/library';
 import Header from '@/components/common/Header';
 import { useState } from 'react';
 

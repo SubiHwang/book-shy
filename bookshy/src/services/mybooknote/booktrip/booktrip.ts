@@ -3,11 +3,12 @@ import type {
   BookTrip,
   CreateBookTripRequest,
   UpdateBookTripRequest,
-} from '@/types/mybooknote/booktrip/types';
+  LibraryBookWithTrip,
+} from '@/types/mybooknote/booktrip/booktrip';
 
 // ✅ 책의 여정 전체 조회
 export const fetchBookTripsByBookId = async (bookId: number): Promise<BookTrip[]> => {
-  const { data } = await authAxiosInstance.get(`/api/booktrip`, {
+  const { data } = await authAxiosInstance.get(`/booktrip`, {
     params: { bookId },
   });
   return data;
@@ -15,7 +16,7 @@ export const fetchBookTripsByBookId = async (bookId: number): Promise<BookTrip[]
 
 // ✅ 책의 여정 등록
 export const createBookTrip = async (trip: CreateBookTripRequest): Promise<BookTrip> => {
-  const { data } = await authAxiosInstance.post(`/api/booktrip`, trip);
+  const { data } = await authAxiosInstance.post(`/booktrip`, trip);
   return data;
 };
 
@@ -24,11 +25,17 @@ export const updateBookTrip = async (
   tripId: number,
   update: UpdateBookTripRequest,
 ): Promise<BookTrip> => {
-  const { data } = await authAxiosInstance.put(`/api/booktrip/${tripId}`, update);
+  const { data } = await authAxiosInstance.put(`/booktrip/${tripId}`, update);
   return data;
 };
 
 // ✅ 책의 여정 삭제
 export const deleteBookTrip = async (tripId: number): Promise<void> => {
-  await authAxiosInstance.delete(`/api/booktrip/${tripId}`);
+  await authAxiosInstance.delete(`/booktrip/${tripId}`);
+};
+
+// ✅ 여정 작성 여부 포함 서재 목록 조회
+export const fetchLibraryBooksWithTrip = async (): Promise<LibraryBookWithTrip[]> => {
+  const { data } = await authAxiosInstance.get('/library/with-trip');
+  return data;
 };

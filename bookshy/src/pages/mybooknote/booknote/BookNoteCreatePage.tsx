@@ -4,7 +4,7 @@ import { fetchLibraryBooks } from '@/services/mybooknote/booknote/library';
 import { fetchBookDetailByBookId } from '@/services/book/search';
 import { createNoteWithQuote } from '@/services/mybooknote/booknote/booknotequote';
 import BookNoteForm from '@/components/mybooknote/booknote/BookNoteForm';
-import type { LibraryBook } from '@/types/mybooknote/library';
+import type { LibraryBook } from '@/types/mybooknote/booknote/library';
 import { useState } from 'react';
 
 const BookNoteCreatePage: React.FC = () => {

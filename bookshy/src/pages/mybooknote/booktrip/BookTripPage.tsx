@@ -1,32 +1,32 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchLibraryBooks } from '@/services/mybooknote/booknote/library';
-import type { LibraryBook } from '@/types/mybooknote/booknote/library';
+import { fetchLibraryBooksWithTrip } from '@/services/mybooknote/booktrip/booktrip'; // ✅ 수정
+import type { LibraryBookWithTrip } from '@/types/mybooknote/booktrip/booktrip'; // ✅ 수정
 import Header from '@/components/common/Header';
 import TabNavBar from '@/components/common/TabNavBar';
 
 const BookTripPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<'ALL' | 'PUBLIC' | 'PRIVATE'>('ALL');
+  const [filter, setFilter] = useState<'ALL' | 'WRITTEN' | 'UNWRITTEN'>('ALL'); // ✅ 변경
 
   const pages = [
     { path: '/booknotes', label: '내 독서 기록 보기' },
     { path: '/booknotes/trip', label: '책의 여정 보기' },
   ];
 
-  const { data: libraryBooks = [], isLoading } = useQuery<LibraryBook[]>({
-    queryKey: ['libraryBooks'],
-    queryFn: fetchLibraryBooks,
+  const { data: libraryBooks = [], isLoading } = useQuery<LibraryBookWithTrip[]>({
+    queryKey: ['libraryBooksWithTrip'],
+    queryFn: fetchLibraryBooksWithTrip,
   });
 
   const filteredBooks = libraryBooks.filter((book) => {
     const matchSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchFilter =
       filter === 'ALL' ||
-      (filter === 'PUBLIC' && book.public) ||
-      (filter === 'PRIVATE' && !book.public);
+      (filter === 'WRITTEN' && book.hasTrip) ||
+      (filter === 'UNWRITTEN' && !book.hasTrip);
     return matchSearch && matchFilter;
   });
 
@@ -58,12 +58,12 @@ const BookTripPage: React.FC = () => {
           />
           <select
             value={filter}
-            onChange={(e) => setFilter(e.target.value as 'ALL' | 'PUBLIC' | 'PRIVATE')}
+            onChange={(e) => setFilter(e.target.value as 'ALL' | 'WRITTEN' | 'UNWRITTEN')}
             className="text-sm border border-gray-300 rounded-md px-2 py-2"
           >
             <option value="ALL">전체 보기</option>
-            <option value="PUBLIC">공개 감상</option>
-            <option value="PRIVATE">비공개 감상</option>
+            <option value="WRITTEN">내가 여정 작성한 책</option>
+            <option value="UNWRITTEN">여정 미작성 책</option>
           </select>
         </div>
 
@@ -86,10 +86,10 @@ const BookTripPage: React.FC = () => {
                   <div className="text-xs text-gray-500">{book.author}</div>
                   <div
                     className={`mt-1 text-xs font-semibold ${
-                      book.public ? 'text-green-600' : 'text-red-500'
+                      book.hasTrip ? 'text-green-600' : 'text-red-500'
                     }`}
                   >
-                    {book.public ? '공개 감상' : '비공개 감상'}
+                    {book.hasTrip ? '여정 작성됨' : '여정 미작성'}
                   </div>
                 </div>
                 <button

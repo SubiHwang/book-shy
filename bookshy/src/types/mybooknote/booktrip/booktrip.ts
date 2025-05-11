@@ -1,3 +1,9 @@
+import type { LibraryBook } from '../booknote';
+
+export interface LibraryBookWithTrip extends LibraryBook {
+  hasTrip: boolean; // ✅ 나의 책 여정 존재 여부
+}
+
 export interface BookTrip {
   tripId: number;
   bookId: number;

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { fetchUnwrittenBooks } from '@/services/mybooknote/booknote/library';
-import type { UnwrittenLibraryBook } from '@/types/mybooknote/library';
+import type { UnwrittenLibraryBook } from '@/types/mybooknote/booknote/library';
 import BookSelectCard from '@/components/mybooknote/booknote/BookSelectCard';
 
 const BookNoteSelectPage: React.FC = () => {
