@@ -22,6 +22,9 @@ services:
       - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
       - KAKAO_REDIRECT_URI=${KAKAO_REDIRECT_URI}
       - ELK_URL=${ELK_URL}
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/secret/firebase-service-account.json
+      - FIREBASE_PROJECT_ID=bookshy-b4c32
+
 
       # JWT 설정 추가
       - JWT_SECRET_KEY=${JWT_KEY}
@@ -35,6 +38,7 @@ services:
     volumes:
       - /home/ubuntu/bookshy/images/coverImage:/home/ubuntu/bookshy/images/coverImage
       - /home/ubuntu/bookshy/images/profile:/home/ubuntu/bookshy/images/profile
+      - /home/ubuntu/secrets/firebase-service-account.json:/app/secret/firebase-service-account.json:ro
 
     restart: always
     networks:

@@ -38,3 +38,6 @@ out/
 
 # Local secrets (DB/Kafka/Redis/JWT etc.)
 src/main/resources/application-key.yml
+
+# Firebase Key Json File
+/secrets/firebase-service-account.json

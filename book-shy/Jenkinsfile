@@ -37,7 +37,8 @@ pipeline {
         KAKAO_CLIENT_ID = credentials('KAKAO_CLIENT_ID')        // 추가
         KAKAO_REDIRECT_URI = credentials('KAKAO_REDIRECT_URI')  // 추가
 
-
+        FIREBASE_PROJECT_ID = 'bookshy-b4c32'
+        GOOGLE_APPLICATION_CREDENTIALS = '/app/secret/firebase-service-account.json'
     }
 
     stages {
@@ -221,10 +222,13 @@ pipeline {
                                     # ✅ 2. 서버에 전송
                                     ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
                                         mkdir -p /home/ubuntu
+                                        mkdir -p /home/ubuntu/secrets
                                     "
 
                                     scp -v -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${DEV_SERVER}:/home/ubuntu/
                                     echo "✅ docker-compose.yml 복사 완료"
+                                    scp -v -o StrictHostKeyChecking=no secrets/firebase-service-account.json ubuntu@${DEV_SERVER}:/home/ubuntu/secrets/
+                                    echo "✅ firebase-service-account.json 복사 완료"
 
                                     # ✅ 3. 배포 실행
                                     ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
