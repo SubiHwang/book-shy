@@ -1,8 +1,8 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchBookNotes, updateBookNote } from '@/services/mybooknote/booknote';
-import { fetchBookQuotes, updateBookQuote } from '@/services/mybooknote/bookquote';
+import { fetchBookNoteList, updateBookNote } from '@/services/mybooknote/booknote';
+import { fetchBookQuoteList, updateBookQuote } from '@/services/mybooknote/bookquote';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import type { BookQuote } from '@/types/mybooknote/bookquote';
 import BookNoteForm from '@/components/booknote/BookNoteForm';
@@ -10,16 +10,15 @@ import BookNoteForm from '@/components/booknote/BookNoteForm';
 const BookNoteEditPage: React.FC = () => {
   const { bookId } = useParams();
   const navigate = useNavigate();
-  const userId = 1;
 
   const { data: notes = [] } = useQuery<BookNote[], Error>({
-    queryKey: ['my-booknotes', userId],
-    queryFn: () => fetchBookNotes(userId),
+    queryKey: ['my-booknotes'],
+    queryFn: () => fetchBookNoteList(),
   });
 
   const { data: quotes = [] } = useQuery<BookQuote[], Error>({
     queryKey: ['my-bookquotes'],
-    queryFn: fetchBookQuotes,
+    queryFn: fetchBookQuoteList,
   });
 
   const book = notes.find((b) => b.bookId === Number(bookId));

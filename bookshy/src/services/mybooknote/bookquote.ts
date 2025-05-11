@@ -1,26 +1,23 @@
 import { authAxiosInstance } from '@/services/axiosInstance';
 import type { BookQuote } from '@/types/mybooknote/bookquote';
 
-const userId = 1;
+// 📚 나의 인용구구 목록 조회
+export const fetchBookQuoteList = async (): Promise<BookQuote[]> => {
+  const res: BookQuote[] = await authAxiosInstance.get('/quotes');
+  return res ?? [];
+};
 
-// 📚 나의 인용구 목록 조회
-export const fetchBookQuotes = async (): Promise<BookQuote[]> => {
-  if (!userId) throw new Error('유저 ID가 없습니다.');
-
+// 📚 특정 도서의 인용구 조회
+export const fetchBookQuote = async (bookId: number): Promise<BookQuote[]> => {
   const res = await authAxiosInstance.get('/quotes', {
-    headers: { 'X-User-Id': userId },
+    params: { bookId },
   });
-
   return res.data ?? [];
 };
 
 // ✍️ 인용구 등록
 export const createBookQuote = async (bookId: number, content: string): Promise<void> => {
-  await authAxiosInstance.post(
-    '/quotes',
-    { userId, bookId, content },
-    { headers: { 'X-User-Id': userId } },
-  );
+  await authAxiosInstance.post('/quotes', { bookId, content });
 };
 
 // ✏️ 인용구 수정

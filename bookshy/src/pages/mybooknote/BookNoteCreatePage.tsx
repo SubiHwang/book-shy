@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchLibraryBooks } from '@/services/mybooknote/library';
 import { fetchBookDetailByBookId } from '@/services/book/search';
 import { createNoteWithQuote } from '@/services/mybooknote/booknotequote';
@@ -32,6 +32,7 @@ const BookNoteCreatePage: React.FC = () => {
 
   const [quoteText, setQuoteText] = useState('');
   const [reviewText, setReviewText] = useState('');
+  const queryClient = useQueryClient();
 
   const handleCreate = async () => {
     if (!bookId) return;
@@ -42,6 +43,9 @@ const BookNoteCreatePage: React.FC = () => {
         reviewContent: reviewText,
         quoteContent: quoteText,
       });
+
+      // 📦 캐시 무효화
+      queryClient.invalidateQueries({ queryKey: ['my-booknotes'] });
 
       alert('📚 독서기록 등록이 완료되었습니다.');
       navigate('/mybooknote');

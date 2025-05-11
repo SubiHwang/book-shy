@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchBookNotes } from '@/services/mybooknote/booknote';
+import { fetchBookNoteList } from '@/services/mybooknote/booknote';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import { IoIosArrowBack } from 'react-icons/io';
 import { HiBell } from 'react-icons/hi';
@@ -8,11 +8,10 @@ import { HiBell } from 'react-icons/hi';
 const BookNoteFullPage: React.FC = () => {
   const { bookId } = useParams();
   const navigate = useNavigate();
-  const userId = 1;
 
   const { data: bookNotes = [], isLoading } = useQuery<BookNote[], Error>({
-    queryKey: ['my-booknotes', userId],
-    queryFn: () => fetchBookNotes(userId),
+    queryKey: ['my-booknotes'],
+    queryFn: () => fetchBookNoteList(),
   });
 
   const book = bookNotes.find((b) => b.bookId === Number(bookId));

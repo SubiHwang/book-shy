@@ -1,22 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchBookNotes } from '@/services/mybooknote/booknote';
-import { fetchBookQuotes } from '@/services/mybooknote/bookquote';
+import { fetchBookNoteList } from '@/services/mybooknote/booknote';
+import { fetchBookQuoteList } from '@/services/mybooknote/bookquote';
 import MyBookNoteGridPage from './MyBookNoteGridPage';
 import LibraryBookListPage from './LibraryBookListPage';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import type { BookQuote } from '@/types/mybooknote/bookquote';
 
 const MyBookNotePage = () => {
-  const userId = 2;
-
   const { data: notes = [], isLoading: notesLoading } = useQuery<BookNote[], Error>({
-    queryKey: ['my-booknotes', userId],
-    queryFn: () => fetchBookNotes(userId),
+    queryKey: ['my-booknotes'],
+    queryFn: () => fetchBookNoteList(),
   });
 
   const { data: quotes = [], isLoading: quotesLoading } = useQuery<BookQuote[], Error>({
     queryKey: ['my-bookquotes'],
-    queryFn: fetchBookQuotes,
+    queryFn: fetchBookQuoteList,
   });
 
   const enrichedNotes = notes.map((note) => {
