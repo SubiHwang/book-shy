@@ -71,6 +71,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.setCharacterEncoding("utf-8");
                 response.setContentType("application/json");
                 response.getWriter().write(objectMapper.writeValueAsString("Access Token이 만료되었거나 유효하지 않습니다."));
+                return;
             }
         } else {
             log.info("토큰이 없음");
