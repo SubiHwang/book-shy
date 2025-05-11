@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { fetchUserProfile, updateUserProfile } from '@/services/mypage/profile';
+import { fetchUserProfile, updateUserProfile, uploadProfileImage } from '@/services/mypage/profile';
 import Header from '@/components/common/Header';
 import { useNavigate } from 'react-router-dom';
 import type { UserProfile } from '@/types/User/user';
@@ -22,6 +22,7 @@ const EditProfilePage = () => {
   const [address, setAddress] = useState('');
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState('');
 
   const {
     fetchCurrentLocation,
@@ -39,10 +40,10 @@ const EditProfilePage = () => {
       setAddress(profile.address ?? '');
       setLatitude(profile.latitude ?? null);
       setLongitude(profile.longitude ?? null);
+      setProfileImageUrl(profile.profileImageUrl || '/default-profile.png');
     }
   }, [profile]);
 
-  // Kakao API 위치 주소 반영
   useEffect(() => {
     if (fetchedAddress) setAddress(fetchedAddress);
     if (currentLat !== null) setLatitude(currentLat);
@@ -73,6 +74,19 @@ const EditProfilePage = () => {
     });
   };
 
+  const handleImageChange = async (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const res = await uploadProfileImage(formData);
+      setProfileImageUrl(res.imageUrl);
+      alert('프로필 이미지가 변경되었습니다.');
+    } catch {
+      alert('이미지 업로드에 실패했습니다.');
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('refresh_token');
@@ -91,7 +105,7 @@ const EditProfilePage = () => {
       <div className="px-6 py-4">
         <p className="text-lg font-semibold mt-4 mb-6">프로필을 설정해주세요.</p>
 
-        <ProfileImage src={profile?.profileImageUrl || '/default-profile.png'} />
+        <ProfileImage src={profileImageUrl} onImageChange={handleImageChange} />
 
         <div className="mb-4">
           <label className="block mb-1 font-medium">닉네임</label>
