@@ -67,9 +67,9 @@ authAxiosInstance.interceptors.response.use(
           // refresh token이 없으면 로그인 페이지로 리다이렉트
           console.log('refresh token 없음');
           // 로그인 페이지로 리다이렉트
-          // window.location.href = '/login';
-          // localStorage.removeItem('auth_token');
-          // localStorage.removeItem('refresh_token');
+          window.location.href = '/login';
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('refresh_token');
           return Promise.reject(error);
         }
 
@@ -81,8 +81,8 @@ authAxiosInstance.interceptors.response.use(
 
         // 새 토큰 저장
         const { accessToken, refreshToken } = response.data;
-        console.log(response);
-        console.log('새롭게 받은 토큰', accessToken);
+        // console.log(response);
+        // console.log('새롭게 받은 토큰', accessToken);
         localStorage.setItem('auth_token', accessToken);
 
         // 새 refresh token이 있으면 업데이트
@@ -99,9 +99,9 @@ authAxiosInstance.interceptors.response.use(
       } catch (refreshError) {
         console.error('토큰 갱신 실패:', refreshError);
         // 토큰 갱신 실패 시 로그인 페이지로 리다이렉트
-        // localStorage.removeItem('access_token');
-        // localStorage.removeItem('refresh_token');
-        // window.location.href = '/login';
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }
