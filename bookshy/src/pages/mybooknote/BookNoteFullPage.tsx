@@ -1,71 +1,45 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchBookNote } from '@/services/mybooknote/booknote';
 import { fetchBookQuote } from '@/services/mybooknote/bookquote';
-import type { BookNote } from '@/types/mybooknote/booknote';
-import type { BookQuote } from '@/types/mybooknote/bookquote';
-import { IoIosArrowBack } from 'react-icons/io';
-import { HiBell } from 'react-icons/hi';
+import BookNoteHeaderCard from '@/components/booknote/BookNoteHeaderCard';
+import BookNoteSection from '@/components/booknote/BookNoteSection';
 
 const BookNoteFullPage: React.FC = () => {
   const { bookId } = useParams();
   const navigate = useNavigate();
   const numericBookId = bookId ? Number(bookId) : null;
 
-  const {
-    data: book,
-    isLoading: loadingNote,
-    error: errorNote,
-  } = useQuery<BookNote>({
+  const { data: book } = useQuery({
     queryKey: ['book-note', numericBookId],
     queryFn: () => fetchBookNote(numericBookId!),
-    enabled: numericBookId !== null,
+    enabled: !!numericBookId,
   });
 
-  const {
-    data: quote,
-    isLoading: loadingQuote,
-    error: errorQuote,
-  } = useQuery<BookQuote>({
+  const { data: quote } = useQuery({
     queryKey: ['book-quote', numericBookId],
     queryFn: () => fetchBookQuote(numericBookId!),
-    enabled: numericBookId !== null,
+    enabled: !!numericBookId,
   });
 
-  if (loadingNote || loadingQuote) return <p className="p-4">불러오는 중...</p>;
-  if (errorNote || errorQuote || !book) return <p className="p-4">책 정보를 찾을 수 없습니다.</p>;
+  if (!bookId || !book) return <p className="p-4">잘못된 접근입니다.</p>;
 
   return (
     <div className="min-h-screen bg-[#f9f4ec] px-4 pb-28">
-      {/* 헤더 */}
       <div className="flex justify-between items-center py-4">
-        <button onClick={() => navigate(-1)}>
-          <IoIosArrowBack size={24} />
-        </button>
+        <button onClick={() => navigate(-1)}>&lt;</button>
         <h1 className="text-lg font-semibold">독서 기록</h1>
-        <HiBell size={20} className="text-gray-700" />
+        <div className="w-6" />
       </div>
 
-      {/* 책 정보 */}
-      <div className="flex items-start gap-4 bg-[#f9f4ec] mb-4">
-        <div className="relative">
-          <img
-            src={book.coverUrl || '/placeholder.jpg'}
-            alt={book.title}
-            className="w-24 h-32 rounded-md object-cover shadow"
-          />
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-[-14px] bg-[#5a524d] text-white text-xs px-2 py-0.5 rounded-full">
-            독서 완료
-          </div>
-        </div>
-        <div className="mt-1">
-          <h2 className="font-bold text-xl mb-1">{book.title}</h2>
-          {book.author && <p className="text-sm text-gray-700">작가 : {book.author}</p>}
-          {book.publisher && <p className="text-sm text-gray-700">출판사 : {book.publisher}</p>}
-        </div>
-      </div>
+      <BookNoteHeaderCard
+        coverUrl={book.coverUrl}
+        title={book.title}
+        author={book.author}
+        publisher={book.publisher}
+        badgeText="독서 완료"
+      />
 
-      {/* 수정하기 버튼 */}
       <div className="flex justify-end mb-6">
         <button
           onClick={() => navigate(`/booknotes/edit/${book.bookId}`)}
@@ -75,21 +49,18 @@ const BookNoteFullPage: React.FC = () => {
         </button>
       </div>
 
-      {/* 인용구 섹션 */}
-      <section className="mb-6">
-        <h3 className="text-red-500 text-sm font-semibold mb-1">✍️ 인용구</h3>
-        <p className="bg-white rounded-lg p-3 text-sm leading-relaxed shadow">
-          {quote?.content || '등록된 인용구가 없습니다.'}
-        </p>
-      </section>
-
-      {/* 감상기록 섹션 */}
-      <section>
-        <h3 className="text-red-500 text-sm font-semibold mb-1">💬 감상 기록</h3>
-        <p className="bg-white rounded-lg p-3 text-sm leading-relaxed shadow">
-          {book.content || '작성된 독후감이 없습니다.'}
-        </p>
-      </section>
+      <BookNoteSection
+        label="인용구"
+        icon="✍️"
+        content={quote?.content}
+        placeholder="등록된 인용구가 없습니다."
+      />
+      <BookNoteSection
+        label="감상 기록"
+        icon="💬"
+        content={book.content}
+        placeholder="작성된 독후감이 없습니다."
+      />
     </div>
   );
 };

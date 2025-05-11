@@ -1,38 +1,47 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchBookNoteList, updateBookNote } from '@/services/mybooknote/booknote';
-import { fetchBookQuoteList, updateBookQuote } from '@/services/mybooknote/bookquote';
-import type { BookNote } from '@/types/mybooknote/booknote';
-import type { BookQuote } from '@/types/mybooknote/bookquote';
+import { useState } from 'react';
+import { fetchBookNote, updateBookNote } from '@/services/mybooknote/booknote';
+import { fetchBookQuote, updateBookQuote } from '@/services/mybooknote/bookquote';
 import BookNoteForm from '@/components/booknote/BookNoteForm';
+import BookNoteHeaderCard from '@/components/booknote/BookNoteHeaderCard';
 
 const BookNoteEditPage: React.FC = () => {
   const { bookId } = useParams();
   const navigate = useNavigate();
 
-  const { data: notes = [] } = useQuery<BookNote[], Error>({
-    queryKey: ['my-booknotes'],
-    queryFn: () => fetchBookNoteList(),
+  const numericBookId = bookId ? Number(bookId) : null;
+
+  const { data: book, isLoading: loadingNote } = useQuery({
+    queryKey: ['book-note', numericBookId],
+    queryFn: () => fetchBookNote(numericBookId as number),
+    enabled: typeof numericBookId === 'number',
   });
 
-  const { data: quotes = [] } = useQuery<BookQuote[], Error>({
-    queryKey: ['my-bookquotes'],
-    queryFn: fetchBookQuoteList,
+  const { data: quote, isLoading: loadingQuote } = useQuery({
+    queryKey: ['book-quote', numericBookId],
+    queryFn: () => fetchBookQuote(numericBookId as number),
+    enabled: typeof numericBookId === 'number',
   });
 
-  const book = notes.find((b) => b.bookId === Number(bookId));
-  const quote = quotes.find((q) => q.bookId === Number(bookId));
+  const [quoteText, setQuoteText] = useState('');
+  const [reviewText, setReviewText] = useState('');
 
-  const [quoteText, setQuoteText] = useState(quote?.content ?? '');
-  const [reviewText, setReviewText] = useState(book?.content ?? '');
+  // 초기화
+  useState(() => {
+    if (quote?.content) setQuoteText(quote.content);
+    if (book?.content) setReviewText(book.content);
+  });
 
   const handleSave = async () => {
-    if (!bookId || !book?.reviewId || !quote?.quoteId) return;
+    if (!book || !book.reviewId || !quote || !quote.quoteId) return;
     await updateBookQuote(quote.quoteId, quoteText);
     await updateBookNote(book.reviewId, reviewText);
     navigate(`/booknotes/detail/${bookId}`);
   };
+
+  if (!bookId || loadingNote || loadingQuote) return <p className="p-4">불러오는 중...</p>;
+  if (!book) return <p className="p-4">책 정보를 찾을 수 없습니다.</p>;
 
   return (
     <div className="min-h-screen bg-[#f9f4ec] px-4 py-6">
@@ -40,18 +49,13 @@ const BookNoteEditPage: React.FC = () => {
         {'< 뒤로가기'}
       </button>
 
-      <div className="flex items-center gap-4 mb-6">
-        <img
-          src={book?.coverUrl || '/placeholder.jpg'}
-          alt={book?.title}
-          className="w-20 h-28 rounded-md object-cover"
-        />
-        <div>
-          <h1 className="font-bold text-lg">{book?.title}</h1>
-          {book?.author && <p className="text-sm text-gray-600">작가 : {book.author}</p>}
-          {book?.publisher && <p className="text-sm text-gray-600">출판사 : {book.publisher}</p>}
-        </div>
-      </div>
+      <BookNoteHeaderCard
+        title={book.title}
+        author={book.author}
+        publisher={book.publisher}
+        coverUrl={book.coverUrl}
+        badgeText="독서 완료"
+      />
 
       <BookNoteForm
         quoteText={quoteText}
