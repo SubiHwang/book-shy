@@ -27,6 +27,8 @@ import Login from '@/pages/auth/Login';
 import PrivateRoute from '@/components/layout/PrivateRoute';
 import KaKaoOauth from '@/pages/auth/KaKaoOauth';
 import WishBooksDetailPage from '@/pages/matching/wishbook/WishBooksDetailPage';
+import RecommandedWishBookList from '../matching/searchwishbooks/RecommandedWishBookList';
+import SearchResultBookList from '../matching/searchwishbooks/SearchResultBookList';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -85,7 +87,10 @@ const AppLayout: FC = () => {
                     path="/matching/neigbors-bookshelf/:userId"
                     element={<NeighborBookshelfPage />}
                   />
-                  <Route path="/matching/search-wish-books" element={<SearchWishBooks />} />
+                  <Route path="/matching/search-wish-books" element={<SearchWishBooks />}>
+                    <Route index element={<RecommandedWishBookList />} />
+                    <Route path="result" element={<SearchResultBookList/>} />
+                  </Route>
 
                   <Route path="/matching/books/:id" element={<WishBooksDetailPage />} />
 
