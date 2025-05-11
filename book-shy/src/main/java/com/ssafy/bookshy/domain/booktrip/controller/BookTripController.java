@@ -1,0 +1,68 @@
+package com.ssafy.bookshy.domain.booktrip.controller;
+
+import com.ssafy.bookshy.domain.booktrip.dto.*;
+import com.ssafy.bookshy.domain.booktrip.service.BookTripService;
+import com.ssafy.bookshy.domain.users.entity.Users;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/booktrip")
+@RequiredArgsConstructor
+@Tag(name = "📘 BookTrip API", description = "책의 여정(독서 경험) 기록 관련 API")
+public class BookTripController {
+
+    private final BookTripService bookTripService;
+
+    @GetMapping
+    @Operation(summary = "📚 특정 도서의 여정 목록 조회", description = "특정 도서에 대해 작성된 모든 여정(BookTrip)을 조회합니다.")
+    public ResponseEntity<List<BookTripDto>> getTrips(
+            @Parameter(description = "조회할 도서의 ID", required = true)
+            @RequestParam Long bookId) {
+        if (bookId == null) return ResponseEntity.badRequest().build();
+        List<BookTripDto> result = bookTripService.getTripsByBookId(bookId);
+        if (result.isEmpty()) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping
+    @Operation(summary = "📝 책의 여정 등록", description = "현재 로그인한 사용자가 특정 도서에 대한 여정 기록을 작성합니다.")
+    public ResponseEntity<BookTripDto> createTrip(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal Users user,
+            @RequestBody CreateBookTripRequest req) {
+        if (req.getBookId() == null) return ResponseEntity.badRequest().build();
+        if (req.getContent() == null || req.getContent().isBlank()) return ResponseEntity.badRequest().build();
+        return ResponseEntity.status(201).body(bookTripService.createTrip(user.getUserId(), req));
+    }
+
+    @PutMapping("/{tripId}")
+    @Operation(summary = "✏️ 책의 여정 수정", description = "사용자가 작성한 여정 기록의 내용을 수정합니다.")
+    public ResponseEntity<BookTripDto> updateTrip(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal Users user,
+            @Parameter(description = "수정할 여정 ID", required = true)
+            @PathVariable Long tripId,
+            @RequestBody UpdateBookTripRequest req) {
+        if (req.getContent() == null || req.getContent().isBlank()) return ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(bookTripService.updateTrip(user.getUserId(), tripId, req));
+    }
+
+    @DeleteMapping("/{tripId}")
+    @Operation(summary = "❌ 책의 여정 삭제", description = "사용자가 작성한 여정 기록을 삭제합니다.")
+    public ResponseEntity<Void> deleteTrip(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal Users user,
+            @Parameter(description = "삭제할 여정 ID", required = true)
+            @PathVariable Long tripId) {
+        bookTripService.deleteTrip(user.getUserId(), tripId);
+        return ResponseEntity.noContent().build();
+    }
+}
