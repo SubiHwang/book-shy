@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchBookNote } from '@/services/mybooknote/booknote';
 import { fetchBookQuote } from '@/services/mybooknote/bookquote';
 import BookNoteHeaderCard from '@/components/booknote/BookNoteHeaderCard';
-import BookNoteSection from '@/components/booknote/BookNoteSection';
 import BookNoteLayout from '@/components/booknote/BookNoteLayout';
 import BookNoteView from '@/components/booknote/BookNoteView';
 
@@ -47,9 +46,9 @@ const BookNoteFullPage: React.FC = () => {
       <div className="flex justify-end mb-6">
         <button
           onClick={() => navigate(`/booknotes/edit/${book.bookId}`)}
-          className="text-sm px-4 py-1 bg-gray-200 rounded-full text-gray-700 shadow"
+          className="flex items-center gap-1 text-sm font-medium text-white bg-pink-500 hover:bg-pink-600 transition-colors px-4 py-1.5 rounded-full shadow"
         >
-          수정하기
+          ✏️ 수정하기
         </button>
       </div>
 
