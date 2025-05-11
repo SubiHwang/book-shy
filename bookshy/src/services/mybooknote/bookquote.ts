@@ -9,7 +9,7 @@ export const fetchBookQuoteList = async (): Promise<BookQuote[]> => {
 
 // 📚 특정 도서의 인용구 조회
 export const fetchBookQuote = async (bookId: number): Promise<BookQuote> => {
-  const res: BookQuote = await authAxiosInstance.get('/quotes', {
+  const res: BookQuote = await authAxiosInstance.get('/quotes/by-book', {
     params: { bookId },
   });
   return res;

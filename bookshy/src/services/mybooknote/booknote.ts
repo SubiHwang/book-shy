@@ -9,7 +9,7 @@ export const fetchBookNoteList = async (): Promise<BookNote[]> => {
 
 // 📚 나의 독후감 1권 조회
 export const fetchBookNote = async (bookId: number): Promise<BookNote> => {
-  const res: BookNote = await authAxiosInstance.get('/notes', {
+  const res: BookNote = await authAxiosInstance.get('/notes/by-book', {
     params: { bookId },
   });
   return res;
