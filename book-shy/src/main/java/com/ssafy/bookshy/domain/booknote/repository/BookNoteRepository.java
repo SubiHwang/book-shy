@@ -4,5 +4,10 @@ import com.ssafy.bookshy.domain.booknote.entity.BookNote;
 import com.ssafy.bookshy.domain.booknote.entity.BookQuote;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface BookNoteRepository extends JpaRepository<BookNote, Long> {}
+import java.util.List;
+
+public interface BookNoteRepository extends JpaRepository<BookNote, Long> {
+    List<BookNote> findByUserIdAndBookId(Long userId, Long bookId);
+
+}
 

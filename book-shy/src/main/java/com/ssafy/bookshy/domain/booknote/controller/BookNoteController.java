@@ -97,10 +97,11 @@ public class BookNoteController {
 
     @GetMapping
     @Operation(
-            summary = "📘 나의 독서 기록 조회",
+            summary = "📘 나의 독서 기록 전체 조회",
             description = """
-                🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 내가 작성한 독후감 목록을 조회합니다.
-            """,
+        🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 <b>내가 작성한 모든 독후감 목록</b>을 조회합니다.<br>
+        - 도서 정보(title, author 등)와 함께 반환됩니다.
+        """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "✅ 조회 성공"),
                     @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
@@ -111,4 +112,28 @@ public class BookNoteController {
     ) {
         return ResponseEntity.ok(bookNoteService.findNoteResponsesByUserId(user.getUserId()));
     }
+
+    @GetMapping("/by-book")
+    @Operation(
+            summary = "📕 특정 도서에 대한 나의 독후감 조회",
+            description = """
+        🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 <b>특정 도서(bookId)에 대한 독후감</b>을 조회합니다.<br>
+        - 존재하지 않는 도서 ID를 입력할 경우 404 에러가 발생할 수 있습니다.
+        """,
+            parameters = {
+                    @Parameter(name = "bookId", description = "📚 조회할 도서의 ID", required = true, example = "101")
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "✅ 조회 성공"),
+                    @ApiResponse(responseCode = "404", description = "❌ 도서를 찾을 수 없음"),
+                    @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
+            }
+    )
+    public ResponseEntity<List<BookNoteResponseDto>> getMyNoteByBookId(
+            @RequestParam Long bookId,
+            @AuthenticationPrincipal Users user
+    ) {
+        return ResponseEntity.ok(bookNoteService.findNoteResponsesByUserIdAndBookId(user.getUserId(), bookId));
+    }
+
 }
