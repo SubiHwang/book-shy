@@ -1,23 +1,39 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchBookNoteList } from '@/services/mybooknote/booknote';
+import { fetchBookNote } from '@/services/mybooknote/booknote';
+import { fetchBookQuote } from '@/services/mybooknote/bookquote';
 import type { BookNote } from '@/types/mybooknote/booknote';
+import type { BookQuote } from '@/types/mybooknote/bookquote';
 import { IoIosArrowBack } from 'react-icons/io';
 import { HiBell } from 'react-icons/hi';
 
 const BookNoteFullPage: React.FC = () => {
   const { bookId } = useParams();
   const navigate = useNavigate();
+  const numericBookId = bookId ? Number(bookId) : null;
 
-  const { data: bookNotes = [], isLoading } = useQuery<BookNote[], Error>({
-    queryKey: ['my-booknotes'],
-    queryFn: () => fetchBookNoteList(),
+  const {
+    data: book,
+    isLoading: loadingNote,
+    error: errorNote,
+  } = useQuery<BookNote>({
+    queryKey: ['book-note', numericBookId],
+    queryFn: () => fetchBookNote(numericBookId!),
+    enabled: numericBookId !== null,
   });
 
-  const book = bookNotes.find((b) => b.bookId === Number(bookId));
+  const {
+    data: quote,
+    isLoading: loadingQuote,
+    error: errorQuote,
+  } = useQuery<BookQuote>({
+    queryKey: ['book-quote', numericBookId],
+    queryFn: () => fetchBookQuote(numericBookId!),
+    enabled: numericBookId !== null,
+  });
 
-  if (isLoading) return <p className="p-4">불러오는 중...</p>;
-  if (!book) return <p className="p-4">책 정보를 찾을 수 없습니다.</p>;
+  if (loadingNote || loadingQuote) return <p className="p-4">불러오는 중...</p>;
+  if (errorNote || errorQuote || !book) return <p className="p-4">책 정보를 찾을 수 없습니다.</p>;
 
   return (
     <div className="min-h-screen bg-[#f9f4ec] px-4 pb-28">
@@ -63,7 +79,7 @@ const BookNoteFullPage: React.FC = () => {
       <section className="mb-6">
         <h3 className="text-red-500 text-sm font-semibold mb-1">✍️ 인용구</h3>
         <p className="bg-white rounded-lg p-3 text-sm leading-relaxed shadow">
-          {book.quoteContent || '등록된 인용구가 없습니다.'}
+          {quote?.content || '등록된 인용구가 없습니다.'}
         </p>
       </section>
 
