@@ -4,7 +4,7 @@ import { fetchBookQuoteList } from '@/services/mybooknote/booknote/bookquote';
 import MyBookNoteGridPage from './MyBookNoteGridPage';
 import LibraryBookListPage from './LibraryBookListPage';
 import type { BookNote } from '@/types/mybooknote/booknote';
-import type { BookQuote } from '@/types/mybooknote/bookquote';
+import type { BookQuote } from '@/types/mybooknote/booknote/bookquote';
 
 const MyBookNotePage = () => {
   const { data: notes = [], isLoading: notesLoading } = useQuery<BookNote[], Error>({
