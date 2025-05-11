@@ -39,7 +39,7 @@ const WishBooksDetailPage = () => {
         title="도서 상세 보기"
         showBackButton={true}
         showNotification={true}
-        className="bg-gradient-to-r from-[#FCF6D4] to-[#F4E8B8] shadow-none"
+        className="bg-light-bg shadow-none"
         onBackClick={() => navigate(-1)}
       />
       <div className="bookshelf-container flex flex-col min-h-screen">
