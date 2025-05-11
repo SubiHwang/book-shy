@@ -14,7 +14,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import static com.ssafy.bookshy.domain.exchange.dto.ExchangePromiseDto.CounterpartDto;
-import static com.ssafy.bookshy.common.constants.ImageUrlConstants.PROFILE_IMAGE_BASE_URL;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -67,7 +66,7 @@ public class ExchangePromiseService {
                     .counterpart(CounterpartDto.builder()
                             .userId(counterpart.getUserId())
                             .nickname(counterpart.getNickname())
-                            .profileImageUrl(PROFILE_IMAGE_BASE_URL + counterpart.getProfileImageUrl())
+                            .profileImageUrl(counterpart.getProfileImageUrl())
                             .build())
                     .timeLeft(timeLeft)
                     .build();
