@@ -134,4 +134,13 @@ public class Users extends TimeStampEntity implements UserDetails {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Library> libraries;
+
+    public void updateProfile(String nickname, Gender gender, String address, Double latitude, Double longitude) {
+        this.nickname = nickname;
+        this.gender = gender;
+        this.address = address;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
 }

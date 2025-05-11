@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.users.service;
 
 import com.ssafy.bookshy.domain.users.dto.UserProfileResponseDto;
+import com.ssafy.bookshy.domain.users.dto.UserProfileUpdateRequestDto;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +61,18 @@ public class UserService {
             throw new UsernameNotFoundException("존재하지 않는 회원입니다.");
         }
         return user;
+    }
+
+    public void updateUserProfile(Long userId, UserProfileUpdateRequestDto dto) {
+        Users user = getUserById(userId);
+
+        user.updateProfile(
+                dto.getNickname(),
+                dto.getGender(),
+                dto.getAddress(),
+                dto.getLatitude(),
+                dto.getLongitude()
+        );
     }
 
 }

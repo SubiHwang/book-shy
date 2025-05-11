@@ -1,18 +1,23 @@
 package com.ssafy.bookshy.domain.users.controller;
 
 import com.ssafy.bookshy.domain.users.dto.UserProfileResponseDto;
+import com.ssafy.bookshy.domain.users.dto.UserProfileUpdateRequestDto;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
-
 
     @Operation(
             summary = "👤 마이페이지 프로필 조회 API",
@@ -40,5 +44,50 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserProfile(user.getUserId()));
     }
 
+    @Operation(
+            summary = "🛠️ 마이페이지 프로필 수정 API",
+            description = """
+                    사용자가 닉네임, 성별, 주소, 위치 정보(위도, 경도)를 수정합니다.  
+                    🔐 인증 토큰을 통해 현재 로그인한 사용자 기준으로 수정됩니다.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "프로필 수정 성공 🎉"),
+            @ApiResponse(responseCode = "400", description = "필드 누락 또는 유효하지 않은 값 ⚠️"),
+            @ApiResponse(responseCode = "401", description = "인증 실패 또는 토큰 만료 🔐"),
+            @ApiResponse(responseCode = "500", description = "서버 오류 또는 DB 저장 실패 ❌")
+    })
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(
+            @AuthenticationPrincipal Users user,
 
+            @RequestBody(
+                    description = "📝 프로필 수정 요청 정보",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(implementation = UserProfileUpdateRequestDto.class),
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "nickname": "강인혁",
+                                              "gender": "M",
+                                              "address": "서울특별시 강남구 역삼동",
+                                              "latitude": 37.5012743,
+                                              "longitude": 127.039585
+                                            }
+                                            """
+                            )
+                    )
+            )
+            @org.springframework.web.bind.annotation.RequestBody
+            UserProfileUpdateRequestDto requestDto
+    ) {
+        userService.updateUserProfile(user.getUserId(), requestDto);
+        return ResponseEntity.ok().body(
+                Map.of(
+                        "status", "SUCCESS",
+                        "message", "프로필이 성공적으로 수정되었습니다."
+                )
+        );
+    }
 }
