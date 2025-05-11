@@ -61,10 +61,10 @@ public class Users extends TimeStampEntity implements UserDetails {
     @Column(name = "fcm_token")
     private String fcmToken;
 
-    @Column(name = "latitude", precision = 12, scale = 8)
+    @Column(name = "latitude")
     private Double latitude;
 
-    @Column(name = "longitude", precision = 12, scale = 8)
+    @Column(name = "longitude")
     private Double longitude;
 
 
