@@ -83,7 +83,7 @@ const ScheduleModal: FC<Props> = ({
         day: 'numeric',
       });
     };
-    console.log('[약속 시간 정하기]', startDate, endDate, borrowTime, returnTime, year, month);
+
     const toISOString = (day: string, time: string): string => {
       const regex = /(오전|오후)\s(\d{2})시\s(\d{2})분/;
       const match = time.match(regex);
@@ -112,14 +112,14 @@ const ScheduleModal: FC<Props> = ({
             roomId,
             requestId,
             type: 'EXCHANGE' as const,
-            title: '책 교환 약속',
+            title: msg,
             eventDate: toISOString(startDate, borrowTime),
           }
         : {
             roomId,
             requestId,
             type: 'RENTAL' as const,
-            title: '책 대여 기간',
+            title: msg,
             startDate: toISOString(startDate, borrowTime),
             endDate: toISOString(endDate!, returnTime!),
           };
