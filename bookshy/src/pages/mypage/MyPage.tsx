@@ -61,7 +61,7 @@ const MyPage = () => {
           className="w-16 h-16 rounded-full object-cover mr-4"
         />
         <div className="flex-1">
-          <p className="font-semibold">{profile.nickname}님 🛠️</p>
+          <p className="font-semibold">{profile.nickname}님 </p>
           <p className="text-sm text-gray-500">{randomGreeting}</p>
           <div className="flex gap-2 mt-2">
             <div className="badge bg-pink-100 text-pink-500 border border-pink-300">

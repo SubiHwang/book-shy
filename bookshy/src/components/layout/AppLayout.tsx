@@ -29,6 +29,7 @@ import BookNoteFullPage from '@/pages/mybooknote/BookNoteFullPage';
 import BookNoteEditPage from '@/pages/mybooknote/BookNoteEditPage';
 import BookNoteCreatePage from '@/pages/mybooknote/BookNoteCreatePage';
 import BookNoteSelectPage from '@/pages/mybooknote/BookNoteSelectPage';
+import EditProfilePage from '@/pages/mypage/EditProfilePage';
 import Login from '@/pages/auth/Login';
 import PrivateRoute from '@/components/layout/PrivateRoute';
 import KaKaoOauth from '@/pages/auth/KaKaoOauth';
@@ -57,14 +58,6 @@ const AppLayout: FC = () => {
           </Route>
           <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
           <Route path="matching/search-wish-books" element={<SearchWishBooks />} />
-          <Route path="/chat" element={<div>채팅</div>} />
-
-          <Route path="/booknotes" element={<MyBookNotesPage />} />
-          <Route path="/booknotes/detail/:bookId" element={<BookNoteDetailPage />} />
-          <Route path="/booknotes/full/:bookId" element={<BookNoteFullPage />} />
-          <Route path="/booknotes/edit/:bookId" element={<BookNoteEditPage />} />
-          <Route path="/booknotes/create" element={<BookNoteCreatePage />} />
-          <Route path="/booknotes/select" element={<BookNoteSelectPage />} />
 
           {/* 보호된 라우트 - 로그인해야만 접근 가능 */}
           <Route
@@ -108,13 +101,22 @@ const AppLayout: FC = () => {
                   />
                   <Route path="/matching/search-wish-books" element={<SearchWishBooks />} />
 
-                  {/* 채팅과 독서기록 페이지 */}
+                  {/* 채팅 페이지 */}
                   <Route path="/chat" element={<div>채팅</div>} />
+
+                  {/* 독서기록 페이지 */}
+                  <Route path="/booknotes" element={<MyBookNotesPage />} />
+                  <Route path="/booknotes/detail/:bookId" element={<BookNoteDetailPage />} />
+                  <Route path="/booknotes/full/:bookId" element={<BookNoteFullPage />} />
+                  <Route path="/booknotes/edit/:bookId" element={<BookNoteEditPage />} />
+                  <Route path="/booknotes/create" element={<BookNoteCreatePage />} />
+                  <Route path="/booknotes/select" element={<BookNoteSelectPage />} />
 
                   {/* ✅ 마이페이지 라우팅 */}
                   <Route path="/mypage" element={<MyPage />}>
                     <Route index element={<TradePromiseList />} />
                     <Route path="history" element={<TradeHistoryList />} />
+                    <Route path="edit" element={<EditProfilePage />} />
                   </Route>
 
                   {/* 그 외 경로는 홈으로 리다이렉션 */}

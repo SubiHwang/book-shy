@@ -14,14 +14,14 @@ const EditProfilePage = () => {
   });
 
   const [nickname, setNickname] = useState('');
-  const [gender, setGender] = useState<'MALE' | 'FEMALE' | ''>('');
+  const [gender, setGender] = useState<'M' | 'F' | ''>('');
   const [address, setAddress] = useState('');
 
   useEffect(() => {
     if (profile) {
-      setNickname(profile.nickname);
-      setGender(profile.gender);
-      setAddress(profile.address);
+      setNickname(profile.nickname || '');
+      setGender(profile.gender ?? '');
+      setAddress(profile.address ?? '');
     }
   }, [profile]);
 
@@ -31,16 +31,34 @@ const EditProfilePage = () => {
       alert('프로필이 저장되었습니다.');
       navigate('/mypage');
     },
+    onError: () => {
+      alert('프로필 저장에 실패했습니다.');
+    },
   });
 
   const handleSave = () => {
-    saveProfile({ nickname, gender, address });
+    if (!nickname.trim()) return alert('닉네임을 입력해주세요.');
+    if (gender === '') return alert('성별을 선택해주세요.');
+
+    saveProfile({
+      nickname,
+      gender,
+      address,
+    });
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken'); // 혹은 logout API 호출
+    localStorage.removeItem('accessToken');
     navigate('/login');
   };
+
+  const handleAddressSearch = () => {
+    alert('주소 검색 기능은 아직 구현되지 않았습니다.');
+  };
+
+  if (isLoading) {
+    return <p className="p-4">프로필을 불러오는 중입니다...</p>;
+  }
 
   return (
     <div className="bg-light-bg min-h-screen">
@@ -79,18 +97,18 @@ const EditProfilePage = () => {
             <label className="flex items-center gap-1">
               <input
                 type="radio"
-                value="FEMALE"
-                checked={gender === 'FEMALE'}
-                onChange={() => setGender('FEMALE')}
+                value="F"
+                checked={gender === 'F'}
+                onChange={() => setGender('F')}
               />
               여성
             </label>
             <label className="flex items-center gap-1">
               <input
                 type="radio"
-                value="MALE"
-                checked={gender === 'MALE'}
-                onChange={() => setGender('MALE')}
+                value="M"
+                checked={gender === 'M'}
+                onChange={() => setGender('M')}
               />
               남성
             </label>
@@ -106,7 +124,10 @@ const EditProfilePage = () => {
             onChange={(e) => setAddress(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded"
           />
-          <button className="mt-2 px-4 py-1 text-sm bg-pink-100 text-pink-600 rounded border border-pink-300">
+          <button
+            onClick={handleAddressSearch}
+            className="mt-2 px-4 py-1 text-sm bg-pink-100 text-pink-600 rounded border border-pink-300"
+          >
             주소 검색
           </button>
         </div>
@@ -117,7 +138,7 @@ const EditProfilePage = () => {
           className="w-full mt-6 bg-pink-500 text-white py-3 rounded text-lg font-semibold"
           disabled={isPending}
         >
-          저장
+          {isPending ? '저장 중...' : '저장'}
         </button>
 
         {/* 로그아웃 */}
