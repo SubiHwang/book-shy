@@ -12,7 +12,7 @@ export const fetchBookNote = async (bookId: number): Promise<BookNote> => {
   const res: BookNote = await authAxiosInstance.get('/notes', {
     params: { bookId },
   });
-  return res ?? [];
+  return res;
 };
 
 // ✍️ 독후감 등록

@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchBookNoteList, fetchBookNote } from '@/services/mybooknote/booknote';
+import { fetchBookNoteList } from '@/services/mybooknote/booknote';
 import { fetchBookQuote } from '@/services/mybooknote/bookquote';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import type { BookQuote } from '@/types/mybooknote/bookquote';
@@ -18,18 +18,17 @@ const BookNoteDetailPage: React.FC = () => {
     queryFn: fetchBookNoteList,
   });
 
-  const { data: bookQuotes = [], isLoading: loadingQuotes } = useQuery<BookQuote[]>({
-    queryKey: ['book-quotes', numericBookId],
+  const { data: bookQuote, isLoading: loadingQuote } = useQuery<BookQuote>({
+    queryKey: ['book-quote', numericBookId],
     queryFn: () => fetchBookQuote(numericBookId as number),
     enabled: typeof numericBookId === 'number',
   });
 
-  if (loadingNotes || loadingQuotes) return <p className="p-4">불러오는 중...</p>;
+  if (loadingNotes || loadingQuote) return <p className="p-4">불러오는 중...</p>;
   if (!numericBookId) return <p className="p-4">잘못된 접근입니다.</p>;
 
   const currentIndex = bookNotes.findIndex((b) => b.bookId === numericBookId);
   const currentBook = bookNotes[currentIndex];
-  const currentQuote = bookQuotes.find((q) => q.bookId === numericBookId);
 
   const goTo = (offset: number) => {
     const newIdx = currentIndex + offset;
@@ -87,7 +86,7 @@ const BookNoteDetailPage: React.FC = () => {
           <p className="text-xs mb-1">{currentBook.author}</p>
           <h2 className="font-semibold text-sm mb-2">{currentBook.title} 중에서</h2>
           <p className="text-sm leading-tight">
-            {currentQuote?.content || '등록된 인용구가 없습니다.'}
+            {bookQuote?.content || '등록된 인용구가 없습니다.'}
           </p>
         </div>
 
