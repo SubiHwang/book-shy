@@ -181,6 +181,15 @@ pipeline {
                         // 블루-그린 배포 방식으로 개발 환경에 배포
                         sshagent(credentials: ['remote-server-credentials']) {
                             dir("${env.WORKSPACE}/book-shy") {
+                                // 🔹 firebase-service-account.json 파일 준비
+                                withCredentials([file(credentialsId: 'firebase-credential-json', variable: 'FIREBASE_CREDENTIAL_FILE')]) {
+                                    sh '''
+                                        mkdir -p secrets
+                                        cp $FIREBASE_CREDENTIAL_FILE secrets/firebase-service-account.json
+                                        echo "✅ firebase-service-account.json 로컬 복사 완료"
+                                    '''
+                                }
+
                                 // 도커 컴포즈 파일을 원격 서버에 복사
                                 sh '''
                                     # ✅ 1. docker-compose.yml 안에 DB_URL, DB_USERNAME, DB_PASSWORD 직접 치환
