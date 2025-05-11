@@ -5,6 +5,7 @@ import { fetchBookNote, updateBookNote } from '@/services/mybooknote/booknote';
 import { fetchBookQuote, updateBookQuote } from '@/services/mybooknote/bookquote';
 import BookNoteForm from '@/components/booknote/BookNoteForm';
 import BookNoteHeaderCard from '@/components/booknote/BookNoteHeaderCard';
+import BookNoteLayout from '@/components/booknote/BookNoteLayout';
 
 const BookNoteEditPage: React.FC = () => {
   const { bookId } = useParams();
@@ -44,19 +45,22 @@ const BookNoteEditPage: React.FC = () => {
   if (!book) return <p className="p-4">책 정보를 찾을 수 없습니다.</p>;
 
   return (
-    <div className="min-h-screen bg-[#f9f4ec] px-4 py-6">
-      <button onClick={() => navigate(-1)} className="mb-4 text-sm text-gray-600">
-        {'< 뒤로가기'}
-      </button>
-
-      <BookNoteHeaderCard
-        title={book.title}
-        author={book.author}
-        publisher={book.publisher}
-        coverUrl={book.coverUrl}
-        badgeText="독서 완료"
-      />
-
+    <BookNoteLayout
+      header={
+        <>
+          <button onClick={() => navigate(-1)} className="mb-4 text-sm text-gray-600">
+            {'< 뒤로가기'}
+          </button>
+          <BookNoteHeaderCard
+            title={book.title}
+            author={book.author}
+            publisher={book.publisher}
+            coverUrl={book.coverUrl}
+            badgeText="독서 완료"
+          />
+        </>
+      }
+    >
       <BookNoteForm
         quoteText={quoteText}
         reviewText={reviewText}
@@ -65,7 +69,7 @@ const BookNoteEditPage: React.FC = () => {
         onSubmit={handleSave}
         submitLabel="수정하기"
       />
-    </div>
+    </BookNoteLayout>
   );
 };
 

@@ -4,6 +4,7 @@ import { fetchBookNote } from '@/services/mybooknote/booknote';
 import { fetchBookQuote } from '@/services/mybooknote/bookquote';
 import BookNoteHeaderCard from '@/components/booknote/BookNoteHeaderCard';
 import BookNoteSection from '@/components/booknote/BookNoteSection';
+import BookNoteLayout from '@/components/booknote/BookNoteLayout';
 
 const BookNoteFullPage: React.FC = () => {
   const { bookId } = useParams();
@@ -25,21 +26,25 @@ const BookNoteFullPage: React.FC = () => {
   if (!bookId || !book) return <p className="p-4">잘못된 접근입니다.</p>;
 
   return (
-    <div className="min-h-screen bg-[#f9f4ec] px-4 pb-28">
-      <div className="flex justify-between items-center py-4">
-        <button onClick={() => navigate(-1)}>&lt;</button>
-        <h1 className="text-lg font-semibold">독서 기록</h1>
-        <div className="w-6" />
-      </div>
+    <BookNoteLayout
+      header={
+        <>
+          <div className="flex justify-between items-center mb-4">
+            <button onClick={() => navigate(-1)}>&lt;</button>
+            <h1 className="text-lg font-semibold">독서 기록</h1>
+            <div className="w-6" />
+          </div>
 
-      <BookNoteHeaderCard
-        coverUrl={book.coverUrl}
-        title={book.title}
-        author={book.author}
-        publisher={book.publisher}
-        badgeText="독서 완료"
-      />
-
+          <BookNoteHeaderCard
+            coverUrl={book.coverUrl}
+            title={book.title}
+            author={book.author}
+            publisher={book.publisher}
+            badgeText="독서 완료"
+          />
+        </>
+      }
+    >
       <div className="flex justify-end mb-6">
         <button
           onClick={() => navigate(`/booknotes/edit/${book.bookId}`)}
@@ -61,7 +66,7 @@ const BookNoteFullPage: React.FC = () => {
         content={book.content}
         placeholder="작성된 독후감이 없습니다."
       />
-    </div>
+    </BookNoteLayout>
   );
 };
 
