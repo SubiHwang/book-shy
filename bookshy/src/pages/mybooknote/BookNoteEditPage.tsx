@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { fetchBookNote } from '@/services/mybooknote/booknote';
 import { fetchBookQuote } from '@/services/mybooknote/bookquote';
 import { updateNoteWithQuote } from '@/services/mybooknote/booknotequote';
@@ -11,6 +11,7 @@ import BookNoteLayout from '@/components/booknote/BookNoteLayout';
 const BookNoteEditPage: React.FC = () => {
   const { bookId } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const numericBookId = bookId ? Number(bookId) : null;
 
@@ -29,11 +30,11 @@ const BookNoteEditPage: React.FC = () => {
   const [quoteText, setQuoteText] = useState('');
   const [reviewText, setReviewText] = useState('');
 
-  // 초기화
-  useState(() => {
-    if (quote?.content) setQuoteText(quote.content);
-    if (book?.content) setReviewText(book.content);
-  });
+  // ✅ 데이터 초기화 (quote, book이 불러와진 뒤에만)
+  useEffect(() => {
+    if (quote?.content !== undefined) setQuoteText(quote.content);
+    if (book?.content !== undefined) setReviewText(book.content);
+  }, [quote, book]);
 
   const handleSave = async () => {
     if (!book?.reviewId || !quote?.quoteId) return;
@@ -45,6 +46,11 @@ const BookNoteEditPage: React.FC = () => {
         reviewContent: reviewText,
         quoteContent: quoteText,
       });
+
+      // ✅ 수정 후 쿼리 무효화 (React Query 캐시 새로고침)
+      queryClient.invalidateQueries({ queryKey: ['book-note'] });
+      queryClient.invalidateQueries({ queryKey: ['book-quote'] });
+
       alert('독서 기록을 수정하였습니다.');
       navigate(`/booknotes/detail/${bookId}`);
     } catch (error) {
