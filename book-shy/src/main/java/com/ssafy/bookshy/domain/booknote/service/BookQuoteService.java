@@ -63,17 +63,18 @@ public class BookQuoteService {
      *
      * @param userId 사용자 ID
      * @param bookId 도서 ID
-     * @return 인용구 응답 리스트
+     * @return 인용구 응답 DTO
      */
     @Transactional(readOnly = true)
-    public List<BookQuoteResponseDto> findQuoteResponsesByUserIdAndBookId(Long userId, Long bookId) {
+    public BookQuoteResponseDto findOneQuoteResponseByUserIdAndBookId(Long userId, Long bookId) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new IllegalArgumentException("도서 정보를 찾을 수 없습니다."));
 
-        return bookQuoteRepository.findByUserIdAndBookId(userId, bookId).stream()
-                .map(q -> BookQuoteResponseDto.from(q, book))
-                .toList();
+        BookQuote quote = bookQuoteRepository.findByUserIdAndBookId(userId, bookId);
+        if (quote == null) {
+            throw new IllegalArgumentException("해당 도서에 대한 인용구가 존재하지 않습니다.");
+        }
+
+        return BookQuoteResponseDto.from(quote, book);
     }
-
-
 }

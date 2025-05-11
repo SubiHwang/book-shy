@@ -127,11 +127,11 @@ public class BookQuoteController {
                     @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
             }
     )
-    public ResponseEntity<List<BookQuoteResponseDto>> getMyQuotesByBook(
+    public ResponseEntity<BookQuoteResponseDto> getMyQuotesByBook(
             @RequestParam Long bookId,
             @AuthenticationPrincipal Users user
     ) {
-        return ResponseEntity.ok(bookQuoteService.findQuoteResponsesByUserIdAndBookId(user.getUserId(), bookId));
+        return ResponseEntity.ok(bookQuoteService.findOneQuoteResponseByUserIdAndBookId(user.getUserId(), bookId));
     }
 
 }

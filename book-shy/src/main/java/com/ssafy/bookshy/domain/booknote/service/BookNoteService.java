@@ -66,16 +66,19 @@ public class BookNoteService {
      *
      * @param userId 사용자 ID
      * @param bookId 도서 ID
-     * @return 독후감 응답 리스트
+     * @return 독후감 응답 DTO
      */
     @Transactional(readOnly = true)
-    public List<BookNoteResponseDto> findNoteResponsesByUserIdAndBookId(Long userId, Long bookId) {
+    public BookNoteResponseDto findNoteResponseByUserIdAndBookId(Long userId, Long bookId) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new IllegalArgumentException("도서 정보를 찾을 수 없습니다."));
 
-        return bookNoteRepository.findByUserIdAndBookId(userId, bookId).stream()
-                .map(note -> BookNoteResponseDto.from(note, book))
-                .toList();
+        BookNote note = bookNoteRepository.findByUserIdAndBookId(userId, bookId);
+        if (note == null) {
+            throw new IllegalArgumentException("해당 도서에 대한 독후감이 존재하지 않습니다.");
+        }
+
+        return BookNoteResponseDto.from(note, book);
     }
 
 

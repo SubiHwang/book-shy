@@ -129,11 +129,11 @@ public class BookNoteController {
                     @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
             }
     )
-    public ResponseEntity<List<BookNoteResponseDto>> getMyNoteByBookId(
+    public ResponseEntity<BookNoteResponseDto> getMyNoteByBookId(
             @RequestParam Long bookId,
             @AuthenticationPrincipal Users user
     ) {
-        return ResponseEntity.ok(bookNoteService.findNoteResponsesByUserIdAndBookId(user.getUserId(), bookId));
+        return ResponseEntity.ok(bookNoteService.findNoteResponseByUserIdAndBookId(user.getUserId(), bookId));
     }
 
 }
