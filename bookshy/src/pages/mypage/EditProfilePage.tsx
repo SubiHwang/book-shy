@@ -74,7 +74,9 @@ const EditProfilePage = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken');
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('firebase_token');
     navigate('/login');
   };
 
