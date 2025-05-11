@@ -5,6 +5,8 @@ import { fetchBookNoteList } from '@/services/mybooknote/booknote';
 import { fetchBookQuote } from '@/services/mybooknote/bookquote';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import type { BookQuote } from '@/types/mybooknote/bookquote';
+import BookNoteCard from '@/components/booknote/BookNoteCard';
+import AdjacentBookPreview from '@/components/booknote/AdjacentBookPreview';
 
 const BookNoteDetailPage: React.FC = () => {
   const { bookId } = useParams();
@@ -29,6 +31,7 @@ const BookNoteDetailPage: React.FC = () => {
 
   const currentIndex = bookNotes.findIndex((b) => b.bookId === numericBookId);
   const currentBook = bookNotes[currentIndex];
+  if (!currentBook) return <p className="p-4">책 정보를 찾을 수 없습니다.</p>;
 
   const goTo = (offset: number) => {
     const newIdx = currentIndex + offset;
@@ -46,8 +49,6 @@ const BookNoteDetailPage: React.FC = () => {
     }
   };
 
-  if (!currentBook) return <p className="p-4">책 정보를 찾을 수 없습니다.</p>;
-
   return (
     <div
       className="relative h-screen flex items-center justify-center bg-white overflow-hidden"
@@ -55,66 +56,31 @@ const BookNoteDetailPage: React.FC = () => {
     >
       {/* 왼쪽 책 */}
       {bookNotes[currentIndex - 1] && (
-        <div className="absolute left-0 top-1/2 w-[280px] h-[420px] -translate-y-1/2 scale-75 opacity-40 overflow-hidden rounded-2xl">
-          <img
-            src={bookNotes[currentIndex - 1].coverUrl || '/placeholder.jpg'}
-            alt=""
-            className="w-full h-full object-cover"
-            onClick={(e) => {
-              e.stopPropagation();
-              goTo(-1);
-            }}
-          />
-        </div>
+        <AdjacentBookPreview
+          book={bookNotes[currentIndex - 1]}
+          direction="left"
+          onClick={() => goTo(-1)}
+        />
       )}
 
       {/* 중앙 카드 */}
-      <div className="w-[280px] h-[420px] rounded-2xl shadow-xl relative overflow-hidden z-10">
-        <img
-          src={currentBook.coverUrl || '/placeholder.jpg'}
-          alt={currentBook.title}
-          className="absolute inset-0 w-full h-full object-cover z-0"
-        />
-        <div className="absolute inset-0 bg-black/30 backdrop-blur-sm z-10" />
-
-        {/* 인용구 화면 */}
-        <div
-          className={`absolute inset-0 z-20 w-full h-full flex flex-col justify-center items-center px-6 text-white text-center transition-opacity duration-300 ${
-            stage === 'quote' ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
-        >
-          <p className="text-xs mb-1">{currentBook.author}</p>
-          <h2 className="font-semibold text-sm mb-2">{currentBook.title} 중에서</h2>
-          <p className="text-sm leading-tight">
-            {bookQuote?.content || '등록된 인용구가 없습니다.'}
-          </p>
-        </div>
-
-        {/* 독후감 화면 */}
-        <div
-          className={`absolute inset-0 z-20 w-full h-full flex flex-col justify-center items-center px-6 text-white text-center transition-opacity duration-300 ${
-            stage === 'review' ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
-        >
-          <h2 className="font-bold text-lg mb-2">{currentBook.title}</h2>
-          <p className="text-sm line-clamp-6">{currentBook.content}</p>
-          <p className="text-right text-xs text-white/80 mt-4 w-full">더 보기 →</p>
-        </div>
-      </div>
+      <BookNoteCard
+        coverUrl={currentBook.coverUrl}
+        title={currentBook.title}
+        author={currentBook.author}
+        quote={bookQuote?.content}
+        review={currentBook.content}
+        stage={stage}
+        onMoreClick={() => navigate(`/booknotes/full/${bookId}`)}
+      />
 
       {/* 오른쪽 책 */}
       {bookNotes[currentIndex + 1] && (
-        <div className="absolute right-0 top-1/2 w-[280px] h-[420px] -translate-y-1/2 scale-75 opacity-40 overflow-hidden rounded-2xl">
-          <img
-            src={bookNotes[currentIndex + 1].coverUrl || '/placeholder.jpg'}
-            alt=""
-            className="w-full h-full object-cover"
-            onClick={(e) => {
-              e.stopPropagation();
-              goTo(1);
-            }}
-          />
-        </div>
+        <AdjacentBookPreview
+          book={bookNotes[currentIndex + 1]}
+          direction="right"
+          onClick={() => goTo(1)}
+        />
       )}
     </div>
   );
