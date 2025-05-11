@@ -143,4 +143,8 @@ public class Users extends TimeStampEntity implements UserDetails {
         this.longitude = longitude;
     }
 
+    public void updateProfileImageUrl(String imageUrl) {
+        this.profileImageUrl = imageUrl;
+    }
+
 }
