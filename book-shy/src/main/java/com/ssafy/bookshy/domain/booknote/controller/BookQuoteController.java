@@ -99,11 +99,7 @@ public class BookQuoteController {
             summary = "📙 나의 인용구 조회",
             description = """
                 🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 나의 인용구 목록을 조회합니다.<br>
-                - bookId를 지정하면 특정 도서의 인용구만 조회됩니다.
             """,
-            parameters = {
-                    @Parameter(name = "bookId", description = "📕 도서 ID (선택)", example = "101")
-            },
             responses = {
                     @ApiResponse(responseCode = "200", description = "✅ 조회 성공"),
                     @ApiResponse(responseCode = "404", description = "❗ 도서가 존재하지 않음"),
@@ -111,9 +107,31 @@ public class BookQuoteController {
             }
     )
     public ResponseEntity<List<BookQuoteResponseDto>> getMyQuotes(
-            @RequestParam(required = false) Long bookId,
             @AuthenticationPrincipal Users user
     ) {
-        return ResponseEntity.ok(bookQuoteService.findQuoteResponsesByUserId(user.getUserId(), bookId));
+        return ResponseEntity.ok(bookQuoteService.findQuoteResponsesByUserId(user.getUserId()));
     }
+
+    @GetMapping("/by-book")
+    @Operation(
+            summary = "📙 특정 도서에 대한 나의 인용구 조회",
+            description = """
+            🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 특정 도서의 인용구 목록을 조회합니다.
+        """,
+            parameters = {
+                    @Parameter(name = "bookId", description = "📕 도서 ID", required = true, example = "101")
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "✅ 조회 성공"),
+                    @ApiResponse(responseCode = "404", description = "❗ 도서가 존재하지 않음"),
+                    @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
+            }
+    )
+    public ResponseEntity<List<BookQuoteResponseDto>> getMyQuotesByBook(
+            @RequestParam Long bookId,
+            @AuthenticationPrincipal Users user
+    ) {
+        return ResponseEntity.ok(bookQuoteService.findQuoteResponsesByUserIdAndBookId(user.getUserId(), bookId));
+    }
+
 }
