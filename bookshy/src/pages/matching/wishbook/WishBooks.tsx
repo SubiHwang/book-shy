@@ -20,8 +20,8 @@ const WishBooks: FC = () => {
 
     const categorySet = new Set<string>();
     data.books.forEach((book: WishBook) => {
-      if (book.categories) {
-        categorySet.add(book.categories);
+      if (book.category) {
+        categorySet.add(book.category);
       }
     });
     return ['전체 보기', ...Array.from(categorySet)];
@@ -33,7 +33,7 @@ const WishBooks: FC = () => {
     const categoryFiltered =
       selectedFilter === '전체 보기'
         ? data.books
-        : data.books.filter((book: WishBook) => book.categories === selectedFilter);
+        : data.books.filter((book: WishBook) => book.category === selectedFilter);
 
     if (!searchTerm.trim()) return categoryFiltered;
 
@@ -61,7 +61,7 @@ const WishBooks: FC = () => {
           </div>
           <input
             type="text"
-            placeholder="읽고 싶은 책 검색 (책 제목, 저자)"
+            placeholder="내가 담아둔 읽고 싶은 책 검색 (책 제목, 저자)"
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-200"
           />
