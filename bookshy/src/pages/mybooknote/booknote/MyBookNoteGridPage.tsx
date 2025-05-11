@@ -15,7 +15,7 @@ const MyBookNoteGridPage: React.FC<BookGridPetalPageProps> = ({ bookNotes }) => 
 
   const pages = [
     { path: '/booknotes', label: '내 독서 기록 보기' },
-    { path: '/booknotes/plan', label: '책의 여정 보기' },
+    { path: '/booknotes/trip', label: '책의 여정 보기' },
   ];
 
   const filteredNotes = bookNotes.filter((book) => {

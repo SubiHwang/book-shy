@@ -23,12 +23,12 @@ import BookDetailPage from '@/pages/mylibrary/BookDetailPage';
 import BookInfoTab from '@/pages/mylibrary/tabs/BookInfoTab';
 import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
 import ISBNScanResultPage from '@/pages/mylibrary/AddBook/ISBNScanResultPage';
-import MyBookNotesPage from '@/pages/mybooknote/MyBookNotesPage';
-import BookNoteDetailPage from '@/pages/mybooknote/BookNoteDetailPage';
-import BookNoteFullPage from '@/pages/mybooknote/BookNoteFullPage';
-import BookNoteEditPage from '@/pages/mybooknote/BookNoteEditPage';
-import BookNoteCreatePage from '@/pages/mybooknote/BookNoteCreatePage';
-import BookNoteSelectPage from '@/pages/mybooknote/BookNoteSelectPage';
+import MyBookNotesPage from '@/pages/mybooknote/booknote/MyBookNotesPage';
+import BookNoteDetailPage from '@/pages/mybooknote/booknote/BookNoteDetailPage';
+import BookNoteFullPage from '@/pages/mybooknote/booknote/BookNoteFullPage';
+import BookNoteEditPage from '@/pages/mybooknote/booknote/BookNoteEditPage';
+import BookNoteCreatePage from '@/pages/mybooknote/booknote/BookNoteCreatePage';
+import BookNoteSelectPage from '@/pages/mybooknote/booknote/BookNoteSelectPage';
 import EditProfilePage from '@/pages/mypage/EditProfilePage';
 import Login from '@/pages/auth/Login';
 import PrivateRoute from '@/components/layout/PrivateRoute';
@@ -104,7 +104,7 @@ const AppLayout: FC = () => {
                   />
                   <Route path="/matching/search-wish-books" element={<SearchWishBooks />}>
                     <Route index element={<RecommandedWishBookList />} />
-                    <Route path="result" element={<SearchResultBookList/>} />
+                    <Route path="result" element={<SearchResultBookList />} />
                   </Route>
 
                   <Route path="/matching/books/:id" element={<WishBooksDetailPage />} />
