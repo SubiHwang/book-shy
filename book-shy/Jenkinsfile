@@ -182,7 +182,7 @@ pipeline {
                         sshagent(credentials: ['remote-server-credentials']) {
                             dir("${env.WORKSPACE}/book-shy") {
                                 // 🔹 firebase-service-account.json 파일 준비
-                                withCredentials([file(credentialsId: 'firebase-credential-json', variable: 'FIREBASE_CREDENTIAL_FILE')]) {
+                                withCredentials([file(credentialsId: 'firebase-service-account', variable: 'FIREBASE_CREDENTIAL_FILE')]) {
                                     sh '''
                                         mkdir -p secrets
                                         cp $FIREBASE_CREDENTIAL_FILE secrets/firebase-service-account.json
