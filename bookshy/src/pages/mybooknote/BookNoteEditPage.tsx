@@ -56,7 +56,6 @@ const BookNoteEditPage: React.FC = () => {
             author={book.author}
             publisher={book.publisher}
             coverUrl={book.coverUrl}
-            badgeText="독서 완료"
           />
         </>
       }

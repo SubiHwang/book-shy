@@ -13,7 +13,7 @@ const BookNoteHeaderCard: React.FC<BookNoteHeaderCardProps> = ({
   title,
   author,
   publisher,
-  badgeText,
+  // badgeText,
 }) => {
   return (
     <div className="flex items-start gap-4 bg-[#f9f4ec] mb-4">
@@ -23,11 +23,6 @@ const BookNoteHeaderCard: React.FC<BookNoteHeaderCardProps> = ({
           alt={title}
           className="w-24 h-32 rounded-md object-cover shadow"
         />
-        {badgeText && (
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-[-14px] bg-[#5a524d] text-white text-xs px-2 py-0.5 rounded-full">
-            {badgeText}
-          </div>
-        )}
       </div>
       <div className="mt-1">
         <h2 className="font-bold text-xl mb-1">{title}</h2>

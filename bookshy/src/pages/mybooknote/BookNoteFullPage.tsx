@@ -5,6 +5,7 @@ import { fetchBookQuote } from '@/services/mybooknote/bookquote';
 import BookNoteHeaderCard from '@/components/booknote/BookNoteHeaderCard';
 import BookNoteSection from '@/components/booknote/BookNoteSection';
 import BookNoteLayout from '@/components/booknote/BookNoteLayout';
+import BookNoteView from '@/components/booknote/BookNoteView';
 
 const BookNoteFullPage: React.FC = () => {
   const { bookId } = useParams();
@@ -34,13 +35,11 @@ const BookNoteFullPage: React.FC = () => {
             <h1 className="text-lg font-semibold">독서 기록</h1>
             <div className="w-6" />
           </div>
-
           <BookNoteHeaderCard
             coverUrl={book.coverUrl}
             title={book.title}
             author={book.author}
             publisher={book.publisher}
-            badgeText="독서 완료"
           />
         </>
       }
@@ -54,18 +53,7 @@ const BookNoteFullPage: React.FC = () => {
         </button>
       </div>
 
-      <BookNoteSection
-        label="인용구"
-        icon="✍️"
-        content={quote?.content}
-        placeholder="등록된 인용구가 없습니다."
-      />
-      <BookNoteSection
-        label="감상 기록"
-        icon="💬"
-        content={book.content}
-        placeholder="작성된 독후감이 없습니다."
-      />
+      <BookNoteView quoteText={quote?.content} reviewText={book.content} />
     </BookNoteLayout>
   );
 };
