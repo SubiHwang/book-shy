@@ -47,6 +47,7 @@ const WishBooksDetailPage = () => {
         {bookDetail ? (
           <>
             <WishBooksDetailInfoHeader
+              itemId={bookDetail.itemId}
               title={bookDetail.title}
               author={bookDetail.author}
               publisher={bookDetail.publisher}

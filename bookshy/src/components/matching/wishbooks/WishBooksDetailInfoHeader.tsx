@@ -1,11 +1,14 @@
 import { Heart } from 'lucide-react';
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { BookDetailPageProps } from '@/types/book';
 import Skeleton from 'react-loading-skeleton';
 import { useImageColors } from '@/hooks/common/useImageColors';
 import { createGradientStyle } from '@/utils/common/gradientStyles';
+import { addWishBook, deleteWishBook } from '@/services/matching/wishbooks';
+import { useQueryClient } from '@tanstack/react-query';
 
 const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
+  itemId,
   title,
   author,
   publisher,
@@ -13,27 +16,62 @@ const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
   isLiked,
   isLoading: isLoadingData,
 }) => {
+  const [isBookInWishList, setIsBookInWishList] = useState<boolean | undefined>(isLiked);
+  const [isLikedLoading, setIsLikedLoading] = useState<boolean>(false);
+  const queryClient = useQueryClient();
   // 이미지에서 색상 추출 및 파스텔 색상 자동 생성
   const { pastelColors, isLoading: isLoadingColors } = useImageColors(
-    !isLoadingData && coverImageUrl ? coverImageUrl : null, 
+    !isLoadingData && coverImageUrl ? coverImageUrl : null,
     ['#FCF6D4', '#F4E8B8'], // 기본 색상
-    0.65,  // 더 밝은 파스텔 색상을 위한 밝기 조정값 (0-1)
-    220    // 최소 밝기값 (0-255)
+    0.65, // 더 밝은 파스텔 색상을 위한 밝기 조정값 (0-1)
+    220, // 최소 밝기값 (0-255)
   );
-  
+
   // 전체 로딩 상태
   const isLoading = isLoadingData || isLoadingColors;
-  
+
   // 배경 그라데이션 스타일 생성 (항상 파스텔 색상 사용)
   const gradientStyle = createGradientStyle(pastelColors, 'bottom right');
+
+  const handleToggleLike = async (e: React.MouseEvent) => {
+    // Stop event propagation to prevent navigation
+    e.stopPropagation();
+
+    // itemId가 없으면 함수 실행을 중단
+    if (itemId === undefined) {
+      console.error('Book ID is missing');
+      return;
+    }
+
+    setIsLikedLoading(true);
+    try {
+      let response;
+
+      if (isBookInWishList) {
+        // 좋아요 취소
+        response = await deleteWishBook(itemId);
+        console.log('Book removed from wishlist:', response);
+      } else {
+        // 좋아요 추가
+        response = await addWishBook(itemId);
+        console.log('Book added to wishlist:', response);
+      }
+      // 서버 응답에 따라 상태 업데이트
+      setIsBookInWishList(!isBookInWishList);
+
+      // 쿼리 무효화 (서버에서 데이터가 변경되었으므로)
+      queryClient.invalidateQueries({ queryKey: ['wishBooks'] });
+    } catch (error) {
+      console.error('Error toggling wishlist status:', error);
+    } finally {
+      setIsLikedLoading(false);
+    }
+  };
 
   return (
     <div>
       {/* 책 정보 섹션 - 파스텔 그라데이션 적용, flex 컨테이너로 변경 */}
-      <div 
-        className="flex flex-col justify-end p-4 shadow-sm min-h-[25vh]" 
-        style={gradientStyle}
-      >
+      <div className="flex flex-col justify-end p-4 shadow-sm min-h-[25vh]" style={gradientStyle}>
         {/* 내용물을 하단에 배치 */}
         <div className="flex flex-row items-start mt-auto">
           {/* 책 표지 이미지 */}
@@ -41,10 +79,10 @@ const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
             {isLoading ? (
               <Skeleton width="100%" height="100%" />
             ) : (
-              <img 
-                src={coverImageUrl || '/api/placeholder/200/300'} 
-                alt={title || '책 표지'} 
-                className="w-full h-full object-cover" 
+              <img
+                src={coverImageUrl || '/api/placeholder/200/300'}
+                alt={title || '책 표지'}
+                className="w-full h-full object-cover"
               />
             )}
           </div>
@@ -70,9 +108,12 @@ const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
               )}
             </div>
             <div className="flex justify-end mt-2">
-              <button className="p-2 rounded-full bg-white bg-opacity-70 hover:bg-opacity-90 shadow-sm">
+              <button
+                className="p-2 rounded-full bg-white bg-opacity-70 hover:bg-opacity-90 shadow-sm"
+                onClick={handleToggleLike}
+              >
                 <Heart
-                  className={`w-6 h-6 text-primary ${!isLoadingData && isLiked ? 'fill-primary' : ''}`}
+                  className={`w-6 h-6 text-primary ${!isLikedLoading && isBookInWishList ? 'fill-primary' : ''}`}
                   strokeWidth={1}
                 />
               </button>
