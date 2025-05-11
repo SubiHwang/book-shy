@@ -3,7 +3,7 @@ import { fetchUserProfile } from '@/services/mypage/profile';
 import Header from '@/components/common/Header';
 import { useNavigate, Outlet } from 'react-router-dom';
 import TabNavBar from '@/components/common/TabNavBar';
-import type { UserProfile } from '@/types/User/user'; // 타입 경로 조정 필요
+import type { UserProfile } from '@/types/User/user';
 
 const greetings = [
   '오늘도 북끄북끄한 하루 되세요!',
@@ -25,8 +25,6 @@ const MyPage = () => {
     queryFn: fetchUserProfile,
   });
 
-  console.log(profile);
-
   const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
 
   const pages = [
@@ -47,14 +45,23 @@ const MyPage = () => {
         className="bg-light-bg shadow-md"
       />
 
-      <section className="px-4 py-4 bg-white flex items-center rounded-xl mx-3 mt-3 shadow-sm">
+      <section className="px-4 py-4 bg-white flex items-center rounded-xl mx-3 mt-3 shadow-sm relative">
+        {/* ✏️ 수정 아이콘 */}
+        <button
+          onClick={() => navigate('/mypage/edit')}
+          className="absolute top-2 right-2 text-gray-500 hover:text-black"
+          aria-label="프로필 수정"
+        >
+          ✏️
+        </button>
+
         <img
           src={profile.profileImageUrl}
           alt="프로필"
           className="w-16 h-16 rounded-full object-cover mr-4"
         />
         <div className="flex-1">
-          <p className="font-semibold">{profile.nickname}님 🛠️</p>
+          <p className="font-semibold">{profile.nickname}님 </p>
           <p className="text-sm text-gray-500">{randomGreeting}</p>
           <div className="flex gap-2 mt-2">
             <div className="badge bg-pink-100 text-pink-500 border border-pink-300">

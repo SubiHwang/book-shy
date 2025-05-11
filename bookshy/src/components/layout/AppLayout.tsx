@@ -23,6 +23,13 @@ import BookDetailPage from '@/pages/mylibrary/BookDetailPage';
 import BookInfoTab from '@/pages/mylibrary/tabs/BookInfoTab';
 import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
 import ISBNScanResultPage from '@/pages/mylibrary/AddBook/ISBNScanResultPage';
+import MyBookNotesPage from '@/pages/mybooknote/MyBookNotesPage';
+import BookNoteDetailPage from '@/pages/mybooknote/BookNoteDetailPage';
+import BookNoteFullPage from '@/pages/mybooknote/BookNoteFullPage';
+import BookNoteEditPage from '@/pages/mybooknote/BookNoteEditPage';
+import BookNoteCreatePage from '@/pages/mybooknote/BookNoteCreatePage';
+import BookNoteSelectPage from '@/pages/mybooknote/BookNoteSelectPage';
+import EditProfilePage from '@/pages/mypage/EditProfilePage';
 import Login from '@/pages/auth/Login';
 import PrivateRoute from '@/components/layout/PrivateRoute';
 import KaKaoOauth from '@/pages/auth/KaKaoOauth';
@@ -46,6 +53,14 @@ const AppLayout: FC = () => {
           {/* 공개 라우트 - 로그인하지 않아도 접근 가능 */}
           <Route path="/login" element={<Login />} />
           <Route path="/oauth" element={<KaKaoOauth />} />
+
+          {/* 📚 매칭 페이지 */}
+          <Route path="/matching" element={<MatchingPage />}>
+            <Route index element={<MatchingRecommend />} />
+            <Route path="wish-books" element={<WishBooks />} />
+          </Route>
+          <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
+          <Route path="matching/search-wish-books" element={<SearchWishBooks />} />
 
           {/* 보호된 라우트 - 로그인해야만 접근 가능 */}
           <Route
@@ -94,15 +109,25 @@ const AppLayout: FC = () => {
 
                   <Route path="/matching/books/:id" element={<WishBooksDetailPage />} />
 
-                  {/* 채팅과 독서기록 페이지 */}
+                  {/* 채팅 페이지 */}
                   <Route path="/chat" element={<div>채팅</div>} />
-                  <Route path="/booknote" element={<div>독서 기록</div>} />
 
-                  {/* ✅ 마이페이지 라우팅 */}
+                  {/* 독서기록 페이지 */}
+                  <Route path="/booknotes" element={<MyBookNotesPage />} />
+                  <Route path="/booknotes/detail/:bookId" element={<BookNoteDetailPage />} />
+                  <Route path="/booknotes/full/:bookId" element={<BookNoteFullPage />} />
+                  <Route path="/booknotes/edit/:bookId" element={<BookNoteEditPage />} />
+                  <Route path="/booknotes/create" element={<BookNoteCreatePage />} />
+                  <Route path="/booknotes/select" element={<BookNoteSelectPage />} />
+
+                  {/* ✅ 마이페이지 라우팅 (공통 레이아웃) */}
                   <Route path="/mypage" element={<MyPage />}>
                     <Route index element={<TradePromiseList />} />
                     <Route path="history" element={<TradeHistoryList />} />
                   </Route>
+
+                  {/* ✅ 독립적인 프로필 수정 페이지 (레이아웃 없음) */}
+                  <Route path="/mypage/edit" element={<EditProfilePage />} />
 
                   {/* 그 외 경로는 홈으로 리다이렉션 */}
                   <Route path="*" element={<Navigate to="/bookshelf" />} />
