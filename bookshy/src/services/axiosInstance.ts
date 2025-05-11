@@ -55,7 +55,7 @@ authAxiosInstance.interceptors.response.use(
     originalRequest.headers = headers;
 
     // 토큰 만료로 인한 401 에러인지 확인
-    if (error.response && error.response.status === 500 && !originalRequest._retry) {
+    if (error.response && error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
@@ -79,6 +79,8 @@ authAxiosInstance.interceptors.response.use(
 
         // 새 토큰 저장
         const { accessToken, refreshToken } = response.data;
+        console.log(response);
+        console.log('새롭게 받은 토큰', accessToken);
         localStorage.setItem('auth_token', accessToken);
 
         // 새 refresh token이 있으면 업데이트
@@ -94,8 +96,8 @@ authAxiosInstance.interceptors.response.use(
         return authAxiosInstance(originalRequest);
       } catch (refreshError) {
         // 토큰 갱신 실패 시 로그인 페이지로 리다이렉트
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
+        // localStorage.removeItem('access_token');
+        // localStorage.removeItem('refresh_token');
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }
