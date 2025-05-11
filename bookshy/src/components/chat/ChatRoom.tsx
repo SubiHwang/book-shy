@@ -137,7 +137,6 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
       type,
     };
     setMessages((prev) => [...prev, newMessage]);
-    sendMessage(numericRoomId, myUserId, content, type);
   };
 
   const registerScheduleAndNotify = async (message: string, payload: RegisterSchedulePayload) => {
@@ -188,7 +187,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
           const showDate = dateLabel !== lastDateLabel;
           lastDateLabel = dateLabel;
 
-          const isSystem = msg.senderId === -1;
+          const isSystem = ['info', 'notice', 'warning'].includes(msg.type ?? '');
 
           return (
             <div key={msg.id}>
