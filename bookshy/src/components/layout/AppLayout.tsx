@@ -112,12 +112,14 @@ const AppLayout: FC = () => {
                   <Route path="/booknotes/create" element={<BookNoteCreatePage />} />
                   <Route path="/booknotes/select" element={<BookNoteSelectPage />} />
 
-                  {/* ✅ 마이페이지 라우팅 */}
+                  {/* ✅ 마이페이지 라우팅 (공통 레이아웃) */}
                   <Route path="/mypage" element={<MyPage />}>
                     <Route index element={<TradePromiseList />} />
                     <Route path="history" element={<TradeHistoryList />} />
-                    <Route path="edit" element={<EditProfilePage />} />
                   </Route>
+
+                  {/* ✅ 독립적인 프로필 수정 페이지 (레이아웃 없음) */}
+                  <Route path="/mypage/edit" element={<EditProfilePage />} />
 
                   {/* 그 외 경로는 홈으로 리다이렉션 */}
                   <Route path="*" element={<Navigate to="/bookshelf" />} />
