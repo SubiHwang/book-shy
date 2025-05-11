@@ -6,4 +6,6 @@ export interface UserProfile {
   address: string | null;
   age: number;
   gender: 'M' | 'F' | null;
+  latitude: number | null;
+  longitude: number | null;
 }

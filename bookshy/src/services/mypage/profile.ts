@@ -9,6 +9,8 @@ export const updateUserProfile = async (payload: {
   nickname: string;
   gender: 'M' | 'F';
   address: string;
+  latitude: number | null;
+  longitude: number | null;
 }) => {
   return authAxiosInstance.put('/user/profile', payload);
 };

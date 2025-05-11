@@ -16,12 +16,16 @@ const EditProfilePage = () => {
   const [nickname, setNickname] = useState('');
   const [gender, setGender] = useState<'M' | 'F' | ''>('');
   const [address, setAddress] = useState('');
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
 
   useEffect(() => {
     if (profile) {
       setNickname(profile.nickname || '');
       setGender(profile.gender ?? '');
       setAddress(profile.address ?? '');
+      setLatitude(profile.latitude ?? null);
+      setLongitude(profile.longitude ?? null);
     }
   }, [profile]);
 
@@ -44,6 +48,8 @@ const EditProfilePage = () => {
       nickname,
       gender,
       address,
+      latitude,
+      longitude,
     });
   };
 
@@ -61,6 +67,8 @@ const EditProfilePage = () => {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
+        setLatitude(latitude);
+        setLongitude(longitude);
 
         try {
           const response = await fetch(
