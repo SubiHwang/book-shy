@@ -53,7 +53,49 @@ const EditProfilePage = () => {
   };
 
   const handleAddressSearch = () => {
-    alert('주소 검색 기능은 아직 구현되지 않았습니다.');
+    if (!navigator.geolocation) {
+      alert('이 기기에서는 위치 정보 사용이 불가능합니다.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          const response = await fetch(
+            `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${longitude}&y=${latitude}`,
+            {
+              headers: {
+                Authorization: `KakaoAK ${import.meta.env.VITE_KAKAO_REST_API_KEY}`,
+              },
+            },
+          );
+          const data = await response.json();
+          const kakaoAddress = data.documents?.[0]?.address?.address_name;
+
+          if (kakaoAddress) {
+            setAddress(kakaoAddress);
+          } else {
+            alert('주소를 찾을 수 없습니다.');
+          }
+        } catch (err) {
+          console.error('주소 검색 오류:', err);
+          alert('주소 검색 중 오류가 발생했습니다.');
+        }
+      },
+      (error) => {
+        if (error.code === 1) {
+          alert('위치 권한이 거부되었습니다.');
+        } else {
+          alert('위치 정보를 가져오는 데 실패했습니다.');
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+      },
+    );
   };
 
   if (isLoading) {
@@ -128,7 +170,7 @@ const EditProfilePage = () => {
             onClick={handleAddressSearch}
             className="mt-2 px-4 py-1 text-sm bg-pink-100 text-pink-600 rounded border border-pink-300"
           >
-            주소 검색
+            현재 위치로 주소 찾기
           </button>
         </div>
 
