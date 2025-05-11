@@ -3,6 +3,7 @@ package com.ssafy.bookshy.domain.library.controller;
 import com.ssafy.bookshy.domain.library.dto.LibraryResponseDto;
 import com.ssafy.bookshy.domain.library.dto.LibrarySearchAddRequestDto;
 import com.ssafy.bookshy.domain.library.dto.LibrarySelfAddRequestDto;
+import com.ssafy.bookshy.domain.library.dto.LibraryWithTripResponseDto;
 import com.ssafy.bookshy.domain.library.service.LibraryService;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import io.swagger.v3.oas.annotations.Operation;
@@ -157,6 +158,21 @@ public class LibraryController {
     )
     public ResponseEntity<List<LibraryResponseDto>> getUnwrittenNoteBooks(@AuthenticationPrincipal Users user) {
         return ResponseEntity.ok(libraryService.findUnwrittenNotesByUserId(user.getUserId()));
+    }
+
+    @Operation(
+            summary = "📘 서재 목록 + 여정 작성 여부 조회",
+            description = "로그인한 사용자의 전체 서재 목록을 반환하고, 각 책에 대해 여정 작성 여부(hasTrip)를 함께 반환합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "✅ 서재 + 여정 여부 반환 성공"),
+                    @ApiResponse(responseCode = "401", description = "❌ 인증 실패"),
+                    @ApiResponse(responseCode = "500", description = "💥 서버 오류")
+            }
+    )
+    @GetMapping("/with-trip")
+    public ResponseEntity<List<LibraryWithTripResponseDto>> getLibraryWithTrip(
+            @AuthenticationPrincipal Users user) {
+        return ResponseEntity.ok(libraryService.findLibraryWithTripStatus(user.getUserId()));
     }
 
 }
