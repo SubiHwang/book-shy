@@ -65,7 +65,9 @@ authAxiosInstance.interceptors.response.use(
 
         if (!refresh_token) {
           // refresh token이 없으면 로그인 페이지로 리다이렉트
-          window.location.href = '/login';
+          console.log('refresh token 없음');
+          // 로그인 페이지로 리다이렉트
+          // window.location.href = '/login';
           // localStorage.removeItem('auth_token');
           // localStorage.removeItem('refresh_token');
           return Promise.reject(error);
@@ -95,10 +97,11 @@ authAxiosInstance.interceptors.response.use(
         // 원래 요청 재시도
         return authAxiosInstance(originalRequest);
       } catch (refreshError) {
+        console.error('토큰 갱신 실패:', refreshError);
         // 토큰 갱신 실패 시 로그인 페이지로 리다이렉트
         // localStorage.removeItem('access_token');
         // localStorage.removeItem('refresh_token');
-        window.location.href = '/login';
+        // window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }
