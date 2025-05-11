@@ -16,6 +16,7 @@ export interface ChatMessage {
   sentAt: string;
   type?: 'notice' | 'info' | 'warning' | 'text';
   emoji?: string;
+  isRead?: boolean;
 }
 
 export interface RegisterSchedulePayload {

@@ -7,7 +7,7 @@ import ScheduleModal from './ScheduleModal.tsx';
 import SystemMessage from './SystemMessage.tsx';
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchMessages, markMessagesAsRead, registerSchedule } from '@/services/chat/chat.ts';
+import { fetchMessages, markMessagesAsRead, registerSchedule, sendEmoji } from '@/services/chat/chat.ts';
 import { useStomp } from '@/hooks/chat/useStomp.ts';
 import { getUserIdFromToken } from '@/utils/jwt.ts';
 
@@ -26,6 +26,8 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const [showOptions, setShowOptions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
+  const [emojiMap, setEmojiMap] = useState<Record<string, string>>({});
 
   const queryClient = useQueryClient();
 
@@ -145,10 +147,21 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
       handleSendSystemMessage(message, 'info');
     } catch (error) {
       console.error('❌ 일정 등록 실패:', error);
-      // handleSendSystemMessage('일정 등록에 실패했습니다. 다시 시도해주세요.', 'warning');
     }
   };
 
+  const handleSelectEmoji = (messageId: string, emoji: string) => {
+    setEmojiMap((prev) => ({
+      ...prev,
+      [messageId]: prev[messageId] === emoji ? '' : emoji,
+    }));
+    setEmojiTargetId(null);
+    sendEmoji(Number(messageId), emoji);
+  };
+
+  const handleLongPressOrRightClick = (messageId: string) => {
+    setEmojiTargetId((prev) => (prev === messageId ? null : messageId));
+  };
   const toggleOptions = () => {
     const shouldScroll = isScrolledToBottom();
     setShowOptions((prev) => !prev);
@@ -220,6 +233,11 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
                 <ChatMessageItem
                   message={{ ...msg, sentAt: formatTime(msg.sentAt) }}
                   isMyMessage={msg.senderId === myUserId}
+                  showEmojiSelector={emojiTargetId === msg.id}
+                  onLongPress={() => handleLongPressOrRightClick(msg.id)}
+                  onRightClick={() => handleLongPressOrRightClick(msg.id)}
+                  onSelectEmoji={(emoji) => handleSelectEmoji(msg.id, emoji)}
+                  selectedEmoji={emojiMap[msg.id]}
                 />
               )}
             </div>
