@@ -35,7 +35,7 @@ public class ChatCalendarService {
     }
 
     @Transactional
-    public ChatCalendarCreateResponseDto createCalendar(ChatCalendarCreateRequestDto dto) {
+    public ChatCalendarCreateResponseDto createCalendar(ChatCalendarCreateRequestDto dto, Long userId) {
         // ✅ 거래 유형 유효성 검사 및 날짜 필드 검증
         if ("EXCHANGE".equalsIgnoreCase(dto.getType())) {
             if (dto.getEventDate() == null) {
@@ -69,7 +69,7 @@ public class ChatCalendarService {
                 .senderId(0L)  // 0 또는 시스템 ID
                 .content(systemMessage)
                 .type("info")
-                .build());
+                .build(), userId);
 
         // ✅ 응답 반환
         return ChatCalendarCreateResponseDto.builder()

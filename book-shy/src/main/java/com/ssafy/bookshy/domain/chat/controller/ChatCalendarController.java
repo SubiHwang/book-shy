@@ -66,7 +66,8 @@ public class ChatCalendarController {
     )
     @PostMapping
     public ResponseEntity<ChatCalendarCreateResponseDto> createCalendar(
-            @org.springframework.web.bind.annotation.RequestBody ChatCalendarCreateRequestDto dto) { // ✅ 실제 동작용 RequestBody
-        return ResponseEntity.ok(chatCalendarService.createCalendar(dto));
+            @org.springframework.web.bind.annotation.RequestBody ChatCalendarCreateRequestDto dto,
+            @AuthenticationPrincipal Users user) {
+        return ResponseEntity.ok(chatCalendarService.createCalendar(dto, user.getUserId()));
     }
 }
