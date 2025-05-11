@@ -23,13 +23,10 @@ public class BookTripController {
 
     @GetMapping
     @Operation(summary = "📚 특정 도서의 여정 목록 조회", description = "특정 도서에 대해 작성된 모든 여정(BookTrip)을 조회합니다.")
-    public ResponseEntity<List<BookTripDto>> getTrips(
-            @Parameter(description = "조회할 도서의 ID", required = true)
-            @RequestParam Long bookId) {
+    public ResponseEntity<List<BookTripDto>> getTrips(@RequestParam Long bookId) {
         if (bookId == null) return ResponseEntity.badRequest().build();
         List<BookTripDto> result = bookTripService.getTripsByBookId(bookId);
-        if (result.isEmpty()) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(result); // ❌ result.isEmpty() 체크 제거
     }
 
     @PostMapping
