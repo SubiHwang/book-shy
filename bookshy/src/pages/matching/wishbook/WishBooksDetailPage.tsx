@@ -2,7 +2,7 @@ import Header from '@/components/common/Header';
 import TabNavBar from '@/components/common/TabNavBar';
 import { useNavigate, Outlet } from 'react-router-dom';
 
-const WishBooksDetail = () => {
+const WishBooksDetailPage = () => {
   const navigate = useNavigate();
   const bookId = 1; // 예시로 bookId를 1로 설정, 실제로는 props나 context에서 받아와야 함
 
@@ -34,4 +34,4 @@ const WishBooksDetail = () => {
     </div>
   );
 };
-export default WishBooksDetail;
+export default WishBooksDetailPage;
