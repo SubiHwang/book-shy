@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchLibraryBooks } from '@/services/mybooknote/library';
 import { fetchBookDetailByBookId } from '@/services/book/search';
 import { createNoteWithQuote } from '@/services/mybooknote/booknotequote';
-import BookNoteForm from '@/components/booknote/BookNoteForm';
+import BookNoteForm from '@/components/mybooknote/booknote/BookNoteForm';
 import type { LibraryBook } from '@/types/mybooknote/library';
 import { useState } from 'react';
 

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/common/Header';
 import TabNavBar from '@/components/common/TabNavBar';
-import BookCard from '@/components/booknote/BookCard';
+import BookCard from '@/components/mybooknote/booknote/BookCard';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import { useState } from 'react';
 
