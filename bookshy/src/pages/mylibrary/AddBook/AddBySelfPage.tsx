@@ -3,11 +3,9 @@ import { useState, FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Pencil } from 'lucide-react';
 import { addBookBySelf } from '@/services/mylibrary/bookAddService';
-import { useAuth } from '@/contexts/AuthContext';
 
 const AddBySelfPage: FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [title, setTitle] = useState<string>('');
   const [author, setAuthor] = useState<string>('');
   const [publisher, setPublisher] = useState<string>('');
@@ -57,18 +55,8 @@ const AddBySelfPage: FC = () => {
     setError(null);
 
     try {
-      // 개발 중이므로 기본 사용자 ID 사용 (로그인 없이 테스트 가능)
-      const userId = Number(user?.id) || 1;
-
       // API 호출하여 도서 등록
-      const registeredBook = await addBookBySelf(
-        userId,
-        title,
-        author,
-        publisher,
-        coverImage,
-        isPublic,
-      );
+      const registeredBook = await addBookBySelf(title, author, publisher, coverImage, isPublic);
 
       console.log('등록된 책 정보:', registeredBook);
 
@@ -77,13 +65,17 @@ const AddBySelfPage: FC = () => {
 
       // 내 서재 페이지로 이동
       navigate('/bookshelf');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('책 등록 중 오류 발생:', error);
-      setError(error.message || '책 등록에 실패했습니다. 다시 시도해주세요.');
+
+      // 에러 메시지 추출을 위한 타입 가드
+      const errorMessage =
+        error instanceof Error ? error.message : '책 등록에 실패했습니다. 다시 시도해주세요.';
+
+      setError(errorMessage);
       setIsSubmitting(false);
     }
   };
-
   // 공개 여부 토글 처리
   const handleTogglePublic = () => {
     setIsPublic(!isPublic);

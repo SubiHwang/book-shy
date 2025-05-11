@@ -1,17 +1,19 @@
 // src/components/mylibrary/BookDetail/BookDetailHeader.tsx
 import React from 'react';
 import { BookDetailResponse } from '@/services/mylibrary/bookDetailService';
-// 공통 Header 컴포넌트 import
 
+// 공통 Header 컴포넌트
 interface BookDetailHeaderProps {
   bookDetail: BookDetailResponse & { libraryId: number; isPublic: boolean };
   onBack: () => void;
   onTogglePublicStatus: () => void;
+  onDelete: () => void; // 삭제 핸들러 추가
 }
 
 const BookDetailHeader: React.FC<BookDetailHeaderProps> = ({
   bookDetail,
   onTogglePublicStatus,
+  onDelete, // 삭제 핸들러 추가
 }) => {
   return (
     <>
@@ -39,12 +41,21 @@ const BookDetailHeader: React.FC<BookDetailHeaderProps> = ({
               <p className="text-sm mb-1 truncate">출판사: {bookDetail.publisher || '정보 없음'}</p>
             </div>
 
-            <button
-              className="mt-3 py-1.5 px-4 rounded-full bg-white text-gray-700 shadow-sm hover:bg-gray-50 text-sm font-medium transition-colors self-start"
-              onClick={onTogglePublicStatus}
-            >
-              {bookDetail.isPublic ? '공개 서재에서 숨기기' : '공개 서재에 추가'}
-            </button>
+            <div className="flex space-x-2 mt-3">
+              <button
+                className="py-1.5 px-4 rounded-full bg-white text-gray-700 shadow-sm hover:bg-gray-50 text-sm font-medium transition-colors"
+                onClick={onTogglePublicStatus}
+              >
+                {bookDetail.isPublic ? '공개 서재에서 숨기기' : '공개 서재에 추가'}
+              </button>
+
+              <button
+                className="py-1.5 px-4 rounded-full bg-white text-gray-700 shadow-sm hover:bg-gray-50 text-sm font-medium transition-colors"
+                onClick={onDelete}
+              >
+                삭제하기
+              </button>
+            </div>
           </div>
         </div>
       </div>

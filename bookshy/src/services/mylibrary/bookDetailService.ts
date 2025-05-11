@@ -22,7 +22,7 @@ export const fetchBookDetail = async (libraryId: number): Promise<BookDetailResp
 
     // API 호출
     const response = await authAxiosInstance.get<BookDetailResponse>(
-      `/book/library/detail?libraryId=${libraryId}&userId=1`,
+      `/book/library/detail?libraryId=${libraryId}`,
     );
 
     console.log('책 상세 정보 조회 성공:', response);
@@ -44,6 +44,21 @@ export const updateBookVisibility = async (libraryId: number, isPublic: boolean)
     console.log('책 공개 상태 변경 성공');
   } catch (error) {
     console.error('책 공개 상태 변경 오류:', error);
+    throw error;
+  }
+};
+
+// 내 서재 책 삭제 API
+export const deleteLibraryBook = async (libraryId: number): Promise<void> => {
+  try {
+    console.log(`책 삭제 요청: libraryId=${libraryId}`);
+
+    // API 호출
+    await authAxiosInstance.delete(`/library/${libraryId}`);
+
+    console.log('책 삭제 성공');
+  } catch (error) {
+    console.error('책 삭제 오류:', error);
     throw error;
   }
 };

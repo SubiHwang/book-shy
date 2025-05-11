@@ -18,12 +18,13 @@ const AllMyBooksTab: React.FC = () => {
     const loadBooks = async () => {
       setIsLoading(true);
       try {
-        // 개발 중이므로 기본 사용자 ID 사용 (로그인 없이 테스트 가능)
-        const userId = Number(user?.id) || 1; // 숫자로 처리
-
         // API 호출하여 책 데이터 가져오기
-        const libraryBooks = await fetchUserAllLibrary(userId);
-        setBooks(libraryBooks);
+        const libraryBooks = await fetchUserAllLibrary();
+
+        // libraryId 기준으로 오름차순 정렬
+        const sortedBooks = [...libraryBooks].sort((a, b) => a.libraryId - b.libraryId);
+
+        setBooks(sortedBooks);
         setError(null);
       } catch (err) {
         console.error('서재 목록을 불러오는 중 오류가 발생했습니다:', err);
