@@ -26,6 +26,7 @@ import ISBNScanResultPage from '@/pages/mylibrary/AddBook/ISBNScanResultPage';
 import Login from '@/pages/auth/Login';
 import PrivateRoute from '@/components/layout/PrivateRoute';
 import KaKaoOauth from '@/pages/auth/KaKaoOauth';
+import WishBooksDetailPage from '@/pages/matching/wishbook/WishBooksDetailPage';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -86,7 +87,7 @@ const AppLayout: FC = () => {
                   />
                   <Route path="/matching/search-wish-books" element={<SearchWishBooks />} />
 
-                  <Route path="/matching/books/:id" element={<div>책 상세 보가</div>}>
+                  <Route path="/matching/books/:id" element={<WishBooksDetailPage/>}>
                     <Route index element={<BookInfoTab />} />
                     <Route path="notes" element={<BookNotesTab />} />
                   </Route>
