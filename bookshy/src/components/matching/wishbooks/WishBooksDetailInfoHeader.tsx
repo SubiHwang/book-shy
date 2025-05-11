@@ -25,16 +25,17 @@ const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
   const isLoading = isLoadingData || isLoadingColors;
   
   // 배경 그라데이션 스타일 생성 (항상 파스텔 색상 사용)
-  const gradientStyle = createGradientStyle(pastelColors , 'bottom right');
+  const gradientStyle = createGradientStyle(pastelColors, 'bottom right');
 
   return (
     <div>
-      {/* 책 정보 섹션 - 파스텔 그라데이션 적용 */}
+      {/* 책 정보 섹션 - 파스텔 그라데이션 적용, flex 컨테이너로 변경 */}
       <div 
-        className="p-4 flex-shrink-0 shadow-sm" 
+        className="flex flex-col justify-end p-4 shadow-sm min-h-[25vh]" 
         style={gradientStyle}
       >
-        <div className="flex flex-row items-start">
+        {/* 내용물을 하단에 배치 */}
+        <div className="flex flex-row items-start mt-auto">
           {/* 책 표지 이미지 */}
           <div className="w-26 h-36 flex-shrink-0 mr-4 rounded-md overflow-hidden shadow-md bg-white">
             {isLoading ? (
@@ -48,9 +49,9 @@ const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
             )}
           </div>
 
-          {/* 책 정보 */}
+          {/* 책 정보 - 제목이 긴 경우를 위해 개선 */}
           <div className="flex-1 min-w-0 flex flex-col min-h-36 justify-between text-gray-800">
-            <div>
+            <div className="overflow-hidden">
               {isLoading ? (
                 <>
                   <Skeleton width="80%" height={28} className="mb-2" />
@@ -59,13 +60,16 @@ const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
                 </>
               ) : (
                 <>
-                  <h2 className="text-xl font-bold mb-2 break-words">{title || '제목 정보 없음'}</h2>
+                  {/* 긴 제목도 잘 보이게 조정 */}
+                  <h2 className="text-lg font-bold mb-2 break-words line-clamp-3 leading-tight">
+                    {title || '제목 정보 없음'}
+                  </h2>
                   <p className="text-sm mb-1 truncate">작가: {author || '정보 없음'}</p>
                   <p className="text-sm mb-1 truncate">출판사: {publisher || '정보 없음'}</p>
                 </>
               )}
             </div>
-            <div className="flex justify-end">
+            <div className="flex justify-end mt-2">
               <button className="p-2 rounded-full bg-white bg-opacity-70 hover:bg-opacity-90 shadow-sm">
                 <Heart
                   className={`w-6 h-6 text-primary ${!isLoadingData && isLiked ? 'fill-primary' : ''}`}
