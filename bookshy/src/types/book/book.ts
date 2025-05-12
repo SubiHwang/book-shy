@@ -35,3 +35,11 @@ export interface BookSearchItemProps {
 export interface BookDetailPageProps extends WishBook {
   isLoading?: boolean;
 }
+
+export interface SearchBookDetailPageProps extends Book {
+  isLoading?: boolean;
+}
+
+export interface ExtendedSearchBookDetailPageProps extends SearchBookDetailPageProps {
+  onAddBook?: (itemId: number) => void;
+}
