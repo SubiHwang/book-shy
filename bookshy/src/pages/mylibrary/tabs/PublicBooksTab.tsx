@@ -43,11 +43,7 @@ const PublicBooksTab: React.FC = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="relative" style={{ transform: 'translateY(-150px)' }}>
-        <Loading loadingText="책을 불러오는 중..." />
-      </div>
-    );
+    return <Loading loadingText="책을 불러오는 중..." />;
   }
 
   if (error) {
