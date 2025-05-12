@@ -16,6 +16,7 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
     '/bookshelf/add/self',
     '/bookshelf/add/search',
     '/bookshelf/add/ocr-result',
+    '/setting-location',
   ];
 
   // 현재 경로가 숨김 목록에 있는지 확인
