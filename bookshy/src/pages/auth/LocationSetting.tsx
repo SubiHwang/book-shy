@@ -2,10 +2,12 @@ import Header from '@/components/common/Header';
 import { FC, useEffect, useState } from 'react';
 import { MapPin, Locate, Search } from 'lucide-react';
 import { useLocationFetcher } from '@/hooks/mypage/useLocationFetcher';
+import { useNavigate } from 'react-router-dom';
 
 const LocationSetting: FC = () => {
   const { fetchCurrentLocation, address, loading, error } = useLocationFetcher();
   const [isGpasEnabled, setIsGpsEnabled] = useState<boolean>(true);
+  const navigate = useNavigate();
 
   // GPS 사용 가능 여부 확인
   useEffect(() => {
@@ -42,8 +44,9 @@ const LocationSetting: FC = () => {
   const handleAddressSelect = () => {
     // 주소 선택 처리 로직
     if (address) {
-      alert(`주소가 설정되었습니다: ${address}`);
       // 여기에 주소 저장 로직 추가
+      // 저장 후 메인 페이지로 이동
+      navigate('/');
     }
   };
 
