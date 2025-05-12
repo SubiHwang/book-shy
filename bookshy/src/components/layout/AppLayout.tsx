@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Routes, Route, Navigate, useNavigate, matchPath } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, matchPath, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import BottomTabBar from '../common/BottomTabBar';
 import MyLibraryPage from '../../pages/mylibrary/MyLibraryPage';
@@ -35,15 +35,17 @@ import Login from '@/pages/auth/Login';
 import PrivateRoute from '@/components/layout/PrivateRoute';
 import KaKaoOauth from '@/pages/auth/KaKaoOauth';
 import WishBooksDetailPage from '@/pages/matching/wishbook/WishBooksDetailPage';
-import RecommandedWishBookList from '../matching/searchwishbooks/RecommandedWishBookList';
-import SearchResultBookList from '../matching/searchwishbooks/SearchResultBookList';
+import RecommandedWishBookList from '@/components/matching/searchwishbooks/RecommandedWishBookList';
+import SearchResultBookList from '@/components/matching/searchwishbooks/SearchResultBookList';
 import ChatListPage from '@/pages/chat/ChatListPage';
 import ChatRoomPage from '@/pages/chat/ChatRoomPage';
 import TradeReviewPage from '@/pages/chat/TradeReviewPage';
+import LocationSetting from '@/pages/auth/LocationSetting';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
   const { isLoading } = useAuth();
+  const location = useLocation();
 
   // 탭 변경 시 해당 경로로 이동
   const handleTabChange = (tabId: string): void => {
@@ -62,20 +64,13 @@ const AppLayout: FC = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/oauth" element={<KaKaoOauth />} />
 
-          {/* 📚 매칭 페이지 */}
-          <Route path="/matching" element={<MatchingPage />}>
-            <Route index element={<MatchingRecommend />} />
-            <Route path="wish-books" element={<WishBooks />} />
-          </Route>
-          <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
-          <Route path="matching/search-wish-books" element={<SearchWishBooks />} />
-
           {/* 보호된 라우트 - 로그인해야만 접근 가능 */}
           <Route
             path="/*"
             element={
               <PrivateRoute>
                 <Routes>
+                  <Route path="/setting-location" element={<LocationSetting />} />
                   {/* 기본 경로 리다이렉션 */}
                   <Route path="/" element={<Navigate to="/bookshelf" replace />} />
 
@@ -134,7 +129,11 @@ const AppLayout: FC = () => {
 
                   {/* 책의 여정 페이지 */}
                   <Route path="/booknotes/trip" element={<BookTripPage />} />
-                  <Route path="/booknotes/trip/:bookId" element={<BookTripDetailPage />} />
+                  {/* <Route path="/booknotes/trip/:bookId" element={<BookTripDetailPage />} /> */}
+                  <Route
+                    path="/booknotes/trip/:bookId"
+                    element={<BookTripDetailPage key={location.key} />}
+                  />
 
                   {/* ✅ 마이페이지 라우팅 (공통 레이아웃) */}
                   <Route path="/mypage" element={<MyPage />}>

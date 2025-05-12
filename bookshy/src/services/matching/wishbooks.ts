@@ -1,4 +1,4 @@
-import { WishBooksResponse } from '@/types/Matching/wishBooks';
+import {  WishBooksResponse } from '@/types/Matching/wishBooks';
 import { WishBook } from '@/types/book';
 import { authAxiosInstance } from '../axiosInstance';
 
@@ -17,9 +17,7 @@ export const getSearchResult = async (searchTerm: string): Promise<WishBooksResp
 
 export const getWishBookList = async (): Promise<WishBooksResponse> => {
   try {
-    const response = await authAxiosInstance.get<string, WishBooksResponse>(
-      `/book/wish`,
-    );
+    const response = await authAxiosInstance.get<string, WishBooksResponse>(`/book/wish`);
     console.log('읽고 싶은 책 목록 API 응답:', response);
     return response;
   } catch (error) {
@@ -30,9 +28,7 @@ export const getWishBookList = async (): Promise<WishBooksResponse> => {
 
 export const addWishBook = async (itemId: number): Promise<boolean> => {
   try {
-    const response = await authAxiosInstance.post<string, boolean>(
-      `/book/wish?itemId=${itemId}`,
-    );
+    const response = await authAxiosInstance.post<string, boolean>(`/book/wish?itemId=${itemId}`);
     console.log('읽고 싶은 책 추가 API 응답:', response);
     return response;
   } catch (error) {
@@ -64,5 +60,18 @@ export const getWishBookDetail = async (itemId: number): Promise<WishBook> => {
   } catch (error) {
     console.error('읽고 싶은 책 상세 API 호출 중 오류 발생:', error);
     throw error; // 오류를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  }
+};
+
+export const getRecommandationBooks = async (): Promise<WishBooksResponse> => {
+  try {
+    const response = await authAxiosInstance.get<string, WishBooksResponse>(
+      '/recommendations',
+    );
+    console.log('추천 도서 API 응답:', response);
+    return response;
+  } catch (error) {
+    console.error('추천 도서 API 호출 중 오류 발생:', error);
+    throw error;
   }
 };
