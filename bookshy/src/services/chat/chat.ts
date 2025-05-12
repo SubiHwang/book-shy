@@ -20,7 +20,3 @@ export async function sendEmoji(messageId: number, emoji: string) {
 export async function registerSchedule(payload: RegisterSchedulePayload): Promise<void> {
   await authAxiosInstance.post('/chats/calendar', payload);
 }
-
-export async function getCalendarEvents() {
-  await authAxiosInstance.get('/chats/calendar');
-}

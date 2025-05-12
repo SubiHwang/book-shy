@@ -41,7 +41,6 @@ import SearchResultBookList from '../matching/searchwishbooks/SearchResultBookLi
 import ChatListPage from '@/pages/chat/ChatListPage';
 import ChatRoomPage from '@/pages/chat/ChatRoomPage';
 import TradeReviewPage from '@/pages/chat/TradeReviewPage';
-import CalendarPage from '@/pages/chat/CalendarPage';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -124,7 +123,6 @@ const AppLayout: FC = () => {
                   <Route path="/chat" element={<ChatListPage />} />
                   <Route path="/chat/:roomId" element={<ChatRoomPage />} />
                   <Route path="/chat/:roomId/review" element={<TradeReviewPage />} />
-                  <Route path="/chat/schedule" element={<CalendarPage />} />
 
                   {/* 독서기록 페이지 */}
                   <Route path="/booknotes" element={<MyBookNotesPage />} />
