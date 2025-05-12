@@ -11,10 +11,9 @@ interface ScannerControlsProps {
 
 const ScannerControls: React.FC<ScannerControlsProps> = ({
   error,
-  cameraReady,
-  scanSuccess,
+  //cameraReady,
+  //scanSuccess,
   onRetry,
-  onManualEntry,
 }) => {
   return (
     <div className="absolute bottom-0 left-0 w-full py-8 bg-black bg-opacity-70 z-10 flex items-center justify-center text-white">
@@ -23,11 +22,11 @@ const ScannerControls: React.FC<ScannerControlsProps> = ({
           다시 시도
         </button>
       )}
-      {cameraReady && !scanSuccess && !error && (
+      {/* {cameraReady && !scanSuccess && !error && (
         <button className="px-6 py-3 bg-blue-500 rounded-md font-medium" onClick={onManualEntry}>
           직접 입력
         </button>
-      )}
+      )} */}
     </div>
   );
 };
