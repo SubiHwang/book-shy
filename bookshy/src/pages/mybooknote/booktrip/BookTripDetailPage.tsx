@@ -1,12 +1,14 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { fetchBookTripsByBookId } from '@/services/mybooknote/booktrip/booktrip';
 import { fetchBookDetailByBookId } from '@/services/book/search';
+import { fetchUserProfile } from '@/services/mypage/profile';
 import type { BookTripWithUser } from '@/types/mybooknote/booktrip/booktrip';
 import type { Book } from '@/types/book/book';
+import type { UserProfile } from '@/types/User/user';
 import BookNoteHeaderCard from '@/components/mybooknote/booknote/BookNoteHeaderCard';
 import Header from '@/components/common/Header';
-import { useState } from 'react';
 
 const BookTripDetailPage = () => {
   const { bookId } = useParams<{ bookId: string }>();
@@ -24,10 +26,15 @@ const BookTripDetailPage = () => {
     enabled: !!bookId,
   });
 
+  const { data: myProfile, isLoading: isUserLoading } = useQuery<UserProfile>({
+    queryKey: ['myProfile'],
+    queryFn: fetchUserProfile,
+  });
+
   const myTrip = trips.find((trip) => trip.isMine);
   const otherTrips = trips.filter((trip) => !trip.isMine);
 
-  if (isTripsLoading || isBookLoading) {
+  if (isTripsLoading || isBookLoading || isUserLoading) {
     return <p className="text-center py-12 text-gray-500">로딩 중입니다...</p>;
   }
 
@@ -87,7 +94,11 @@ const BookTripDetailPage = () => {
             </div>
           ) : (
             <div className="flex gap-2 items-start mt-4">
-              <img src="/avatars/me.png" className="w-8 h-8 rounded-full" />
+              <img
+                src={myProfile?.profileImageUrl || '/avatars/me.png'}
+                className="w-8 h-8 rounded-full"
+                alt="내 프로필 이미지"
+              />
               <div className="flex-1">
                 <textarea
                   placeholder="0/1000"
