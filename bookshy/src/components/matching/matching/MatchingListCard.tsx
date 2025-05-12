@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import { FC, useState } from 'react';
 import { MatchingCardProps } from '@/types/Matching';
 import { ChevronDown, ChevronUp, BookMarked, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -35,7 +35,7 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
 
       console.log('✅ 채팅방 생성 성공, roomId:', roomId);
 
-      navigate(`/chats/${roomId}`, {
+      navigate(`/chat/${roomId}`, {
         state: {
           partnerName: matching.name,
           partnerProfileImage: matching.profileImage,
