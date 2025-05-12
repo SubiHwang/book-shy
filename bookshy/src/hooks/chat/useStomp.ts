@@ -11,7 +11,7 @@ interface ReadPayload {
 export const useStomp = (
   roomId: number,
   onMessage: (msg: ChatMessage) => void,
-  onRead?: (payload: ReadPayload) => void,
+  onRead?: (readerId: number, messageIds: number[]) => void,
 ) => {
   const {
     subscribeRoom,
@@ -27,23 +27,18 @@ export const useStomp = (
   useEffect(() => {
     if (!isConnected || !roomId) return;
 
-    // 메시지 수신 구독
     roomSubRef.current = subscribeRoom(roomId, (frame: IMessage) => {
       try {
         const payload = JSON.parse(frame.body) as ChatMessage;
         onMessage(payload);
       } catch (e) {
-        console.error('❌ STOMP 메시지 파싱 실패', e);
+        console.error('❌ 채팅 메시지 파싱 실패:', e);
       }
     });
 
-    // 읽음 수신 구독
-    readSubRef.current = subscribeReadTopic(roomId, (frame: IMessage) => {
-      try {
-        const payload = JSON.parse(frame.body) as ReadPayload;
-        onRead?.(payload);
-      } catch (e) {
-        console.error('❌ 읽음 메시지 파싱 실패', e);
+    readSubRef.current = subscribeReadTopic(roomId, (readerId, messageIds) => {
+      if (onRead) {
+        onRead(readerId, messageIds);
       }
     });
 

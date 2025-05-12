@@ -11,11 +11,12 @@ interface WebSocketContextValue {
   ) => { unsubscribe: () => void } | null;
   subscribeReadTopic: (
     roomId: number,
-    onMessage: (msg: IMessage) => void,
+    onRead: (readerId: number, messageIds: number[]) => void,
   ) => { unsubscribe: () => void } | null;
   unsubscribe: (sub: { unsubscribe: () => void } | null) => void;
   sendMessage: (roomId: number, senderId: number, content: string, type: string) => void;
   isConnected: boolean;
+  sendReadReceipt: (roomId: number, readerId: number, messageIds: number[]) => void;
 }
 
 const WebSocketContext = createContext<WebSocketContextValue | null>(null);
@@ -104,7 +105,7 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ c
   );
 
   const subscribeReadTopic = useCallback(
-    (roomId: number, onMessage: (message: IMessage) => void) => {
+    (roomId: number, onRead: (readerId: number, messageIds: number[]) => void) => {
       const topic = `/topic/read/${roomId}`;
       const client = clientRef.current;
 
@@ -125,7 +126,12 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ c
       }
 
       const sub = client.subscribe(topic, (frame) => {
-        onMessage(frame);
+        try {
+          const { readerId, messageIds } = JSON.parse(frame.body);
+          onRead(readerId, messageIds);
+        } catch (e) {
+          console.error('❌ 읽음 데이터 파싱 실패:', e);
+        }
       });
 
       subscriptions.current.set(topic, sub);
@@ -141,10 +147,27 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ c
     },
     [],
   );
+  const sendReadReceipt = useCallback((roomId: number, readerId: number, messageIds: number[]) => {
+    if (!clientRef.current?.connected) return;
+
+    const payload = {
+      readerId,
+      messageIds,
+    };
+
+    clientRef.current.send('/app/chat.read', {}, JSON.stringify(payload));
+  }, []);
 
   return (
     <WebSocketContext.Provider
-      value={{ subscribeRoom, subscribeReadTopic, unsubscribe, sendMessage, isConnected }}
+      value={{
+        subscribeRoom,
+        subscribeReadTopic,
+        sendReadReceipt,
+        unsubscribe,
+        sendMessage,
+        isConnected,
+      }}
     >
       {children}
     </WebSocketContext.Provider>

@@ -37,7 +37,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const [emojiMap, setEmojiMap] = useState<Record<string, string>>({});
 
   const queryClient = useQueryClient();
-  const { subscribeReadTopic } = useWebSocket();
+  const { subscribeReadTopic, sendReadReceipt } = useWebSocket();
 
   const {
     data: initialMessages = [],
@@ -50,39 +50,47 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
     retry: false,
   });
 
+  // 초기 입장 시 파트너 메시지 unread -> read 처리
   useEffect(() => {
-    if (!isNaN(numericRoomId)) {
-      markMessagesAsRead(numericRoomId)
-        .then(() => {
-          refetch();
-          queryClient.setQueryData(['chatList'], (prev: any) => {
-            if (!Array.isArray(prev)) return prev;
-            return prev.map((room: any) =>
-              room.id === numericRoomId ? { ...room, unreadCount: 0 } : room,
-            );
-          });
-        })
-        .catch((err) => console.error('❌ 읽음 처리 실패:', err));
-    }
-  }, [numericRoomId, refetch, queryClient]);
+    if (!isNaN(numericRoomId) && initialMessages.length > 0) {
+      markMessagesAsRead(numericRoomId).then(() => {
+        const unreadMessages = initialMessages.filter(
+          (msg) => msg.senderId !== myUserId && !msg.isRead,
+        );
 
-  // 실시간 읽음 알림 구독
+        const messageIds = unreadMessages.map((m) => Number(m.id));
+        if (messageIds.length > 0) {
+          sendReadReceipt(numericRoomId, myUserId, messageIds);
+        }
+
+        setMessages((prev) =>
+          prev.map((msg) => (msg.senderId !== myUserId ? { ...msg, isRead: true } : msg)),
+        );
+      });
+    }
+  }, [numericRoomId, initialMessages, myUserId, sendReadReceipt]);
+
+  // 실시간 읽음 알림 구독 (상대가 읽었을 때만 내 메시지 읽음 처리)
   useEffect(() => {
     if (isNaN(numericRoomId)) return;
-    const sub = subscribeReadTopic(numericRoomId, (frame) => {
-      const payload = JSON.parse(frame.body) as {
-        messageIds: number[];
-        readerId: number;
-      };
+    const sub = subscribeReadTopic(numericRoomId, (readerId, messageIds) => {
+      // 내가 읽은 거면 무시
+      if (readerId === myUserId) return;
+
+      // 상대가 읽은 내 메시지들에 대해 isRead 처리
       setMessages((prev) =>
         prev.map((msg) =>
-          payload.messageIds.includes(Number(msg.id)) ? { ...msg, isRead: true } : msg,
+          msg.senderId === myUserId && messageIds.includes(Number(msg.id))
+            ? { ...msg, isRead: true }
+            : msg,
         ),
       );
     });
-    return () => sub?.unsubscribe();
-  }, [numericRoomId, subscribeReadTopic]);
 
+    return () => sub?.unsubscribe();
+  }, [numericRoomId, subscribeReadTopic, myUserId]);
+
+  // 과거 + 신규 메시지 불러오기 및 공지 삽입
   useEffect(() => {
     if (!isSuccess) return;
 
