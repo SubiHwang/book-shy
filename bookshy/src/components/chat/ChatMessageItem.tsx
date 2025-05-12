@@ -12,15 +12,7 @@ interface Props {
   selectedEmoji?: string;
 }
 
-function ChatMessageItem({
-  message,
-  isMyMessage,
-  onLongPress,
-  onRightClick,
-  onSelectEmoji,
-  showEmojiSelector,
-  selectedEmoji,
-}: Props) {
+function ChatMessageItem({ message, isMyMessage, onLongPress, onRightClick, onSelectEmoji, showEmojiSelector, selectedEmoji }: Props) {
   const touchTimer = useRef<NodeJS.Timeout | null>(null);
 
   const handleTouchStart = () => {
