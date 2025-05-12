@@ -23,7 +23,7 @@ const NeighborhoodList: FC = () => {
   ];
   return (
     <div className="flex flex-col mb-10">
-      <h1 className="text-xl text-light-text font-medium flex flex-col justify-start text-start px-10">
+      <h1 className="text-xl text-light-text font-medium flex flex-col justify-start text-start pl-2 sm:pl-4">
         내 주변 이웃들의 서재
       </h1>
       {dummyData.map((user) => (
