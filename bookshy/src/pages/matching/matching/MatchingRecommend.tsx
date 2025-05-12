@@ -41,12 +41,14 @@ const MatchingRecommend: FC = () => {
 
   return (
     <div className="flex flex-col bg-light-bg">
-      <div className="bg-primary-light/20 px-10 py-4">
-        <div className="flex items-center gap-1">
-          <Zap className="text-primary-dark" size={20} strokeWidth={1} />
-          <h1 className="text-primary-dark font-medium">북끄북끄 매칭 시스템</h1>
+      <div className="bg-primary-light/20 px-5 sm:px-8 md:px-10 py-3 sm:py-4">
+        <div className="flex items-center gap-1 mb-1 sm:mb-2">
+          <Zap className="text-primary-dark w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1} />
+          <h1 className="text-primary-dark font-medium text-sm sm:text-base md:text-lg">
+            북끄북끄 매칭 시스템
+          </h1>
         </div>
-        <p className="text-light-text-secondary font-light">
+        <p className="text-light-text-secondary font-light text-xs sm:text-sm leading-tight sm:leading-normal">
           읽고 싶은 책, 보유 도서, 위치, 북끄 지수 등을 고려한 알고리즘으로 최적의 교환 상대를 추천
           해드려요.{' '}
           {dummyData.length > 0 ? (
