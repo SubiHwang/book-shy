@@ -22,13 +22,13 @@ const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
   const handleToggleLike = async (e: React.MouseEvent) => {
     // Stop event propagation to prevent navigation
     e.stopPropagation();
-    
+
     // itemId가 없으면 함수 실행을 중단
     if (wishBook.itemId === undefined) {
       console.error('Book ID is missing');
       return;
     }
-    
+
     setIsLoading(true);
     try {
       let response;
@@ -53,7 +53,7 @@ const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div
       className="card flex items-center justify-between p-4 mb-4 w-full cursor-pointer"
@@ -70,11 +70,11 @@ const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
 
       {/* Book Info */}
       <div className="flex-grow min-w-0 pr-2">
-        <h3 className="text-base font-medium text-gray-800 mb-1 truncate" title={wishBook.title}>
+        <h3 className="text-base font-medium text-light-text mb-1 truncate" title={wishBook.title}>
           {wishBook.title}
         </h3>
-        <p className="text-xs text-gray-600 mb-1 truncate">{wishBook.author}</p>
-        <p className="text-xs text-gray-500 mb-1 truncate">{wishBook.publisher}</p>
+        <p className="text-xs text-light-text-secondary mb-1 truncate">{wishBook.author}</p>
+        <p className="text-xs text-light-text-muted mb-1 truncate">{wishBook.publisher}</p>
         {wishBook.description && (
           <p
             className="text-xs text-gray-500 line-clamp-2 overflow-hidden mb-1"
