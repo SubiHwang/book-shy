@@ -30,7 +30,7 @@ public class BookTripService {
     @Transactional(readOnly = true)
     public List<BookTripWithUserDto> getTripsWithUser(Long bookId, Users loginUser) {
         Long loginUserId = loginUser.getUserId();
-        return bookTripRepository.findByBookId(bookId).stream()
+        return bookTripRepository.findByBookIdOrderByCreatedAtAsc(bookId).stream()
                 .map(trip -> {
                     var user = userRepository.findById(trip.getUserId())
                             .orElseThrow(() -> new IllegalArgumentException("USER_NOT_FOUND"));
