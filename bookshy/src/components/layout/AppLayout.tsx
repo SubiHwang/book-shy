@@ -41,6 +41,7 @@ import SearchResultBookList from '../matching/searchwishbooks/SearchResultBookLi
 import ChatListPage from '@/pages/chat/ChatListPage';
 import ChatRoomPage from '@/pages/chat/ChatRoomPage';
 import TradeReviewPage from '@/pages/chat/TradeReviewPage';
+import LocationSetting from '@/pages/auth/LocationSetting';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -63,20 +64,13 @@ const AppLayout: FC = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/oauth" element={<KaKaoOauth />} />
 
-          {/* 📚 매칭 페이지 */}
-          <Route path="/matching" element={<MatchingPage />}>
-            <Route index element={<MatchingRecommend />} />
-            <Route path="wish-books" element={<WishBooks />} />
-          </Route>
-          <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
-          <Route path="matching/search-wish-books" element={<SearchWishBooks />} />
-
           {/* 보호된 라우트 - 로그인해야만 접근 가능 */}
           <Route
             path="/*"
             element={
               <PrivateRoute>
                 <Routes>
+                  <Route path="/setting-location" element={<LocationSetting />} />
                   {/* 기본 경로 리다이렉션 */}
                   <Route path="/" element={<Navigate to="/bookshelf" replace />} />
 
