@@ -20,37 +20,61 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
   };
 
   const handleChatClick = async () => {
+    console.log('✅ handleChatClick 호출됨');
+
     try {
+      console.log('📡 createChatRoom 요청 시작:', {
+        user1Id: myUserId,
+        user2Id: matching.id,
+      });
+
       const { roomId } = await createChatRoom({
         user1Id: myUserId,
         user2Id: matching.id,
       });
+
+      console.log('✅ 채팅방 생성 성공, roomId:', roomId);
+
       navigate(`/chats/${roomId}`, {
         state: {
           partnerName: matching.name,
           partnerProfileImage: matching.profileImage,
         },
       });
+      console.log('🚀 채팅방으로 이동 완료');
     } catch (err: any) {
+      console.error('❌ 채팅방 생성 중 에러 발생:', err);
+
       // Conflict: 이미 채팅방이 있을 때
       if (err.response?.status === 405 || err.response?.status === 409) {
+        console.log('⚠️ 이미 존재하는 채팅방일 수 있음, 목록 조회 시작');
+
         const rooms = await fetchChatList();
+        console.log('📄 fetchChatList 결과:', rooms);
+
         const existing = rooms.find(
           (r: any) =>
             (r.participantId === myUserId && r.partnerId === 10) ||
             (r.partnerId === myUserId && r.participantId === 10),
         );
+
         if (existing) {
+          console.log('✅ 기존 채팅방 존재, 이동할 room id:', existing.id);
+
           navigate(`/chat/${existing.id}`, {
             state: {
               partnerName: existing.partnerName,
               partnerProfileImage: existing.partnerProfileImage,
             },
           });
+
+          console.log('🚀 기존 채팅방으로 이동 완료');
           return;
+        } else {
+          console.warn('⚠️ 기존 채팅방 없음');
         }
       }
-      console.error(err);
+
       alert('채팅방 열기에 실패했습니다.');
     }
   };
