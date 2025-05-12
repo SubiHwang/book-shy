@@ -2,57 +2,13 @@ import { FC, useState } from 'react';
 import { MatchingCardProps } from '@/types/Matching';
 import { ChevronDown, ChevronUp, BookMarked, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getUserIdFromToken } from '@/utils/jwt';
-import { fetchChatList } from '@/services/chat/chat';
-import { createChatRoom } from '@/services/matching/chatroom';
 
 const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
   const navigate = useNavigate();
   const [isCardExtended, setIsCardExtended] = useState<boolean>(false);
-  const myUserId = getUserIdFromToken()!;
 
   const handleCardExtend = (): void => {
     setIsCardExtended(!isCardExtended);
-  };
-
-  const handleChatClick = async () => {
-    try {
-      const { roomId } = await createChatRoom({
-        user1Id: myUserId,
-        user2Id: matching.id,
-      });
-
-      navigate(`/chats/${roomId}`, {
-        state: {
-          partnerName: matching.name,
-          partnerProfileImage: matching.profileImage,
-        },
-      });
-    } catch (err: any) {
-      if (err.response?.status === 405) {
-        // 기존 방이 이미 있는 경우: fetchChatList 로 찾아서 이동
-        const rooms = await fetchChatList();
-        const existing = rooms.find(
-          /**
-           * 매칭 데이터가 없어서 일단 하드 코딩으로 인혁이 채팅방으로 가지도록 해놓았습니다.
-           */
-          (r: any) =>
-            (r.participantId === myUserId && r.partnerId === 10) ||
-            (r.partnerId === myUserId && r.participantId === 10),
-        );
-        if (existing) {
-          navigate(`/chat/${existing.id}`, {
-            state: {
-              partnerName: existing.partnerName,
-              partnerProfileImage: existing.partnerProfileImage,
-            },
-          });
-          return;
-        }
-      }
-      console.error(err);
-      alert('채팅방 열기에 실패했습니다.');
-    }
   };
 
   const handleClickNeighborsBookshelf = (userId: number): void => {
@@ -174,10 +130,7 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
               <BookMarked width={16} height={16} strokeWidth={0.5} className="mx-1 sm:mx-2" />
               <span className="mr-1 sm:mr-2">서재 보기</span>
             </button>
-            <button
-              onClick={handleChatClick}
-              className="bg-primary-light text-white mx-1 sm:mx-3 text-xs sm:text-sm font-extralight px-2 sm:px-4 py-1 rounded-md border border-white flex items-center"
-            >
+            <button className="bg-primary-light text-white mx-1 sm:mx-3 text-xs sm:text-sm font-extralight px-2 sm:px-4 py-1 rounded-md border border-white flex items-center">
               <MessageCircle width={16} height={16} strokeWidth={0.5} className="mx-1 sm:mx-2" />
               <span className="mr-1 sm:mr-2">채팅 하기</span>
             </button>

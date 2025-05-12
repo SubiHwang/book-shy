@@ -45,7 +45,7 @@ const ChatRoomHeader: FC<ChatRoomHeaderProps> = ({
 
       {/* 오른쪽: 일정/알림 */}
       <div className="flex items-center gap-3">
-        <button onClick={() => navigate('/calendar')} className="p-2">
+        <button className="p-2">
           <Calendar size={20} />
         </button>
         <button className="p-2">
