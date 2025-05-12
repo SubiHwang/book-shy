@@ -1,7 +1,7 @@
 import Header from '@/components/common/Header';
 import { FC, useEffect, useState } from 'react';
 import { MapPin, Locate, Search } from 'lucide-react';
-import { useLocationFetcher } from '@/hooks/mypage/useLocationFetcher';
+import { useLocationFetcher } from '@/hooks/location/useLocationFetcher';
 import { useNavigate } from 'react-router-dom';
 
 const LocationSetting: FC = () => {
