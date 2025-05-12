@@ -1,8 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchLibraryBooksWithTrip } from '@/services/mybooknote/booktrip/booktrip';
-import type { LibraryBookWithTrip } from '@/types/mybooknote/booktrip/booktrip';
+
+import {
+  fetchLibraryBooksWithTrip,
+  fetchMyTripsOutsideLibrary,
+} from '@/services/mybooknote/booktrip/booktrip';
+import type {
+  LibraryBookWithTrip,
+  BookTripBookItem,
+  BookTripListItem,
+} from '@/types/mybooknote/booktrip/booktrip';
 
 import Header from '@/components/common/Header';
 import TabNavBar from '@/components/common/TabNavBar';
@@ -20,12 +28,38 @@ const BookTripPage: React.FC = () => {
     { path: '/booknotes/trip', label: '책의 여정 보기' },
   ];
 
-  const { data: libraryBooks = [], isLoading } = useQuery<LibraryBookWithTrip[]>({
+  // ✅ 여정 여부 포함 서재 도서
+  const { data: libraryBooks = [], isLoading: isLoadingLibrary } = useQuery<LibraryBookWithTrip[]>({
     queryKey: ['libraryBooksWithTrip'],
     queryFn: fetchLibraryBooksWithTrip,
   });
 
-  const filteredBooks = libraryBooks.filter((book) => {
+  // ✅ 서재에 없는 여정만 있는 도서
+  const { data: extraTrips = [], isLoading: isLoadingExtra } = useQuery<BookTripBookItem[]>({
+    queryKey: ['myTripsOutsideLibrary'],
+    queryFn: fetchMyTripsOutsideLibrary,
+  });
+
+  // ✅ 공통 리스트 타입으로 가공
+  const libraryMapped: BookTripListItem[] = libraryBooks.map((book) => ({
+    bookId: book.bookId,
+    title: book.title,
+    author: book.author,
+    coverImageUrl: book.coverImageUrl,
+    hasTrip: book.hasTrip,
+  }));
+
+  const extraMapped: BookTripListItem[] = extraTrips.map((trip) => ({
+    bookId: trip.bookId,
+    title: trip.title,
+    author: trip.author,
+    coverImageUrl: trip.coverImageUrl,
+    hasTrip: true, // 여정은 항상 있음
+  }));
+
+  const allBooks = [...libraryMapped, ...extraMapped];
+
+  const filteredBooks = allBooks.filter((book) => {
     const matchSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchFilter =
       filter === 'ALL' ||
@@ -33,6 +67,8 @@ const BookTripPage: React.FC = () => {
       (filter === 'UNWRITTEN' && !book.hasTrip);
     return matchSearch && matchFilter;
   });
+
+  const isLoading = isLoadingLibrary || isLoadingExtra;
 
   return (
     <div className="bg-light-bg min-h-screen pb-28">

@@ -1,14 +1,14 @@
-import type { LibraryBookWithTrip } from '@/types/mybooknote/booktrip/booktrip';
+import type { BookTripListItem } from '@/types/mybooknote/booktrip/booktrip';
 
 interface Props {
-  books: LibraryBookWithTrip[];
+  books: BookTripListItem[];
   onClick: (bookId: number) => void;
 }
 
 const BookTripBookList = ({ books, onClick }: Props) => (
   <div className="flex flex-col gap-4">
     {books.map((book) => (
-      <div key={book.libraryId} className="flex items-center gap-3 p-3 bg-white rounded-md shadow">
+      <div key={book.bookId} className="flex items-center gap-3 p-3 bg-white rounded-md shadow">
         <img
           src={book.coverImageUrl || '/placeholder.jpg'}
           alt={book.title}
