@@ -10,6 +10,7 @@ import {
   BookDetailResponse,
 } from '@/services/mylibrary/bookDetailService';
 import Header from '@/components/common/Header';
+import Loading from '@/components/common/Loading';
 
 interface BookDetailState extends BookDetailResponse {
   libraryId: number;
@@ -128,14 +129,7 @@ const BookDetailPage: React.FC = () => {
   }
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-gradient-to-r from-[#FCF6D4] to-[#F4E8B8]">
-        <div className="flex flex-col items-center">
-          <div className="w-10 h-10 border-4 border-[#FCF6D4] border-t-[#F4E8B8] rounded-full animate-spin mb-3"></div>
-          <p className="text-gray-700 text-sm">책 정보를 불러오는 중...</p>
-        </div>
-      </div>
-    );
+    return <Loading loadingText="책 정보를 불러오는 중..." />;
   }
 
   if (error || !bookDetail) {
