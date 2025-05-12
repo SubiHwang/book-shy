@@ -1,5 +1,5 @@
 import { authAxiosInstance } from '@/services/axiosInstance';
-import type { BookQuote } from '@/types/mybooknote/bookquote';
+import type { BookQuote } from '@/types/mybooknote/booknote/bookquote';
 
 // 📚 나의 인용구 목록 조회
 export const fetchBookQuoteList = async (): Promise<BookQuote[]> => {

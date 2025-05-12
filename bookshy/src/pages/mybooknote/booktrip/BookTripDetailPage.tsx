@@ -1,6 +1,5 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import { fetchBookTripsByBookId } from '@/services/mybooknote/booktrip/booktrip';
 import { fetchBookDetailByBookId } from '@/services/book/search';
 import { fetchUserProfile } from '@/services/mypage/profile';
@@ -12,10 +11,10 @@ import BookTripHeaderSection from '@/components/mybooknote/booktrip/BookTripHead
 import OtherUserTripList from '@/components/mybooknote/booktrip/OtherUserTripList';
 import MyTripBox from '@/components/mybooknote/booktrip/MyTripBox';
 import MyTripEditor from '@/components/mybooknote/booktrip/MyTripEditor';
+import Loading from '@/components/common/Loading'; // ✅ import 추가
 
 const BookTripDetailPage = () => {
   const { bookId } = useParams<{ bookId: string }>();
-  const [myContent, setMyContent] = useState('');
 
   const { data: trips = [], isLoading: isTripsLoading } = useQuery<BookTripWithUser[]>({
     queryKey: ['bookTrips', bookId],
@@ -34,38 +33,30 @@ const BookTripDetailPage = () => {
     queryFn: fetchUserProfile,
   });
 
-  const myTrip = trips.find((trip) => trip.isMine);
-  const otherTrips = trips.filter((trip) => !trip.isMine);
+  const myTrip = trips.find((trip) => trip.mine);
+  const otherTrips = trips.filter((trip) => !trip.mine);
 
   if (isTripsLoading || isBookLoading || isUserLoading) {
-    return <p className="text-center py-12 text-gray-500">로딩 중입니다...</p>;
+    return <Loading loadingText="책의 여정 정보를 불러오고 있어요..." />;
   }
 
   return (
     <div className="bg-[#f9f4ec] min-h-screen pb-28">
       <Header title="독서 기록" showBackButton showNotification />
       <div className="px-4 py-4">
-        {bookInfo?.title && bookInfo?.author && bookInfo?.publisher && (
-          <BookTripHeaderSection
-            title={bookInfo.title}
-            author={bookInfo.author}
-            publisher={bookInfo.publisher}
-            coverUrl={bookInfo.coverImageUrl}
-          />
-        )}
+        <BookTripHeaderSection
+          title={bookInfo!.title as string}
+          author={bookInfo!.author as string}
+          publisher={bookInfo!.publisher as string}
+          coverUrl={bookInfo!.coverImageUrl}
+        />
 
         <div className="flex flex-col gap-3">
           <OtherUserTripList trips={otherTrips} />
-
           {myTrip ? (
             <MyTripBox trip={myTrip} />
           ) : (
-            <MyTripEditor
-              profileImageUrl={myProfile?.profileImageUrl}
-              value={myContent}
-              onChange={setMyContent}
-              onSubmit={() => console.log('작성하기')}
-            />
+            <MyTripEditor profileImageUrl={myProfile?.profileImageUrl} />
           )}
         </div>
       </div>
