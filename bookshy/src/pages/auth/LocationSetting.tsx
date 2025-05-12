@@ -1,10 +1,43 @@
 import Header from '@/components/common/Header';
-import { FC, useEffect } from 'react';
-import { MapPin, Compass, Search } from 'lucide-react';
+import { FC, useEffect, useState } from 'react';
+import { MapPin, Locate, Search } from 'lucide-react';
 import { useLocationFetcher } from '@/hooks/mypage/useLocationFetcher';
 
 const LocationSetting: FC = () => {
   const { fetchCurrentLocation, address, loading, error } = useLocationFetcher();
+  const [isGpasEnabled, setIsGpsEnabled] = useState<boolean>(true);
+
+  // GPS 사용 가능 여부 확인
+  useEffect(() => {
+    const checkGpsAvailability = () => {
+      if (!navigator.geolocation) {
+        setIsGpsEnabled(false);
+        return;
+      }
+
+      // GPS 권한 확인을 위한 테스트 호출
+      navigator.permissions
+        ?.query({ name: 'geolocation' })
+        .then((permissionStatus) => {
+          setIsGpsEnabled(permissionStatus.state !== 'denied');
+
+          // 권한 상태 변경 감지
+          permissionStatus.onchange = () => {
+            setIsGpsEnabled(permissionStatus.state !== 'denied');
+          };
+        })
+        .catch(() => {
+          // permissions API를 지원하지 않는 경우, 실제 호출로 확인
+          navigator.geolocation.getCurrentPosition(
+            () => setIsGpsEnabled(true),
+            () => setIsGpsEnabled(false),
+            { timeout: 3000 },
+          );
+        });
+    };
+
+    checkGpsAvailability();
+  }, []);
 
   const handleAddressSelect = () => {
     // 주소 선택 처리 로직
@@ -57,19 +90,21 @@ const LocationSetting: FC = () => {
             />
           </div>
 
-          {loading ? (
-            <div className="flex justify-center py-4">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-            </div>
-          ) : error ? (
+          {error ? (
             <div className="mb-4">
               <p className="text-light-status-error text-sm mb-3">{error}</p>
               <button
                 onClick={fetchCurrentLocation}
-                className="w-full py-2.5 bg-gray-100 text-primary rounded-md mb-2 flex items-center justify-center transition hover:bg-gray-200 text-sm"
+                disabled={!isGpasEnabled || loading}
+                className={`w-full py-2.5 rounded-md flex items-center justify-center transition text-sm
+    ${
+      isGpasEnabled
+        ? 'bg-primary text-white hover:bg-primary/90'
+        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+    }`}
               >
-                <Compass className="mr-1" size={16} />
-                다시 시도하기
+                <Locate className="mr-1" size={16} />
+                현재 위치 가져오기
               </button>
             </div>
           ) : address ? (
@@ -82,9 +117,10 @@ const LocationSetting: FC = () => {
               </button>
               <button
                 onClick={fetchCurrentLocation}
+                disabled={!isGpasEnabled || loading}
                 className="w-full py-2.5 bg-gray-100 text-primary rounded-md flex items-center justify-center transition hover:bg-gray-200 text-sm"
               >
-                <Compass className="mr-1" size={16} />
+                <Locate className="mr-1" size={16} />
                 현재 위치 다시 가져오기
               </button>
             </div>
@@ -92,13 +128,15 @@ const LocationSetting: FC = () => {
             <div className="flex flex-col space-y-2">
               <button
                 onClick={fetchCurrentLocation}
+                disabled={!isGpasEnabled || loading}
                 className="w-full py-2.5 bg-primary text-white rounded-md flex items-center justify-center transition hover:bg-primary/90 text-sm"
               >
-                <Compass className="mr-1" size={16} />
+                <Locate className="mr-1" size={16} />
                 현재 위치 가져오기
               </button>
               <button
                 onClick={handleSearchAddress}
+                disabled={loading}
                 className="w-full py-2.5 bg-gray-100 text-light-text rounded-md flex items-center justify-center transition hover:bg-gray-200 text-sm"
               >
                 <Search className="mr-1" size={16} />
