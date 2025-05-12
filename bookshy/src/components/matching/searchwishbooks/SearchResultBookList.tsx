@@ -37,11 +37,7 @@ const SearchResultBookList: FC = () => {
   }, [searchParams]); // 의존성 배열에 searchParams 추가
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loading loadingText={'도서 검색 중...'} />
-      </div>
-    );
+    return <Loading loadingText={'도서 검색 중...'} />;
   }
 
   return (
