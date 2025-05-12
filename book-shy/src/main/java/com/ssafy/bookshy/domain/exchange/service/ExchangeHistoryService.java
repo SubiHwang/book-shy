@@ -14,8 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import static com.ssafy.bookshy.common.constants.ImageUrlConstants.PROFILE_IMAGE_BASE_URL;
-import static com.ssafy.bookshy.common.constants.ImageUrlConstants.COVER_IMAGE_BASE_URL;
 
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -47,8 +45,7 @@ public class ExchangeHistoryService {
                     : request.getRequesterId();
 
             String nickname = userService.getNicknameById(counterpartId);
-            String profileImageFile = userService.getProfileImageUrlById(counterpartId);
-            String profileImageUrl = PROFILE_IMAGE_BASE_URL + profileImageFile;
+            String profileImageUrl = userService.getProfileImageUrlById(counterpartId);
 
             Long receivedBookId = request.getRequesterId().equals(userId)
                     ? request.getBookBId()
@@ -72,10 +69,10 @@ public class ExchangeHistoryService {
                     .tradeType(request.getType().name())
                     .receivedBookTitle(receivedBook.getTitle())
                     .receivedBookAuthor(receivedBook.getAuthor())
-                    .receivedBookCoverUrl(COVER_IMAGE_BASE_URL + receivedBook.getCoverImageUrl())
+                    .receivedBookCoverUrl(receivedBook.getCoverImageUrl())
                     .givenBookTitle(givenBook.getTitle())
                     .givenBookAuthor(givenBook.getAuthor())
-                    .givenBookCoverUrl(COVER_IMAGE_BASE_URL + givenBook.getCoverImageUrl())
+                    .givenBookCoverUrl(givenBook.getCoverImageUrl())
                     .build();
         }).toList();
 

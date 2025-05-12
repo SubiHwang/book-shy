@@ -63,13 +63,13 @@ public class ChatMessageService {
      * @return 저장된 메시지 응답 DTO
      */
     @Transactional
-    public ChatMessageResponseDto saveMessage(ChatMessageRequestDto request) {
+    public ChatMessageResponseDto saveMessage(ChatMessageRequestDto request, Long userId) {
         ChatRoom chatRoom = chatRoomRepository.findById(request.getChatRoomId())
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
 
         ChatMessage message = ChatMessage.builder()
                 .chatRoom(chatRoom)
-                .senderId(request.getSenderId())
+                .senderId(userId)
                 .content(request.getContent())
                 .timestamp(LocalDateTime.now())
                 .type(request.getType())

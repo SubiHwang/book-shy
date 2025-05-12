@@ -152,6 +152,16 @@ public class KafkaEventConsumer {
             logData.put("eventData", logDto.getEventData());
             logData.put("timestamp", logDto.getTimestamp());
 
+
+            // 💥 여기에 상세 로그 추가!
+            log.info("🔍 받은 메시지 정보: 토픽={}, 파티션={}, 오프셋={}, 이벤트타입={}, 아이템ID={}, 타임스탬프={}",
+                    record.topic(),
+                    record.partition(),
+                    record.offset(),
+                    logDto.getEventType(),
+                    logDto.getEventData().get("itemId"),
+                    logDto.getTimestamp());
+
             // 인덱스 이름 - 공통 인덱스 사용
             String indexName = "recommend.event"; //3개의 개발자들이 공통 인덱스 사용하게 하고 내 것만 저장하게 바꿈!
 

@@ -42,33 +42,39 @@ public class BookQuoteService {
         return quote;
     }
 
-    // 💬 BookQuoteService.java - 인용구 목록 조회 서비스 추가
     /**
-     * 💬 사용자 ID와 (선택적으로) 도서 ID를 기반으로 인용구 목록을 조회합니다.
-     * - 도서 ID가 없으면 전체 인용구를,
-     * - 있으면 해당 도서의 인용구만 필터링합니다.
+     * 💬 사용자 ID를 기반으로 인용구 목록을 조회합니다.
      */
     @Transactional(readOnly = true)
-    public List<BookQuoteResponseDto> findQuoteResponsesByUserId(Long userId, Long bookId) {
+    public List<BookQuoteResponseDto> findQuoteResponsesByUserId(Long userId) {
         return bookQuoteRepository.findAll().stream()
                 .filter(q -> q.getUserId().equals(userId))
-                .filter(q -> bookId == null || q.getBookId().equals(bookId))
                 .map(q -> {
                     Book book = bookRepository.findById(q.getBookId())
                             .orElseThrow(() -> new IllegalArgumentException("도서 정보를 찾을 수 없습니다."));
-                    return BookQuoteResponseDto.builder()
-                            .quoteId(q.getQuoteId())
-                            .bookId(book.getId())
-                            .title(book.getTitle())
-                            .author(book.getAuthor())
-                            .description(book.getDescription())
-                            .publisher(book.getPublisher())
-                            .pubDate(book.getPubDate())
-                            .coverUrl(book.getCoverImageUrl())
-                            .content(q.getContent())
-                            .createdAt(q.getCreatedAt())
-                            .build();
+                    return BookQuoteResponseDto.from(q, book);
                 })
                 .toList();
+    }
+
+
+    /**
+     * 💬 특정 사용자의 특정 도서에 대한 인용구 목록 조회
+     *
+     * @param userId 사용자 ID
+     * @param bookId 도서 ID
+     * @return 인용구 응답 DTO
+     */
+    @Transactional(readOnly = true)
+    public BookQuoteResponseDto findOneQuoteResponseByUserIdAndBookId(Long userId, Long bookId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new IllegalArgumentException("도서 정보를 찾을 수 없습니다."));
+
+        BookQuote quote = bookQuoteRepository.findByUserIdAndBookId(userId, bookId);
+        if (quote == null) {
+            throw new IllegalArgumentException("해당 도서에 대한 인용구가 존재하지 않습니다.");
+        }
+
+        return BookQuoteResponseDto.from(quote, book);
     }
 }

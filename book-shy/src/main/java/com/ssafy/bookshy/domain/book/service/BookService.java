@@ -41,13 +41,13 @@ public class BookService {
     public void addWish(Long userId, WishRequestDto dto) {
 
         Users user = userService.getUserById(userId);
-        Book book = bookRepository.findByAladinItemId(dto.getItemId())
+        Book book = bookRepository.findByitemId(dto.getItemId())
                 .orElseGet(() -> {
                     BookResponseDto response = aladinClient.searchByItemIdToDto(dto.getItemId());
                     if (response.getTitle() == null) throw new RuntimeException("도서 정보 없음");
 
                     Book newBook = Book.builder()
-                            .aladinItemId(dto.getItemId())
+                            .itemId(response.getItemId())
                             .isbn(response.getIsbn13())
                             .title(response.getTitle())
                             .author(response.getAuthor())
@@ -82,7 +82,7 @@ public class BookService {
     public void removeWish(Long userId, Long itemId) {
 
         Users user = userService.getUserById(userId);
-        Book book = bookRepository.findByAladinItemId(itemId)
+        Book book = bookRepository.findByitemId(itemId)
                 .orElseThrow(() -> new RuntimeException("도서 없음"));
 
         Wish wish = wishRepository.findByUserAndBook(user, book)
@@ -123,7 +123,7 @@ public class BookService {
     public boolean isBookLiked(Long userId, Long itemId) {
 
         Users user = userService.getUserById(userId);
-        return bookRepository.findByAladinItemId(itemId)
+        return bookRepository.findByitemId(itemId)
                 .map(book -> wishRepository.existsByUserAndBook(user, book))
                 .orElse(false);
     }
@@ -134,6 +134,22 @@ public class BookService {
         return bookRepository.findByIsbn(isbn13)
                 .map(book -> wishRepository.existsByUserAndBook(user, book))
                 .orElse(false);
+    }
+
+    /**
+     * 📕 bookId를 기반으로 사용자의 서재에 있는 도서 상세 정보를 조회합니다.
+     *
+     * @param bookId 조회할 도서 ID
+     * @param userId 현재 로그인한 사용자 ID
+     * @return BookResponseDto 도서 상세 정보
+     * @throws RuntimeException 도서가 존재하지 않거나 접근 권한이 없을 경우
+     */
+    public BookResponseDto getBookDetailById(Long bookId, Long userId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new RuntimeException("해당 도서를 찾을 수 없습니다."));
+
+
+        return BookResponseDto.from(book, true); // isPublic은 true로 고정 (또는 필요 시 추출)
     }
 
 }

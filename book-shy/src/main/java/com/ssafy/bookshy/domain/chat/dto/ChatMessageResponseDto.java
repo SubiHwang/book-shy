@@ -23,6 +23,7 @@ public class ChatMessageResponseDto {
     private String content;        // 메시지 본문
     private String type;        // 메시지 타입
     private LocalDateTime sentAt;  // 보낸 시간
+    private boolean isRead = false; // ✅ 읽음 여부 필드 추가
 
     public static ChatMessageResponseDto from(ChatMessage message, String senderNickname) {
         return ChatMessageResponseDto.builder()
@@ -33,6 +34,7 @@ public class ChatMessageResponseDto {
                 .content(message.getContent())
                 .sentAt(message.getTimestamp())
                 .type(message.getType())
+                .isRead(message.isRead())
                 .build();
     }
 }

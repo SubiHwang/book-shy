@@ -9,8 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LibraryResponseDto {
-
+public class LibraryWithTripResponseDto {
     private Long libraryId;
     private Long bookId;
     private Long itemId;
@@ -19,10 +18,11 @@ public class LibraryResponseDto {
     private String author;
     private String coverImageUrl;
     private boolean isPublic;
+    private boolean hasTrip;
 
-    public static LibraryResponseDto from(Library lib) {
+    public static LibraryWithTripResponseDto from(Library lib, boolean hasTrip) {
         Book book = lib.getBook();
-        return LibraryResponseDto.builder()
+        return LibraryWithTripResponseDto.builder()
                 .libraryId(lib.getId())
                 .bookId(book.getId())
                 .itemId(book.getItemId())
@@ -31,6 +31,7 @@ public class LibraryResponseDto {
                 .author(book.getAuthor())
                 .coverImageUrl(book.getCoverImageUrl())
                 .isPublic(lib.isPublic())
+                .hasTrip(hasTrip)
                 .build();
     }
 }

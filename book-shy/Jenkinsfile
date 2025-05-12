@@ -37,7 +37,8 @@ pipeline {
         KAKAO_CLIENT_ID = credentials('KAKAO_CLIENT_ID')        // 추가
         KAKAO_REDIRECT_URI = credentials('KAKAO_REDIRECT_URI')  // 추가
 
-        DEV_ID = credentials('DEV_ID')
+        FIREBASE_PROJECT_ID = 'bookshy-b4c32'
+        GOOGLE_APPLICATION_CREDENTIALS = '/app/secret/firebase-service-account.json'
     }
 
     stages {
@@ -180,6 +181,15 @@ pipeline {
                         // 블루-그린 배포 방식으로 개발 환경에 배포
                         sshagent(credentials: ['remote-server-credentials']) {
                             dir("${env.WORKSPACE}/book-shy") {
+                                // 🔹 firebase-service-account.json 파일 준비
+                                withCredentials([file(credentialsId: 'firebase-service-account', variable: 'FIREBASE_CREDENTIAL_FILE')]) {
+                                    sh '''
+                                        mkdir -p secrets
+                                        cp $FIREBASE_CREDENTIAL_FILE secrets/firebase-service-account.json
+                                        echo "✅ firebase-service-account.json 로컬 복사 완료"
+                                    '''
+                                }
+
                                 // 도커 컴포즈 파일을 원격 서버에 복사
                                 sh '''
                                     # ✅ 1. docker-compose.yml 안에 DB_URL, DB_USERNAME, DB_PASSWORD 직접 치환
@@ -221,6 +231,7 @@ pipeline {
                                     # ✅ 2. 서버에 전송
                                     ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
                                         mkdir -p /home/ubuntu
+                                        mkdir -p /home/ubuntu/secrets
                                     "
 
                                     scp -v -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${DEV_SERVER}:/home/ubuntu/
