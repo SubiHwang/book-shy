@@ -13,6 +13,7 @@ const WishBooksDetailPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     const fetchBookDetail = async (bookId: number) => {
       setIsLoading(true);
       try {
@@ -63,7 +64,7 @@ const WishBooksDetailPage = () => {
                   category={bookDetail.category}
                   description={bookDetail.description}
                   isLoading={isLoading}
-                  />
+                />
               </div>
             </div>
           </>

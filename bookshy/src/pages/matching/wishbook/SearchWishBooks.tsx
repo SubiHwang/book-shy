@@ -11,7 +11,9 @@ const SearchWishBooks = () => {
   const handleSearch = async (e: KeyboardEvent<HTMLInputElement>): Promise<void> => {
     if (!searchTerm) return;
     if (e.key === 'Enter') {
-      navigate(`/matching/search-wish-books/result?searchTerm=${encodeURIComponent(searchTerm.trim())}`); // 검색어 앞뒤 공백 제거
+      navigate(
+        `/matching/search-wish-books/result?searchTerm=${encodeURIComponent(searchTerm.trim())}`,
+      ); // 검색어 앞뒤 공백 제거
     }
   };
 
@@ -31,7 +33,7 @@ const SearchWishBooks = () => {
       <div className="bg-primary-light">
         <PopularSearchTerm />
       </div>
-      <Outlet/>
+      <Outlet />
     </div>
   );
 };

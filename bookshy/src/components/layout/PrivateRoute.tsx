@@ -6,11 +6,7 @@ import Loading from '@/components/common/Loading';
 const PrivateRoute: FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isLoggedIn, isLoading } = useAuth();
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loading />
-      </div>
-    );
+    return <Loading />;
   }
 
   if (!isLoggedIn) {
