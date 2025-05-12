@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.recommend.service;
 
+import com.ssafy.bookshy.domain.book.dto.BookListResponseDto;
 import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
 import com.ssafy.bookshy.external.aladin.AladinClient;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -37,7 +39,7 @@ public class BookRecommendByCatecory {
      * @param recommendCount 추천할 책 개수 (기본값 3)
      * @return 추천된 책 목록
      */
-    public List<BookResponseDto> getCategoryBasedRecommendations(Long userId, int recommendCount) {
+    public List<BookListResponseDto> getCategoryBasedRecommendations(Long userId, int recommendCount) {
         // 기본 추천 개수 설정
         if (recommendCount <= 0) {
             recommendCount = 3;
@@ -49,7 +51,8 @@ public class BookRecommendByCatecory {
         // 위시리스트가 비어있으면 베스트셀러로 추천
         if (bookIds.isEmpty()) {
             log.info("사용자 {}의 위시리스트가 비어있어 베스트셀러로 추천합니다.", userId);
-            return aladinClient.getBestSellerRecommendations(recommendCount);
+            List<BookResponseDto> bestSellers = aladinClient.getBestSellerRecommendations(recommendCount);
+            return convertToBookListResponseDto(bestSellers);
         }
 
         // STEP 2: 위시리스트 책들의 카테고리 분석
@@ -58,7 +61,8 @@ public class BookRecommendByCatecory {
         // 카테고리 정보를 찾지 못했으면 베스트셀러로 추천
         if (categoryFrequency.isEmpty()) {
             log.info("사용자 {}의 위시리스트 책들의 카테고리를 찾을 수 없어 베스트셀러로 추천합니다.", userId);
-            return aladinClient.getBestSellerRecommendations(recommendCount);
+            List<BookResponseDto> bestSellers = aladinClient.getBestSellerRecommendations(recommendCount);
+            return convertToBookListResponseDto(bestSellers);
         }
 
         // STEP 3: 가장 많이 나타나는 상위 카테고리 선택
@@ -66,7 +70,25 @@ public class BookRecommendByCatecory {
         log.info("사용자 {}의 최다 선호 카테고리: {}", userId, topCategory);
 
         // STEP 4: 선택된 카테고리 기반으로 알라딘 API에서 책 추천받기
-        return aladinClient.getRecommendationsByCategory(topCategory, recommendCount);
+        List<BookResponseDto> categoryRecommendations = aladinClient.getRecommendationsByCategory(topCategory, recommendCount);
+        return convertToBookListResponseDto(categoryRecommendations);
+    }
+
+    /**
+     * BookResponseDto 리스트를 BookListResponseDto 리스트로 변환
+     */
+    private List<BookListResponseDto> convertToBookListResponseDto(List<BookResponseDto> books) {
+        return books.stream()
+                .map(book -> BookListResponseDto.builder()
+                        .itemId(book.getAladinItemId())
+                        .title(book.getTitle())
+                        .author(book.getAuthor())
+                        .publisher(book.getPublisher())
+                        .coverImageUrl(book.getCoverImageUrl())
+                        .description(book.getDescription())
+                        .isLiked(false) // 기본값으로 false 설정
+                        .build())
+                .collect(Collectors.toList());
     }
 
     /**

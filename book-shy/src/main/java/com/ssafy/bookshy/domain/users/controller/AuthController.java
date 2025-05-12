@@ -6,7 +6,6 @@ import com.ssafy.bookshy.domain.users.dto.RefreshDto;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.service.AuthService;
 import com.ssafy.bookshy.domain.users.service.AuthTokenService;
-import com.ssafy.bookshy.domain.users.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,7 +33,6 @@ public class AuthController {
 
     private final AuthService authService;
     private final AuthTokenService authTokenService;
-    private final UserService userService;
 
 //    @PostMapping("/sign-up")
 //    @Operation(
@@ -60,8 +58,7 @@ public class AuthController {
     @PostMapping("/refresh")
     @Operation(
             summary = "토큰 재발급",
-            description = "Refresh Token을 이용하여 새로운 Refresh Token, Access Token을 발급 받기 위한 메서드입니다.",
-            tags = {"Auth"}
+            description = "Refresh Token을 이용하여 새로운 Refresh Token, Access Token을 발급 받기 위한 메서드입니다."
     )
     @ApiResponses({
             @ApiResponse(
@@ -105,8 +102,7 @@ public class AuthController {
     @PostMapping("/sign-in/kakao")
     @Operation(
             summary = "카카오 로그인",
-            description = "카카오 OAuth 토큰을 이용해 로그인하기 위한 메서드입니다.",
-            tags = {"Auth"}
+            description = "카카오 OAuth 토큰을 이용해 로그인하기 위한 메서드입니다."
     )
     @ApiResponses({
             @ApiResponse(

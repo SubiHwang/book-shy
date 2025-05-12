@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.recommend.service;
 
+import com.ssafy.bookshy.domain.book.dto.BookListResponseDto;
 import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
 import com.ssafy.bookshy.external.aladin.AladinClient;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class BookRecommendByAuthor {
      * @param recommendCount 추천 받을 책 개수 (기본값 1)
      * @return 작가 기반 추천 책 목록
      */
-    public List<BookResponseDto> getAuthorBasedRecommendations(Long userId, int recommendCount) {
+    public List<BookListResponseDto> getAuthorBasedRecommendations(Long userId, int recommendCount) {
         try {
             log.info("사용자 {} 작가 기반 추천 시작", userId);
 
@@ -51,7 +52,8 @@ public class BookRecommendByAuthor {
             // 가장 많이 검색한 작가를 찾지 못했을 경우
             if (topAuthor == null || topAuthor.isEmpty()) {
                 log.info("사용자 {}가 검색한 작가 정보를 찾을 수 없습니다. 베스트셀러로 대체합니다.", userId);
-                return aladinClient.getBestSellerRecommendations(recommendCount);
+                List<BookResponseDto> bestSellers = aladinClient.getBestSellerRecommendations(recommendCount);
+                return convertToBookListResponseDto(bestSellers);
             }
 
             log.info("사용자 {}의 가장 많이 검색한 작가: {}", userId, topAuthor);
@@ -62,7 +64,8 @@ public class BookRecommendByAuthor {
             // 작가의 책을 찾지 못했을 경우
             if (authorBooks.isEmpty()) {
                 log.info("작가 {}의 책을 찾을 수 없습니다. 베스트셀러로 대체합니다.", topAuthor);
-                return aladinClient.getBestSellerRecommendations(recommendCount);
+                List<BookResponseDto> bestSellers = aladinClient.getBestSellerRecommendations(recommendCount);
+                return convertToBookListResponseDto(bestSellers);
             }
 
             // 4. 랜덤하게 섞어서 선택
@@ -74,7 +77,7 @@ public class BookRecommendByAuthor {
                     .collect(Collectors.toList());
 
             log.info("작가 {} 기반 추천 완료: {}권", topAuthor, result.size());
-            return result;
+            return convertToBookListResponseDto(result);
 
         } catch (Exception e) {
             log.error("작가 기반 추천 중 오류 발생: {}", e.getMessage(), e);
@@ -82,6 +85,23 @@ public class BookRecommendByAuthor {
             // 오류 발생 시 빈 리스트 반환
             return Collections.emptyList();
         }
+    }
+
+    /**
+     * BookResponseDto 리스트를 BookListResponseDto 리스트로 변환
+     */
+    private List<BookListResponseDto> convertToBookListResponseDto(List<BookResponseDto> books) {
+        return books.stream()
+                .map(book -> BookListResponseDto.builder()
+                        .itemId(book.getAladinItemId())
+                        .title(book.getTitle())
+                        .author(book.getAuthor())
+                        .publisher(book.getPublisher())
+                        .coverImageUrl(book.getCoverImageUrl())
+                        .description(book.getDescription())
+                        .isLiked(false) // 기본값으로 false 설정
+                        .build())
+                .collect(Collectors.toList());
     }
 
     /**
