@@ -92,7 +92,13 @@ pipeline {
                                     echo "VITE_FIREBASE_MEASUREMENT_ID=${VITE_FIREBASE_MEASUREMENT_ID}" >> .env
                                     echo "VITE_FIREBASE_VAPID_KEY=${VITE_FIREBASE_VAPID_KEY}" >> .env
                                     echo "VITE_KAKAO_REST_API_KEY=${VITE_KAKAO_REST_API_KEY}" >> .env
+                                    
+                                    echo "===== ✅ .env 파일 출력 ====="
                                     cat .env
+
+                                    echo "===== ✅ VITE_KAKAO_REST_API_KEY 로그 ====="
+                                    grep VITE_KAKAO_REST_API_KEY .env || echo "⚠️ 키가 존재하지 않습니다!"
+
                                 """
                                 
                                 // Docker 이미지 빌드
