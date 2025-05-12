@@ -11,11 +11,9 @@ import TradeHistoryList from '@/pages/mypage/TradeHistoryList';
 import WishBooks from '@/pages/matching/wishbook/WishBooks';
 import NeighborBookshelfPage from '@/pages/matching/neighborbookshelf/NeighborBookshelfPage';
 import AddBySelfPage from '@/pages/mylibrary/AddBook/AddBySelfPage';
-import AddByTitlePage from '@/pages/mylibrary/AddBook/AddByTitlePage';
 import AddByBarcodePage from '@/pages/mylibrary/AddBook/AddByISBNPage';
 import AddISBNResultPage from '@/pages/mylibrary/AddBook/AddISBNResultPage';
 import AddBySearchPage from '@/pages/mylibrary/AddBook/AddBySearchPage';
-import OCRResultPage from '@/pages/mylibrary/AddBook/OCRResultPage';
 import AllMyBooksTab from '@/pages/mylibrary/tabs/AllBooksTab';
 import PublicMyBooksTab from '@/pages/mylibrary/tabs/PublicBooksTab';
 import SearchWishBooks from '@/pages/matching/wishbook/SearchWishBooks';
@@ -23,6 +21,7 @@ import BookDetailPage from '@/pages/mylibrary/BookDetailPage';
 import BookInfoTab from '@/pages/mylibrary/tabs/BookInfoTab';
 import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
 import ISBNScanResultPage from '@/pages/mylibrary/AddBook/ISBNScanResultPage';
+import SearchBookDetailPage from '@/pages/mylibrary/AddBook/SearchBookDetailPage';
 import MyBookNotesPage from '@/pages/mybooknote/booknote/MyBookNotesPage';
 import BookNoteDetailPage from '@/pages/mybooknote/booknote/BookNoteDetailPage';
 import BookNoteFullPage from '@/pages/mybooknote/booknote/BookNoteFullPage';
@@ -95,12 +94,14 @@ const AppLayout: FC = () => {
                   {/* 📚 책 추가 페이지 */}
                   <Route path="/bookshelf/add/search" element={<AddBySearchPage />} />
                   <Route path="/bookshelf/add/self" element={<AddBySelfPage />} />
-                  <Route path="/bookshelf/add/title" element={<AddByTitlePage />} />
                   <Route path="/bookshelf/add/isbn" element={<AddByBarcodePage />} />
                   <Route path="/bookshelf/add/isbn-scan-result" element={<AddISBNResultPage />} />
-                  {/* OCR, ISBN결과 페이지 */}
-                  <Route path="/bookshelf/add/ocr-result" element={<OCRResultPage />} />
+                  {/* ISBN결과 페이지 */}
                   <Route path="/bookshelf/add/isbn-result/:isbn" element={<ISBNScanResultPage />} />
+                  <Route
+                    path="/bookshelf/add/searchdetail/:id"
+                    element={<SearchBookDetailPage />}
+                  />
 
                   {/* 📚 매칭 페이지 */}
                   <Route path="/matching" element={<MatchingPage />}>
