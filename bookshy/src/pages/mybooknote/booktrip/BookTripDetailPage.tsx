@@ -11,6 +11,7 @@ import BookTripHeaderSection from '@/components/mybooknote/booktrip/BookTripHead
 import OtherUserTripList from '@/components/mybooknote/booktrip/OtherUserTripList';
 import MyTripBox from '@/components/mybooknote/booktrip/MyTripBox';
 import MyTripEditor from '@/components/mybooknote/booktrip/MyTripEditor';
+import Loading from '@/components/common/Loading'; // ✅ import 추가
 
 const BookTripDetailPage = () => {
   const { bookId } = useParams<{ bookId: string }>();
@@ -36,7 +37,7 @@ const BookTripDetailPage = () => {
   const otherTrips = trips.filter((trip) => !trip.mine);
 
   if (isTripsLoading || isBookLoading || isUserLoading) {
-    return <p className="text-center py-12 text-gray-500">로딩 중입니다...</p>;
+    return <Loading loadingText="책의 여정 정보를 불러오고 있어요..." />;
   }
 
   return (
