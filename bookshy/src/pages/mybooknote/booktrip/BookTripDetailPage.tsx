@@ -60,12 +60,7 @@ const BookTripDetailPage = () => {
           {myTrip ? (
             <MyTripBox trip={myTrip} />
           ) : (
-            <MyTripEditor
-              profileImageUrl={myProfile?.profileImageUrl}
-              value={myContent}
-              onChange={setMyContent}
-              onSubmit={() => console.log('작성하기')}
-            />
+            <MyTripEditor profileImageUrl={myProfile?.profileImageUrl} />
           )}
         </div>
       </div>

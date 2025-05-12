@@ -22,13 +22,13 @@ const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
   const handleToggleLike = async (e: React.MouseEvent) => {
     // Stop event propagation to prevent navigation
     e.stopPropagation();
-    
+
     // itemId가 없으면 함수 실행을 중단
     if (wishBook.itemId === undefined) {
       console.error('Book ID is missing');
       return;
     }
-    
+
     setIsLoading(true);
     try {
       let response;
@@ -53,7 +53,7 @@ const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div
       className="card flex items-center justify-between p-4 mb-4 w-full cursor-pointer"
