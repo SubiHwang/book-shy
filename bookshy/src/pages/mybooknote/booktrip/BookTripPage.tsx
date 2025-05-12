@@ -1,11 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+
 import {
   fetchLibraryBooksWithTrip,
   fetchMyTripsOutsideLibrary,
 } from '@/services/mybooknote/booktrip/booktrip';
-import type { BookTripBookItem } from '@/types/mybooknote/booktrip/booktrip';
+import type {
+  LibraryBookWithTrip,
+  BookTripBookItem,
+  BookTripListItem,
+} from '@/types/mybooknote/booktrip/booktrip';
 
 import Header from '@/components/common/Header';
 import TabNavBar from '@/components/common/TabNavBar';
@@ -23,24 +28,43 @@ const BookTripPage: React.FC = () => {
     { path: '/booknotes/trip', label: '책의 여정 보기' },
   ];
 
-  const { data: libraryTrips = [], isLoading: isLoadingLibrary } = useQuery<BookTripBookItem[]>({
+  // ✅ 여정 여부 포함 서재 도서
+  const { data: libraryBooks = [], isLoading: isLoadingLibrary } = useQuery<LibraryBookWithTrip[]>({
     queryKey: ['libraryBooksWithTrip'],
     queryFn: fetchLibraryBooksWithTrip,
   });
 
+  // ✅ 서재에 없는 여정만 있는 도서
   const { data: extraTrips = [], isLoading: isLoadingExtra } = useQuery<BookTripBookItem[]>({
     queryKey: ['myTripsOutsideLibrary'],
     queryFn: fetchMyTripsOutsideLibrary,
   });
 
-  const allTrips = [...libraryTrips, ...extraTrips];
+  // ✅ 공통 리스트 타입으로 가공
+  const libraryMapped: BookTripListItem[] = libraryBooks.map((book) => ({
+    bookId: book.bookId,
+    title: book.title,
+    author: book.author,
+    coverImageUrl: book.coverImageUrl,
+    hasTrip: book.hasTrip,
+  }));
 
-  const filteredTrips = allTrips.filter((item) => {
-    const matchSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
+  const extraMapped: BookTripListItem[] = extraTrips.map((trip) => ({
+    bookId: trip.bookId,
+    title: trip.title,
+    author: trip.author,
+    coverImageUrl: trip.coverImageUrl,
+    hasTrip: true, // 여정은 항상 있음
+  }));
+
+  const allBooks = [...libraryMapped, ...extraMapped];
+
+  const filteredBooks = allBooks.filter((book) => {
+    const matchSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchFilter =
       filter === 'ALL' ||
-      (filter === 'WRITTEN' && item.hasTrip) ||
-      (filter === 'UNWRITTEN' && !item.hasTrip); // 현재는 hasTrip이 모두 true이므로 실제 UNWRITTEN 필터는 사용되지 않음
+      (filter === 'WRITTEN' && book.hasTrip) ||
+      (filter === 'UNWRITTEN' && !book.hasTrip);
     return matchSearch && matchFilter;
   });
 
@@ -60,11 +84,11 @@ const BookTripPage: React.FC = () => {
         />
         {isLoading ? (
           <p className="text-center text-gray-500">불러오는 중...</p>
-        ) : filteredTrips.length === 0 ? (
+        ) : filteredBooks.length === 0 ? (
           <p className="text-center text-sm text-gray-400 mt-12">조건에 맞는 책이 없습니다.</p>
         ) : (
           <BookTripBookList
-            books={filteredTrips}
+            books={filteredBooks}
             onClick={(bookId) => navigate(`/booknotes/trip/${bookId}`)}
           />
         )}

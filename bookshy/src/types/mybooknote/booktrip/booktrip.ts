@@ -17,6 +17,14 @@ export interface BookTripBookItem {
   mine: boolean;
 }
 
+export interface BookTripListItem {
+  bookId: number;
+  title: string;
+  author: string;
+  coverImageUrl: string;
+  hasTrip: boolean;
+}
+
 export interface LibraryBookWithTrip extends LibraryBook {
   hasTrip: boolean; // ✅ 나의 책 여정 존재 여부
 }
