@@ -5,6 +5,7 @@ import type {
   UpdateBookTripRequest,
   LibraryBookWithTrip,
   BookTripWithUser,
+  BookTripBookItem,
 } from '@/types/mybooknote/booktrip/booktrip';
 
 // ✅ 책의 여정 전체 조회
@@ -33,11 +34,11 @@ export const deleteBookTrip = (tripId: number): Promise<void> => {
 };
 
 // ✅ 여정 작성 여부 포함 서재 목록 조회
-export const fetchLibraryBooksWithTrip = (): Promise<LibraryBookWithTrip[]> => {
-  return authAxiosInstance.get('/library/with-trip');
+export const fetchLibraryBooksWithTrip = (): Promise<BookTripBookItem[]> => {
+  return authAxiosInstance.get('/library/with-trip'); // API 응답도 해당 구조로 변경해야 함
 };
 
 // ✅ 내가 여정은 작성했지만 서재에는 없는 책 목록 조회
-export const fetchMyTripsOutsideLibrary = (): Promise<BookTripWithUser[]> => {
-  return authAxiosInstance.get('/booktrip/my-only-not-in-library');
+export const fetchMyTripsOutsideLibrary = (): Promise<BookTripBookItem[]> => {
+  return authAxiosInstance.get('/booktrip/my-only-not-in-library'); // API 응답도 위 구조로
 };

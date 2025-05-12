@@ -1,8 +1,13 @@
+// 📁 pages/mybooknote/booktrip/BookTripPage.tsx
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchLibraryBooksWithTrip } from '@/services/mybooknote/booktrip/booktrip';
-import type { LibraryBookWithTrip } from '@/types/mybooknote/booktrip/booktrip';
+import {
+  fetchLibraryBooksWithTrip,
+  fetchMyTripsOutsideLibrary,
+} from '@/services/mybooknote/booktrip/booktrip';
+import type { BookTripBookItem } from '@/types/mybooknote/booktrip/booktrip';
 
 import Header from '@/components/common/Header';
 import TabNavBar from '@/components/common/TabNavBar';
@@ -20,19 +25,28 @@ const BookTripPage: React.FC = () => {
     { path: '/booknotes/trip', label: '책의 여정 보기' },
   ];
 
-  const { data: libraryBooks = [], isLoading } = useQuery<LibraryBookWithTrip[]>({
+  const { data: libraryTrips = [], isLoading: isLoadingLibrary } = useQuery<BookTripBookItem[]>({
     queryKey: ['libraryBooksWithTrip'],
     queryFn: fetchLibraryBooksWithTrip,
   });
 
-  const filteredBooks = libraryBooks.filter((book) => {
-    const matchSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
+  const { data: extraTrips = [], isLoading: isLoadingExtra } = useQuery<BookTripBookItem[]>({
+    queryKey: ['myTripsOutsideLibrary'],
+    queryFn: fetchMyTripsOutsideLibrary,
+  });
+
+  const allTrips = [...libraryTrips, ...extraTrips];
+
+  const filteredTrips = allTrips.filter((item) => {
+    const matchSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchFilter =
       filter === 'ALL' ||
-      (filter === 'WRITTEN' && book.hasTrip) ||
-      (filter === 'UNWRITTEN' && !book.hasTrip);
+      (filter === 'WRITTEN' && item.hasTrip) ||
+      (filter === 'UNWRITTEN' && !item.hasTrip); // 현재는 hasTrip이 모두 true이므로 실제 UNWRITTEN 필터는 사용되지 않음
     return matchSearch && matchFilter;
   });
+
+  const isLoading = isLoadingLibrary || isLoadingExtra;
 
   return (
     <div className="bg-light-bg min-h-screen pb-28">
@@ -48,11 +62,11 @@ const BookTripPage: React.FC = () => {
         />
         {isLoading ? (
           <p className="text-center text-gray-500">불러오는 중...</p>
-        ) : filteredBooks.length === 0 ? (
+        ) : filteredTrips.length === 0 ? (
           <p className="text-center text-sm text-gray-400 mt-12">조건에 맞는 책이 없습니다.</p>
         ) : (
           <BookTripBookList
-            books={filteredBooks}
+            books={filteredTrips}
             onClick={(bookId) => navigate(`/booknotes/trip/${bookId}`)}
           />
         )}
