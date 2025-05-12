@@ -6,11 +6,22 @@ import type { BookSearchItem } from '@/types/mylibrary/bookSearch';
 interface BookSearchItemProps {
   book: BookSearchItem;
   onAddBook: (itemId: number) => void;
+  onItemClick?: (itemId: number) => void; // 아이템 클릭 핸들러 추가
 }
 
-const BookSearchItem: FC<BookSearchItemProps> = ({ book, onAddBook }) => {
+const BookSearchItem: FC<BookSearchItemProps> = ({ book, onAddBook, onItemClick }) => {
+  // 아이템 클릭 핸들러
+  const handleItemClick = () => {
+    if (onItemClick && book.itemId) {
+      onItemClick(book.itemId);
+    }
+  };
+
   return (
-    <div className="card flex items-center justify-between p-4 mb-4 w-full cursor-pointer">
+    <div
+      className="card flex items-center justify-between p-4 mb-4 w-full cursor-pointer"
+      onClick={handleItemClick} // 카드 클릭 이벤트
+    >
       {/* Book Image */}
       <div className="flex-shrink-0 w-24 h-32 mr-4">
         <img
