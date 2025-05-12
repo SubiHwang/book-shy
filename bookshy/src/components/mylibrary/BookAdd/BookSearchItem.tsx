@@ -26,11 +26,11 @@ const BookSearchItem: FC<BookSearchItemProps> = ({ book, onAddBook }) => {
 
       {/* Book Info */}
       <div className="flex-grow min-w-0 pr-2">
-        <h3 className="text-base font-medium text-gray-800 mb-1 truncate" title={book.title}>
+        <h3 className="text-base font-medium text-light-text mb-1 truncate" title={book.title}>
           {book.title}
         </h3>
-        <p className="text-xs text-gray-600 mb-1 truncate">{book.author}</p>
-        <p className="text-xs text-gray-500 mb-1 truncate">{book.publisher}</p>
+        <p className="text-xs text-light-text-secondary mb-1 truncate">{book.author}</p>
+        <p className="text-xs text-light-text-muted mb-1 truncate">{book.publisher}</p>
         {book.description && (
           <p
             className="text-xs text-gray-500 line-clamp-2 overflow-hidden mb-1"
