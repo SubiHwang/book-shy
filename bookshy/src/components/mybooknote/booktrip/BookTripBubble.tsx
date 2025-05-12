@@ -2,7 +2,7 @@ interface Props {
   profileImageUrl: string;
   nickname: string;
   createdAt: string;
-  content: string;
+  content: React.ReactNode;
   isMine?: boolean;
   children?: React.ReactNode; // 수정/삭제 버튼 영역 등
 }
