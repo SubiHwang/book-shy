@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -107,7 +108,7 @@ public class ChatMessageService {
                 .chatRoom(chatRoom)
                 .senderId(dto.getSenderId())
                 .content(dto.getContent())
-                .timestamp(LocalDateTime.now()) // Kafka 메시지에는 timestamp가 없을 수 있으므로 현재 시간
+                .timestamp(LocalDateTime.now(ZoneId.of("Asia/Seoul"))) // Kafka 메시지에는 timestamp가 없을 수 있으므로 현재 시간
                 .type(dto.getType())
                 .build();
 
