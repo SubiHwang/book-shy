@@ -6,6 +6,8 @@ import { createNoteWithQuote } from '@/services/mybooknote/booknote/booknotequot
 import BookNoteForm from '@/components/mybooknote/booknote/BookNoteForm';
 import type { LibraryBook } from '@/types/mybooknote/booknote/library';
 import { useState } from 'react';
+import Header from '@/components/common/Header';
+import BookNoteHeader from '@/components/mybooknote/booknote/BookNoteHeader';
 
 const BookNoteCreatePage: React.FC = () => {
   const navigate = useNavigate();
@@ -24,7 +26,7 @@ const BookNoteCreatePage: React.FC = () => {
   const targetBook =
     bookId !== null ? libraryBooks.find((book) => book.bookId === bookId) : undefined;
 
-  const { data: bookDetail } = useQuery({
+  const { data: bookDetail, isLoading } = useQuery({
     queryKey: ['book-detail', bookId],
     queryFn: () => fetchBookDetailByBookId(bookId as number),
     enabled: typeof bookId === 'number',
@@ -59,27 +61,15 @@ const BookNoteCreatePage: React.FC = () => {
   if (!targetBook) return <p className="p-4">해당 책이 서재에 없습니다.</p>;
 
   return (
-    <div className="min-h-screen bg-[#f9f4ec] px-4 py-6">
-      <button onClick={() => navigate(-1)} className="mb-4 text-sm text-gray-600">
-        {'< 뒤로가기'}
-      </button>
+    <div>
+      <Header
+        title="독서 기록 작성하기"
+        onBackClick={() => navigate(-1)}
+        showBackButton={true}
+        showNotification={true}
+      />
 
-      <div className="flex items-center gap-4 mb-6">
-        <img
-          src={bookDetail?.coverImageUrl || '/placeholder.jpg'}
-          alt={bookDetail?.title}
-          className="w-20 h-28 rounded-md object-cover"
-        />
-        <div>
-          <h1 className="font-bold text-lg">{bookDetail?.title}</h1>
-          {bookDetail?.author && (
-            <p className="text-sm text-gray-600">작가 : {bookDetail.author}</p>
-          )}
-          {bookDetail?.publisher && (
-            <p className="text-sm text-gray-600">출판사 : {bookDetail.publisher}</p>
-          )}
-        </div>
-      </div>
+      <BookNoteHeader title={bookDetail?.title} author={bookDetail?.author} publisher={bookDetail?.publisher} coverImageUrl={bookDetail?.coverImageUrl} isLoading={isLoading} />
 
       <BookNoteForm
         quoteText={quoteText}
