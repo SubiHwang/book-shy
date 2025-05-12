@@ -36,8 +36,8 @@ import Login from '@/pages/auth/Login';
 import PrivateRoute from '@/components/layout/PrivateRoute';
 import KaKaoOauth from '@/pages/auth/KaKaoOauth';
 import WishBooksDetailPage from '@/pages/matching/wishbook/WishBooksDetailPage';
-import RecommandedWishBookList from '../matching/searchwishbooks/RecommandedWishBookList';
-import SearchResultBookList from '../matching/searchwishbooks/SearchResultBookList';
+import RecommandedWishBookList from '@/components/matching/searchwishbooks/RecommandedWishBookList';
+import SearchResultBookList from '@/components/matching/searchwishbooks/SearchResultBookList';
 import ChatListPage from '@/pages/chat/ChatListPage';
 import ChatRoomPage from '@/pages/chat/ChatRoomPage';
 import TradeReviewPage from '@/pages/chat/TradeReviewPage';
@@ -63,14 +63,6 @@ const AppLayout: FC = () => {
           {/* 공개 라우트 - 로그인하지 않아도 접근 가능 */}
           <Route path="/login" element={<Login />} />
           <Route path="/oauth" element={<KaKaoOauth />} />
-
-          {/* 📚 매칭 페이지 */}
-          <Route path="/matching" element={<MatchingPage />}>
-            <Route index element={<MatchingRecommend />} />
-            <Route path="wish-books" element={<WishBooks />} />
-          </Route>
-          <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
-          <Route path="matching/search-wish-books" element={<SearchWishBooks />} />
 
           {/* 보호된 라우트 - 로그인해야만 접근 가능 */}
           <Route
