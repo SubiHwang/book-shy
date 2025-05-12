@@ -128,7 +128,7 @@ const AddBySearchPage: FC = () => {
               <div className="flex items-center bg-white rounded-full px-4 py-2">
                 <input
                   type="text"
-                  placeholder="책 제목을 입력해주세요"
+                  placeholder="책 제목, 저자, 출판사..."
                   className="bg-transparent w-full outline-none text-sm text-gray-700"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -164,7 +164,7 @@ const AddBySearchPage: FC = () => {
         )}
 
         {/* 책 목록 */}
-        <div className="bg-light-bg p-4 flex-1 flex flex-col gap-4 min-h-[calc(100vh-180px)] pb-20">
+        <div className="bg-light-bg p-4 flex-1 flex flex-col min-h-[calc(100vh-180px)] pb-20">
           {isSearching ? (
             <div className="flex justify-center py-10">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-pink-300"></div>
