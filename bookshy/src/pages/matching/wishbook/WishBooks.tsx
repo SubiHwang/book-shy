@@ -45,11 +45,7 @@ const WishBooks: FC = () => {
   }, [data, selectedFilter, searchTerm]);
 
   if (isLoading || !data) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loading loadingText={'읽고 싶은 책 목록 불러오는 중...'} />
-      </div>
-    );
+    return <Loading loadingText={'읽고 싶은 책 목록 불러오는 중...'} />;
   }
 
   return (
