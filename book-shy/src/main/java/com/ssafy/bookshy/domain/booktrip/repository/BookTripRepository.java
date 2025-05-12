@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface BookTripRepository extends JpaRepository<BookTrip, Long> {
-    List<BookTrip> findByBookId(Long bookId);
+    List<BookTrip> findByBookIdOrderByCreatedAtAsc(Long bookId);
 
     @Query("""
         SELECT bt FROM BookTrip bt
@@ -16,6 +16,7 @@ public interface BookTripRepository extends JpaRepository<BookTrip, Long> {
         AND bt.bookId NOT IN (
             SELECT l.book.id FROM Library l WHERE l.user.userId = :userId
         )
+        ORDER BY bt.createdAt DESC
     """)
     List<BookTrip> findMyTripsNotInMyLibrary(@Param("userId") Long userId);
 }

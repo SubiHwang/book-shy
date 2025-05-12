@@ -1,5 +1,7 @@
 package com.ssafy.bookshy.domain.booktrip.service;
 
+import com.ssafy.bookshy.domain.book.entity.Book;
+import com.ssafy.bookshy.domain.book.repository.BookRepository;
 import com.ssafy.bookshy.domain.booktrip.entity.BookTrip;
 import com.ssafy.bookshy.domain.booktrip.dto.*;
 import com.ssafy.bookshy.domain.booktrip.repository.BookTripRepository;
@@ -9,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,6 +20,7 @@ import java.util.stream.Collectors;
 public class BookTripService {
     private final BookTripRepository bookTripRepository;
     private final UserRepository userRepository;
+    private final BookRepository bookRepository;
 
     /**
      * 📖 특정 도서 ID에 대한 여정 목록을 조회합니다.
@@ -26,7 +30,7 @@ public class BookTripService {
     @Transactional(readOnly = true)
     public List<BookTripWithUserDto> getTripsWithUser(Long bookId, Users loginUser) {
         Long loginUserId = loginUser.getUserId();
-        return bookTripRepository.findByBookId(bookId).stream()
+        return bookTripRepository.findByBookIdOrderByCreatedAtAsc(bookId).stream()
                 .map(trip -> {
                     var user = userRepository.findById(trip.getUserId())
                             .orElseThrow(() -> new IllegalArgumentException("USER_NOT_FOUND"));
@@ -93,22 +97,31 @@ public class BookTripService {
      * - Repository에서 직접 필터링된 결과를 가져오므로 성능이 향상됩니다.
      *
      * @param loginUser 현재 로그인한 사용자
-     * @return BookTripWithUserDto 리스트 (isMine은 항상 true)
+     * @return BookTripBookItemDto 리스트 (isMine은 항상 true)
      */
     @Transactional(readOnly = true)
-    public List<BookTripWithUserDto> getTripsNotInMyLibrary(Users loginUser) {
+    public List<BookTripBookItemDto> getTripsNotInMyLibraryWithBookInfo(Users loginUser) {
         Long userId = loginUser.getUserId();
-
         List<BookTrip> trips = bookTripRepository.findMyTripsNotInMyLibrary(userId);
 
+        // 도서 ID만 추출
+        Set<Long> bookIds = trips.stream()
+                .map(BookTrip::getBookId)
+                .collect(Collectors.toSet());
+
+        // 도서 정보 조회 (in 쿼리로 한 번에 조회)
+        Map<Long, Book> bookMap = bookRepository.findAllById(bookIds).stream()
+                .collect(Collectors.toMap(Book::getId, b -> b));
+
+        // 응답 DTO로 변환
         return trips.stream()
-                .map(trip -> BookTripWithUserDto.from(
+                .map(trip -> BookTripBookItemDto.from(
                         trip,
-                        true,
+                        bookMap.get(trip.getBookId()),
                         loginUser.getNickname(),
-                        loginUser.getProfileImageUrl()
-                ))
-                .collect(Collectors.toList());
+                        loginUser.getProfileImageUrl()))
+                .toList();
     }
+
 
 }

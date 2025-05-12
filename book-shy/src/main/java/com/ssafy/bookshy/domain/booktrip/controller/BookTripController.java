@@ -70,18 +70,19 @@ public class BookTripController {
     }
 
     @Operation(
-            summary = "📘 서재에 없는 나의 책 여정 목록 조회",
-            description = "🗃️ 로그인한 사용자가 작성한 여정 중, 현재 자신의 서재에는 존재하지 않는 도서에 대한 여정만을 조회합니다.",
+            summary = "📘 서재에 없는 나의 책 여정 목록 + 도서 정보 조회",
+            description = "🗃️ 로그인한 사용자가 작성한 책 여정 중, 현재 자신의 서재에는 존재하지 않는 도서와 그 여정을 함께 조회합니다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "✅ 여정 목록 조회 성공", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BookTripWithUserDto.class)))),
+                    @ApiResponse(responseCode = "200", description = "✅ 여정 + 도서 목록 조회 성공", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BookTripBookItemDto.class)))),
                     @ApiResponse(responseCode = "401", description = "❌ 인증되지 않은 사용자", content = @Content),
                     @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류", content = @Content)
             }
     )
     @GetMapping("/my-only-not-in-library")
-    public ResponseEntity<List<BookTripWithUserDto>> getMyBookTripsNotInLibrary(
+    public ResponseEntity<List<BookTripBookItemDto>> getMyBookTripsWithBookInfo(
             @Parameter(hidden = true) @AuthenticationPrincipal Users user) {
-        return ResponseEntity.ok(bookTripService.getTripsNotInMyLibrary(user));
+        return ResponseEntity.ok(bookTripService.getTripsNotInMyLibraryWithBookInfo(user));
     }
+
 
 }
