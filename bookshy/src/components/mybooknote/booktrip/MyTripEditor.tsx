@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createBookTrip } from '@/services/mybooknote/booktrip/booktrip';
 import type { CreateBookTripRequest } from '@/types/mybooknote/booktrip/booktrip';
 import { toast } from 'react-toastify';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useState } from 'react';
 
 interface Props {
@@ -11,7 +11,6 @@ interface Props {
 
 const MyTripEditor = ({ profileImageUrl }: Props) => {
   const { bookId } = useParams<{ bookId: string }>();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [content, setContent] = useState('');
 
@@ -23,9 +22,6 @@ const MyTripEditor = ({ profileImageUrl }: Props) => {
       // ✅ 1. 캐시 무효화
       queryClient.invalidateQueries({ queryKey: ['libraryBooksWithTrip'] });
       queryClient.invalidateQueries({ queryKey: ['bookTrips', bookId] });
-
-      // ✅ 2. 전체 목록으로 리다이렉션
-      navigate('/booknotes/trip', { replace: true });
     },
     onError: () => {
       toast.error('❌ 책의 여정 등록에 실패했습니다.');

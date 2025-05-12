@@ -17,7 +17,7 @@ export interface BookTripWithUser extends BookTrip {
     nickname: string;
     profileImageUrl: string;
   };
-  isMine: boolean;
+  mine: boolean;
 }
 
 export interface CreateBookTripRequest {

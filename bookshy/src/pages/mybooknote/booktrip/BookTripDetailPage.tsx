@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { fetchBookTripsByBookId } from '@/services/mybooknote/booktrip/booktrip';
 import { fetchBookDetailByBookId } from '@/services/book/search';
 import { fetchUserProfile } from '@/services/mypage/profile';
@@ -32,8 +32,8 @@ const BookTripDetailPage = () => {
     queryFn: fetchUserProfile,
   });
 
-  const myTrip = trips.find((trip) => trip.isMine);
-  const otherTrips = trips.filter((trip) => !trip.isMine);
+  const myTrip = trips.find((trip) => trip.mine);
+  const otherTrips = trips.filter((trip) => !trip.mine);
 
   if (isTripsLoading || isBookLoading || isUserLoading) {
     return <p className="text-center py-12 text-gray-500">로딩 중입니다...</p>;
