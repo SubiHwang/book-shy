@@ -3,6 +3,8 @@ package com.ssafy.bookshy.domain.booktrip.service;
 import com.ssafy.bookshy.domain.booktrip.entity.BookTrip;
 import com.ssafy.bookshy.domain.booktrip.dto.*;
 import com.ssafy.bookshy.domain.booktrip.repository.BookTripRepository;
+import com.ssafy.bookshy.domain.users.entity.Users;
+import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +15,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BookTripService {
     private final BookTripRepository bookTripRepository;
+    private final UserRepository userRepository;
 
     /**
      * 📖 특정 도서 ID에 대한 여정 목록을 조회합니다.
@@ -20,11 +23,18 @@ public class BookTripService {
      * @return BookTripDto 리스트
      */
     @Transactional(readOnly = true)
-    public List<BookTripDto> getTripsByBookId(Long bookId) {
+    public List<BookTripWithUserDto> getTripsWithUser(Long bookId, Users loginUser) {
+        Long loginUserId = loginUser.getUserId();
         return bookTripRepository.findByBookId(bookId).stream()
-                .map(BookTripDto::from)
+                .map(trip -> {
+                    var user = userRepository.findById(trip.getUserId())
+                            .orElseThrow(() -> new IllegalArgumentException("USER_NOT_FOUND"));
+                    boolean isMine = trip.getUserId().equals(loginUserId);
+                    return BookTripWithUserDto.from(trip, isMine, user.getNickname(), user.getProfileImageUrl());
+                })
                 .collect(Collectors.toList());
     }
+
 
     /**
      * 📝 책의 여정 등록

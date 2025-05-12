@@ -22,11 +22,13 @@ public class BookTripController {
     private final BookTripService bookTripService;
 
     @GetMapping
-    @Operation(summary = "📚 특정 도서의 여정 목록 조회", description = "특정 도서에 대해 작성된 모든 여정(BookTrip)을 조회합니다.")
-    public ResponseEntity<List<BookTripDto>> getTrips(@RequestParam Long bookId) {
+    @Operation(summary = "📚 특정 도서의 여정 목록 조회", description = "특정 도서에 대해 작성된 모든 여정(BookTrip)을 조회하며, 각 여정에는 작성자의 프로필과 로그인 사용자의 작성 여부가 포함됩니다.")
+    public ResponseEntity<List<BookTripWithUserDto>> getTrips(
+            @RequestParam Long bookId,
+            @Parameter(hidden = true) @AuthenticationPrincipal Users user) {
         if (bookId == null) return ResponseEntity.badRequest().build();
-        List<BookTripDto> result = bookTripService.getTripsByBookId(bookId);
-        return ResponseEntity.ok(result); // ❌ result.isEmpty() 체크 제거
+        List<BookTripWithUserDto> result = bookTripService.getTripsWithUser(bookId, user);
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping
