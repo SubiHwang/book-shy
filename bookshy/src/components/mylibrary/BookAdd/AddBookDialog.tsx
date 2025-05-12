@@ -15,7 +15,7 @@ const AddBookDialog: React.FC<AddBookDialogProps> = ({ isOpen, onClose }) => {
 
   // 각 옵션 선택 시 처리 함수
   const handleTitleRecognition = () => {
-    navigate('/bookshelf/add/title');
+    navigate('/bookshelf/add/self');
     onClose();
   };
 
@@ -47,26 +47,26 @@ const AddBookDialog: React.FC<AddBookDialogProps> = ({ isOpen, onClose }) => {
             <div className="px-6 py-4 space-y-4">
               {/* 제목 인식 버튼 */}
               <button
-                onClick={handleTitleRecognition}
-                className="w-full py-3 px-4 rounded-md bg-primary-light text-white font-medium text-lg hover:bg-primary-accent transition-colors"
-              >
-                제목 인식
-              </button>
-
-              {/* ISBN 인식 버튼 */}
-              <button
                 onClick={handleISBNRecognition}
                 className="w-full py-3 px-4 rounded-md bg-primary-light text-white font-medium text-lg hover:bg-primary-accent transition-colors"
               >
-                ISBN 인식
+                ISBN 인식하기
               </button>
 
-              {/* 직접 검색 버튼 */}
+              {/* ISBN 인식 버튼 */}
               <button
                 onClick={handleManualSearch}
                 className="w-full py-3 px-4 rounded-md bg-primary-light text-white font-medium text-lg hover:bg-primary-accent transition-colors"
               >
                 직접 검색하기
+              </button>
+
+              {/* 직접 검색 버튼 */}
+              <button
+                onClick={handleTitleRecognition}
+                className="w-full py-3 px-4 rounded-md bg-primary-light text-white font-medium text-lg hover:bg-primary-accent transition-colors"
+              >
+                직접 등록하기
               </button>
             </div>
 
