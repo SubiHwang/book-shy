@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchLibraryBooksWithTrip } from '@/services/mybooknote/booktrip/booktrip'; // ✅ 수정
-import type { LibraryBookWithTrip } from '@/types/mybooknote/booktrip/booktrip'; // ✅ 수정
+import { fetchLibraryBooksWithTrip } from '@/services/mybooknote/booktrip/booktrip';
+import type { LibraryBookWithTrip } from '@/types/mybooknote/booktrip/booktrip';
 import Header from '@/components/common/Header';
 import TabNavBar from '@/components/common/TabNavBar';
 
 const BookTripPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<'ALL' | 'WRITTEN' | 'UNWRITTEN'>('ALL'); // ✅ 변경
+  const [filter, setFilter] = useState<'ALL' | 'WRITTEN' | 'UNWRITTEN'>('ALL');
 
   const pages = [
     { path: '/booknotes', label: '내 독서 기록 보기' },

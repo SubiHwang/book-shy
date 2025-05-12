@@ -1,9 +1,4 @@
-import axios, {
-  AxiosInstance,
-  AxiosResponse,
-  AxiosError,
-  AxiosRequestConfig,
-} from 'axios';
+import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestConfig } from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_BASE_URL as string; // .env 파일에서 가져온 API 기본 URL
 const API_TIMEOUT = 30000;
@@ -66,7 +61,7 @@ authAxiosInstance.interceptors.response.use(
   async (error: AxiosError) => {
     // originalRequest에 _retry 속성을 추가하기 위한 타입 정의
     const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
-    
+
     if (!originalRequest.headers) {
       originalRequest.headers = {};
     }
@@ -77,7 +72,7 @@ authAxiosInstance.interceptors.response.use(
 
       if (!isRefreshing) {
         isRefreshing = true;
-        
+
         try {
           const refresh_token = localStorage.getItem('refresh_token');
           const fcmToken = localStorage.getItem('firebase_token');
@@ -98,19 +93,19 @@ authAxiosInstance.interceptors.response.use(
 
           const { accessToken, refreshToken } = response.data;
           localStorage.setItem('auth_token', accessToken);
-          
+
           if (refreshToken) {
             localStorage.setItem('refresh_token', refreshToken);
           }
 
           authAxiosInstance.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-          
+
           // 대기 중인 요청들에게 새 토큰 전달
           onRefreshed(accessToken);
-          
+
           // 갱신 상태 초기화
           isRefreshing = false;
-          
+
           // 현재 요청 재시도
           originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
           return authAxiosInstance(originalRequest);
@@ -136,7 +131,7 @@ authAxiosInstance.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 // 모두 접근 가능한 api 사용을 위한 기본 인스턴스 생성(로그인, 회원가입 등)
