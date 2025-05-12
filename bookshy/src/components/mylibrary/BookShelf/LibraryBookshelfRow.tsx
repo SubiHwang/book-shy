@@ -33,7 +33,7 @@ const LibraryBookshelfRow: FC<LibraryBookshelfRowProps> = ({ books, onBookClick 
   };
 
   return (
-    <div className="relative mb-6">
+    <div className="relative mb-2">
       {/* 책장 선반 */}
       <div className="flex justify-center items-end">
         <div className="flex justify-around w-full px-4 pb-2">
