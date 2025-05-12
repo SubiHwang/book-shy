@@ -236,8 +236,6 @@ pipeline {
 
                                     scp -v -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${DEV_SERVER}:/home/ubuntu/
                                     echo "✅ docker-compose.yml 복사 완료"
-                                    scp -v -o StrictHostKeyChecking=no secrets/firebase-service-account.json ubuntu@${DEV_SERVER}:/home/ubuntu/secrets/
-                                    echo "✅ firebase-service-account.json 복사 완료"
 
                                     # ✅ 3. 배포 실행
                                     ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
