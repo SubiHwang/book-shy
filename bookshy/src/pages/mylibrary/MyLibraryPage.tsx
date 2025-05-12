@@ -115,10 +115,12 @@ const MyLibraryPage: React.FC = () => {
 
           {/* 탭 네비게이션 */}
           <TabNavBar pages={pages} />
-
-          {/* 중첩 라우트 컨텐츠 */}
-          <div className="tab-content mt-4">
-            <Outlet />
+          {/* 탭 네비게이션과 컨텐츠를 감싸는 흰색 박스 */}
+          <div className="bg-white rounded-lg shadow-md mt-4 pt-3 ">
+            {/* 중첩 라우트 컨텐츠 */}
+            <div className="tab-content ">
+              <Outlet />
+            </div>
           </div>
         </div>
 
