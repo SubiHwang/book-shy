@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchBookNoteList } from '@/services/mybooknote/booknote';
-import { fetchBookQuoteList } from '@/services/mybooknote/bookquote';
+import { fetchBookNoteList } from '@/services/mybooknote/booknote/booknote';
+import { fetchBookQuoteList } from '@/services/mybooknote/booknote/bookquote';
 import MyBookNoteGridPage from './MyBookNoteGridPage';
 import LibraryBookListPage from './LibraryBookListPage';
 import type { BookNote } from '@/types/mybooknote/booknote';
-import type { BookQuote } from '@/types/mybooknote/bookquote';
+import type { BookQuote } from '@/types/mybooknote/booknote/bookquote';
 
 const MyBookNotePage = () => {
   const { data: notes = [], isLoading: notesLoading } = useQuery<BookNote[], Error>({
