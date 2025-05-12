@@ -88,4 +88,7 @@ export default defineConfig({
       '@service': path.resolve(__dirname, './src/services'),
     },
   },
+  define: {
+    global: 'window',
+  },
 });

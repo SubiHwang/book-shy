@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, matchPath } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import BottomTabBar from '../common/BottomTabBar';
 import MyLibraryPage from '../../pages/mylibrary/MyLibraryPage';
@@ -36,6 +36,9 @@ import KaKaoOauth from '@/pages/auth/KaKaoOauth';
 import WishBooksDetailPage from '@/pages/matching/wishbook/WishBooksDetailPage';
 import RecommandedWishBookList from '../matching/searchwishbooks/RecommandedWishBookList';
 import SearchResultBookList from '../matching/searchwishbooks/SearchResultBookList';
+import ChatListPage from '@/pages/chat/ChatListPage';
+import ChatRoomPage from '@/pages/chat/ChatRoomPage';
+import TradeReviewPage from '@/pages/chat/TradeReviewPage';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -45,6 +48,10 @@ const AppLayout: FC = () => {
   const handleTabChange = (tabId: string): void => {
     navigate(`/${tabId}`);
   };
+
+  // 채팅창에서 BottomTabBar 숨기기
+  const isChatRoom = matchPath('/chat/:roomId', location.pathname);
+  const isReviewPage = matchPath('/chat/:roomId/review', location.pathname);
 
   return (
     <div className="app-container">
@@ -110,7 +117,9 @@ const AppLayout: FC = () => {
                   <Route path="/matching/books/:id" element={<WishBooksDetailPage />} />
 
                   {/* 채팅 페이지 */}
-                  <Route path="/chat" element={<div>채팅</div>} />
+                  <Route path="/chat" element={<ChatListPage />} />
+                  <Route path="/chat/:roomId" element={<ChatRoomPage />} />
+                  <Route path="/chat/:roomId/review" element={<TradeReviewPage />} />
 
                   {/* 독서기록 페이지 */}
                   <Route path="/booknotes" element={<MyBookNotesPage />} />
@@ -139,7 +148,7 @@ const AppLayout: FC = () => {
       </div>
 
       {/* 하단 탭 바 (로그인된 경우에만 표시) */}
-      {!isLoading && <BottomTabBar onTabChange={handleTabChange} />}
+      {!(isLoading || isChatRoom || isReviewPage) && <BottomTabBar onTabChange={handleTabChange} />}
     </div>
   );
 };
