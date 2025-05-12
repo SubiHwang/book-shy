@@ -1,4 +1,4 @@
-import { RecommandationBooksResponse, WishBooksResponse } from '@/types/Matching/wishBooks';
+import {  WishBooksResponse } from '@/types/Matching/wishBooks';
 import { WishBook } from '@/types/book';
 import { authAxiosInstance } from '../axiosInstance';
 
@@ -63,9 +63,9 @@ export const getWishBookDetail = async (itemId: number): Promise<WishBook> => {
   }
 };
 
-export const getRecommandationBooks = async (): Promise<RecommandationBooksResponse> => {
+export const getRecommandationBooks = async (): Promise<WishBooksResponse> => {
   try {
-    const response = await authAxiosInstance.get<string, RecommandationBooksResponse>(
+    const response = await authAxiosInstance.get<string, WishBooksResponse>(
       '/recommendations',
     );
     console.log('추천 도서 API 응답:', response);
