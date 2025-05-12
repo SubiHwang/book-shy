@@ -34,3 +34,15 @@ export interface MatchingCardProps {
 export interface NeighborhoodCardProps {
   neighborhood: Neighborhood;
 }
+
+export interface CreateChatRoomReq {
+  user1Id: number;
+  user2Id: number;
+  bookId?: number;
+  message?: string;
+}
+export interface CreateChatRoomRes {
+  roomId: number;
+  status: 'CREATED' | 'EXISTS';
+  message: string;
+}

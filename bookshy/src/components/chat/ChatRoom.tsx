@@ -7,8 +7,14 @@ import ScheduleModal from './ScheduleModal.tsx';
 import SystemMessage from './SystemMessage.tsx';
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchMessages, markMessagesAsRead, registerSchedule, sendEmoji } from '@/services/chat/chat.ts';
+import {
+  fetchMessages,
+  markMessagesAsRead,
+  registerSchedule,
+  sendEmoji,
+} from '@/services/chat/chat.ts';
 import { useStomp } from '@/hooks/chat/useStomp.ts';
+import { useWebSocket } from '@/contexts/WebSocketProvider';
 import { getUserIdFromToken } from '@/utils/jwt.ts';
 
 interface Props {
@@ -21,7 +27,8 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const { roomId } = useParams();
   const numericRoomId = Number(roomId);
   const myUserId = getUserIdFromToken();
-  if (myUserId === null) return;
+  if (myUserId === null) return null;
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showOptions, setShowOptions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -30,6 +37,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const [emojiMap, setEmojiMap] = useState<Record<string, string>>({});
 
   const queryClient = useQueryClient();
+  const { subscribeReadTopic, sendReadReceipt } = useWebSocket();
 
   const {
     data: initialMessages = [],
@@ -42,41 +50,71 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
     retry: false,
   });
 
+  // 초기 입장 시 파트너 메시지 unread -> read 처리
   useEffect(() => {
-    if (!isNaN(numericRoomId)) {
-      markMessagesAsRead(numericRoomId)
-        .then(() => {
-          refetch();
-          queryClient.setQueryData(['chatList'], (prev: any) => {
-            if (!Array.isArray(prev)) return prev;
-            return prev.map((room: any) =>
-              room.id === numericRoomId ? { ...room, unreadCount: 0 } : room,
-            );
-          });
-        })
-        .catch((err) => console.error('❌ 읽음 처리 실패:', err));
-    }
-  }, [numericRoomId, refetch, queryClient]);
+    if (!isNaN(numericRoomId) && initialMessages.length > 0) {
+      markMessagesAsRead(numericRoomId).then(() => {
+        const unreadMessages = initialMessages.filter(
+          (msg) => msg.senderId !== myUserId && !msg.isRead,
+        );
 
+        const messageIds = unreadMessages.map((m) => Number(m.id));
+        if (messageIds.length > 0) {
+          sendReadReceipt(numericRoomId, myUserId, messageIds);
+        }
+
+        setMessages((prev) =>
+          prev.map((msg) => (msg.senderId !== myUserId ? { ...msg, isRead: true } : msg)),
+        );
+      });
+    }
+  }, [numericRoomId, initialMessages, myUserId, sendReadReceipt]);
+
+  // 실시간 읽음 알림 구독 (상대가 읽었을 때만 내 메시지 읽음 처리)
+  useEffect(() => {
+    if (isNaN(numericRoomId)) return;
+    const sub = subscribeReadTopic(numericRoomId, (readerId, messageIds) => {
+      // 내가 읽은 거면 무시
+      if (readerId === myUserId) return;
+
+      // 상대가 읽은 내 메시지들에 대해 isRead 처리
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.senderId === myUserId && messageIds.includes(Number(msg.id))
+            ? { ...msg, isRead: true }
+            : msg,
+        ),
+      );
+    });
+
+    return () => sub?.unsubscribe();
+  }, [numericRoomId, subscribeReadTopic, myUserId]);
+
+  // 과거 + 신규 메시지 불러오기 및 공지 삽입
   useEffect(() => {
     if (!isSuccess) return;
 
-    if (initialMessages.length > 0 && messages.length === 0) {
-      setMessages(initialMessages);
-    } else if (initialMessages.length === 0 && messages.length === 0) {
-      const now = new Date();
-      const noticeMessage: ChatMessage = {
-        id: 'notice-' + Date.now(),
-        senderId: -1,
-        chatRoomId: numericRoomId,
-        content:
-          '도서 교환은 공공장소에서 진행하고, 책 상태를 미리 확인하세요.\n과도한 개인정보 요청이나 외부 연락 유도는 주의하세요.\n도서 상호 대여 서비스 사용 시 반납 기한을 꼭 지켜주세요!\n안전하고 즐거운 독서 문화 함께 만들어가요!',
-        sentAt: now.toISOString(),
-        type: 'notice',
-      };
-      setMessages([noticeMessage]);
-    }
-  }, [initialMessages, messages.length, isSuccess, numericRoomId]);
+    setMessages((prev) => {
+      const prevIds = new Set(prev.map((m) => m.id));
+      const newMessages = initialMessages.filter((m) => !prevIds.has(m.id));
+
+      if (prev.length === 0 && initialMessages.length === 0) {
+        const now = new Date();
+        const noticeMessage: ChatMessage = {
+          id: 'notice-' + Date.now(),
+          senderId: -1,
+          chatRoomId: numericRoomId,
+          content:
+            '도서 교환은 공공장소에서 진행하고, 책 상태를 미리 확인하세요.\n과도한 개인정보 요청이나 외부 연락 유도는 주의하세요.\n도서 상호 대여 서비스 사용 시 반납 기한을 꼭 지켜주세요!\n안전하고 즐거운 독서 문화 함께 만들어가요!',
+          sentAt: now.toISOString(),
+          type: 'notice',
+        };
+        return [noticeMessage];
+      }
+
+      return [...prev, ...newMessages];
+    });
+  }, [initialMessages, isSuccess, numericRoomId]);
 
   const onMessage = useCallback(
     (newMessage: ChatMessage) => {
@@ -103,6 +141,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
 
   const { sendMessage } = useStomp(numericRoomId, onMessage);
 
+  // 메시지 수신 시 자동 스크롤
   useEffect(() => {
     scrollToBottom(messages.length === 1);
   }, [messages]);
@@ -162,6 +201,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const handleLongPressOrRightClick = (messageId: string) => {
     setEmojiTargetId((prev) => (prev === messageId ? null : messageId));
   };
+
   const toggleOptions = () => {
     const shouldScroll = isScrolledToBottom();
     setShowOptions((prev) => !prev);
