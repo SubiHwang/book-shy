@@ -69,7 +69,13 @@ const BookNoteCreatePage: React.FC = () => {
         showNotification={true}
       />
 
-      <BookNoteHeader title={bookDetail?.title} author={bookDetail?.author} publisher={bookDetail?.publisher} coverImageUrl={bookDetail?.coverImageUrl} isLoading={isLoading} />
+      <BookNoteHeader
+        title={bookDetail?.title}
+        author={bookDetail?.author}
+        publisher={bookDetail?.publisher}
+        coverImageUrl={bookDetail?.coverImageUrl}
+        isLoading={isLoading}
+      />
 
       <BookNoteForm
         quoteText={quoteText}
