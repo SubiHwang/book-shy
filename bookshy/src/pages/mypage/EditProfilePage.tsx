@@ -7,7 +7,7 @@ import type { UserProfile } from '@/types/User/user';
 import ProfileImage from '@/components/mypage/profile/ProfileImage';
 import GenderSelector from '@/components/mypage/profile/GenderSelector';
 import AddressInput from '@/components/mypage/profile/AddressInput';
-import { useLocationFetcher } from '@/hooks/mypage/useLocationFetcher';
+import { useLocationFetcher } from '@/hooks/location/useLocationFetcher';
 
 const EditProfilePage = () => {
   const navigate = useNavigate();

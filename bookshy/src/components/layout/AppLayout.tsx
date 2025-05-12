@@ -41,6 +41,7 @@ import SearchResultBookList from '@/components/matching/searchwishbooks/SearchRe
 import ChatListPage from '@/pages/chat/ChatListPage';
 import ChatRoomPage from '@/pages/chat/ChatRoomPage';
 import TradeReviewPage from '@/pages/chat/TradeReviewPage';
+import LocationSetting from '@/pages/auth/LocationSetting';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -70,6 +71,7 @@ const AppLayout: FC = () => {
             element={
               <PrivateRoute>
                 <Routes>
+                  <Route path="/setting-location" element={<LocationSetting />} />
                   {/* 기본 경로 리다이렉션 */}
                   <Route path="/" element={<Navigate to="/bookshelf" replace />} />
 
