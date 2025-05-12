@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createBookTrip } from '@/services/mybooknote/booktrip/booktrip';
 import type { CreateBookTripRequest } from '@/types/mybooknote/booktrip/booktrip';
 import { toast } from 'react-toastify';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
 interface Props {
@@ -11,6 +11,7 @@ interface Props {
 
 const MyTripEditor = ({ profileImageUrl }: Props) => {
   const { bookId } = useParams<{ bookId: string }>();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [content, setContent] = useState('');
 
@@ -18,8 +19,13 @@ const MyTripEditor = ({ profileImageUrl }: Props) => {
     mutationFn: (trip: CreateBookTripRequest) => createBookTrip(trip),
     onSuccess: () => {
       toast.success('✅ 책의 여정이 등록되었습니다!');
-      queryClient.invalidateQueries({ queryKey: ['bookTrips'] });
-      setContent('');
+
+      // ✅ 1. 캐시 무효화
+      queryClient.invalidateQueries({ queryKey: ['libraryBooksWithTrip'] });
+      queryClient.invalidateQueries({ queryKey: ['bookTrips', bookId] });
+
+      // ✅ 2. 전체 목록으로 리다이렉션
+      navigate('/booknotes/trip', { replace: true });
     },
     onError: () => {
       toast.error('❌ 책의 여정 등록에 실패했습니다.');
@@ -31,6 +37,7 @@ const MyTripEditor = ({ profileImageUrl }: Props) => {
       toast.error('❌ 유효한 도서 ID가 없습니다.');
       return;
     }
+
     if (!content.trim()) {
       toast.warning('내용을 입력해주세요.');
       return;
