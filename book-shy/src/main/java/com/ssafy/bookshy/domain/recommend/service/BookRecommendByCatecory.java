@@ -2,6 +2,9 @@ package com.ssafy.bookshy.domain.recommend.service;
 
 import com.ssafy.bookshy.domain.book.dto.BookListResponseDto;
 import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
+import com.ssafy.bookshy.domain.book.repository.WishRepository;
+import com.ssafy.bookshy.domain.users.entity.Users;
+import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import com.ssafy.bookshy.external.aladin.AladinClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,10 +20,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -31,20 +31,27 @@ public class BookRecommendByCatecory {
     private final RestHighLevelClient elasticsearchClient;
     private final JdbcTemplate jdbcTemplate;
     private final AladinClient aladinClient;
+    private final WishRepository wishRepository;
+    private final UserRepository usersRepository;
 
     /**
      * 사용자 맞춤형 책 추천 메인 메소드
      * 사용자의 위시리스트 분석 후 가장 많이 나타나는 카테고리 기반으로 책 추천
+     * 이미 위시리스트에 있는 책은 제외하고 랜덤으로 추천
      *
      * @param userId         추천 대상 사용자 ID
-     * @param recommendCount 추천할 책 개수 (기본값 3)
+     * @param recommendCount 추천할 책 개수 (기본값 4)
      * @return 추천된 책 목록
      */
     public List<BookListResponseDto> getCategoryBasedRecommendations(Long userId, int recommendCount) {
         // 기본 추천 개수 설정
         if (recommendCount <= 0) {
-            recommendCount = 3;
+            recommendCount = 4;
         }
+
+        // 사용자 정보 조회
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
 
         // STEP 1: Elasticsearch에서 사용자 위시리스트 책 ID 가져오기
         List<Long> bookIds = getUserWishlistedBookIds(userId);
@@ -53,7 +60,7 @@ public class BookRecommendByCatecory {
         if (bookIds.isEmpty()) {
             log.info("사용자 {}의 위시리스트가 비어있어 베스트셀러로 추천합니다.", userId);
             List<BookResponseDto> bestSellers = aladinClient.getBestSellerRecommendations(recommendCount);
-            return convertToBookListResponseDto(bestSellers);
+            return convertToBookListResponseDto(bestSellers, user);
         }
 
         // STEP 2: 위시리스트 책들의 카테고리 분석
@@ -63,22 +70,82 @@ public class BookRecommendByCatecory {
         if (categoryFrequency.isEmpty()) {
             log.info("사용자 {}의 위시리스트 책들의 카테고리를 찾을 수 없어 베스트셀러로 추천합니다.", userId);
             List<BookResponseDto> bestSellers = aladinClient.getBestSellerRecommendations(recommendCount);
-            return convertToBookListResponseDto(bestSellers);
+            return convertToBookListResponseDto(bestSellers, user);
         }
 
         // STEP 3: 가장 많이 나타나는 상위 카테고리 선택
         String topCategory = getTopCategory(categoryFrequency);
         log.info("사용자 {}의 최다 선호 카테고리: {}", userId, topCategory);
 
-        // STEP 4: 선택된 카테고리 기반으로 알라딘 API에서 책 추천받기
-        List<BookResponseDto> categoryRecommendations = aladinClient.getRecommendationsByCategory(topCategory, recommendCount);
-        return convertToBookListResponseDto(categoryRecommendations);
+        // STEP 4: 선택된 카테고리 기반으로 알라딘 API에서 충분한 수의 책 가져오기
+        List<BookResponseDto> categoryBooks = aladinClient.getRecommendationsByCategory(topCategory, 20);
+
+        // STEP 5: 위시리스트에 있는 책 제외하고 랜덤 선택
+        return selectRandomBooksExcludingWish(categoryBooks, user, recommendCount);
+    }
+
+    /**
+     * 카테고리 책 목록에서 위시리스트에 없는 책들을 랜덤으로 선택
+     */
+    private List<BookListResponseDto> selectRandomBooksExcludingWish(List<BookResponseDto> categoryBooks, Users user, int recommendCount) {
+        // 사용자의 위시리스트에 있는 책 ID 목록 가져오기 (itemId 사용)
+        Set<Long> wishListItemIds = wishRepository.findAllByUser(user)
+                .stream()
+                .map(wish -> wish.getBook().getItemId())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        // 위시리스트에 없는 책들만 필터링
+        List<BookResponseDto> availableBooks = categoryBooks.stream()
+                .filter(book -> {
+                    Long bookItemId = book.getItemId();
+                    return bookItemId == null || !wishListItemIds.contains(bookItemId);
+                })
+                .collect(Collectors.toList());
+
+        // 만약 필터링 후 책이 부족하면 베스트셀러에서 추가
+        if (availableBooks.size() < recommendCount) {
+            log.info("카테고리 책이 부족하여 베스트셀러를 추가합니다.");
+            List<BookResponseDto> bestSellers = aladinClient.getBestSellerRecommendations(recommendCount * 2);
+
+            // 베스트셀러에서도 위시리스트에 없는 책만 추가
+            List<BookResponseDto> filteredBestSellers = bestSellers.stream()
+                    .filter(book -> {
+                        Long bookItemId = book.getItemId();
+                        return bookItemId == null || !wishListItemIds.contains(bookItemId);
+                    })
+                    .collect(Collectors.toList());
+
+            availableBooks.addAll(filteredBestSellers);
+
+            // 중복 제거
+            availableBooks = availableBooks.stream()
+                    .distinct()
+                    .collect(Collectors.toList());
+        }
+
+        // 랜덤하게 섞고 요청한 개수만큼 선택
+        Collections.shuffle(availableBooks);
+        List<BookResponseDto> selectedBooks = availableBooks.stream()
+                .limit(recommendCount)
+                .collect(Collectors.toList());
+
+        // BookResponseDto를 BookListResponseDto로 변환
+        return convertToBookListResponseDto(selectedBooks, user);
     }
 
     /**
      * BookResponseDto 리스트를 BookListResponseDto 리스트로 변환
+     * 위시리스트 여부도 확인하여 설정
      */
-    private List<BookListResponseDto> convertToBookListResponseDto(List<BookResponseDto> books) {
+    private List<BookListResponseDto> convertToBookListResponseDto(List<BookResponseDto> books, Users user) {
+        // 사용자의 위시리스트에 있는 책 ID 목록 가져오기
+        Set<Long> wishListItemIds = wishRepository.findAllByUser(user)
+                .stream()
+                .map(wish -> wish.getBook().getItemId())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
         return books.stream()
                 .map(book -> BookListResponseDto.builder()
                         .itemId(book.getItemId())
@@ -87,7 +154,7 @@ public class BookRecommendByCatecory {
                         .publisher(book.getPublisher())
                         .coverImageUrl(book.getCoverImageUrl())
                         .description(book.getDescription())
-                        .isLiked(false) // 기본값으로 false 설정
+                        .isLiked(book.getItemId() != null && wishListItemIds.contains(book.getItemId()))
                         .build())
                 .collect(Collectors.toList());
     }
@@ -158,8 +225,8 @@ public class BookRecommendByCatecory {
         // 각 책의 카테고리 조회
         for (Long bookId : bookIds) {
             try {
-                // PostgreSQL에서 카테고리 조회
-                String sql = "SELECT category FROM books WHERE id = ?";
+                // PostgreSQL에서 카테고리 조회 (books 테이블의 PK는 book_id)
+                String sql = "SELECT category FROM books WHERE book_id = ?";
                 String category = jdbcTemplate.queryForObject(sql, String.class, bookId);
 
                 if (category != null && !category.isEmpty()) {
