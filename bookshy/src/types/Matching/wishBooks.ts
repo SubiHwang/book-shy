@@ -18,3 +18,10 @@ export interface WishBooksResponse {
   total: number;
   books: WishBook[];
 }
+
+export interface RecommandationBooksResponse {
+  categoryRecommendations: WishBook[];
+  authorRecommendations: WishBook[];
+  similarUserRecommendations: WishBook[];
+  nextRefreshTime: string;
+}
