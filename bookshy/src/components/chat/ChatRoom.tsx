@@ -7,8 +7,14 @@ import ScheduleModal from './ScheduleModal.tsx';
 import SystemMessage from './SystemMessage.tsx';
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchMessages, markMessagesAsRead, registerSchedule, sendEmoji } from '@/services/chat/chat.ts';
+import {
+  fetchMessages,
+  markMessagesAsRead,
+  registerSchedule,
+  sendEmoji,
+} from '@/services/chat/chat.ts';
 import { useStomp } from '@/hooks/chat/useStomp.ts';
+import { useWebSocket } from '@/contexts/WebSocketProvider';
 import { getUserIdFromToken } from '@/utils/jwt.ts';
 
 interface Props {
@@ -21,7 +27,8 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const { roomId } = useParams();
   const numericRoomId = Number(roomId);
   const myUserId = getUserIdFromToken();
-  if (myUserId === null) return;
+  if (myUserId === null) return null;
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showOptions, setShowOptions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -30,6 +37,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const [emojiMap, setEmojiMap] = useState<Record<string, string>>({});
 
   const queryClient = useQueryClient();
+  const { subscribeReadTopic } = useWebSocket();
 
   const {
     data: initialMessages = [],
@@ -58,25 +66,47 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
     }
   }, [numericRoomId, refetch, queryClient]);
 
+  // 실시간 읽음 알림 구독
+  useEffect(() => {
+    if (isNaN(numericRoomId)) return;
+    const sub = subscribeReadTopic(numericRoomId, (frame) => {
+      const payload = JSON.parse(frame.body) as {
+        messageIds: number[];
+        readerId: number;
+      };
+      setMessages((prev) =>
+        prev.map((msg) =>
+          payload.messageIds.includes(Number(msg.id)) ? { ...msg, isRead: true } : msg,
+        ),
+      );
+    });
+    return () => sub?.unsubscribe();
+  }, [numericRoomId, subscribeReadTopic]);
+
   useEffect(() => {
     if (!isSuccess) return;
 
-    if (initialMessages.length > 0 && messages.length === 0) {
-      setMessages(initialMessages);
-    } else if (initialMessages.length === 0 && messages.length === 0) {
-      const now = new Date();
-      const noticeMessage: ChatMessage = {
-        id: 'notice-' + Date.now(),
-        senderId: -1,
-        chatRoomId: numericRoomId,
-        content:
-          '도서 교환은 공공장소에서 진행하고, 책 상태를 미리 확인하세요.\n과도한 개인정보 요청이나 외부 연락 유도는 주의하세요.\n도서 상호 대여 서비스 사용 시 반납 기한을 꼭 지켜주세요!\n안전하고 즐거운 독서 문화 함께 만들어가요!',
-        sentAt: now.toISOString(),
-        type: 'notice',
-      };
-      setMessages([noticeMessage]);
-    }
-  }, [initialMessages, messages.length, isSuccess, numericRoomId]);
+    setMessages((prev) => {
+      const prevIds = new Set(prev.map((m) => m.id));
+      const newMessages = initialMessages.filter((m) => !prevIds.has(m.id));
+
+      if (prev.length === 0 && initialMessages.length === 0) {
+        const now = new Date();
+        const noticeMessage: ChatMessage = {
+          id: 'notice-' + Date.now(),
+          senderId: -1,
+          chatRoomId: numericRoomId,
+          content:
+            '도서 교환은 공공장소에서 진행하고, 책 상태를 미리 확인하세요.\n과도한 개인정보 요청이나 외부 연락 유도는 주의하세요.\n도서 상호 대여 서비스 사용 시 반납 기한을 꼭 지켜주세요!\n안전하고 즐거운 독서 문화 함께 만들어가요!',
+          sentAt: now.toISOString(),
+          type: 'notice',
+        };
+        return [noticeMessage];
+      }
+
+      return [...prev, ...newMessages];
+    });
+  }, [initialMessages, isSuccess, numericRoomId]);
 
   const onMessage = useCallback(
     (newMessage: ChatMessage) => {
@@ -103,6 +133,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
 
   const { sendMessage } = useStomp(numericRoomId, onMessage);
 
+  // 메시지 수신 시 자동 스크롤
   useEffect(() => {
     scrollToBottom(messages.length === 1);
   }, [messages]);
@@ -162,6 +193,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const handleLongPressOrRightClick = (messageId: string) => {
     setEmojiTargetId((prev) => (prev === messageId ? null : messageId));
   };
+
   const toggleOptions = () => {
     const shouldScroll = isScrolledToBottom();
     setShowOptions((prev) => !prev);

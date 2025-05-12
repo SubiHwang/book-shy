@@ -1,17 +1,34 @@
 import { useEffect, useRef } from 'react';
 import { useWebSocket } from '@/contexts/WebSocketProvider';
-import type { ChatMessage } from '@/types/chat/chat.ts';
+import type { ChatMessage } from '@/types/chat/chat';
 import { IMessage } from '@stomp/stompjs';
 
-export const useStomp = (roomId: number, onMessage: (msg: ChatMessage) => void) => {
-  const { subscribeRoom, unsubscribe, sendMessage: sendWS, isConnected } = useWebSocket();
+interface ReadPayload {
+  messageIds: number[];
+  readerId: number;
+}
 
-  const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
+export const useStomp = (
+  roomId: number,
+  onMessage: (msg: ChatMessage) => void,
+  onRead?: (payload: ReadPayload) => void,
+) => {
+  const {
+    subscribeRoom,
+    subscribeReadTopic,
+    unsubscribe,
+    sendMessage: sendWS,
+    isConnected,
+  } = useWebSocket();
+
+  const roomSubRef = useRef<{ unsubscribe: () => void } | null>(null);
+  const readSubRef = useRef<{ unsubscribe: () => void } | null>(null);
 
   useEffect(() => {
     if (!isConnected || !roomId) return;
 
-    const sub = subscribeRoom(roomId, (frame: IMessage) => {
+    // 메시지 수신 구독
+    roomSubRef.current = subscribeRoom(roomId, (frame: IMessage) => {
       try {
         const payload = JSON.parse(frame.body) as ChatMessage;
         onMessage(payload);
@@ -20,13 +37,23 @@ export const useStomp = (roomId: number, onMessage: (msg: ChatMessage) => void) 
       }
     });
 
-    subscriptionRef.current = sub;
+    // 읽음 수신 구독
+    readSubRef.current = subscribeReadTopic(roomId, (frame: IMessage) => {
+      try {
+        const payload = JSON.parse(frame.body) as ReadPayload;
+        onRead?.(payload);
+      } catch (e) {
+        console.error('❌ 읽음 메시지 파싱 실패', e);
+      }
+    });
 
     return () => {
-      unsubscribe(subscriptionRef.current);
-      subscriptionRef.current = null;
+      unsubscribe(roomSubRef.current);
+      unsubscribe(readSubRef.current);
+      roomSubRef.current = null;
+      readSubRef.current = null;
     };
-  }, [roomId, isConnected, subscribeRoom, unsubscribe, onMessage]);
+  }, [roomId, isConnected, subscribeRoom, subscribeReadTopic, unsubscribe, onMessage, onRead]);
 
   const sendMessage = (
     roomId: number,
