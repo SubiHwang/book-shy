@@ -23,12 +23,14 @@ import BookDetailPage from '@/pages/mylibrary/BookDetailPage';
 import BookInfoTab from '@/pages/mylibrary/tabs/BookInfoTab';
 import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
 import ISBNScanResultPage from '@/pages/mylibrary/AddBook/ISBNScanResultPage';
-import MyBookNotesPage from '@/pages/mybooknote/MyBookNotesPage';
-import BookNoteDetailPage from '@/pages/mybooknote/BookNoteDetailPage';
-import BookNoteFullPage from '@/pages/mybooknote/BookNoteFullPage';
-import BookNoteEditPage from '@/pages/mybooknote/BookNoteEditPage';
-import BookNoteCreatePage from '@/pages/mybooknote/BookNoteCreatePage';
-import BookNoteSelectPage from '@/pages/mybooknote/BookNoteSelectPage';
+import MyBookNotesPage from '@/pages/mybooknote/booknote/MyBookNotesPage';
+import BookNoteDetailPage from '@/pages/mybooknote/booknote/BookNoteDetailPage';
+import BookNoteFullPage from '@/pages/mybooknote/booknote/BookNoteFullPage';
+import BookNoteEditPage from '@/pages/mybooknote/booknote/BookNoteEditPage';
+import BookNoteCreatePage from '@/pages/mybooknote/booknote/BookNoteCreatePage';
+import BookNoteSelectPage from '@/pages/mybooknote/booknote/BookNoteSelectPage';
+import BookTripPage from '@/pages/mybooknote/booktrip/BookTripPage';
+import BookTripDetailPage from '@/pages/mybooknote/booktrip/BookTripDetailPage';
 import EditProfilePage from '@/pages/mypage/EditProfilePage';
 import Login from '@/pages/auth/Login';
 import PrivateRoute from '@/components/layout/PrivateRoute';
@@ -130,6 +132,10 @@ const AppLayout: FC = () => {
                   <Route path="/booknotes/edit/:bookId" element={<BookNoteEditPage />} />
                   <Route path="/booknotes/create" element={<BookNoteCreatePage />} />
                   <Route path="/booknotes/select" element={<BookNoteSelectPage />} />
+
+                  {/* 책의 여정 페이지 */}
+                  <Route path="/booknotes/trip" element={<BookTripPage />} />
+                  <Route path="/booknotes/trip/:bookId" element={<BookTripDetailPage />} />
 
                   {/* ✅ 마이페이지 라우팅 (공통 레이아웃) */}
                   <Route path="/mypage" element={<MyPage />}>

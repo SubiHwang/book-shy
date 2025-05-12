@@ -1,12 +1,12 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchBookNoteList } from '@/services/mybooknote/booknote';
-import { fetchBookQuote } from '@/services/mybooknote/bookquote';
+import { fetchBookNoteList } from '@/services/mybooknote/booknote/booknote';
+import { fetchBookQuote } from '@/services/mybooknote/booknote/bookquote';
 import type { BookNote } from '@/types/mybooknote/booknote';
-import type { BookQuote } from '@/types/mybooknote/bookquote';
-import BookNoteCard from '@/components/booknote/BookNoteCard';
-import AdjacentBookPreview from '@/components/booknote/AdjacentBookPreview';
+import type { BookQuote } from '@/types/mybooknote/booknote/bookquote';
+import BookNoteCard from '@/components/mybooknote/booknote/BookNoteCard';
+import AdjacentBookPreview from '@/components/mybooknote/booknote/AdjacentBookPreview';
 
 const BookNoteDetailPage: React.FC = () => {
   const { bookId } = useParams();

@@ -9,7 +9,7 @@ import { WishBooksResponse } from '@/types/Matching';
 const SearchResultBookList: FC = () => {
   // useParams 대신 useSearchParams 사용
   const [searchParams] = useSearchParams();
-  
+
   const [resultList, setResultList] = useState<WishBook[]>([]); // 검색 결과 리스트
   const [total, setTotal] = useState<number>(0); // 검색 결과 총 개수
   const [isLoading, setIsLoading] = useState<boolean>(false); // 로딩 상태
@@ -49,7 +49,10 @@ const SearchResultBookList: FC = () => {
       <div className="flex flex-col text-light-text px-8 py-4">
         <div className="flex gap-2 justify-between items-center mb-1">
           <p className="text-lg font-medium">
-            <span className="font-semibold text-primary-dark">{searchParams.get('searchTerm')} </span>의 검색 결과
+            <span className="font-semibold text-primary-dark">
+              {searchParams.get('searchTerm')}{' '}
+            </span>
+            의 검색 결과
           </p>
           <p className="font-light">검색 결과 수 : {total}</p>
         </div>

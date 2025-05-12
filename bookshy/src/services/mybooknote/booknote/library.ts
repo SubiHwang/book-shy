@@ -1,5 +1,5 @@
 import { authAxiosInstance } from '@/services/axiosInstance';
-import type { LibraryBook, UnwrittenLibraryBook } from '@/types/mybooknote/library';
+import type { LibraryBook, UnwrittenLibraryBook } from '@/types/mybooknote/booknote/library';
 
 export const fetchLibraryBooks = async (): Promise<LibraryBook[]> => {
   return (await authAxiosInstance.get(`/library`)) as LibraryBook[];
