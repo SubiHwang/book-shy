@@ -1,11 +1,15 @@
-import { FC, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { MatchingCardProps } from '@/types/Matching';
 import { ChevronDown, ChevronUp, BookMarked, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { getUserIdFromToken } from '@/utils/jwt';
+import { fetchChatList } from '@/services/chat/chat';
+import { createChatRoom } from '@/services/matching/chatroom';
 
 const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
   const navigate = useNavigate();
   const [isCardExtended, setIsCardExtended] = useState<boolean>(false);
+  const myUserId = getUserIdFromToken()!;
 
   const handleCardExtend = (): void => {
     setIsCardExtended(!isCardExtended);
@@ -13,6 +17,42 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
 
   const handleClickNeighborsBookshelf = (userId: number): void => {
     navigate(`/matching/neigbors-bookshelf/${userId}`);
+  };
+
+  const handleChatClick = async () => {
+    try {
+      const { roomId } = await createChatRoom({
+        user1Id: myUserId,
+        user2Id: matching.id,
+      });
+      navigate(`/chats/${roomId}`, {
+        state: {
+          partnerName: matching.name,
+          partnerProfileImage: matching.profileImage,
+        },
+      });
+    } catch (err: any) {
+      // Conflict: 이미 채팅방이 있을 때
+      if (err.response?.status === 405 || err.response?.status === 409) {
+        const rooms = await fetchChatList();
+        const existing = rooms.find(
+          (r: any) =>
+            (r.participantId === myUserId && r.partnerId === 10) ||
+            (r.partnerId === myUserId && r.participantId === 10),
+        );
+        if (existing) {
+          navigate(`/chat/${existing.id}`, {
+            state: {
+              partnerName: existing.partnerName,
+              partnerProfileImage: existing.partnerProfileImage,
+            },
+          });
+          return;
+        }
+      }
+      console.error(err);
+      alert('채팅방 열기에 실패했습니다.');
+    }
   };
 
   return (
@@ -130,7 +170,10 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
               <BookMarked width={16} height={16} strokeWidth={0.5} className="mx-1 sm:mx-2" />
               <span className="mr-1 sm:mr-2">서재 보기</span>
             </button>
-            <button className="bg-primary-light text-white mx-1 sm:mx-3 text-xs sm:text-sm font-extralight px-2 sm:px-4 py-1 rounded-md border border-white flex items-center">
+            <button
+              onClick={handleChatClick}
+              className="bg-primary-light text-white mx-1 sm:mx-3 text-xs sm:text-sm font-extralight px-2 sm:px-4 py-1 rounded-md border border-white flex items-center"
+            >
               <MessageCircle width={16} height={16} strokeWidth={0.5} className="mx-1 sm:mx-2" />
               <span className="mr-1 sm:mr-2">채팅 하기</span>
             </button>
