@@ -49,9 +49,7 @@ public class BookRecommendBySimilar {
 
             // 내 위시리스트가 비어있으면 베스트셀러로 대체
             if (myBookIds.isEmpty()) {
-                log.info("사용자 {}의 위시리스트가 비어있습니다. 베스트셀러로 대체합니다.", userId);
-                List<BookResponseDto> bestSellers = aladinClient.getBestSellerRecommendations(recommendCount);
-                return convertToBookListResponseDto(bestSellers);
+                log.info("사용자 {}의 위시리스트가 비어있습니다. ", userId);
             }
 
             log.info("사용자 {}의 위시리스트 책 수: {}", userId, myBookIds.size());
@@ -61,9 +59,7 @@ public class BookRecommendBySimilar {
 
             // 다른 사용자 정보가 없으면 베스트셀러로 대체
             if (otherUsersBooks.isEmpty()) {
-                log.info("다른 사용자 정보를 찾을 수 없습니다. 베스트셀러로 대체합니다.");
-                List<BookResponseDto> bestSellers = aladinClient.getBestSellerRecommendations(recommendCount);
-                return convertToBookListResponseDto(bestSellers);
+                log.info("다른 사용자 정보를 찾을 수 없습니다.");
             }
 
             // 3. 유사도 계산 (겹치는 책 수 기준)
@@ -169,16 +165,16 @@ public class BookRecommendBySimilar {
         for (SearchHit hit : response.getHits().getHits()) {
             Map<String, Object> sourceAsMap = hit.getSourceAsMap();
 
-            if (sourceAsMap.containsKey("eventData.bookId")) {
-                Object bookIdObj = sourceAsMap.get("eventData.bookId");
+            // eventData가 중첩된 객체로 저장되어 있을 경우
+            if (sourceAsMap.containsKey("eventData")) {
+                Map<String, Object> eventData = (Map<String, Object>) sourceAsMap.get("eventData");
 
-                if (bookIdObj instanceof List) {
-                    List<?> bookIdList = (List<?>) bookIdObj;
-                    if (!bookIdList.isEmpty()) {
-                        bookIds.add(Long.valueOf(bookIdList.get(0).toString()));
+                if (eventData.containsKey("bookId")) {
+                    Object bookIdObj = eventData.get("bookId");
+
+                    if (bookIdObj != null) {
+                        bookIds.add(Long.valueOf(bookIdObj.toString()));
                     }
-                } else if (bookIdObj != null) {
-                    bookIds.add(Long.valueOf(bookIdObj.toString()));
                 }
             }
         }
@@ -211,22 +207,17 @@ public class BookRecommendBySimilar {
         for (SearchHit hit : response.getHits().getHits()) {
             Map<String, Object> sourceAsMap = hit.getSourceAsMap();
 
-            if (sourceAsMap.containsKey("eventData.userId") && sourceAsMap.containsKey("eventData.bookId")) {
-                Long otherUserId = Long.valueOf(sourceAsMap.get("eventData.userId").toString());
+            // eventData가 중첩된 객체로 저장되어 있을 경우
+            if (sourceAsMap.containsKey("eventData")) {
+                Map<String, Object> eventData = (Map<String, Object>) sourceAsMap.get("eventData");
 
-                Object bookIdObj = sourceAsMap.get("eventData.bookId");
-                Long bookId = null;
+                Object userIdObj = eventData.get("userId");
+                Object bookIdObj = eventData.get("bookId");
 
-                if (bookIdObj instanceof List) {
-                    List<?> bookIdList = (List<?>) bookIdObj;
-                    if (!bookIdList.isEmpty()) {
-                        bookId = Long.valueOf(bookIdList.get(0).toString());
-                    }
-                } else if (bookIdObj != null) {
-                    bookId = Long.valueOf(bookIdObj.toString());
-                }
+                if (userIdObj != null && bookIdObj != null) {
+                    Long otherUserId = Long.valueOf(userIdObj.toString());
+                    Long bookId = Long.valueOf(bookIdObj.toString());
 
-                if (bookId != null) {
                     userBooks.computeIfAbsent(otherUserId, k -> new ArrayList<>()).add(bookId);
                 }
             }

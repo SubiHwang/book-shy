@@ -34,8 +34,8 @@ public class BookRecommendationService {
     public BookListTotalResponseDto getAllRecommendations(Long userId) {
         // 각 추천 타입별로 책 목록 조회
         List<BookListResponseDto> categoryRecs = bookRecommendByCatecory.getCategoryBasedRecommendations(userId, 4);
-        List<BookListResponseDto> authorRecs = bookRecommendByAuthor.getAuthorBasedRecommendations(userId, 1);
-        List<BookListResponseDto> similarUserRecs = bookRecommendBySimilar.getSimilarUserRecommendations(userId, 5);
+        List<BookListResponseDto> authorRecs = bookRecommendByAuthor.getAuthorBasedRecommendations(userId, 2);
+        List<BookListResponseDto> similarUserRecs = bookRecommendBySimilar.getSimilarUserRecommendations(userId, 4);
 
         // 모든 추천 결과를 하나의 리스트로 합침
         List<BookListResponseDto> allRecommendations = new ArrayList<>();
