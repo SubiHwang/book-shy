@@ -1,6 +1,6 @@
 // @/components/booknote/BookSelectCard.tsx
 import { useNavigate } from 'react-router-dom';
-import type { UnwrittenLibraryBook } from '@/types/mybooknote/library';
+import type { UnwrittenLibraryBook } from '@/types/mybooknote/booknote/library';
 
 interface BookSelectCardProps {
   book: UnwrittenLibraryBook;
