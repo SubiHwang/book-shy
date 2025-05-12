@@ -13,6 +13,7 @@ public class BookListResponseDto {
     private String title;
     private String author;
     private String publisher;
+    private String category;
     private String coverImageUrl;
     private String description;
     private Boolean isLiked;
@@ -34,6 +35,7 @@ public class BookListResponseDto {
                 .title(book.getTitle())
                 .author(book.getAuthor())
                 .publisher(book.getPublisher())
+                .category(book.getCategory())
                 .coverImageUrl(book.getCoverImageUrl())
                 .description(book.getDescription())
                 .isLiked(isLiked)
