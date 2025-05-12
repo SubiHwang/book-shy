@@ -1,28 +1,26 @@
-// src/components/mylibrary/BookDetail/BookDetailHeader.tsx
-import React from 'react';
-import { BookDetailResponse } from '@/services/mylibrary/bookDetailService';
+import { Plus } from 'lucide-react';
+import { FC, useState } from 'react';
+import { ExtendedSearchBookDetailPageProps } from '@/types/book';
+import Skeleton from 'react-loading-skeleton';
 import { useImageColors } from '@/hooks/common/useImageColors';
 import { createGradientStyle } from '@/utils/common/gradientStyles';
-import Skeleton from 'react-loading-skeleton';
+import { useQueryClient } from '@tanstack/react-query';
 
-// 공통 Header 컴포넌트
-interface BookDetailHeaderProps {
-  bookDetail: BookDetailResponse & { libraryId: number; isPublic: boolean };
-  onBack: () => void;
-  onTogglePublicStatus: () => void;
-  onDelete: () => void; // 삭제 핸들러 추가
-  isLoading?: boolean;
-}
-
-const BookDetailHeader: React.FC<BookDetailHeaderProps> = ({
-  bookDetail,
-  onTogglePublicStatus,
-  onDelete,
-  isLoading: isLoadingData = false,
+const SearchBookDetailHeader: FC<ExtendedSearchBookDetailPageProps> = ({
+  itemId,
+  title,
+  author,
+  publisher,
+  coverImageUrl,
+  isLoading: isLoadingData,
+  onAddBook, // 북 추가 함수 props로 받기
 }) => {
+  const [isAddLoading, setIsAddLoading] = useState<boolean>(false);
+  const queryClient = useQueryClient();
+
   // 이미지에서 색상 추출 및 파스텔 색상 자동 생성
   const { pastelColors, isLoading: isLoadingColors } = useImageColors(
-    !isLoadingData && bookDetail?.coverImageUrl ? bookDetail.coverImageUrl : null,
+    !isLoadingData && coverImageUrl ? coverImageUrl : null,
     ['#FCF6D4', '#F4E8B8'], // 기본 색상
     0.65, // 더 밝은 파스텔 색상을 위한 밝기 조정값 (0-1)
     220, // 최소 밝기값 (0-255)
@@ -34,8 +32,36 @@ const BookDetailHeader: React.FC<BookDetailHeaderProps> = ({
   // 배경 그라데이션 스타일 생성 (항상 파스텔 색상 사용)
   const gradientStyle = createGradientStyle(pastelColors, 'bottom right');
 
+  // 북 추가 핸들러
+  const handleAddBook = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (itemId === undefined) {
+      console.error('Book ID is missing');
+      return;
+    }
+
+    setIsAddLoading(true);
+    try {
+      if (onAddBook) {
+        await onAddBook(itemId);
+
+        // 성공 알림 추가
+        alert('책이 성공적으로 등록되었습니다!');
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['myLibraryBooks'] });
+    } catch (error) {
+      console.error('Error adding book:', error);
+
+      // 실패 알림 추가
+      alert('책 등록에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsAddLoading(false);
+    }
+  };
   return (
-    <>
+    <div>
       {/* 책 정보 섹션 - 파스텔 그라데이션 적용, flex 컨테이너로 변경 */}
       <div className="flex flex-col justify-end p-4 shadow-sm min-h-[25vh]" style={gradientStyle}>
         {/* 내용물을 하단에 배치 */}
@@ -46,13 +72,9 @@ const BookDetailHeader: React.FC<BookDetailHeaderProps> = ({
               <Skeleton width="100%" height="100%" />
             ) : (
               <img
-                src={bookDetail.coverImageUrl || '/placeholder-book.jpg'}
-                alt={bookDetail.title}
+                src={coverImageUrl || '/api/placeholder/200/300'}
+                alt={title || '책 표지'}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = '/placeholder-book.jpg';
-                }}
               />
             )}
           </div>
@@ -70,38 +92,27 @@ const BookDetailHeader: React.FC<BookDetailHeaderProps> = ({
                 <>
                   {/* 긴 제목도 잘 보이게 조정 */}
                   <h2 className="text-lg font-bold mb-2 break-words line-clamp-3 leading-tight">
-                    {bookDetail.title || '제목 정보 없음'}
+                    {title || '제목 정보 없음'}
                   </h2>
-                  <p className="text-sm mb-1 truncate">작가: {bookDetail.author || '정보 없음'}</p>
-                  <p className="text-sm mb-1 truncate">
-                    출판사: {bookDetail.publisher || '정보 없음'}
-                  </p>
+                  <p className="text-sm mb-1 truncate">작가: {author || '정보 없음'}</p>
+                  <p className="text-sm mb-1 truncate">출판사: {publisher || '정보 없음'}</p>
                 </>
               )}
             </div>
-
-            {!isLoading && (
-              <div className="flex space-x-2 mt-3">
-                <button
-                  className="py-1.5 px-4 rounded-full bg-white bg-opacity-70 hover:bg-opacity-90 shadow-sm text-gray-700 text-sm font-medium transition-colors"
-                  onClick={onTogglePublicStatus}
-                >
-                  {bookDetail.isPublic ? '공개 서재에서 숨기기' : '공개 서재에 추가'}
-                </button>
-
-                <button
-                  className="py-1.5 px-4 rounded-full bg-white bg-opacity-70 hover:bg-opacity-90 shadow-sm text-gray-700 text-sm font-medium transition-colors"
-                  onClick={onDelete}
-                >
-                  삭제하기
-                </button>
-              </div>
-            )}
+            <div className="flex justify-end mt-2">
+              <button
+                className="p-2 rounded-full bg-white bg-opacity-70 hover:bg-opacity-90 shadow-sm"
+                onClick={handleAddBook}
+                disabled={isAddLoading || isLoading}
+              >
+                <Plus className="w-6 h-6 text-primary" strokeWidth={1} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
-export default BookDetailHeader;
+export default SearchBookDetailHeader;

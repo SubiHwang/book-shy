@@ -1,20 +1,15 @@
-// src/components/mylibrary/BookDetail/BookInfoTab.tsx
-import React from 'react';
-import { useOutletContext } from 'react-router-dom';
-import { BookDetailResponse } from '@/services/mylibrary/bookDetailService';
 import Loading from '@/components/common/Loading';
+import { SearchBookDetailPageProps } from '@/types/book';
 import { CalendarDays, Layers, Tag } from 'lucide-react';
+import { FC } from 'react';
 
-interface BookDetailContext {
-  bookDetail: BookDetailResponse & { libraryId: number; isPublic: boolean };
-  isLoading?: boolean;
-}
-
-const BookInfoTab: React.FC = () => {
-  const { bookDetail, isLoading } = useOutletContext<BookDetailContext>();
-
-  if (!bookDetail && !isLoading) return null;
-
+const SearchBookDetailBody: FC<SearchBookDetailPageProps> = ({
+  pubDate,
+  pageCount,
+  category,
+  description,
+  isLoading,
+}) => {
   return (
     <div className="px-10 py-5">
       {isLoading ? (
@@ -32,15 +27,13 @@ const BookInfoTab: React.FC = () => {
                 <p className="text-sm text-light-text-secondary">출간일</p>
               </div>
               <div className="flex-grow text-right">
-                <p className="text-sm text-light-text font-medium">
-                  {bookDetail.pubDate || '정보 없음'}
-                </p>
+                <p className="text-sm text-light-text font-medium">{pubDate || '정보 없음'}</p>
               </div>
             </div>
 
             <div className="flex items-center p-4 border-b border-gray-100">
               {/* 책 페이지 아이콘 - 원형 배경 추가 */}
-              <div className="w-8 h-8 mr-3 flex-shrink-0 rounded-full bg-card-bg-pink text-primary flex items-center justify-center">
+              <div className="w-8 h-8 mr-3 flex-shrink-0 rounded-full flex items-center justify-center bg-card-bg-pink text-primary">
                 <Layers strokeWidth={1} />
               </div>
               <div className="w-20 flex-shrink-0">
@@ -48,7 +41,7 @@ const BookInfoTab: React.FC = () => {
               </div>
               <div className="flex-grow text-right">
                 <p className="text-sm text-light-text font-medium">
-                  {bookDetail.pageCount ? `${bookDetail.pageCount}쪽` : '정보 없음'}
+                  {pageCount ? `${pageCount}쪽` : '정보 없음'}
                 </p>
               </div>
             </div>
@@ -62,18 +55,15 @@ const BookInfoTab: React.FC = () => {
                 <p className="text-sm text-light-text-secondary">카테고리</p>
               </div>
               <div className="flex-grow text-right">
-                <p className="text-sm text-light-text font-medium">
-                  {bookDetail.category || '정보 없음'}
-                </p>
+                <p className="text-sm text-light-text font-medium">{category || '정보 없음'}</p>
               </div>
             </div>
           </div>
-
           <h2 className="text-xl font-bold mb-3">책 소개</h2>
           <div className="bg-light-bg-secondary rounded-lg mb-6 shadow-sm">
             <div className="p-4">
               <p className="text-sm text-light-text leading-relaxed whitespace-pre-line">
-                {bookDetail.description || '책 소개 정보가 없습니다.'}
+                {description || '책 소개 정보가 없습니다.'}
               </p>
             </div>
           </div>
@@ -83,4 +73,4 @@ const BookInfoTab: React.FC = () => {
   );
 };
 
-export default BookInfoTab;
+export default SearchBookDetailBody;
