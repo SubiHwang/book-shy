@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useRef, useState, useCallb
 import SockJS from 'sockjs-client';
 import { CompatClient, IMessage, Stomp } from '@stomp/stompjs';
 
-const SOCKET_URL = 'https://k12d204.p.ssafy.io:8080/ws-chat';
+const SOCKET_URL = 'https://k12d204.p.ssafy.io/ws-chat';
 
 interface WebSocketContextValue {
   subscribeRoom: (
