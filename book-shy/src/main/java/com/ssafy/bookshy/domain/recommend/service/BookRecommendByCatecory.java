@@ -9,6 +9,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.document.DocumentField;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -80,7 +81,7 @@ public class BookRecommendByCatecory {
     private List<BookListResponseDto> convertToBookListResponseDto(List<BookResponseDto> books) {
         return books.stream()
                 .map(book -> BookListResponseDto.builder()
-                        .itemId(book.getAladinItemId())
+                        .itemId(book.getItemId())
                         .title(book.getTitle())
                         .author(book.getAuthor())
                         .publisher(book.getPublisher())
@@ -108,7 +109,9 @@ public class BookRecommendByCatecory {
 
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
                     .query(boolQuery)
-                    .size(100); // 최대 100개까지만 조회
+                    .size(100) // 최대 100개까지만 조회
+                    .fetchSource(true)  // _source 필드 가져오기
+                    .fetchField("eventData.bookId");  // 특정 필드 요청
 
             SearchRequest searchRequest = new SearchRequest("recommend.event")
                     .source(searchSourceBuilder);
@@ -118,26 +121,17 @@ public class BookRecommendByCatecory {
 
             // 검색 결과에서 책 ID 추출
             for (SearchHit hit : response.getHits().getHits()) {
-                Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+                DocumentField bookIdField = hit.getFields().get("eventData.bookId");
 
-                // eventData.bookId 필드에서 값 추출
-                if (sourceAsMap.containsKey("eventData.bookId")) {
-                    Object bookIdObj = sourceAsMap.get("eventData.bookId");
-
-                    // 배열 형태인 경우 처리
-                    if (bookIdObj instanceof List) {
-                        List<?> bookIdList = (List<?>) bookIdObj;
-                        if (!bookIdList.isEmpty()) {
-                            bookIds.add(Long.valueOf(bookIdList.get(0).toString()));
+                if (bookIdField != null && bookIdField.getValues() != null) {
+                    // fields는 항상 List 형태로 값을 반환
+                    for (Object value : bookIdField.getValues()) {
+                        if (value != null) {
+                            bookIds.add(Long.valueOf(value.toString()));
                         }
-                    }
-                    // 단일 값인 경우 처리
-                    else if (bookIdObj != null) {
-                        bookIds.add(Long.valueOf(bookIdObj.toString()));
                     }
                 }
             }
-
             log.info("사용자 {}의 위시리스트에서 {}개의 책 ID를 찾았습니다.", userId, bookIds.size());
 
         } catch (Exception e) {

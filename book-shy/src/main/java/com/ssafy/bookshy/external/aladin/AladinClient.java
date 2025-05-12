@@ -6,6 +6,7 @@ import com.ssafy.bookshy.domain.book.dto.BookListResponseDto;
 import com.ssafy.bookshy.domain.book.dto.BookListTotalResponseDto;
 import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,10 +14,12 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class AladinClient {
 
     private final RestTemplate restTemplate = new RestTemplate();
@@ -164,6 +167,60 @@ public class AladinClient {
                 .toLowerCase()
                 .trim()
                 .split("\\s+");
+    }
+
+    public List<BookListResponseDto> searchListAuthor(String query, int start) {
+        try {
+            log.info("작가 검색 시작 - 쿼리: {}, 시작 인덱스: {}", query, start);
+
+            String url = String.format(
+                    "%s/ItemSearch.aspx?ttbkey=%s&Query=%s&QueryType=Keyword&SearchTarget=Book&MaxResults=50&Start=%d&OptResult=bookinfo&Sort=Accuracy&output=js",
+                    baseUrl, ttbKey, query, start
+            );
+
+            log.info("요청 URL: {}", url);
+
+            String raw = restTemplate.getForObject(url, String.class);
+            log.info("API 응답 길이: {}", raw != null ? raw.length() : "null");
+
+            String clean = preprocessResponse(raw);
+            log.info("전처리 후 응답 길이: {}", clean != null ? clean.length() : "null");
+
+            JsonNode root = objectMapper.readTree(clean);
+            JsonNode items = root.path("item");
+            log.info("파싱된 아이템 수: {}", items.size());
+
+            List<BookListResponseDto> result = new ArrayList<>();
+
+            String[] tokens = tokenizeQuery(query);
+            log.info("검색 토큰: {}", Arrays.toString(tokens));
+
+            for (JsonNode it : items) {
+                String title = it.path("title").asText("").toLowerCase();
+                String author = it.path("author").asText("").toLowerCase();
+                String publisher = it.path("publisher").asText("").toLowerCase();
+
+                boolean allMatch = true;
+                for (String token : tokens) {
+                    if (!(title.contains(token) || author.contains(token) || publisher.contains(token))) {
+                        allMatch = false;
+                        break;
+                    }
+                }
+
+                if (allMatch) {
+                    log.debug("매칭된 책: 제목={}, 작가={}, 출판사={}", title, author, publisher);
+                    result.add(BookListResponseDto.from(it));
+                }
+            }
+
+            log.info("필터링 후 결과 수: {}", result.size());
+            return result;
+
+        } catch (Exception e) {
+            log.error("❌ 검색 목록 API 실패", e);
+            return new ArrayList<>();
+        }
     }
 
     /**

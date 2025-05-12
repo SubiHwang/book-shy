@@ -50,7 +50,8 @@ public class BookRecommendBySimilar {
             // 내 위시리스트가 비어있으면 베스트셀러로 대체
             if (myBookIds.isEmpty()) {
                 log.info("사용자 {}의 위시리스트가 비어있습니다. 베스트셀러로 대체합니다.", userId);
-                return aladinClient.getBestSellerRecommendations(recommendCount);
+                List<BookResponseDto> bestSellers = aladinClient.getBestSellerRecommendations(recommendCount);
+                return convertToBookListResponseDto(bestSellers);
             }
 
             log.info("사용자 {}의 위시리스트 책 수: {}", userId, myBookIds.size());
@@ -61,7 +62,8 @@ public class BookRecommendBySimilar {
             // 다른 사용자 정보가 없으면 베스트셀러로 대체
             if (otherUsersBooks.isEmpty()) {
                 log.info("다른 사용자 정보를 찾을 수 없습니다. 베스트셀러로 대체합니다.");
-                return aladinClient.getBestSellerRecommendations(recommendCount);
+                List<BookResponseDto> bestSellers = aladinClient.getBestSellerRecommendations(recommendCount);
+                return convertToBookListResponseDto(bestSellers);
             }
 
             // 3. 유사도 계산 (겹치는 책 수 기준)
@@ -70,7 +72,8 @@ public class BookRecommendBySimilar {
             // 유사한 사용자가 없으면 베스트셀러로 대체
             if (userSimilarity.isEmpty()) {
                 log.info("유사한 사용자를 찾을 수 없습니다. 베스트셀러로 대체합니다.");
-                return aladinClient.getBestSellerRecommendations(recommendCount);
+                List<BookResponseDto> bestSellers = aladinClient.getBestSellerRecommendations(recommendCount);
+                return convertToBookListResponseDto(bestSellers);
             }
 
             // 4. 가장 유사한 사용자 찾기
@@ -86,7 +89,8 @@ public class BookRecommendBySimilar {
             // 추천할 책이 없으면 베스트셀러로 대체
             if (recommendableBookIds.isEmpty()) {
                 log.info("유사 사용자와 겹치지 않는 책이 없습니다. 베스트셀러로 대체합니다.");
-                return aladinClient.getBestSellerRecommendations(recommendCount);
+                List<BookResponseDto> bestSellers = aladinClient.getBestSellerRecommendations(recommendCount);
+                return convertToBookListResponseDto(bestSellers);
             }
 
             // 6. 랜덤하게 섞어서 선택
@@ -108,11 +112,12 @@ public class BookRecommendBySimilar {
             // 결과가 없으면 베스트셀러로 대체
             if (result.isEmpty()) {
                 log.info("추천 결과가 없습니다. 베스트셀러로 대체합니다.");
-                return aladinClient.getBestSellerRecommendations(recommendCount);
+                List<BookResponseDto> bestSellers = aladinClient.getBestSellerRecommendations(recommendCount);
+                return convertToBookListResponseDto(bestSellers);
             }
 
             log.info("유사 사용자 기반 추천 완료: {}권", result.size());
-            return result;
+            return convertToBookListResponseDto(result);
 
         } catch (Exception e) {
             log.error("유사 사용자 기반 추천 중 오류 발생: {}", e.getMessage(), e);
@@ -120,6 +125,23 @@ public class BookRecommendBySimilar {
             // 오류 발생 시 빈 리스트 반환
             return Collections.emptyList();
         }
+    }
+
+    /**
+     * BookResponseDto 리스트를 BookListResponseDto 리스트로 변환
+     */
+    private List<BookListResponseDto> convertToBookListResponseDto(List<BookResponseDto> books) {
+        return books.stream()
+                .map(book -> BookListResponseDto.builder()
+                        .itemId(book.getItemId())
+                        .title(book.getTitle())
+                        .author(book.getAuthor())
+                        .publisher(book.getPublisher())
+                        .coverImageUrl(book.getCoverImageUrl())
+                        .description(book.getDescription())
+                        .isLiked(false) // 기본값으로 false 설정
+                        .build())
+                .collect(Collectors.toList());
     }
 
     /**

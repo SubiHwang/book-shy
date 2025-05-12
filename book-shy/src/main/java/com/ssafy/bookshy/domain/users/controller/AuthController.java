@@ -133,7 +133,6 @@ public class AuthController {
     @Operation(
             summary = "로그아웃",
             description = "사용자가 로그아웃을 하기 위한 메서드입니다.",
-            tags = {"Auth"},
             security = {@SecurityRequirement(name = "Bearer")}
     )
     @ApiResponses({

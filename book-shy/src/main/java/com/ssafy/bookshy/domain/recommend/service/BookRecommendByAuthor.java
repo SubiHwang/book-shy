@@ -17,6 +17,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,33 +52,37 @@ public class BookRecommendByAuthor {
 
             // 가장 많이 검색한 작가를 찾지 못했을 경우
             if (topAuthor == null || topAuthor.isEmpty()) {
-                log.info("사용자 {}가 검색한 작가 정보를 찾을 수 없습니다. 베스트셀러로 대체합니다.", userId);
-                List<BookResponseDto> bestSellers = aladinClient.getBestSellerRecommendations(recommendCount);
-                return convertToBookListResponseDto(bestSellers);
+                log.info("사용자 {}가 검색한 작가 정보를 찾을 수 없습니다. ", userId);
             }
 
             log.info("사용자 {}의 가장 많이 검색한 작가: {}", userId, topAuthor);
 
             // 2. 해당 작가의 책 목록 가져오기
-            List<BookResponseDto> authorBooks = aladinClient.searchByKeyword(topAuthor);
+            // "지음", "저", "글" 등의 불필요한 텍스트 제거
+            String cleanAuthorName = topAuthor.replaceAll("\\s*(지음|저|글|옮김|역)\\s*", "").trim();
+            log.info("정제된 작가명: {} -> {}", topAuthor, cleanAuthorName);
+
+            List<BookListResponseDto> authorBooks = aladinClient.searchListAuthor(cleanAuthorName, 1);
+
 
             // 작가의 책을 찾지 못했을 경우
-            if (authorBooks.isEmpty()) {
+            if (topAuthor == null || topAuthor.isEmpty()) {
                 log.info("작가 {}의 책을 찾을 수 없습니다. 베스트셀러로 대체합니다.", topAuthor);
                 List<BookResponseDto> bestSellers = aladinClient.getBestSellerRecommendations(recommendCount);
                 return convertToBookListResponseDto(bestSellers);
             }
 
             // 4. 랜덤하게 섞어서 선택
-            Collections.shuffle(authorBooks);
+            List<BookListResponseDto> bookList = new ArrayList<>(authorBooks);
+            Collections.shuffle(bookList);
 
             // 5. 요청 개수만큼 반환 (목록이 부족하면 있는 만큼만 반환)
-            List<BookResponseDto> result = authorBooks.stream()
+            List<BookListResponseDto> result = bookList.stream()
                     .limit(recommendCount)
                     .collect(Collectors.toList());
 
             log.info("작가 {} 기반 추천 완료: {}권", topAuthor, result.size());
-            return convertToBookListResponseDto(result);
+            return result;
 
         } catch (Exception e) {
             log.error("작가 기반 추천 중 오류 발생: {}", e.getMessage(), e);
@@ -93,7 +98,7 @@ public class BookRecommendByAuthor {
     private List<BookListResponseDto> convertToBookListResponseDto(List<BookResponseDto> books) {
         return books.stream()
                 .map(book -> BookListResponseDto.builder()
-                        .itemId(book.getAladinItemId())
+                        .itemId(book.getItemId())
                         .title(book.getTitle())
                         .author(book.getAuthor())
                         .publisher(book.getPublisher())
