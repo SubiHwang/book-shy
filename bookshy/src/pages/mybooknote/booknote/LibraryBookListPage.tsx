@@ -4,6 +4,7 @@ import { fetchLibraryBooks } from '@/services/mybooknote/booknote/library';
 import type { LibraryBook } from '@/types/mybooknote/booknote/library';
 import Header from '@/components/common/Header';
 import { useState } from 'react';
+import { PlusCircle } from 'lucide-react';
 
 const LibraryBookListPage = () => {
   const navigate = useNavigate();
@@ -72,13 +73,14 @@ const LibraryBookListPage = () => {
           )}
         </div>
       </div>
-
-      <button
-        onClick={() => navigate('/booknotes/create')}
-        className="fixed bottom-20 right-6 w-12 h-12 bg-pink-500 text-white rounded-full shadow-lg text-2xl"
-      >
-        +
-      </button>
+      <div className="fixed bottom-24 right-6">
+        <button
+          onClick={() => navigate('/booknotes/create')}
+          className="w-14 h-14 rounded-xl bg-primary text-white flex justify-center items-center shadow-lg"
+        >
+          <PlusCircle size={32} strokeWidth={1} />
+        </button>
+      </div>
     </div>
   );
 };
