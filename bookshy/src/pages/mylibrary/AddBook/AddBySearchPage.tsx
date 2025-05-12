@@ -114,11 +114,11 @@ const AddBySearchPage: FC = () => {
         <div className="relative flex items-center w-full px-4">
           <input
             type="text"
-            placeholder="책 제목, 저자, 출판사..."
+            placeholder="등록할 책 검색(책 제목, 저자, 출판사)"
             value={searchQuery}
             onChange={handleSearchChange}
             onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && executeSearch()}
-            className="w-full px-4 py-2 pr-10 rounded-full border-none focus:outline-none shadow-sm text-gray-800"
+            className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-200"
           />
           <button
             className="absolute right-7 top-1/2 transform -translate-y-1/2 text-gray-400"
