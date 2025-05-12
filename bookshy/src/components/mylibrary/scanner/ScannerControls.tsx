@@ -18,7 +18,7 @@ const ScannerControls: React.FC<ScannerControlsProps> = ({
   return (
     <div className="absolute bottom-0 left-0 w-full py-8 bg-black bg-opacity-70 z-10 flex items-center justify-center text-white">
       {error && (
-        <button className="px-6 py-3 bg-blue-500 rounded-md font-medium" onClick={onRetry}>
+        <button className="px-6 py-3 bg-primary rounded-md font-medium" onClick={onRetry}>
           다시 시도
         </button>
       )}
