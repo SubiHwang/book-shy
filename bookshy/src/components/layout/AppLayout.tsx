@@ -30,6 +30,7 @@ import BookNoteEditPage from '@/pages/mybooknote/booknote/BookNoteEditPage';
 import BookNoteCreatePage from '@/pages/mybooknote/booknote/BookNoteCreatePage';
 import BookNoteSelectPage from '@/pages/mybooknote/booknote/BookNoteSelectPage';
 import BookTripPage from '@/pages/mybooknote/booktrip/BookTripPage';
+import BookTripDetailPage from '@/pages/mybooknote/booktrip/BookTripDetailPage';
 import EditProfilePage from '@/pages/mypage/EditProfilePage';
 import Login from '@/pages/auth/Login';
 import PrivateRoute from '@/components/layout/PrivateRoute';
@@ -123,6 +124,7 @@ const AppLayout: FC = () => {
 
                   {/* 책의 여정 페이지 */}
                   <Route path="/booknotes/trip" element={<BookTripPage />} />
+                  <Route path="/booknotes/trip/:bookId" element={<BookTripDetailPage />} />
 
                   {/* ✅ 마이페이지 라우팅 (공통 레이아웃) */}
                   <Route path="/mypage" element={<MyPage />}>

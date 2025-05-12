@@ -1,42 +1,48 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchBookTripsByBookId } from '@/services/mybooknote/booktrip/booktrip';
-import type { BookTrip } from '@/types/mybooknote/booktrip/booktrip';
+import { fetchBookDetailByBookId } from '@/services/book/search';
+import type { BookTripWithUser } from '@/types/mybooknote/booktrip/booktrip';
+import type { Book } from '@/types/book/book';
 import BookNoteHeaderCard from '@/components/mybooknote/booknote/BookNoteHeaderCard';
 import Header from '@/components/common/Header';
 import { useState } from 'react';
-
-const mockBookInfo = {
-  title: '어린왕자',
-  author: '생텍쥐페리',
-  publisher: '더스토리북',
-  coverImageUrl: 'https://image.aladin.co.kr/product/36321/12/coversum/k672038544_1.jpg',
-};
-
-const currentUserId = 1; // ✅ 임시: 실제론 로그인 유저 ID 추출 필요
 
 const BookTripDetailPage = () => {
   const { bookId } = useParams<{ bookId: string }>();
   const [myContent, setMyContent] = useState('');
 
-  const { data: trips = [], isLoading } = useQuery<BookTrip[]>({
+  const { data: trips = [], isLoading: isTripsLoading } = useQuery<BookTripWithUser[]>({
     queryKey: ['bookTrips', bookId],
     queryFn: () => fetchBookTripsByBookId(Number(bookId)),
+    enabled: !!bookId,
   });
 
-  const myTrip = trips.find((trip) => trip.userId === currentUserId);
-  const otherTrips = trips.filter((trip) => trip.userId !== currentUserId);
+  const { data: bookInfo, isLoading: isBookLoading } = useQuery<Book>({
+    queryKey: ['bookInfo', bookId],
+    queryFn: () => fetchBookDetailByBookId(Number(bookId)),
+    enabled: !!bookId,
+  });
+
+  const myTrip = trips.find((trip) => trip.isMine);
+  const otherTrips = trips.filter((trip) => !trip.isMine);
+
+  if (isTripsLoading || isBookLoading) {
+    return <p className="text-center py-12 text-gray-500">로딩 중입니다...</p>;
+  }
 
   return (
     <div className="bg-[#f9f4ec] min-h-screen pb-28">
       <Header title="독서 기록" showBackButton showNotification />
       <div className="px-4 py-4">
-        <BookNoteHeaderCard
-          title={mockBookInfo.title}
-          author={mockBookInfo.author}
-          publisher={mockBookInfo.publisher}
-          coverUrl={mockBookInfo.coverImageUrl}
-        />
+        {bookInfo?.title && bookInfo?.author && bookInfo?.publisher && (
+          <BookNoteHeaderCard
+            title={bookInfo.title}
+            author={bookInfo.author}
+            publisher={bookInfo.publisher}
+            coverUrl={bookInfo.coverImageUrl}
+          />
+        )}
 
         <h3 className="text-base font-semibold mb-4">책의 여정 살펴보기</h3>
 
@@ -44,13 +50,14 @@ const BookTripDetailPage = () => {
           {otherTrips.map((trip) => (
             <div key={trip.tripId} className="flex items-start gap-2">
               <img
-                src={`/avatars/user${trip.userId}.png`} // ⛔ 예시용
+                src={trip.userProfile.profileImageUrl || '/avatars/default.png'}
                 className="w-8 h-8 rounded-full"
-                alt="user"
+                alt={trip.userProfile.nickname}
               />
               <div>
                 <p className="text-xs text-gray-500 mb-1">
-                  유저 {trip.userId} 님의 한 마디 · {new Date(trip.createdAt).toLocaleString()}
+                  {trip.userProfile.nickname} 님의 한 마디 ·{' '}
+                  {new Date(trip.createdAt).toLocaleString()}
                 </p>
                 <div className="bg-white px-4 py-2 rounded-md shadow-sm max-w-[80%] text-sm">
                   {trip.content}

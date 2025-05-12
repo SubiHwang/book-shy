@@ -4,10 +4,11 @@ import type {
   CreateBookTripRequest,
   UpdateBookTripRequest,
   LibraryBookWithTrip,
+  BookTripWithUser,
 } from '@/types/mybooknote/booktrip/booktrip';
 
 // ✅ 책의 여정 전체 조회
-export const fetchBookTripsByBookId = (bookId: number): Promise<BookTrip[]> => {
+export const fetchBookTripsByBookId = (bookId: number): Promise<BookTripWithUser[]> => {
   return authAxiosInstance.get('/booktrip', {
     params: { bookId },
   });

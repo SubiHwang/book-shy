@@ -12,6 +12,14 @@ export interface BookTrip {
   createdAt: string;
 }
 
+export interface BookTripWithUser extends BookTrip {
+  userProfile: {
+    nickname: string;
+    profileImageUrl: string;
+  };
+  isMine: boolean;
+}
+
 export interface CreateBookTripRequest {
   bookId: number;
   content: string;
