@@ -33,9 +33,12 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
         // 기존 방이 이미 있는 경우: fetchChatList 로 찾아서 이동
         const rooms = await fetchChatList();
         const existing = rooms.find(
+          /**
+           * 매칭 데이터가 없어서 일단 하드 코딩으로 인혁이 채팅방으로 가지도록 해놓았습니다.
+           */
           (r: any) =>
-            (r.participantId === myUserId && r.partnerId === matching.id) ||
-            (r.partnerId === myUserId && r.participantId === matching.id),
+            (r.participantId === myUserId && r.partnerId === 10) ||
+            (r.partnerId === myUserId && r.participantId === 10),
         );
         if (existing) {
           navigate(`/chat/${existing.id}`, {
