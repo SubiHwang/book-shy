@@ -13,7 +13,7 @@ const WishBooksDetailInfoBody: FC<BookDetailPageProps> = ({
   return (
     <div className="px-10 py-5">
       {isLoading ? (
-        <Loading loadingText='정보 불러오는 중...'/>
+        <Loading loadingText="정보 불러오는 중..." />
       ) : (
         <>
           {' '}
@@ -22,7 +22,7 @@ const WishBooksDetailInfoBody: FC<BookDetailPageProps> = ({
             <div className="flex items-center p-4 border-b border-gray-100">
               {/* 달력 아이콘 - 원형 배경 추가 */}
               <div className="w-8 h-8 mr-3 flex-shrink-0 rounded-full bg-card-bg-pink text-primary flex items-center justify-center">
-                <CalendarDays strokeWidth={1}/>
+                <CalendarDays strokeWidth={1} />
               </div>
               <div className="w-20 flex-shrink-0">
                 <p className="text-sm text-light-text-secondary">출간일</p>
@@ -35,7 +35,7 @@ const WishBooksDetailInfoBody: FC<BookDetailPageProps> = ({
             <div className="flex items-center p-4 border-b border-gray-100">
               {/* 책 페이지 아이콘 - 원형 배경 추가 */}
               <div className="w-8 h-8 mr-3 flex-shrink-0 rounded-full flex items-center justify-center bg-card-bg-pink text-primary">
-                <Layers strokeWidth={1}/>
+                <Layers strokeWidth={1} />
               </div>
               <div className="w-20 flex-shrink-0">
                 <p className="text-sm text-light-text-secondary">페이지</p>
@@ -50,7 +50,7 @@ const WishBooksDetailInfoBody: FC<BookDetailPageProps> = ({
             <div className="flex items-center p-4">
               {/* 태그 아이콘 - 원형 배경 추가 */}
               <div className="w-8 h-8 mr-3 flex-shrink-0 rounded-full bg-card-bg-pink text-primary flex items-center justify-center">
-                <Tag strokeWidth={1}/>
+                <Tag strokeWidth={1} />
               </div>
               <div className="w-20 flex-shrink-0">
                 <p className="text-sm text-light-text-secondary">카테고리</p>
