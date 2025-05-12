@@ -16,7 +16,7 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
   };
 
   return (
-    <div className="flex flex-col card m-2 sm:m-4 w-full max-w-md mx-auto">
+    <div className="flex flex-col card m-4 sm:m-4 w-full max-w-md mx-auto">
       {/* 카드 헤더 - 프로필 부분 */}
       <div className="flex items-center justify-between px-3 sm:px-5 pt-4 sm:pt-5 flex-wrap gap-2">
         <div className="flex items-center gap-2 sm:gap-3">
