@@ -9,6 +9,7 @@ import UpdatePrompt from '@/components/common/UpdatePrompt';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { FirebaseProvider } from '@/contexts/FirebaseContext';
 import NotificationInitializer from './components/common/NotificationInitializer';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 // 서비스 워커 등록 콜백 타입 정의
 interface RegisterSWCallbacks {

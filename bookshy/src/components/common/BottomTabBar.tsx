@@ -25,7 +25,7 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
     const path = location.pathname.substring(1); // '/' 제거
     if (path === '') {
       setActiveTab('bookshelf');
-    } else if (['bookshelf', 'matching', 'chat', 'booknote', 'mypage'].includes(path)) {
+    } else if (['bookshelf', 'matching', 'chat', 'booknotes', 'mypage'].includes(path)) {
       setActiveTab(path);
     }
   }, [location.pathname]);
@@ -65,7 +65,7 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
     { id: 'bookshelf', name: '내 서재', icon: LibraryBig },
     { id: 'matching', name: '매칭 추천', icon: BookCopy },
     { id: 'chat', name: '채팅', icon: MessageCircle },
-    { id: 'booknote', name: '독서 기록', icon: NotepadText },
+    { id: 'booknotes', name: '독서 기록', icon: NotepadText },
     { id: 'mypage', name: '마이', icon: UserRound },
   ];
 

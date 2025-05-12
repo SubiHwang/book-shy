@@ -8,8 +8,7 @@ import Loading from '@/components/common/Loading';
 
 const WishBooks: FC = () => {
   const navigate = useNavigate();
-  const userId = 1; // 임시 userId, 실제로는 로그인한 사용자의 ID를 사용해야 함
-  const { data, isLoading } = useWishBooks(userId); // 실제 API 호출을 위한 훅 사용
+  const { data, isLoading } = useWishBooks(); // 실제 API 호출을 위한 훅 사용
 
   const [selectedFilter, setSelectedFilter] = useState<string>('전체 보기');
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
@@ -21,8 +20,8 @@ const WishBooks: FC = () => {
 
     const categorySet = new Set<string>();
     data.books.forEach((book: WishBook) => {
-      if (book.categories) {
-        categorySet.add(book.categories);
+      if (book.category) {
+        categorySet.add(book.category);
       }
     });
     return ['전체 보기', ...Array.from(categorySet)];
@@ -34,7 +33,7 @@ const WishBooks: FC = () => {
     const categoryFiltered =
       selectedFilter === '전체 보기'
         ? data.books
-        : data.books.filter((book: WishBook) => book.categories === selectedFilter);
+        : data.books.filter((book: WishBook) => book.category === selectedFilter);
 
     if (!searchTerm.trim()) return categoryFiltered;
 
@@ -62,7 +61,7 @@ const WishBooks: FC = () => {
           </div>
           <input
             type="text"
-            placeholder="읽고 싶은 책 검색 (책 제목, 저자)"
+            placeholder="내가 담아둔 읽고 싶은 책 검색 (책 제목, 저자)"
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-200"
           />

@@ -4,7 +4,6 @@ import { Library } from '@/types/mylibrary/library';
 
 // 직접 입력한 도서 등록 함수
 export const addBookBySelf = async (
-  userId: number,
   title: string,
   author: string,
   publisher: string,
@@ -13,7 +12,6 @@ export const addBookBySelf = async (
 ): Promise<Library> => {
   try {
     console.log('직접 입력 도서 등록 요청:', {
-      userId,
       title,
       author,
       publisher,
@@ -30,7 +28,7 @@ export const addBookBySelf = async (
     }
 
     // API 요청 URL 생성 (쿼리 파라미터에 정보 추가)
-    const url = `/library/self/add?userId=${userId}&title=${encodeURIComponent(title)}&author=${encodeURIComponent(author)}&publisher=${encodeURIComponent(publisher)}&isPublic=${isPublic}`;
+    const url = `/library/self/add?title=${encodeURIComponent(title)}&author=${encodeURIComponent(author)}&publisher=${encodeURIComponent(publisher)}&isPublic=${isPublic}`;
 
     console.log('API 요청 URL:', url);
 

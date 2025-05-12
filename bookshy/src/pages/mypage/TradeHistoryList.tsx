@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTradeHistory } from '@/services/mypage/trade';
 import type { TradeHistoryGroup } from '@/types/trade';
-import TradeHistoryCard from '@/components/mypage/TradeHistoryCard';
+import TradeHistoryCard from '@/components/mypage/trade/TradeHistoryCard';
 
 const TradeHistoryList: FC = () => {
   const { data, isLoading, error } = useQuery<TradeHistoryGroup[], Error>({

@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, matchPath } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import BottomTabBar from '../common/BottomTabBar';
 import MyLibraryPage from '../../pages/mylibrary/MyLibraryPage';
@@ -23,9 +23,24 @@ import BookDetailPage from '@/pages/mylibrary/BookDetailPage';
 import BookInfoTab from '@/pages/mylibrary/tabs/BookInfoTab';
 import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
 import ISBNScanResultPage from '@/pages/mylibrary/AddBook/ISBNScanResultPage';
+import MyBookNotesPage from '@/pages/mybooknote/booknote/MyBookNotesPage';
+import BookNoteDetailPage from '@/pages/mybooknote/booknote/BookNoteDetailPage';
+import BookNoteFullPage from '@/pages/mybooknote/booknote/BookNoteFullPage';
+import BookNoteEditPage from '@/pages/mybooknote/booknote/BookNoteEditPage';
+import BookNoteCreatePage from '@/pages/mybooknote/booknote/BookNoteCreatePage';
+import BookNoteSelectPage from '@/pages/mybooknote/booknote/BookNoteSelectPage';
+import BookTripPage from '@/pages/mybooknote/booktrip/BookTripPage';
+import BookTripDetailPage from '@/pages/mybooknote/booktrip/BookTripDetailPage';
+import EditProfilePage from '@/pages/mypage/EditProfilePage';
 import Login from '@/pages/auth/Login';
 import PrivateRoute from '@/components/layout/PrivateRoute';
 import KaKaoOauth from '@/pages/auth/KaKaoOauth';
+import WishBooksDetailPage from '@/pages/matching/wishbook/WishBooksDetailPage';
+import RecommandedWishBookList from '../matching/searchwishbooks/RecommandedWishBookList';
+import SearchResultBookList from '../matching/searchwishbooks/SearchResultBookList';
+import ChatListPage from '@/pages/chat/ChatListPage';
+import ChatRoomPage from '@/pages/chat/ChatRoomPage';
+import TradeReviewPage from '@/pages/chat/TradeReviewPage';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -36,6 +51,10 @@ const AppLayout: FC = () => {
     navigate(`/${tabId}`);
   };
 
+  // 채팅창에서 BottomTabBar 숨기기
+  const isChatRoom = matchPath('/chat/:roomId', location.pathname);
+  const isReviewPage = matchPath('/chat/:roomId/review', location.pathname);
+
   return (
     <div className="app-container">
       <div className="content">
@@ -43,6 +62,14 @@ const AppLayout: FC = () => {
           {/* 공개 라우트 - 로그인하지 않아도 접근 가능 */}
           <Route path="/login" element={<Login />} />
           <Route path="/oauth" element={<KaKaoOauth />} />
+
+          {/* 📚 매칭 페이지 */}
+          <Route path="/matching" element={<MatchingPage />}>
+            <Route index element={<MatchingRecommend />} />
+            <Route path="wish-books" element={<WishBooks />} />
+          </Route>
+          <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
+          <Route path="matching/search-wish-books" element={<SearchWishBooks />} />
 
           {/* 보호된 라우트 - 로그인해야만 접근 가능 */}
           <Route
@@ -55,16 +82,13 @@ const AppLayout: FC = () => {
 
                   {/* 📚 서재 기본 페이지 */}
                   <Route path="/bookshelf" element={<MyLibraryPage />}>
-                    {/* 기본 라우트는 모든 책 페이지로 리다이렉트 */}
-                    <Route index element={<Navigate to="/bookshelf/all-my-books" replace />} />
-                    {/* 책 보기 탭 */}
-                    <Route path="all-my-books" element={<AllMyBooksTab />} />
-                    <Route path="public-my-books" element={<PublicMyBooksTab />} />
+                    <Route index element={<AllMyBooksTab />} />
+                    <Route path="/bookshelf/public-my-books" element={<PublicMyBooksTab />} />
                   </Route>
 
                   {/* 책 상세 페이지 */}
                   <Route path="/bookshelf/books/:id" element={<BookDetailPage />}>
-                    <Route path="info" element={<BookInfoTab />} />
+                    <Route index element={<BookInfoTab />} />
                     <Route path="notes" element={<BookNotesTab />} />
                   </Route>
 
@@ -87,17 +111,38 @@ const AppLayout: FC = () => {
                     path="/matching/neigbors-bookshelf/:userId"
                     element={<NeighborBookshelfPage />}
                   />
-                  <Route path="/matching/search-wish-books" element={<SearchWishBooks />} />
+                  <Route path="/matching/search-wish-books" element={<SearchWishBooks />}>
+                    <Route index element={<RecommandedWishBookList />} />
+                    <Route path="result" element={<SearchResultBookList />} />
+                  </Route>
 
-                  {/* 채팅과 독서기록 페이지 */}
-                  <Route path="/chat" element={<div>채팅</div>} />
-                  <Route path="/booknote" element={<div>독서 기록</div>} />
+                  <Route path="/matching/books/:id" element={<WishBooksDetailPage />} />
 
-                  {/* ✅ 마이페이지 라우팅 */}
+                  {/* 채팅 페이지 */}
+                  <Route path="/chat" element={<ChatListPage />} />
+                  <Route path="/chat/:roomId" element={<ChatRoomPage />} />
+                  <Route path="/chat/:roomId/review" element={<TradeReviewPage />} />
+
+                  {/* 독서기록 페이지 */}
+                  <Route path="/booknotes" element={<MyBookNotesPage />} />
+                  <Route path="/booknotes/detail/:bookId" element={<BookNoteDetailPage />} />
+                  <Route path="/booknotes/full/:bookId" element={<BookNoteFullPage />} />
+                  <Route path="/booknotes/edit/:bookId" element={<BookNoteEditPage />} />
+                  <Route path="/booknotes/create" element={<BookNoteCreatePage />} />
+                  <Route path="/booknotes/select" element={<BookNoteSelectPage />} />
+
+                  {/* 책의 여정 페이지 */}
+                  <Route path="/booknotes/trip" element={<BookTripPage />} />
+                  <Route path="/booknotes/trip/:bookId" element={<BookTripDetailPage />} />
+
+                  {/* ✅ 마이페이지 라우팅 (공통 레이아웃) */}
                   <Route path="/mypage" element={<MyPage />}>
                     <Route index element={<TradePromiseList />} />
                     <Route path="history" element={<TradeHistoryList />} />
                   </Route>
+
+                  {/* ✅ 독립적인 프로필 수정 페이지 (레이아웃 없음) */}
+                  <Route path="/mypage/edit" element={<EditProfilePage />} />
 
                   {/* 그 외 경로는 홈으로 리다이렉션 */}
                   <Route path="*" element={<Navigate to="/bookshelf" />} />
@@ -109,7 +154,7 @@ const AppLayout: FC = () => {
       </div>
 
       {/* 하단 탭 바 (로그인된 경우에만 표시) */}
-      {!isLoading && <BottomTabBar onTabChange={handleTabChange} />}
+      {!(isLoading || isChatRoom || isReviewPage) && <BottomTabBar onTabChange={handleTabChange} />}
     </div>
   );
 };

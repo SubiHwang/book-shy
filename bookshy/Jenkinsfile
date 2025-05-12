@@ -22,6 +22,7 @@ pipeline {
         VITE_FIREBASE_APP_ID = credentials('VITE_FIREBASE_APP_ID')
         VITE_FIREBASE_MEASUREMENT_ID = credentials('VITE_FIREBASE_MEASUREMENT_ID')
         VITE_FIREBASE_VAPID_KEY = credentials('VITE_FIREBASE_VAPID_KEY')
+        VITE_KAKAO_REST_API_KEY = credentials('VITE_KAKAO_REST_API_KEY')
         
         // 프로젝트 경로 변수 추가
         PROJECT_PATH = "${env.WORKSPACE}/bookshy" // 프로젝트 경로 설정
@@ -90,6 +91,7 @@ pipeline {
                                     echo "VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}" >> .env
                                     echo "VITE_FIREBASE_MEASUREMENT_ID=${VITE_FIREBASE_MEASUREMENT_ID}" >> .env
                                     echo "VITE_FIREBASE_VAPID_KEY=${VITE_FIREBASE_VAPID_KEY}" >> .env
+                                    echo "VITE_KAKAO_REST_API_KEY=${VITE_KAKAO_REST_API_KEY}" >> .env
                                     cat .env
                                 """
                                 

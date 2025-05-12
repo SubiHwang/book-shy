@@ -1,4 +1,5 @@
 import { WishBooksResponse } from '@/types/Matching/wishBooks';
+import { WishBook } from '@/types/book';
 import { authAxiosInstance } from '../axiosInstance';
 
 export const getSearchResult = async (searchTerm: string): Promise<WishBooksResponse> => {
@@ -14,10 +15,10 @@ export const getSearchResult = async (searchTerm: string): Promise<WishBooksResp
   }
 };
 
-export const getWishBookList = async (userId: number): Promise<WishBooksResponse> => {
+export const getWishBookList = async (): Promise<WishBooksResponse> => {
   try {
     const response = await authAxiosInstance.get<string, WishBooksResponse>(
-      `/book/wish?userId=${userId}`,
+      `/book/wish`,
     );
     console.log('읽고 싶은 책 목록 API 응답:', response);
     return response;
@@ -27,10 +28,10 @@ export const getWishBookList = async (userId: number): Promise<WishBooksResponse
   }
 };
 
-export const addWishBook = async (userId: number, itemId: number): Promise<boolean> => {
+export const addWishBook = async (itemId: number): Promise<boolean> => {
   try {
     const response = await authAxiosInstance.post<string, boolean>(
-      `/book/wish?userId=${userId}&itemId=${itemId}`,
+      `/book/wish?itemId=${itemId}`,
     );
     console.log('읽고 싶은 책 추가 API 응답:', response);
     return response;
@@ -40,15 +41,28 @@ export const addWishBook = async (userId: number, itemId: number): Promise<boole
   }
 };
 
-export const deleteWishBook = async (userId: number, itemId: number): Promise<boolean> => {
+export const deleteWishBook = async (itemId: number): Promise<boolean> => {
   try {
     const response = await authAxiosInstance.delete<string, boolean>(
-      `/book/wish/remove?userId=${userId}&itemId=${itemId}`,
+      `/book/wish/remove?itemId=${itemId}`,
     );
     console.log('읽고 싶은 책 삭제 API 응답:', response);
     return response;
   } catch (error) {
     console.error('읽고 싶은 책 삭제 API 호출 중 오류 발생:', error);
+    throw error; // 오류를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  }
+};
+
+export const getWishBookDetail = async (itemId: number): Promise<WishBook> => {
+  try {
+    const response = await authAxiosInstance.get<string, WishBook>(
+      `/book/search/detail?itemId=${itemId}`,
+    );
+    console.log('읽고 싶은 책 상세 API 응답:', response);
+    return response;
+  } catch (error) {
+    console.error('읽고 싶은 책 상세 API 호출 중 오류 발생:', error);
     throw error; // 오류를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
   }
 };
