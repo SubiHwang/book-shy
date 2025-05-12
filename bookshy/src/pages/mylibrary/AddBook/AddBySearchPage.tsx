@@ -91,6 +91,12 @@ const AddBySearchPage: FC = () => {
     }
   };
 
+  // 책 아이템 클릭 핸들러 - 상세 페이지로 이동
+  const handleBookItemClick = (itemId: number) => {
+    // 책 상세 페이지로 이동
+    navigate(`/bookshelf/add/searchdetail/${itemId}`);
+  };
+
   // 직접 등록 페이지로 이동
   const handleSelfRegister = () => {
     navigate('/bookshelf/add/self');
@@ -194,7 +200,12 @@ const AddBySearchPage: FC = () => {
             // 책 목록
             <div className="flex flex-col pb-20">
               {books.map((book) => (
-                <BookSearchItem key={book.itemId} book={book} onAddBook={handleAddBook} />
+                <BookSearchItem
+                  key={book.itemId}
+                  book={book}
+                  onAddBook={handleAddBook}
+                  onItemClick={handleBookItemClick} // 추가: 아이템 클릭 핸들러 전달
+                />
               ))}
             </div>
           )}
