@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { useParams } from 'react-router-dom';
-
+import Loading from '@/components/common/Loading';
 import BookTripBubble from './BookTripBubble';
 import type { BookTripWithUser } from '@/types/mybooknote/booktrip/booktrip';
 import { deleteBookTrip, updateBookTrip } from '@/services/mybooknote/booktrip/booktrip';
@@ -76,29 +76,37 @@ const MyTripBox = ({ trip }: Props) => {
           >
             취소
           </button>
-          <button
-            onClick={handleSave}
-            disabled={isUpdating}
-            className="text-xs text-white bg-primary px-3 py-1 rounded-md disabled:opacity-50"
-          >
-            {isUpdating ? '저장 중...' : '저장하기'}
-          </button>
+          {isUpdating ? (
+            <Loading loadingText="수정 중..." /> // ✅ 로딩 컴포넌트 활용
+          ) : (
+            <button
+              onClick={handleSave}
+              className="text-xs text-white bg-primary px-3 py-1 rounded-md"
+            >
+              저장하기
+            </button>
+          )}
         </>
       ) : (
         <>
-          <button
-            onClick={() => deleteTrip()}
-            disabled={isDeleting}
-            className="text-xs text-gray-600 border px-3 py-1 rounded-md disabled:opacity-50"
-          >
-            {isDeleting ? '삭제 중...' : '삭제하기'}
-          </button>
-          <button
-            onClick={() => setEditing(true)}
-            className="text-xs text-white bg-primary px-3 py-1 rounded-md"
-          >
-            수정하기
-          </button>
+          {isDeleting ? (
+            <Loading loadingText="삭제 중..." />
+          ) : (
+            <>
+              <button
+                onClick={() => deleteTrip()}
+                className="text-xs text-gray-600 border px-3 py-1 rounded-md"
+              >
+                삭제하기
+              </button>
+              <button
+                onClick={() => setEditing(true)}
+                className="text-xs text-white bg-primary px-3 py-1 rounded-md"
+              >
+                수정하기
+              </button>
+            </>
+          )}
         </>
       )}
     </BookTripBubble>
