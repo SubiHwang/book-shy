@@ -33,7 +33,6 @@ public class ChatCalendarController {
             summary = "🗓️ 거래 일정 조회",
             description = "📆 사용자가 등록한 특정 날짜의 교환/대여 일정을 조회합니다.",
             parameters = {
-                    @Parameter(name = "userId", description = "👤 사용자 ID", required = true, example = "1"),
                     @Parameter(name = "date", description = "📅 조회할 날짜 (ISO 형식: yyyy-MM-dd)", required = true, example = "2025-05-02")
             },
             responses = {

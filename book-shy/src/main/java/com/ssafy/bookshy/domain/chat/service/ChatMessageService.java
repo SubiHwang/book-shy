@@ -2,6 +2,7 @@ package com.ssafy.bookshy.domain.chat.service;
 
 import com.ssafy.bookshy.domain.chat.dto.ChatMessageRequestDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatMessageResponseDto;
+import com.ssafy.bookshy.domain.chat.dto.ReadReceiptPayload;
 import com.ssafy.bookshy.domain.chat.entity.ChatMessage;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatMessageRepository;
@@ -9,10 +10,12 @@ import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
 import com.ssafy.bookshy.domain.users.service.UserService;
 import com.ssafy.bookshy.kafka.dto.ChatMessageKafkaDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +36,7 @@ public class ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final UserService userService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     /**
      * 🕐 채팅방의 메시지 전체를 시간 순으로 조회
@@ -104,7 +108,7 @@ public class ChatMessageService {
                 .chatRoom(chatRoom)
                 .senderId(dto.getSenderId())
                 .content(dto.getContent())
-                .timestamp(LocalDateTime.now()) // Kafka 메시지에는 timestamp가 없을 수 있으므로 현재 시간
+                .timestamp(LocalDateTime.now(ZoneId.of("Asia/Seoul"))) // Kafka 메시지에는 timestamp가 없을 수 있으므로 현재 시간
                 .type(dto.getType())
                 .build();
 
@@ -143,9 +147,16 @@ public class ChatMessageService {
     @Transactional
     public void markMessagesAsRead(Long chatRoomId, Long userId) {
         List<ChatMessage> unreadMessages = chatMessageRepository.findUnreadMessages(chatRoomId, userId);
-        for (ChatMessage message : unreadMessages) {
-            message.markAsRead();
-        }
-        // Dirty Checking으로 자동 반영
+        if (unreadMessages.isEmpty()) return;
+
+        unreadMessages.forEach(ChatMessage::markAsRead);
+
+        List<Long> readMessageIds = unreadMessages.stream()
+                .map(ChatMessage::getId)
+                .collect(Collectors.toList());
+
+        ReadReceiptPayload payload = new ReadReceiptPayload(readMessageIds, userId);
+
+        messagingTemplate.convertAndSend("/topic/read/" + chatRoomId, payload);
     }
 }

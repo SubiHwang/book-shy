@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -84,4 +85,30 @@ public class BookTripService {
         if (!trip.getUserId().equals(userId)) throw new SecurityException("FORBIDDEN_USER");
         bookTripRepository.delete(trip);
     }
+
+    /**
+     * 📘 서재에 없는 나의 책 여정 목록 조회
+     *
+     * - 사용자가 작성한 여정 중 자신의 서재에 없는 도서(Book)에 대한 여정만 조회합니다.
+     * - Repository에서 직접 필터링된 결과를 가져오므로 성능이 향상됩니다.
+     *
+     * @param loginUser 현재 로그인한 사용자
+     * @return BookTripWithUserDto 리스트 (isMine은 항상 true)
+     */
+    @Transactional(readOnly = true)
+    public List<BookTripWithUserDto> getTripsNotInMyLibrary(Users loginUser) {
+        Long userId = loginUser.getUserId();
+
+        List<BookTrip> trips = bookTripRepository.findMyTripsNotInMyLibrary(userId);
+
+        return trips.stream()
+                .map(trip -> BookTripWithUserDto.from(
+                        trip,
+                        true,
+                        loginUser.getNickname(),
+                        loginUser.getProfileImageUrl()
+                ))
+                .collect(Collectors.toList());
+    }
+
 }

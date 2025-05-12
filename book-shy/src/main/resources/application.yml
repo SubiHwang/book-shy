@@ -6,6 +6,9 @@ spring:
     active: dev     # ✅ 현재 활성화할 profile 지정 (dev, prod 등)
     include: key     # 🔐 보안 정보 포함한 외부 yml 파일 분리 (application-key.yml)
 
+  jackson:
+    time-zone: Asia/Seoul
+
   data:
     redis:
       host: k12d204.p.ssafy.io
