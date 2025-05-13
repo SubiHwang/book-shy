@@ -55,29 +55,22 @@ function ChatMessageItem({
       onTouchEnd={handleTouchEnd}
       onContextMenu={handleContextMenu}
     >
-      <div className={`flex ${isMyMessage ? 'flex-row-reverse' : 'flex-row'} items-end gap-2`}>
+      <div className={`flex ${isMyMessage ? 'flex-row-reverse' : 'flex-row'} items-end gap-1`}>
         <div className="relative max-w-[85%] sm:max-w-[70%]">
           <div
             className={`px-4 py-2 rounded-2xl text-sm sm:text-base whitespace-pre-wrap break-words ${
-              isMyMessage ? 'bg-primary-light text-white' : 'bg-light-bg-secondary text-light-text'
+              isMyMessage ? 'bg-primary-light text-white' : 'bg-light-bg-secondary text-gray-900'
             }`}
           >
             {message.content}
           </div>
-
-          {selectedEmoji && (
-            <div className="absolute -bottom-5 left-3 flex items-center gap-1 bg-light-bg-card rounded-full px-2 py-[2px] shadow border border-light-bg-shade text-xs">
-              <span>{selectedEmoji}</span>
-              <span className="text-light-text-muted text-[11px]">1</span>
-            </div>
-          )}
         </div>
 
-        <div className="flex flex-col items-end min-w-[35px]">
+        <div className="flex flex-col justify-end gap-[2px] pb-1">
           {isMyMessage && !message.read && (
-            <span className="text-[10px] text-primary mt-[2px]">1</span>
+            <span className="text-[10px] text-primary text-right">1</span>
           )}
-          <span className="text-[10px] text-light-text-muted">{message.sentAt}</span>
+          <span className="text-[10px] text-light-text-muted text-right">{message.sentAt}</span>
         </div>
       </div>
 
