@@ -25,7 +25,7 @@ const MyBookNoteGridPage: React.FC<BookGridPetalPageProps> = ({ bookNotes }) => 
 
   return (
     <div className="bg-light-bg min-h-screen pb-28">
-      <Header title="독서 기록" onBackClick={() => navigate(-1)} showBackButton showNotification />
+      <Header title="독서 기록" showBackButton={false} showNotification={true} />
       <TabNavBar pages={pages} />
 
       <div className="px-4 pt-4">
