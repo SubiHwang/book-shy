@@ -5,6 +5,7 @@ import Skeleton from 'react-loading-skeleton';
 import { useImageColors } from '@/hooks/common/useImageColors';
 import { createGradientStyle } from '@/utils/common/gradientStyles';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 const SearchBookDetailHeader: FC<ExtendedSearchBookDetailPageProps> = ({
   itemId,
@@ -13,7 +14,7 @@ const SearchBookDetailHeader: FC<ExtendedSearchBookDetailPageProps> = ({
   publisher,
   coverImageUrl,
   isLoading: isLoadingData,
-  onAddBook, // 북 추가 함수 props로 받기
+  onAddBook,
 }) => {
   const [isAddLoading, setIsAddLoading] = useState<boolean>(false);
   const queryClient = useQueryClient();
@@ -38,6 +39,7 @@ const SearchBookDetailHeader: FC<ExtendedSearchBookDetailPageProps> = ({
 
     if (itemId === undefined) {
       console.error('Book ID is missing');
+      toast.error('책 ID 정보가 없습니다.');
       return;
     }
 
@@ -47,7 +49,7 @@ const SearchBookDetailHeader: FC<ExtendedSearchBookDetailPageProps> = ({
         await onAddBook(itemId);
 
         // 성공 알림 추가
-        alert('책이 성공적으로 등록되었습니다!');
+        toast.success('책이 성공적으로 등록되었습니다!');
       }
 
       queryClient.invalidateQueries({ queryKey: ['myLibraryBooks'] });
@@ -55,7 +57,7 @@ const SearchBookDetailHeader: FC<ExtendedSearchBookDetailPageProps> = ({
       console.error('Error adding book:', error);
 
       // 실패 알림 추가
-      alert('책 등록에 실패했습니다. 다시 시도해주세요.');
+      toast.error('책 등록에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsAddLoading(false);
     }

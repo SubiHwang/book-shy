@@ -6,6 +6,7 @@ import BookSearchItem from '@/components/mylibrary/BookAdd/BookSearchItem';
 import { searchBooksByKeyword, addBookFromSearch } from '@/services/mylibrary/bookSearchService';
 import type { BookSearchItem as BookItemType } from '@/types/mylibrary/bookSearch';
 import Loading from '@/components/common/Loading';
+import { toast } from 'react-toastify';
 
 const AddBySearchPage: FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -41,6 +42,7 @@ const AddBySearchPage: FC = () => {
     } catch (err) {
       console.error('책 검색 중 오류 발생:', err);
       setError('책 검색에 실패했습니다. 다시 시도해주세요.');
+      toast.error('책 검색에 실패했습니다. 다시 시도해주세요.');
       setBooks([]);
       setTotalResults(0);
     } finally {
@@ -70,9 +72,9 @@ const AddBySearchPage: FC = () => {
       const selectedBook = books.find((book) => book.itemId === itemId);
       if (!selectedBook) {
         console.error('선택한 책을 찾을 수 없습니다.');
+        toast.error('선택한 책을 찾을 수 없습니다.');
         return;
       }
-
       console.log('선택한 책:', selectedBook);
 
       // 검색 결과 책 등록 API 호출
@@ -81,11 +83,11 @@ const AddBySearchPage: FC = () => {
       console.log('책 등록 성공:', registeredBook);
 
       // 성공 알림 및 서재 페이지로 이동
-      alert('책이 성공적으로 등록되었습니다!');
+      toast.success('책이 성공적으로 등록되었습니다!');
       navigate('/bookshelf');
     } catch (error) {
       console.error('책 추가 중 오류 발생:', error);
-      alert('책 추가에 실패했습니다. 다시 시도해주세요.');
+      toast.error('책 추가에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsAdding(false);
     }
