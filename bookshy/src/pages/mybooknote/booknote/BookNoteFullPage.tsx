@@ -4,6 +4,7 @@ import { fetchBookNote } from '@/services/mybooknote/booknote/booknote';
 import { fetchBookQuote } from '@/services/mybooknote/booknote/bookquote';
 import BookDetailHeader from '@/components/mybooknote/booknote/BookNoteHeader';
 import BookNoteView from '@/components/mybooknote/booknote/BookNoteView';
+import Header from '@/components/common/Header';
 
 const BookNoteFullPage: React.FC = () => {
   const { bookId } = useParams();
@@ -26,6 +27,12 @@ const BookNoteFullPage: React.FC = () => {
 
   return (
     <div>
+      <Header
+        title="독서 기록 상세보기"
+        showBackButton={true}
+        onBackClick={() => navigate('/booknotes')}
+        showNotification={true}
+      />
       <BookDetailHeader
         coverImageUrl={book.coverUrl}
         title={book.title}
