@@ -1,26 +1,19 @@
 // src/components/Mylibrary/BookShelf/BannerCards/ExchangeBanner.tsx
 import React from 'react';
 import { ExchangeBannerData } from '@/types/mylibrary/components';
-import { getExchangeMessage, getLastExchangeMessage } from '@/utils/exchangeUtils';
-import { Repeat } from 'lucide-react';
+import { getExchangeMessage } from '@/utils/exchangeUtils';
 
 interface ExchangeBannerProps {
   data: ExchangeBannerData;
 }
 
 const ExchangeBanner: React.FC<ExchangeBannerProps> = ({ data }) => {
-  const { exchangeCount, peopleCount, lastExchangeDate } = data;
+  const { exchangeCount, peopleCount } = data;
 
   // 교환 메시지 생성
   const exchangeMessage = getExchangeMessage(exchangeCount, peopleCount);
-  const lastExchangeMessage = getLastExchangeMessage(lastExchangeDate);
 
   // 날짜 포맷팅
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
-  };
 
   return (
     <div className="bg-card-bg-blue rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200">
