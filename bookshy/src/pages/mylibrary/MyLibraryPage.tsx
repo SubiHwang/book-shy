@@ -112,11 +112,11 @@ const MyLibraryPage: React.FC = () => {
         <div className="max-w-screen-md mx-auto px-4 py-4">
           {/* 배너 캐로셀 */}
           <BannerCarousel data={bannerData} isLoading={isLoading} error={error} />
-
-          {/* 탭 네비게이션 */}
-          <TabNavBar pages={pages} />
           {/* 탭 네비게이션과 컨텐츠를 감싸는 흰색 박스 */}
-          <div className="bg-white rounded-lg shadow-md mt-4 pt-3 ">
+          <div className="bg-white rounded-xl shadow-md mt-4 pt-3 px-4 ">
+            {/* 탭 네비게이션 */}
+            <TabNavBar pages={pages} />
+
             {/* 중첩 라우트 컨텐츠 */}
             <div className="tab-content ">
               <Outlet />
