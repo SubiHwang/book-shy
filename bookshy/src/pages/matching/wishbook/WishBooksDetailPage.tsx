@@ -5,23 +5,29 @@ import { useEffect, useState } from 'react';
 import { getWishBookDetail } from '@/services/matching/wishbooks';
 import { WishBook } from '@/types/book';
 import WishBooksDetailInfoBody from '@/components/matching/wishbooks/WishBooksDetailInfoBody';
+import Loading from '@/components/common/Loading';
 
 const WishBooksDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [bookDetail, setBookDetail] = useState<WishBook | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+
     const fetchBookDetail = async (bookId: number) => {
       setIsLoading(true);
+      setError(null);
+
       try {
         const response = await getWishBookDetail(bookId);
         console.log('책 상세 정보:', response);
         setBookDetail(response);
       } catch (error) {
         console.error('책 상세 정보 가져오기 실패:', error);
+        setError('책 정보를 가져오는 중 오류가 발생했습니다.');
       } finally {
         setIsLoading(false);
       }
@@ -31,6 +37,7 @@ const WishBooksDetailPage = () => {
       fetchBookDetail(Number(id));
     } else {
       console.error('책 ID가 유효하지 않습니다.');
+      setError('유효하지 않은 책 ID입니다.');
       setIsLoading(false);
     }
   }, [id]);
@@ -45,7 +52,21 @@ const WishBooksDetailPage = () => {
         onBackClick={() => navigate(-1)}
       />
       <div className="bookshelf-container flex flex-col min-h-screen">
-        {bookDetail ? (
+        {isLoading ? (
+          <Loading loadingText="책 정보를 불러오는 중..." />
+        ) : error ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center p-4">
+              <p className="text-red-500 mb-2">{error}</p>
+              <button
+                onClick={() => navigate(-1)}
+                className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
+              >
+                뒤로 가기
+              </button>
+            </div>
+          </div>
+        ) : bookDetail ? (
           <>
             <WishBooksDetailInfoHeader
               itemId={bookDetail.itemId}
@@ -54,7 +75,7 @@ const WishBooksDetailPage = () => {
               publisher={bookDetail.publisher}
               coverImageUrl={bookDetail.coverImageUrl}
               isLiked={bookDetail.isLiked}
-              isLoading={isLoading}
+              isLoading={false}
             />
             <div className="bg-light-bg flex-1 overflow-y-auto overflow-x-hidden">
               <div className="max-w-screen-md mx-auto">
@@ -63,7 +84,7 @@ const WishBooksDetailPage = () => {
                   pageCount={bookDetail.pageCount}
                   category={bookDetail.category}
                   description={bookDetail.description}
-                  isLoading={isLoading}
+                  isLoading={false}
                 />
               </div>
             </div>
