@@ -69,8 +69,8 @@ const BookTripPage: React.FC = () => {
 
   return (
     <div className="bg-light-bg min-h-screen pb-28">
+      <BookTripIntroCard />
       <div className="px-4 pt-4">
-        <BookTripIntroCard />
         <div className="mt-2">
           <SearchFilterBar
             searchTerm={searchTerm}
