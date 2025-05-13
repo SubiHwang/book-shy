@@ -22,7 +22,7 @@ const BookTripHeaderSection = ({ title, author, publisher, coverUrl }: Props) =>
 
   return (
     <div
-      className="flex flex-col justify-end p-4 shadow-sm rounded-lg min-h-[20vh] mb-4"
+      className="flex flex-col justify-end p-4 shadow-sm min-h-[25vh] mb-4"
       style={gradientStyle}
     >
       {/* 내용물을 하단에 배치 */}
