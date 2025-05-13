@@ -58,10 +58,8 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
 
   // 하단 탭바가 항상 표시되도록 설정
   return (
-    <div
-      className="fixed bottom-0 left-0 right-0 bg-tabBackground border-t border-light-text-muted/30 z-50"
-    >
-      <nav className="flex justify-around items-center h-16">
+    <div className="fixed bottom-0 left-0 right-0 bg-tabBackground border-t border-light-text-muted/30 z-50">
+      <nav className="flex justify-around items-center h-20">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -70,7 +68,7 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
             <button
               key={tab.id}
               className={`flex flex-col items-center justify-center w-full h-full ${
-                isActive ? 'text-primary' : 'text-light-text-muted'
+                isActive ? 'text-primary' : 'text-light-text-secondary'
               }`}
               onClick={() => handleTabChange(tab.id)}
             >
@@ -78,11 +76,10 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
                 {/* 활성화 상태에 따라 아이콘 스타일 변경 */}
                 <Icon
                   size={24}
-                  strokeWidth={isActive ? 1 : 0.5}
-                  className={isActive ? 'fill-primary/65' : ''}
+                  strokeWidth={isActive ? 2 : 0.5}
                 />
               </div>
-              <p className={`text-xs mt-1 ${isActive ? 'font-medium' : 'font-normal'}`}>
+              <p className={`text-xs mt-1 ${isActive ? 'font-semibold' : 'font-medium'}`}>
                 {tab.name}
               </p>
               {isActive && <div className="bg-primary h-1 w-3 rounded-sm"></div>}
