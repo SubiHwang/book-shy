@@ -7,7 +7,7 @@ import type { BookTripWithUser } from '@/types/mybooknote/booktrip/booktrip';
 import type { Book } from '@/types/book/book';
 import type { UserProfile } from '@/types/User/user';
 import Header from '@/components/common/Header';
-import BookTripHeaderSection from '@/components/mybooknote/booktrip/BookTripHeaderSection';
+import BookTripHeaderSection from '@/components/mybooknote/BookDetailHeaderSection';
 import OtherUserTripList from '@/components/mybooknote/booktrip/OtherUserTripList';
 import MyTripBox from '@/components/mybooknote/booktrip/MyTripBox';
 import MyTripEditor from '@/components/mybooknote/booktrip/MyTripEditor';
