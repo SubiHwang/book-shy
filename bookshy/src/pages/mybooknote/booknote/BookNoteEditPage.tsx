@@ -9,6 +9,7 @@ import BookNoteHeaderCard from '@/components/mybooknote/BookDetailHeaderSection'
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Loading from '@/components/common/Loading';
+import Header from '@/components/common/Header';
 
 const BookNoteEditPage: React.FC = () => {
   const { bookId } = useParams();
@@ -103,15 +104,14 @@ const BookNoteEditPage: React.FC = () => {
 
   return (
     <div>
-      <div className="p-4 bg-gray-50">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-1 mb-4 text-sm text-gray-600 hover:text-gray-800 transition-colors"
-        >
-          <ArrowLeft size={16} />
-          <span>뒤로가기</span>
-        </button>
-      </div>
+      <Header
+        title="독서 감상 수정하기기"
+        showBackButton={true}
+        showNotification={true}
+        onBackClick={() => {
+          navigate(-1);
+        }}
+      />
 
       <BookNoteHeaderCard
         title={book.title || '제목 없음'}
@@ -132,6 +132,9 @@ const BookNoteEditPage: React.FC = () => {
           setQuoteText={setQuoteText}
           setReviewText={setReviewText}
           onSubmit={handleSave}
+          onCancel={() => {
+            navigate(-1);
+          }}
           submitLabel={isPending ? '수정 중...' : '수정하기'}
         />
       </div>

@@ -83,6 +83,9 @@ const BookNoteCreatePage: React.FC = () => {
         setQuoteText={setQuoteText}
         setReviewText={setReviewText}
         onSubmit={handleCreate}
+        onCancel={() => {
+          navigate(-1);
+        }}
         submitLabel="등록하기"
       />
     </div>

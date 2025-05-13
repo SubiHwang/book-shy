@@ -7,7 +7,9 @@ interface BookNoteFormProps {
   setQuoteText: (value: string) => void;
   setReviewText: (value: string) => void;
   onSubmit: () => void;
+  onCancel?: () => void; // 취소 버튼 핸들러 추가
   submitLabel?: string;
+  cancelLabel?: string; // 취소 버튼 텍스트 커스터마이징 옵션
 }
 
 const BookNoteForm: React.FC<BookNoteFormProps> = ({
@@ -16,7 +18,9 @@ const BookNoteForm: React.FC<BookNoteFormProps> = ({
   setQuoteText,
   setReviewText,
   onSubmit,
+  onCancel,
   submitLabel = '등록하기',
+  cancelLabel = '취소하기',
 }) => {
   return (
     <div className="p-4">
@@ -60,12 +64,25 @@ const BookNoteForm: React.FC<BookNoteFormProps> = ({
         </div>
       </section>
 
-      <button
-        onClick={onSubmit}
-        className="w-full py-3 text-white bg-primary-light rounded-lg text-sm font-medium shadow-sm"
-      >
-        {submitLabel}
-      </button>
+      <div className="flex gap-3">
+        {/* onCancel prop이 제공된 경우에만 취소 버튼 렌더링 */}
+        {onCancel && (
+          <button
+            onClick={onCancel}
+            className="flex-1 py-3 text-gray-700 bg-gray-100 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+          >
+            {cancelLabel}
+          </button>
+        )}
+        <button
+          onClick={onSubmit}
+          className={`py-3 text-white bg-primary-light rounded-lg text-sm font-medium shadow-sm hover:bg-primary transition-colors ${
+            onCancel ? 'flex-1' : 'w-full'
+          }`}
+        >
+          {submitLabel}
+        </button>
+      </div>
     </div>
   );
 };
