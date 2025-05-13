@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import BookTripFilterBar from '@/components/mybooknote/booktrip/BookTripFilterBar';
 
 import {
   fetchLibraryBooksWithTrip,
@@ -12,13 +13,12 @@ import type {
   BookTripListItem,
 } from '@/types/mybooknote/booktrip/booktrip';
 import BookTripIntroCard from '@/components/mybooknote/booktrip/BookTripIntroCard';
-import BookTripFilterBar from '@/components/mybooknote/booktrip/BookTripFilterBar';
 import BookTripBookList from '@/components/mybooknote/booktrip/BookTripBookList';
 
 const BookTripPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<'ALL' | 'WRITTEN' | 'UNWRITTEN'>('ALL');
+  const [selectedFilter, setSelectedFilter] = useState<'ALL' | 'WRITTEN' | 'UNWRITTEN'>('ALL');
 
   // ✅ 여정 여부 포함 서재 도서
   const { data: libraryBooks = [], isLoading: isLoadingLibrary } = useQuery<LibraryBookWithTrip[]>({
@@ -54,9 +54,9 @@ const BookTripPage: React.FC = () => {
   const filteredBooks = allBooks.filter((book) => {
     const matchSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchFilter =
-      filter === 'ALL' ||
-      (filter === 'WRITTEN' && book.hasTrip) ||
-      (filter === 'UNWRITTEN' && !book.hasTrip);
+      selectedFilter === 'ALL' ||
+      (selectedFilter === 'WRITTEN' && book.hasTrip) ||
+      (selectedFilter === 'UNWRITTEN' && !book.hasTrip);
     return matchSearch && matchFilter;
   });
 
@@ -69,9 +69,11 @@ const BookTripPage: React.FC = () => {
         <BookTripFilterBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          filter={filter}
-          onFilterChange={setFilter}
+          filter={selectedFilter}
+          onFilterChange={setSelectedFilter}
+          totalCount={filteredBooks.length}
         />
+
         {isLoading ? (
           <p className="text-center text-gray-500">불러오는 중...</p>
         ) : filteredBooks.length === 0 ? (
