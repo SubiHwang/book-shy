@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchBookTripsByBookId } from '@/services/mybooknote/booktrip/booktrip';
 import { fetchBookDetailByBookId } from '@/services/book/search';
@@ -15,6 +15,7 @@ import Loading from '@/components/common/Loading'; // ✅ import 추가
 
 const BookTripDetailPage = () => {
   const { bookId } = useParams<{ bookId: string }>();
+  const navigate = useNavigate();
 
   const { data: trips = [], isLoading: isTripsLoading } = useQuery<BookTripWithUser[]>({
     queryKey: ['bookTrips', bookId],
@@ -42,15 +43,20 @@ const BookTripDetailPage = () => {
 
   return (
     <div className="bg-[#f9f4ec] min-h-screen pb-28">
-      <Header title="독서 기록" showBackButton showNotification />
+      <Header
+        title="독서 기록"
+        showBackButton={true}
+        showNotification={true}
+        onBackClick={() => navigate(-1)}
+        className="bg-light-bg shadow-none"
+      />
+      <BookTripHeaderSection
+        title={bookInfo!.title as string}
+        author={bookInfo!.author as string}
+        publisher={bookInfo!.publisher as string}
+        coverUrl={bookInfo!.coverImageUrl}
+      />
       <div className="px-4 py-4">
-        <BookTripHeaderSection
-          title={bookInfo!.title as string}
-          author={bookInfo!.author as string}
-          publisher={bookInfo!.publisher as string}
-          coverUrl={bookInfo!.coverImageUrl}
-        />
-
         <div className="flex flex-col gap-3">
           <OtherUserTripList trips={otherTrips} />
           {myTrip ? (
