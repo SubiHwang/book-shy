@@ -1,4 +1,3 @@
-import React from 'react';
 import { useImageColors } from '@/hooks/common/useImageColors';
 import { createGradientStyle } from '@/utils/common/gradientStyles';
 
@@ -11,7 +10,7 @@ interface Props {
 
 const BookTripHeaderSection = ({ title, author, publisher, coverUrl }: Props) => {
   // 이미지에서 색상 추출 및 파스텔 색상 자동 생성
-  const { pastelColors, isLoading: isLoadingColors } = useImageColors(
+  const { pastelColors } = useImageColors(
     coverUrl || null,
     ['#FCF6D4', '#F4E8B8'], // 기본 색상
     0.65, // 더 밝은 파스텔 색상을 위한 밝기 조정값 (0-1)
