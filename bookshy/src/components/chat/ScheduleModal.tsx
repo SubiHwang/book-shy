@@ -28,21 +28,26 @@ const ScheduleModal: FC<Props> = ({
   const [borrowTime, setBorrowTime] = useState('');
   const [returnTime, setReturnTime] = useState('');
   const [year, setYear] = useState(today.getFullYear());
-  const [month, setMonth] = useState(today.getMonth()); // 0-indexed
+  const [month, setMonth] = useState(today.getMonth());
 
   const startDay = new Date(year, month, 1).getDay();
   const lastDate = new Date(year, month + 1, 0).getDate();
 
   const handleDateClick = (day: string) => {
-    if (!startDate || (startDate && endDate)) {
+    if (tab === '교환') {
       setStartDate(day);
       setEndDate(null);
-    } else if (startDate && !endDate) {
-      if (day < startDate) {
-        setEndDate(startDate);
+    } else {
+      if (!startDate || (startDate && endDate)) {
         setStartDate(day);
-      } else {
-        setEndDate(day);
+        setEndDate(null);
+      } else if (startDate && !endDate) {
+        if (day < startDate) {
+          setEndDate(startDate);
+          setStartDate(day);
+        } else {
+          setEndDate(day);
+        }
       }
     }
   };
@@ -111,40 +116,44 @@ const ScheduleModal: FC<Props> = ({
         ? {
             roomId,
             requestId,
-            type: 'EXCHANGE' as const,
+            type: 'EXCHANGE',
             title: msg,
             eventDate: toISOString(startDate, borrowTime),
           }
         : {
             roomId,
             requestId,
-            type: 'RENTAL' as const,
+            type: 'RENTAL',
             title: msg,
             startDate: toISOString(startDate, borrowTime),
             endDate: toISOString(endDate!, returnTime!),
           };
 
-    console.log('일정 등록 payload', payload);
     onConfirm(msg, payload);
     onClose();
   };
 
-  const isCompleteDisabled = !startDate || !borrowTime || (tab === '대여' && !returnTime);
+  const isCompleteDisabled =
+    !startDate || !borrowTime || (tab === '대여' && (!returnTime || !endDate));
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-[#FFFCF9] rounded-2xl p-4 w-[360px] shadow-md">
+      <div className="bg-light-bg rounded-2xl p-4 w-[90%] max-w-md shadow-md">
+        {/* 헤더 */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <img src={partnerProfileImage} className="w-8 h-8 rounded-full" />
-            <span className="font-semibold text-sm">{partnerName}님과 약속을 잡을게요.</span>
+            <span className="font-semibold text-sm text-light-text">
+              {partnerName}님과 약속을 잡을게요.
+            </span>
           </div>
           <button onClick={onClose}>
             <X size={20} />
           </button>
         </div>
 
-        <div className="flex mb-3 border-b">
+        {/* 탭 */}
+        <div className="flex mb-3 border-b border-light-bg-shade">
           {['책 대여 하기', '책 교환 하기'].map((label, idx) => (
             <button
               key={label}
@@ -156,7 +165,7 @@ const ScheduleModal: FC<Props> = ({
               className={`flex-1 py-2 text-sm font-medium ${
                 tab === (idx === 0 ? '대여' : '교환')
                   ? 'text-primary border-b-2 border-primary'
-                  : 'text-gray-400'
+                  : 'text-light-text-muted'
               }`}
             >
               {label}
@@ -164,24 +173,25 @@ const ScheduleModal: FC<Props> = ({
           ))}
         </div>
 
+        {/* 날짜 선택 */}
         <div className="mb-4">
-          <div className="text-sm font-medium mb-1">
+          <div className="text-sm font-medium text-light-text mb-1">
             🗓️ {tab === '대여' ? '대여 기간 선택' : '교환 날짜 선택'}
           </div>
-          <div className="bg-white rounded-lg shadow-sm p-4">
+          <div className="bg-light-bg-card rounded-lg shadow-sm p-4">
             <div className="flex items-center justify-between mb-2">
-              <button onClick={goPrevMonth} className="text-gray-500 text-sm px-2">
+              <button onClick={goPrevMonth} className="text-light-text-secondary text-sm px-2">
                 ◀
               </button>
-              <div className="text-sm font-semibold text-gray-700">
+              <div className="text-sm font-semibold text-light-text">
                 {year}년 {month + 1}월
               </div>
-              <button onClick={goNextMonth} className="text-gray-500 text-sm px-2">
+              <button onClick={goNextMonth} className="text-light-text-secondary text-sm px-2">
                 ▶
               </button>
             </div>
 
-            <div className="grid grid-cols-7 text-xs text-gray-400 text-center mb-2">
+            <div className="grid grid-cols-7 text-xs text-light-text-muted text-center mb-2">
               {['일', '월', '화', '수', '목', '금', '토'].map((d) => (
                 <div key={d}>{d}</div>
               ))}
@@ -191,7 +201,6 @@ const ScheduleModal: FC<Props> = ({
               {Array.from({ length: startDay }).map((_, i) => (
                 <div key={`empty-${i}`} />
               ))}
-
               {Array.from({ length: lastDate }).map((_, i) => {
                 const day = i + 1;
                 const padded = String(day).padStart(2, '0');
@@ -213,11 +222,11 @@ const ScheduleModal: FC<Props> = ({
                     onClick={() => !isPast && handleDateClick(padded)}
                     className={`
                       p-2 rounded-full transition-all
-                      ${isPast ? 'text-gray-300 cursor-not-allowed' : ''}
+                      ${isPast ? 'text-light-text-muted cursor-not-allowed' : ''}
                       ${isStart || isEnd ? 'bg-primary text-white font-bold' : ''}
                       ${inRange ? 'bg-pink-100 text-primary' : ''}
                       ${isToday ? 'border border-primary font-semibold' : ''}
-                      ${!isPast && !isStart && !isEnd && !inRange && !isToday ? 'text-gray-700' : ''}
+                      ${!isPast && !isStart && !isEnd && !inRange && !isToday ? 'text-light-text' : ''}
                     `}
                     disabled={isPast}
                   >
@@ -229,12 +238,13 @@ const ScheduleModal: FC<Props> = ({
           </div>
         </div>
 
+        {/* 시간 선택 */}
         <div className="mb-3">
-          <label className="text-sm text-gray-700 font-medium">
+          <label className="text-sm text-light-text font-medium">
             ⏰ {tab === '대여' ? '대여 시간' : '교환 시간'}
           </label>
           <div
-            className="w-full mt-1 px-4 py-2 bg-white rounded-lg border border-gray-300 text-gray-500 cursor-pointer"
+            className="w-full mt-1 px-4 py-2 bg-light-bg-card rounded-lg border border-light-bg-shade text-light-text-secondary text-sm cursor-pointer hover:bg-light-bg-shade"
             onClick={() => setShowTimePickerFor('대여')}
           >
             {borrowTime || '시간을 선택해주세요'}
@@ -243,9 +253,9 @@ const ScheduleModal: FC<Props> = ({
 
         {tab === '대여' && (
           <div className="mb-4">
-            <label className="text-sm text-gray-700 font-medium">⏰ 반납 시간</label>
+            <label className="text-sm text-light-text font-medium">⏰ 반납 시간</label>
             <div
-              className="w-full mt-1 px-4 py-2 bg-white rounded-lg border border-gray-300 text-gray-500 cursor-pointer"
+              className="w-full mt-1 px-4 py-2 bg-light-bg-card rounded-lg border border-light-bg-shade text-light-text-secondary cursor-pointer hover:bg-light-bg-shade"
               onClick={() => setShowTimePickerFor('반납')}
             >
               {returnTime || '시간을 선택해주세요'}
@@ -253,11 +263,16 @@ const ScheduleModal: FC<Props> = ({
           </div>
         )}
 
+        {/* 완료 버튼 */}
         <button
           onClick={handleComplete}
           disabled={isCompleteDisabled}
-          className={`w-full py-2 rounded-lg text-sm font-semibold transition-colors
-            ${isCompleteDisabled ? 'bg-gray-300 text-white cursor-not-allowed' : 'bg-primary text-white'}`}
+          className={`w-full py-2 rounded-lg text-sm font-semibold transition
+            ${
+              isCompleteDisabled
+                ? 'bg-light-bg-shade text-white cursor-not-allowed'
+                : 'bg-primary text-white hover:bg-primary-dark'
+            }`}
         >
           완료
         </button>

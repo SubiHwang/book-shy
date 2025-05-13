@@ -5,7 +5,7 @@ import { ArrowLeft, Calendar, Bell } from 'lucide-react';
 interface ChatRoomHeaderProps {
   partnerName: string;
   partnerProfileImage: string;
-  reputationScore?: number; // 복꾸지수
+  reputationScore?: number; // 북끄지수
 }
 
 const ChatRoomHeader: FC<ChatRoomHeaderProps> = ({
@@ -16,26 +16,26 @@ const ChatRoomHeader: FC<ChatRoomHeaderProps> = ({
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-50 bg-[#FFFCF9] px-4 py-3 flex items-center justify-between border-b border-gray-200">
+    <header className="sticky top-0 z-50 bg-white px-4 py-3 min-h-[64px] flex items-center justify-between border-b border-[#E5E5E5]">
       {/* 왼쪽: 뒤로가기 + 프로필 */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <button
           onClick={() => navigate(-1)}
-          className="p-1 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
+          className="p-2 rounded-full active:bg-gray-200 transition-colors"
           aria-label="뒤로가기"
         >
-          <ArrowLeft size={24} />
+          <ArrowLeft size={22} />
         </button>
         <img
           src={partnerProfileImage}
           alt={partnerName}
-          className="w-9 h-9 rounded-full object-cover"
+          className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover"
         />
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-base text-black">{partnerName}</span>
+            <span className="font-semibold text-base sm:text-lg text-black">{partnerName}</span>
             {reputationScore !== undefined && (
-              <span className="text-xs text-pink-600 bg-pink-100 px-2 py-0.5 rounded-full">
+              <span className="text-xs sm:text-sm text-pink-600 bg-pink-100 px-2 py-0.5 rounded-full">
                 북끄지수 {reputationScore}
               </span>
             )}
@@ -44,11 +44,11 @@ const ChatRoomHeader: FC<ChatRoomHeaderProps> = ({
       </div>
 
       {/* 오른쪽: 일정/알림 */}
-      <div className="flex items-center gap-3">
-        <button className="p-2">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <button className="p-2 rounded-full active:bg-gray-100 transition" aria-label="일정 보기">
           <Calendar size={20} />
         </button>
-        <button className="p-2">
+        <button className="p-2 rounded-full active:bg-gray-100 transition" aria-label="알림 보기">
           <Bell size={20} />
         </button>
       </div>

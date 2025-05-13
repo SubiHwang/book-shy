@@ -7,7 +7,12 @@ import ScheduleModal from './ScheduleModal.tsx';
 import SystemMessage from './SystemMessage.tsx';
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchMessages, markMessagesAsRead, registerSchedule, sendEmoji } from '@/services/chat/chat.ts';
+import {
+  fetchMessages,
+  markMessagesAsRead,
+  registerSchedule,
+  sendEmoji,
+} from '@/services/chat/chat.ts';
 import { useStomp } from '@/hooks/chat/useStomp.ts';
 import { getUserIdFromToken } from '@/utils/jwt.ts';
 
@@ -21,7 +26,8 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const { roomId } = useParams();
   const numericRoomId = Number(roomId);
   const myUserId = getUserIdFromToken();
-  if (myUserId === null) return;
+  if (myUserId === null) return null;
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showOptions, setShowOptions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -31,39 +37,33 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
 
   const queryClient = useQueryClient();
 
-  const {
-    data: initialMessages = [],
-    isSuccess,
-    refetch,
-  } = useQuery({
+  const { data: initialMessages = [], isSuccess } = useQuery({
     queryKey: ['chatMessages', numericRoomId],
     queryFn: () => fetchMessages(numericRoomId),
     enabled: !isNaN(numericRoomId),
     retry: false,
+    staleTime: 0,
   });
 
   useEffect(() => {
     if (!isNaN(numericRoomId)) {
-      markMessagesAsRead(numericRoomId)
-        .then(() => {
-          refetch();
-          queryClient.setQueryData(['chatList'], (prev: any) => {
-            if (!Array.isArray(prev)) return prev;
-            return prev.map((room: any) =>
-              room.id === numericRoomId ? { ...room, unreadCount: 0 } : room,
-            );
-          });
-        })
-        .catch((err) => console.error('❌ 읽음 처리 실패:', err));
+      markMessagesAsRead(numericRoomId).catch((err) => console.error('❌ 읽음 처리 실패:', err));
+
+      queryClient.setQueryData(['chatList'], (prev: any) => {
+        if (!Array.isArray(prev)) return prev;
+        return prev.map((room: any) =>
+          room.id === numericRoomId ? { ...room, unreadCount: 0 } : room,
+        );
+      });
     }
-  }, [numericRoomId, refetch, queryClient]);
+  }, [numericRoomId, queryClient]);
 
   useEffect(() => {
     if (!isSuccess) return;
 
-    if (initialMessages.length > 0 && messages.length === 0) {
+    if (initialMessages.length > 0) {
       setMessages(initialMessages);
-    } else if (initialMessages.length === 0 && messages.length === 0) {
+    } else {
       const now = new Date();
       const noticeMessage: ChatMessage = {
         id: 'notice-' + Date.now(),
@@ -76,7 +76,20 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
       };
       setMessages([noticeMessage]);
     }
-  }, [initialMessages, messages.length, isSuccess, numericRoomId]);
+  }, [initialMessages, isSuccess, numericRoomId]);
+
+  const onRead = useCallback(
+    (payload: { readerId: number; messageIds: number[] }) => {
+      if (payload.readerId === myUserId) return;
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          payload.messageIds.includes(Number(msg.id)) ? { ...msg, read: true } : msg,
+        ),
+      );
+    },
+    [myUserId],
+  );
 
   const onMessage = useCallback(
     (newMessage: ChatMessage) => {
@@ -84,6 +97,13 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
         const exists = prev.some((m) => m.id === newMessage.id);
         return exists ? prev : [...prev, newMessage];
       });
+
+      // 채팅방 열려 있고 내 메시지가 아닌 경우 즉시 읽음 처리
+      if (newMessage.senderId !== myUserId) {
+        markMessagesAsRead(numericRoomId).catch((err) =>
+          console.error('❌ 읽음 처리 실패 (수신 시점):', err),
+        );
+      }
 
       queryClient.setQueryData(['chatList'], (prev: any) => {
         if (!Array.isArray(prev)) return prev;
@@ -101,7 +121,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
     [queryClient],
   );
 
-  const { sendMessage } = useStomp(numericRoomId, onMessage);
+  const { sendMessage } = useStomp(numericRoomId, onMessage, onRead);
 
   useEffect(() => {
     scrollToBottom(messages.length === 1);
@@ -162,6 +182,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const handleLongPressOrRightClick = (messageId: string) => {
     setEmojiTargetId((prev) => (prev === messageId ? null : messageId));
   };
+
   const toggleOptions = () => {
     const shouldScroll = isScrolledToBottom();
     setShowOptions((prev) => !prev);
@@ -192,23 +213,22 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   let lastDateLabel = '';
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-[100dvh]">
       <ChatRoomHeader partnerName={partnerName} partnerProfileImage={partnerProfileImage} />
-      <div className="flex-1 overflow-y-auto bg-[#FFFCF9] px-3 py-2">
+      <div className="flex-1 overflow-y-auto bg-white px-4 sm:px-6 py-3">
         {messages.map((msg) => {
           const dateLabel = formatDateLabel(msg.sentAt);
           const showDate = dateLabel !== lastDateLabel;
           lastDateLabel = dateLabel;
 
           const isSystem = ['info', 'notice', 'warning'].includes(msg.type ?? '');
-
           return (
             <div key={msg.id}>
               {showDate && (
-                <div className="flex items-center gap-2 text-xs text-gray-400 my-4">
-                  <div className="flex-grow border-t border-gray-300" />
+                <div className="flex items-center gap-2 text-[11px] sm:text-xs text-light-text-muted my-4">
+                  <div className="flex-grow border-t border-light-bg-shade" />
                   <span className="px-2 whitespace-nowrap">{dateLabel}</span>
-                  <div className="flex-grow border-t border-gray-300" />
+                  <div className="flex-grow border-t border-light-bg-shade" />
                 </div>
               )}
               {isSystem ? (
@@ -231,7 +251,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
                 />
               ) : (
                 <ChatMessageItem
-                  message={{ ...msg, sentAt: formatTime(msg.sentAt) }}
+                  message={{ ...msg, sentAt: formatTime(msg.sentAt), read: msg.read }}
                   isMyMessage={msg.senderId === myUserId}
                   showEmojiSelector={emojiTargetId === msg.id}
                   onLongPress={() => handleLongPressOrRightClick(msg.id)}
@@ -243,7 +263,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
             </div>
           );
         })}
-        <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} className="h-4" />
       </div>
       <ChatInput
         onSend={handleSendMessage}

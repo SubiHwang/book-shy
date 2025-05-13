@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Routes, Route, Navigate, useNavigate, matchPath } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, matchPath, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import BottomTabBar from '../common/BottomTabBar';
 import MyLibraryPage from '../../pages/mylibrary/MyLibraryPage';
@@ -11,11 +11,9 @@ import TradeHistoryList from '@/pages/mypage/TradeHistoryList';
 import WishBooks from '@/pages/matching/wishbook/WishBooks';
 import NeighborBookshelfPage from '@/pages/matching/neighborbookshelf/NeighborBookshelfPage';
 import AddBySelfPage from '@/pages/mylibrary/AddBook/AddBySelfPage';
-import AddByTitlePage from '@/pages/mylibrary/AddBook/AddByTitlePage';
 import AddByBarcodePage from '@/pages/mylibrary/AddBook/AddByISBNPage';
 import AddISBNResultPage from '@/pages/mylibrary/AddBook/AddISBNResultPage';
 import AddBySearchPage from '@/pages/mylibrary/AddBook/AddBySearchPage';
-import OCRResultPage from '@/pages/mylibrary/AddBook/OCRResultPage';
 import AllMyBooksTab from '@/pages/mylibrary/tabs/AllBooksTab';
 import PublicMyBooksTab from '@/pages/mylibrary/tabs/PublicBooksTab';
 import SearchWishBooks from '@/pages/matching/wishbook/SearchWishBooks';
@@ -23,6 +21,7 @@ import BookDetailPage from '@/pages/mylibrary/BookDetailPage';
 import BookInfoTab from '@/pages/mylibrary/tabs/BookInfoTab';
 import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
 import ISBNScanResultPage from '@/pages/mylibrary/AddBook/ISBNScanResultPage';
+import SearchBookDetailPage from '@/pages/mylibrary/AddBook/SearchBookDetailPage';
 import MyBookNotesPage from '@/pages/mybooknote/booknote/MyBookNotesPage';
 import BookNoteDetailPage from '@/pages/mybooknote/booknote/BookNoteDetailPage';
 import BookNoteFullPage from '@/pages/mybooknote/booknote/BookNoteFullPage';
@@ -36,15 +35,18 @@ import Login from '@/pages/auth/Login';
 import PrivateRoute from '@/components/layout/PrivateRoute';
 import KaKaoOauth from '@/pages/auth/KaKaoOauth';
 import WishBooksDetailPage from '@/pages/matching/wishbook/WishBooksDetailPage';
-import RecommandedWishBookList from '../matching/searchwishbooks/RecommandedWishBookList';
-import SearchResultBookList from '../matching/searchwishbooks/SearchResultBookList';
+import RecommandedWishBookList from '@/components/matching/searchwishbooks/RecommandedWishBookList';
+import SearchResultBookList from '@/components/matching/searchwishbooks/SearchResultBookList';
 import ChatListPage from '@/pages/chat/ChatListPage';
 import ChatRoomPage from '@/pages/chat/ChatRoomPage';
 import TradeReviewPage from '@/pages/chat/TradeReviewPage';
+import LocationSetting from '@/pages/auth/LocationSetting';
+import BookNotePage from '@/pages/mybooknote/booknote/BookNotePage';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
   const { isLoading } = useAuth();
+  const location = useLocation();
 
   // 탭 변경 시 해당 경로로 이동
   const handleTabChange = (tabId: string): void => {
@@ -63,20 +65,13 @@ const AppLayout: FC = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/oauth" element={<KaKaoOauth />} />
 
-          {/* 📚 매칭 페이지 */}
-          <Route path="/matching" element={<MatchingPage />}>
-            <Route index element={<MatchingRecommend />} />
-            <Route path="wish-books" element={<WishBooks />} />
-          </Route>
-          <Route path="matching/neigbors-bookshelf/:userId" element={<NeighborBookshelfPage />} />
-          <Route path="matching/search-wish-books" element={<SearchWishBooks />} />
-
           {/* 보호된 라우트 - 로그인해야만 접근 가능 */}
           <Route
             path="/*"
             element={
               <PrivateRoute>
                 <Routes>
+                  <Route path="/setting-location" element={<LocationSetting />} />
                   {/* 기본 경로 리다이렉션 */}
                   <Route path="/" element={<Navigate to="/bookshelf" replace />} />
 
@@ -95,12 +90,14 @@ const AppLayout: FC = () => {
                   {/* 📚 책 추가 페이지 */}
                   <Route path="/bookshelf/add/search" element={<AddBySearchPage />} />
                   <Route path="/bookshelf/add/self" element={<AddBySelfPage />} />
-                  <Route path="/bookshelf/add/title" element={<AddByTitlePage />} />
                   <Route path="/bookshelf/add/isbn" element={<AddByBarcodePage />} />
                   <Route path="/bookshelf/add/isbn-scan-result" element={<AddISBNResultPage />} />
-                  {/* OCR, ISBN결과 페이지 */}
-                  <Route path="/bookshelf/add/ocr-result" element={<OCRResultPage />} />
+                  {/* ISBN결과 페이지 */}
                   <Route path="/bookshelf/add/isbn-result/:isbn" element={<ISBNScanResultPage />} />
+                  <Route
+                    path="/bookshelf/add/searchdetail/:id"
+                    element={<SearchBookDetailPage />}
+                  />
 
                   {/* 📚 매칭 페이지 */}
                   <Route path="/matching" element={<MatchingPage />}>
@@ -123,8 +120,12 @@ const AppLayout: FC = () => {
                   <Route path="/chat/:roomId" element={<ChatRoomPage />} />
                   <Route path="/chat/:roomId/review" element={<TradeReviewPage />} />
 
-                  {/* 독서기록 페이지 */}
-                  <Route path="/booknotes" element={<MyBookNotesPage />} />
+                  {/* 독서기록 페이지 - 탭이 있는 부분은 중첩 라우팅 적용용 */}
+                  <Route path="/booknotes" element={<BookNotePage />}>
+                    <Route index element={<MyBookNotesPage />} />
+                    <Route path="/booknotes/trip" element={<BookTripPage />} />
+                  </Route>
+
                   <Route path="/booknotes/detail/:bookId" element={<BookNoteDetailPage />} />
                   <Route path="/booknotes/full/:bookId" element={<BookNoteFullPage />} />
                   <Route path="/booknotes/edit/:bookId" element={<BookNoteEditPage />} />
@@ -132,8 +133,10 @@ const AppLayout: FC = () => {
                   <Route path="/booknotes/select" element={<BookNoteSelectPage />} />
 
                   {/* 책의 여정 페이지 */}
-                  <Route path="/booknotes/trip" element={<BookTripPage />} />
-                  <Route path="/booknotes/trip/:bookId" element={<BookTripDetailPage />} />
+                  <Route
+                    path="/booknotes/trip/:bookId"
+                    element={<BookTripDetailPage key={location.key} />}
+                  />
 
                   {/* ✅ 마이페이지 라우팅 (공통 레이아웃) */}
                   <Route path="/mypage" element={<MyPage />}>

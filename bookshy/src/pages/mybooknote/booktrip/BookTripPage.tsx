@@ -1,110 +1,97 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchLibraryBooksWithTrip } from '@/services/mybooknote/booktrip/booktrip';
-import type { LibraryBookWithTrip } from '@/types/mybooknote/booktrip/booktrip';
-import Header from '@/components/common/Header';
-import TabNavBar from '@/components/common/TabNavBar';
+
+import {
+  fetchLibraryBooksWithTrip,
+  fetchMyTripsOutsideLibrary,
+} from '@/services/mybooknote/booktrip/booktrip';
+import type {
+  LibraryBookWithTrip,
+  BookTripBookItem,
+  BookTripListItem,
+} from '@/types/mybooknote/booktrip/booktrip';
+import BookTripIntroCard from '@/components/mybooknote/booktrip/BookTripIntroCard';
+import BookTripBookList from '@/components/mybooknote/booktrip/BookTripBookList';
+import SearchFilterBar from '@/components/common/SearchFilterBar';
 
 const BookTripPage: React.FC = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<'ALL' | 'WRITTEN' | 'UNWRITTEN'>('ALL');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState<string>('전체 보기');
 
-  const pages = [
-    { path: '/booknotes', label: '내 독서 기록 보기' },
-    { path: '/booknotes/trip', label: '책의 여정 보기' },
-  ];
+  // 필터 옵션 정의
+  const filterList = useMemo(() => {
+    return ['전체 보기', '여정이 있는 책', '여정이 없는 책'];
+  }, []);
 
-  const { data: libraryBooks = [], isLoading } = useQuery<LibraryBookWithTrip[]>({
+  // ✅ 여정 여부 포함 서재 도서
+  const { data: libraryBooks = [], isLoading: isLoadingLibrary } = useQuery<LibraryBookWithTrip[]>({
     queryKey: ['libraryBooksWithTrip'],
     queryFn: fetchLibraryBooksWithTrip,
   });
 
-  const filteredBooks = libraryBooks.filter((book) => {
-    const matchSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
+  // ✅ 서재에 없는 여정만 있는 도서
+  const { data: extraTrips = [], isLoading: isLoadingExtra } = useQuery<BookTripBookItem[]>({
+    queryKey: ['myTripsOutsideLibrary'],
+    queryFn: fetchMyTripsOutsideLibrary,
+  });
+
+  // ✅ 공통 리스트 타입으로 가공
+  const libraryMapped: BookTripListItem[] = libraryBooks.map((book) => ({
+    bookId: book.bookId,
+    title: book.title,
+    author: book.author,
+    coverImageUrl: book.coverImageUrl,
+    hasTrip: book.hasTrip,
+  }));
+
+  const extraMapped: BookTripListItem[] = extraTrips.map((trip) => ({
+    bookId: trip.bookId,
+    title: trip.title,
+    author: trip.author,
+    coverImageUrl: trip.coverImageUrl,
+    hasTrip: true, // 여정은 항상 있음
+  }));
+
+  const allBooks = [...libraryMapped, ...extraMapped];
+
+  const filteredBooks = allBooks.filter((book) => {
+    const matchSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchFilter =
-      filter === 'ALL' ||
-      (filter === 'WRITTEN' && book.hasTrip) ||
-      (filter === 'UNWRITTEN' && !book.hasTrip);
+      selectedFilter === '전체 보기' ||
+      (selectedFilter === '여정이 있는 책' && book.hasTrip) ||
+      (selectedFilter === '여정이 없는 책' && !book.hasTrip);
     return matchSearch && matchFilter;
   });
 
+  const isLoading = isLoadingLibrary || isLoadingExtra;
+
   return (
     <div className="bg-light-bg min-h-screen pb-28">
-      <Header title="독서 기록" showBackButton={false} showNotification />
-      <TabNavBar pages={pages} />
-
+      <BookTripIntroCard />
       <div className="px-4 pt-4">
-        <div className="bg-[#FFF3F3] rounded-lg p-4 text-sm text-gray-600 mb-4">
-          <div className="flex items-center gap-1 mb-1">
-            <img src="/icons/book-journey-icon.svg" className="w-4 h-4" alt="책의 여정" />
-            <span className="font-bold text-red-500">책의 여정 보기 시스템</span>
-          </div>
-          <p>
-            내가 공감하거나, 대단한 책들을 다른 사람은 어떻게 읽었을까요?
-            <br />
-            책의 여정 기록을 통해 다른 사람들의 감상평을 알아보세요.
-          </p>
-        </div>
-
-        <div className="flex gap-2 items-center mb-4">
-          <input
-            type="text"
-            placeholder="여정이 궁금한 책 검색하기"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
+        <div>
+          <SearchFilterBar
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            selectedFilter={selectedFilter}
+            onFilterChange={setSelectedFilter}
+            filterList={filterList}
+            totalCount={filteredBooks.length}
+            searchPlaceholder="책 여정 검색 (책 제목)"
           />
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as 'ALL' | 'WRITTEN' | 'UNWRITTEN')}
-            className="text-sm border border-gray-300 rounded-md px-2 py-2"
-          >
-            <option value="ALL">전체 보기</option>
-            <option value="WRITTEN">내가 여정 작성한 책</option>
-            <option value="UNWRITTEN">여정 미작성 책</option>
-          </select>
         </div>
 
         {isLoading ? (
           <p className="text-center text-gray-500">불러오는 중...</p>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {filteredBooks.map((book) => (
-              <div
-                key={book.libraryId}
-                className="flex items-center gap-3 p-3 bg-white rounded-md shadow"
-              >
-                <img
-                  src={book.coverImageUrl || '/placeholder.jpg'}
-                  alt={book.title}
-                  className="w-14 h-20 object-cover rounded"
-                />
-                <div className="flex-1">
-                  <div className="font-semibold text-sm">{book.title}</div>
-                  <div className="text-xs text-gray-500">{book.author}</div>
-                  <div
-                    className={`mt-1 text-xs font-semibold ${
-                      book.hasTrip ? 'text-green-600' : 'text-red-500'
-                    }`}
-                  >
-                    {book.hasTrip ? '여정 작성됨' : '여정 미작성'}
-                  </div>
-                </div>
-                <button
-                  onClick={() => navigate(`/booknotes/trip/${book.bookId}`)}
-                  className="text-xs bg-primary text-white px-3 py-1 rounded-md"
-                >
-                  책의 여정 보기
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {!isLoading && filteredBooks.length === 0 && (
+        ) : filteredBooks.length === 0 ? (
           <p className="text-center text-sm text-gray-400 mt-12">조건에 맞는 책이 없습니다.</p>
+        ) : (
+          <BookTripBookList
+            books={filteredBooks}
+            onClick={(bookId) => navigate(`/booknotes/trip/${bookId}`)}
+          />
         )}
       </div>
     </div>

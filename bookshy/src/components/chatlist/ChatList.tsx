@@ -44,13 +44,26 @@ function ChatList() {
     return () => unsubscribe(subscription);
   }, [queryClient, subscribeRoom, unsubscribe]);
 
-  if (isLoading) return <div className="p-4">불러오는 중...</div>;
-  if (isError || !data) return <div className="p-4">채팅 목록을 불러올 수 없습니다.</div>;
+  if (isLoading) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center bg-light-bg px-4">
+        <span className="text-sm text-light-text-muted">불러오는 중...</span>
+      </div>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center bg-light-bg px-4">
+        <span className="text-sm text-light-status-error">채팅 목록을 불러올 수 없습니다.</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-light-bg dark:bg-dark-bg h-full p-4">
+    <div className="min-h-[100dvh] bg-light-bg px-4 py-4 flex flex-col gap-3">
       {data.length === 0 ? (
-        <div className="text-center text-light-text-muted dark:text-dark-text-muted">
+        <div className="flex-grow flex items-center justify-center text-sm text-light-text-muted">
           진행 중인 채팅이 없습니다.
         </div>
       ) : (

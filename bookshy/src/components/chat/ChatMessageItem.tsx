@@ -12,7 +12,15 @@ interface Props {
   selectedEmoji?: string;
 }
 
-function ChatMessageItem({ message, isMyMessage, onLongPress, onRightClick, onSelectEmoji, showEmojiSelector, selectedEmoji }: Props) {
+function ChatMessageItem({
+  message,
+  isMyMessage,
+  onLongPress,
+  onRightClick,
+  onSelectEmoji,
+  showEmojiSelector,
+  selectedEmoji,
+}: Props) {
   const touchTimer = useRef<NodeJS.Timeout | null>(null);
 
   const handleTouchStart = () => {
@@ -34,54 +42,51 @@ function ChatMessageItem({ message, isMyMessage, onLongPress, onRightClick, onSe
   };
 
   const emojiList = [
-    { icon: <ThumbsUp size={16} />, label: '👍' },
-    { icon: <Smile size={16} />, label: '😊' },
-    { icon: <Check size={16} />, label: '✅' },
-    { icon: <HelpCircle size={16} />, label: '❓' },
+    { icon: <ThumbsUp size={18} />, label: '👍' },
+    { icon: <Smile size={18} />, label: '😊' },
+    { icon: <Check size={18} />, label: '✅' },
+    { icon: <HelpCircle size={18} />, label: '❓' },
   ];
 
   return (
     <div
-      className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'} px-2 py-1 mb-2 relative`}
+      className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'} px-3 py-1 mb-2 relative`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onContextMenu={handleContextMenu}
     >
       <div className={`flex ${isMyMessage ? 'flex-row-reverse' : 'flex-row'} items-end gap-2`}>
-        <div className="relative max-w-[70%]">
+        <div className="relative max-w-[85%] sm:max-w-[70%]">
           <div
-            className={`px-3 py-2 rounded-2xl break-words ${
-              isMyMessage ? 'bg-primary-light text-white' : 'bg-white text-black'
+            className={`px-4 py-2 rounded-2xl text-sm sm:text-base whitespace-pre-wrap break-words ${
+              isMyMessage ? 'bg-primary-light text-white' : 'bg-light-bg-secondary text-light-text'
             }`}
           >
             {message.content}
           </div>
 
           {selectedEmoji && (
-            <div
-              className="absolute -bottom-5 left-3 flex items-center gap-1 bg-white rounded-full px-2 py-[2px] shadow-sm border border-gray-200 text-sm"
-              style={{ fontSize: '12px' }}
-            >
+            <div className="absolute -bottom-5 left-3 flex items-center gap-1 bg-light-bg-card rounded-full px-2 py-[2px] shadow border border-light-bg-shade text-xs">
               <span>{selectedEmoji}</span>
-              <span className="text-[11px] text-gray-500">1</span>
+              <span className="text-light-text-muted text-[11px]">1</span>
             </div>
           )}
         </div>
 
         <div className="flex flex-col items-end min-w-[35px]">
-          <span className="text-[10px] text-gray-400 text-right">{message.sentAt}</span>
-          {isMyMessage && !message.isRead && (
+          <span className="text-[10px] text-light-text-muted">{message.sentAt}</span>
+          {isMyMessage && !message.read && (
             <span className="text-[10px] text-primary mt-[2px]">1</span>
           )}
         </div>
       </div>
 
       {showEmojiSelector && (
-        <div className="absolute bottom-full mb-1 flex gap-1 bg-white border border-gray-200 rounded-xl shadow-sm p-1 z-10">
+        <div className="absolute bottom-full mb-1 flex gap-1 bg-light-bg-card border border-light-bg-shade rounded-xl shadow p-1 z-20">
           {emojiList.map((emoji) => (
             <button
               key={emoji.label}
-              className="p-1 hover:bg-gray-100 rounded-full"
+              className="p-1 hover:bg-light-bg-shade rounded-full transition"
               onClick={() => onSelectEmoji?.(emoji.label)}
             >
               {emoji.icon}
