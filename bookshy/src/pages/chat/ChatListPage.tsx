@@ -4,7 +4,7 @@ import Header from '@/components/common/Header';
 function ChatListPage() {
   return (
     <div>
-      <Header title={'채팅'} />
+      <Header title={'채팅'} showBackButton={false} />
       <ChatList />
     </div>
   );
