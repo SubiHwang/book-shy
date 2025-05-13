@@ -98,6 +98,13 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
         return exists ? prev : [...prev, newMessage];
       });
 
+      // 채팅방 열려 있고 내 메시지가 아닌 경우 즉시 읽음 처리
+      if (newMessage.senderId !== myUserId) {
+        markMessagesAsRead(numericRoomId).catch((err) =>
+          console.error('❌ 읽음 처리 실패 (수신 시점):', err),
+        );
+      }
+
       queryClient.setQueryData(['chatList'], (prev: any) => {
         if (!Array.isArray(prev)) return prev;
         return prev.map((room: any) =>
@@ -215,7 +222,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
           lastDateLabel = dateLabel;
 
           const isSystem = ['info', 'notice', 'warning'].includes(msg.type ?? '');
-
+          console.log(`[UI] 렌더링 msg.id: ${msg.id}, isRead: ${msg.read}`);
           return (
             <div key={msg.id}>
               {showDate && (
