@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import BookCard from '@/components/mybooknote/booknote/BookCard';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import { useState } from 'react';
+import { PlusCircle, ChevronDown } from 'lucide-react';
 
 interface BookGridPetalPageProps {
   bookNotes: BookNote[];
@@ -9,27 +10,59 @@ interface BookGridPetalPageProps {
 
 const MyBookNoteGridPage: React.FC<BookGridPetalPageProps> = ({ bookNotes }) => {
   const navigate = useNavigate();
-  const [filter, setFilter] = useState<'ALL' | 'X'>('ALL');
+  const [selectedFilter, setSelectedFilter] = useState<string>('all');
+  const [filterOpen, setFilterOpen] = useState<boolean>(false);
+
+  const filterOptions = [
+    { value: 'all', label: '전체 보기' },
+    { value: 'has', label: '기록이 있는 책' },
+    { value: 'none', label: '기록이 없는 책' },
+  ];
 
   const filteredNotes = bookNotes.filter((book) => {
-    const matchFilter = filter === 'ALL' || book.reviewId;
-    return matchFilter;
+    if (selectedFilter === 'all') return true;
+    if (selectedFilter === 'has') return book.reviewId;
+    if (selectedFilter === 'none') return !book.reviewId;
+    return true;
   });
 
   return (
     <div className="bg-light-bg min-h-screen pb-28">
       <div className="px-4 pt-4">
-        <p className="text-sm text-gray-500 mb-2">나의 독서 기록을 모아보세요.</p>
+        <div className="mb-4">
+          <div className="flex justify-between items-center mb-2">
+            <div className="font-light text-light-text-secondary">총 {filteredNotes.length} 권</div>
+            <div className="relative">
+              <button
+                className="flex items-center border rounded px-3 py-1 text-sm"
+                onClick={() => setFilterOpen(!filterOpen)}
+              >
+                <span>
+                  {filterOptions.find((option) => option.value === selectedFilter)?.label}
+                </span>
+                <ChevronDown size={16} className="ml-1" />
+              </button>
 
-        <div className="flex gap-2 mb-4">
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as 'ALL' | 'X')}
-            className="text-sm border rounded-md px-2 py-1"
-          >
-            <option value="X">X 책</option>
-            <option value="ALL">기록있는 책</option>
-          </select>
+              {filterOpen && (
+                <div className="absolute right-0 mt-1 bg-white border rounded shadow-lg z-10 w-32">
+                  <ul className="py-1">
+                    {filterOptions.map((option) => (
+                      <li
+                        key={option.value}
+                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm font-light"
+                        onClick={() => {
+                          setSelectedFilter(option.value);
+                          setFilterOpen(false);
+                        }}
+                      >
+                        {option.label}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="w-fit mx-auto grid grid-cols-2 gap-12">
@@ -51,12 +84,12 @@ const MyBookNoteGridPage: React.FC<BookGridPetalPageProps> = ({ bookNotes }) => 
       </div>
 
       {/* 책 추가 플로팅 액션 버튼 */}
-      <div className="fixed bottom-28 right-5 md:right-10">
+      <div className="fixed bottom-24 right-6">
         <button
-          className="bg-primary hover:bg-primary-dark text-light-text-inverted rounded-full p-3 shadow-lg transition-colors"
           onClick={() => navigate('/booknotes/select')}
+          className="w-14 h-14 rounded-xl bg-primary text-white flex justify-center items-center shadow-lg"
         >
-          <img src="/icons/camera-upload.svg" alt="카메라 업로드" className="w-10 h-10" />
+          <PlusCircle size={32} strokeWidth={1} />
         </button>
       </div>
     </div>
