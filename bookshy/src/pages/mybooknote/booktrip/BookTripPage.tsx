@@ -11,9 +11,6 @@ import type {
   BookTripBookItem,
   BookTripListItem,
 } from '@/types/mybooknote/booktrip/booktrip';
-
-import Header from '@/components/common/Header';
-import TabNavBar from '@/components/common/TabNavBar';
 import BookTripIntroCard from '@/components/mybooknote/booktrip/BookTripIntroCard';
 import BookTripFilterBar from '@/components/mybooknote/booktrip/BookTripFilterBar';
 import BookTripBookList from '@/components/mybooknote/booktrip/BookTripBookList';

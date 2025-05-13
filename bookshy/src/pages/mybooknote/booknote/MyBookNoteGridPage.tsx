@@ -1,6 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import Header from '@/components/common/Header';
-import TabNavBar from '@/components/common/TabNavBar';
 import BookCard from '@/components/mybooknote/booknote/BookCard';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import { useState } from 'react';
@@ -12,11 +10,6 @@ interface BookGridPetalPageProps {
 const MyBookNoteGridPage: React.FC<BookGridPetalPageProps> = ({ bookNotes }) => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<'ALL' | 'X'>('ALL');
-
-  const pages = [
-    { path: '/booknotes', label: '내 독서 기록 보기' },
-    { path: '/booknotes/trip', label: '책의 여정 보기' },
-  ];
 
   const filteredNotes = bookNotes.filter((book) => {
     const matchFilter = filter === 'ALL' || book.reviewId;
