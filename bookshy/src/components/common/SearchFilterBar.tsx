@@ -1,28 +1,27 @@
+// components/common/SearchFilterBar.tsx
 import { Search, ChevronDown } from 'lucide-react';
 import { FC, useState } from 'react';
 
-interface BookTripFilterBarProps {
-  searchQuery: string;
+interface SearchFilterBarProps {
+  searchTerm: string;
   onSearchChange: (value: string) => void;
-  filter: 'ALL' | 'WRITTEN' | 'UNWRITTEN';
-  onFilterChange: (value: 'ALL' | 'WRITTEN' | 'UNWRITTEN') => void;
-  totalCount?: number;
+  selectedFilter: string;
+  onFilterChange: (value: string) => void;
+  filterList: string[];
+  totalCount: number;
+  searchPlaceholder?: string;
 }
 
-const BookTripFilterBar: FC<BookTripFilterBarProps> = ({
-  searchQuery,
+const SearchFilterBar: FC<SearchFilterBarProps> = ({
+  searchTerm,
   onSearchChange,
-  filter,
+  selectedFilter,
   onFilterChange,
-  totalCount = 0,
+  filterList,
+  totalCount,
+  searchPlaceholder = '검색하기',
 }) => {
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
-
-  const filterOptions = [
-    { value: 'ALL', label: '전체 보기' },
-    { value: 'WRITTEN', label: '여정이 있는 책' },
-    { value: 'UNWRITTEN', label: '여정이 없는 책' },
-  ];
 
   return (
     <>
@@ -34,8 +33,8 @@ const BookTripFilterBar: FC<BookTripFilterBarProps> = ({
           </div>
           <input
             type="text"
-            placeholder="책 여정 검색 (책 제목)"
-            value={searchQuery}
+            placeholder={searchPlaceholder}
+            value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-200 text-sm"
           />
@@ -51,23 +50,23 @@ const BookTripFilterBar: FC<BookTripFilterBarProps> = ({
               className="flex items-center border rounded px-3 py-1 text-sm"
               onClick={() => setFilterOpen(!filterOpen)}
             >
-              <span>{filterOptions.find((option) => option.value === filter)?.label}</span>
+              <span>{selectedFilter}</span>
               <ChevronDown size={16} className="ml-1" />
             </button>
 
             {filterOpen && (
               <div className="absolute right-0 mt-1 bg-white border rounded shadow-lg z-10 w-32">
                 <ul className="py-1">
-                  {filterOptions.map((option) => (
+                  {filterList.map((filter) => (
                     <li
-                      key={option.value}
+                      key={filter}
                       className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm font-light"
                       onClick={() => {
-                        onFilterChange(option.value as 'ALL' | 'WRITTEN' | 'UNWRITTEN');
+                        onFilterChange(filter);
                         setFilterOpen(false);
                       }}
                     >
-                      {option.label}
+                      {filter}
                     </li>
                   ))}
                 </ul>
@@ -80,4 +79,4 @@ const BookTripFilterBar: FC<BookTripFilterBarProps> = ({
   );
 };
 
-export default BookTripFilterBar;
+export default SearchFilterBar;
