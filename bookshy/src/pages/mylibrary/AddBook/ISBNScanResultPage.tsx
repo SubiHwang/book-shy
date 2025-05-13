@@ -1,10 +1,9 @@
 //src/pages/mylibrary/AddBook/ISBNScanResultPage.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, AlertCircle } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { fetchBookDetailsByISBN, registerBookByISBN } from '@/services/mylibrary/isbnresultService';
 import { ISBNSearchResponse } from '@/types/mylibrary/isbn';
-import { toast } from 'react-toastify';
 
 const ISBNScanResultPage: React.FC = () => {
   const { isbn } = useParams<{ isbn: string }>();
@@ -83,7 +82,6 @@ const ISBNScanResultPage: React.FC = () => {
 
     if (!isbn) {
       setRegistrationError('ISBN 정보가 없어 등록할 수 없습니다.');
-      toast.error('ISBN 정보가 없어 등록할 수 없습니다.');
       return;
     }
 
@@ -95,7 +93,8 @@ const ISBNScanResultPage: React.FC = () => {
       const registeredBook = await registerBookByISBN(isbn, isPublic);
       console.log('책 등록 성공:', registeredBook);
 
-      toast.success('책이 성공적으로 등록되었습니다!');
+      // 알림 표시 후 서재 페이지로 이동
+      alert('책이 성공적으로 등록되었습니다!');
       navigate('/bookshelf');
     } catch (err) {
       console.error('책 등록 오류:', err);
@@ -106,7 +105,6 @@ const ISBNScanResultPage: React.FC = () => {
       }
 
       setRegistrationError(errorMessage);
-      toast.error(errorMessage);
     } finally {
       setIsRegistering(false);
     }
@@ -203,7 +201,7 @@ const ISBNScanResultPage: React.FC = () => {
                       className="text-xs text-primary-light mt-2"
                       onClick={() => {
                         console.log('더 보기 버튼 클릭');
-                        toast.info('전체 내용 보기 기능은 개발 중입니다.');
+                        alert('전체 내용 보기 기능은 개발 중입니다.');
                       }}
                     >
                       더 보기
@@ -228,9 +226,8 @@ const ISBNScanResultPage: React.FC = () => {
 
               {/* 등록 오류 메시지 */}
               {registrationError && (
-                <div className="text-red-500 text-sm p-2 bg-red-50 rounded-md flex items-start">
-                  <AlertCircle size={16} className="mt-0.5 mr-2 flex-shrink-0" />
-                  <span>{registrationError}</span>
+                <div className="text-red-500 text-sm p-2 bg-red-50 rounded-md">
+                  {registrationError}
                 </div>
               )}
 

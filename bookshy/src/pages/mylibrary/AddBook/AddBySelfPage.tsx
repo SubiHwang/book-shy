@@ -1,9 +1,8 @@
 // src/pages/mylibrary/AddBook/AddBySelfPage.tsx
 import { useState, FC } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Pencil, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Pencil } from 'lucide-react';
 import { addBookBySelf } from '@/services/mylibrary/bookAddService';
-import { toast } from 'react-toastify';
 
 const AddBySelfPage: FC = () => {
   const navigate = useNavigate();
@@ -14,15 +13,7 @@ const AddBySelfPage: FC = () => {
   const [coverPreviewUrl, setCoverPreviewUrl] = useState<string>('');
   const [isPublic, setIsPublic] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  // 각 필드별 오류 상태 관리
-  const [errors, setErrors] = useState<{
-    title?: string;
-    author?: string;
-    publisher?: string;
-    coverImage?: string;
-    general?: string;
-  }>({});
+  const [error, setError] = useState<string | null>(null);
 
   // 이미지 업로드 처리
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,72 +25,43 @@ const AddBySelfPage: FC = () => {
       // 미리보기 URL 생성
       const imageUrl = URL.createObjectURL(file);
       setCoverPreviewUrl(imageUrl);
-
-      // 이미지 오류 제거
-      setErrors((prev) => ({ ...prev, coverImage: undefined }));
     }
-  };
-
-  // 입력 변경 핸들러 - 오류 제거 포함
-  const handleInputChange = (field: 'title' | 'author' | 'publisher', value: string) => {
-    // 값 업데이트
-    if (field === 'title') setTitle(value);
-    else if (field === 'author') setAuthor(value);
-    else if (field === 'publisher') setPublisher(value);
-
-    // 값이 있으면 해당 필드 오류 제거
-    if (value.trim()) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
-
-  // 입력 유효성 검사
-  const validateForm = (): boolean => {
-    const newErrors: typeof errors = {};
-    let isValid = true;
-
-    if (!title.trim()) {
-      newErrors.title = '책 제목을 입력해주세요.';
-      isValid = false;
-    }
-
-    if (!author.trim()) {
-      newErrors.author = '저자를 입력해주세요.';
-      isValid = false;
-    }
-
-    if (!publisher.trim()) {
-      newErrors.publisher = '출판사를 입력해주세요.';
-      isValid = false;
-    }
-
-    if (!coverImage) {
-      newErrors.coverImage = '표지 이미지를 업로드해주세요.';
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
   };
 
   // 책 등록 처리
   const handleRegister = async () => {
     // 입력 유효성 검사
-    if (!validateForm()) {
+    if (!title.trim()) {
+      setError('책 제목을 입력해주세요.');
+      return;
+    }
+
+    if (!author.trim()) {
+      setError('저자를 입력해주세요.');
+      return;
+    }
+
+    if (!publisher.trim()) {
+      setError('출판사를 입력해주세요.');
+      return;
+    }
+
+    if (!coverImage) {
+      setError('표지 이미지를 업로드해주세요.');
       return;
     }
 
     setIsSubmitting(true);
-    setErrors({});
+    setError(null);
 
     try {
       // API 호출하여 도서 등록
-      const registeredBook = await addBookBySelf(title, author, publisher, coverImage!, isPublic);
+      const registeredBook = await addBookBySelf(title, author, publisher, coverImage, isPublic);
 
       console.log('등록된 책 정보:', registeredBook);
 
       // 성공 알림 표시
-      toast.success('책이 성공적으로 등록되었습니다!');
+      alert('책이 성공적으로 등록되었습니다!');
 
       // 내 서재 페이지로 이동
       navigate('/bookshelf');
@@ -110,15 +72,10 @@ const AddBySelfPage: FC = () => {
       const errorMessage =
         error instanceof Error ? error.message : '책 등록에 실패했습니다. 다시 시도해주세요.';
 
-      // 일반 오류 설정
-      setErrors((prev) => ({ ...prev, general: errorMessage }));
-
-      // 심각한 오류는 토스트로도 표시
-      toast.error(errorMessage);
+      setError(errorMessage);
       setIsSubmitting(false);
     }
   };
-
   // 공개 여부 토글 처리
   const handleTogglePublic = () => {
     setIsPublic(!isPublic);
@@ -139,13 +96,8 @@ const AddBySelfPage: FC = () => {
       {/* 전체 내용을 감싸는 스크롤 영역 */}
       <div className="flex-1 overflow-auto pb-16">
         <div className="max-w-md mx-auto p-4">
-          {/* 일반 오류 메시지 */}
-          {errors.general && (
-            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md flex items-start">
-              <AlertCircle size={18} className="min-w-[18px] mt-0.5 mr-2" />
-              <span>{errors.general}</span>
-            </div>
-          )}
+          {/* 오류 메시지 */}
+          {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">{error}</div>}
 
           {/* 표지 업로드 */}
           <div className="mb-8 flex flex-col items-center">
@@ -162,9 +114,7 @@ const AddBySelfPage: FC = () => {
                 id="cover-upload"
               />
               <label htmlFor="cover-upload" className="cursor-pointer block w-full h-full">
-                <div
-                  className={`w-full h-full bg-gray-200 flex items-center justify-center rounded ${errors.coverImage ? 'border-2 border-red-500' : ''}`}
-                >
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center rounded">
                   {coverPreviewUrl ? (
                     <img
                       src={coverPreviewUrl}
@@ -177,12 +127,6 @@ const AddBySelfPage: FC = () => {
                 </div>
               </label>
             </div>
-            {errors.coverImage && (
-              <p className="text-red-500 text-sm mt-2 self-start flex items-center">
-                <AlertCircle size={14} className="mr-1" />
-                {errors.coverImage}
-              </p>
-            )}
           </div>
 
           {/* 책 제목 입력 */}
@@ -197,18 +141,10 @@ const AddBySelfPage: FC = () => {
               type="text"
               id="book-title"
               value={title}
-              onChange={(e) => handleInputChange('title', e.target.value)}
+              onChange={(e) => setTitle(e.target.value)}
               placeholder="책 이름"
-              className={`w-full p-3 border rounded-md focus:outline-none focus:border-primary-light ${
-                errors.title ? 'border-red-500' : 'border-light-text-muted/30'
-              }`}
+              className="w-full p-3 border border-light-text-muted/30 rounded-md focus:outline-none focus:border-primary-light"
             />
-            {errors.title && (
-              <p className="text-red-500 text-sm mt-1 flex items-center">
-                <AlertCircle size={14} className="mr-1" />
-                {errors.title}
-              </p>
-            )}
           </div>
 
           {/* 저자 입력 */}
@@ -223,18 +159,10 @@ const AddBySelfPage: FC = () => {
               type="text"
               id="book-author"
               value={author}
-              onChange={(e) => handleInputChange('author', e.target.value)}
+              onChange={(e) => setAuthor(e.target.value)}
               placeholder="저자"
-              className={`w-full p-3 border rounded-md focus:outline-none focus:border-primary-light ${
-                errors.author ? 'border-red-500' : 'border-light-text-muted/30'
-              }`}
+              className="w-full p-3 border border-light-text-muted/30 rounded-md focus:outline-none focus:border-primary-light"
             />
-            {errors.author && (
-              <p className="text-red-500 text-sm mt-1 flex items-center">
-                <AlertCircle size={14} className="mr-1" />
-                {errors.author}
-              </p>
-            )}
           </div>
 
           {/* 출판사 입력 */}
@@ -249,18 +177,10 @@ const AddBySelfPage: FC = () => {
               type="text"
               id="book-publisher"
               value={publisher}
-              onChange={(e) => handleInputChange('publisher', e.target.value)}
+              onChange={(e) => setPublisher(e.target.value)}
               placeholder="출판사"
-              className={`w-full p-3 border rounded-md focus:outline-none focus:border-primary-light ${
-                errors.publisher ? 'border-red-500' : 'border-light-text-muted/30'
-              }`}
+              className="w-full p-3 border border-light-text-muted/30 rounded-md focus:outline-none focus:border-primary-light"
             />
-            {errors.publisher && (
-              <p className="text-red-500 text-sm mt-1 flex items-center">
-                <AlertCircle size={14} className="mr-1" />
-                {errors.publisher}
-              </p>
-            )}
           </div>
 
           {/* 공개 설정 토글 추가 */}

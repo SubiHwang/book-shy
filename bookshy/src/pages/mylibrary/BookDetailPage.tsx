@@ -11,7 +11,6 @@ import {
 } from '@/services/mylibrary/bookDetailService';
 import Header from '@/components/common/Header';
 import Loading from '@/components/common/Loading';
-import { toast } from 'react-toastify';
 
 interface BookDetailState extends BookDetailResponse {
   libraryId: number;
@@ -49,11 +48,11 @@ const BookDetailPage: React.FC = () => {
     if (window.confirm('정말로 이 책을 삭제하시겠습니까?')) {
       try {
         await deleteLibraryBook(bookDetail.libraryId);
-        toast.success('책이 성공적으로 삭제되었습니다.');
+        alert('책이 성공적으로 삭제되었습니다.');
         navigate('/bookshelf'); // 서재 페이지로 이동
       } catch (error) {
         console.error('책 삭제 중 오류 발생:', error);
-        toast.error('책 삭제 중 오류가 발생했습니다.');
+        alert('책 삭제 중 오류가 발생했습니다.');
       }
     }
   };
@@ -84,7 +83,6 @@ const BookDetailPage: React.FC = () => {
       } catch (err) {
         console.error('책 정보를 가져오는 중 오류 발생:', err);
         setError('책 정보를 불러오는 중 문제가 발생했습니다.');
-        toast.error('책 정보를 불러오는 중 문제가 발생했습니다.');
       } finally {
         setLoading(false);
       }
@@ -115,13 +113,13 @@ const BookDetailPage: React.FC = () => {
 
       // 알림 표시
       if (newPublicStatus) {
-        toast.success('공개 서재에 추가되었습니다.');
+        alert('공개 서재에 추가되었습니다.');
       } else {
-        toast.info('공개 서재에서 숨김 처리되었습니다.');
+        alert('공개 서재에서 숨김 처리되었습니다.');
       }
     } catch (error) {
       console.error('공개 상태 변경 중 오류 발생:', error);
-      toast.error('공개 상태 변경 중 오류가 발생했습니다.');
+      alert('공개 상태 변경 중 오류가 발생했습니다.');
     }
   };
 
