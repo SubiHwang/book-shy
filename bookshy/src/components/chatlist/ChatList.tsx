@@ -48,11 +48,9 @@ function ChatList() {
   if (isError || !data) return <div className="p-4">채팅 목록을 불러올 수 없습니다.</div>;
 
   return (
-    <div className="bg-light-bg dark:bg-dark-bg h-full p-4">
+    <div className="bg-light-bg h-full p-4">
       {data.length === 0 ? (
-        <div className="text-center text-light-text-muted dark:text-dark-text-muted">
-          진행 중인 채팅이 없습니다.
-        </div>
+        <div className="text-center text-light-text-muted ">진행 중인 채팅이 없습니다.</div>
       ) : (
         [...data]
           .sort(
