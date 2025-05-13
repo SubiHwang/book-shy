@@ -78,7 +78,7 @@ function ChatMessageItem({
 
         <div className="flex flex-col items-end min-w-[35px]">
           <span className="text-[10px] text-gray-400 text-right">{message.sentAt}</span>
-          {isMyMessage && !message.isRead && (
+          {isMyMessage && !message.read && (
             <span className="text-[10px] text-primary mt-[2px]">1</span>
           )}
         </div>

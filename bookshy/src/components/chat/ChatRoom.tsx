@@ -84,7 +84,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
 
       setMessages((prev) =>
         prev.map((msg) =>
-          payload.messageIds.includes(Number(msg.id)) ? { ...msg, isRead: true } : msg,
+          payload.messageIds.includes(Number(msg.id)) ? { ...msg, read: true } : msg,
         ),
       );
     },
@@ -245,7 +245,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
                 />
               ) : (
                 <ChatMessageItem
-                  message={{ ...msg, sentAt: formatTime(msg.sentAt) }}
+                  message={{ ...msg, sentAt: formatTime(msg.sentAt), read: msg.read }}
                   isMyMessage={msg.senderId === myUserId}
                   showEmojiSelector={emojiTargetId === msg.id}
                   onLongPress={() => handleLongPressOrRightClick(msg.id)}
