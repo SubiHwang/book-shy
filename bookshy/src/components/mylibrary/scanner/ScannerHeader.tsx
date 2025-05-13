@@ -26,7 +26,7 @@ const ScannerHeader: React.FC<ScannerHeaderProps> = ({
         </button>
       </div>
       <h2 className="text-xl font-bold">
-        {error || (scanSuccess ? '✅ ISBN 인식 성공!' : '바코드 스캔 중...')}
+        {error || (scanSuccess ? '✅ ISBN 인식 성공!' : 'ISBN 인식 중')}
       </h2>
       {lastScannedData && <p className="text-sm text-green-400 mt-1">ISBN: {lastScannedData}</p>}
       {lastError && !scanSuccess && <p className="text-xs text-red-400 mt-1">{lastError}</p>}

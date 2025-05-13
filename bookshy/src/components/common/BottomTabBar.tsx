@@ -5,7 +5,9 @@ import { useLocation } from 'react-router-dom';
 
 const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState<string>('bookshelf');
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    return sessionStorage.getItem('activeTab') || 'bookshelf';
+  });
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [lastScrollY, setLastScrollY] = useState<number>(0);
 
@@ -16,6 +18,7 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
     '/bookshelf/add/self',
     '/bookshelf/add/search',
     '/bookshelf/add/ocr-result',
+    '/setting-location',
   ];
 
   // 현재 경로가 숨김 목록에 있는지 확인
@@ -25,8 +28,10 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
     const path = location.pathname.substring(1); // '/' 제거
     if (path === '') {
       setActiveTab('bookshelf');
+      sessionStorage.setItem('activeTab', 'bookshelf');
     } else if (['bookshelf', 'matching', 'chat', 'booknotes', 'mypage'].includes(path)) {
       setActiveTab(path);
+      sessionStorage.setItem('activeTab', path);
     }
   }, [location.pathname]);
 
@@ -53,6 +58,7 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
 
   const handleTabChange = (tabId: string): void => {
     setActiveTab(tabId);
+    sessionStorage.setItem('activeTab', tabId);
     // 탭 변경 시 스크롤 위치 초기화
     window.scrollTo({ top: 0, behavior: 'smooth' });
 

@@ -43,11 +43,7 @@ const PublicBooksTab: React.FC = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="relative" style={{ transform: 'translateY(-150px)' }}>
-        <Loading loadingText="책을 불러오는 중..." />
-      </div>
-    );
+    return <Loading loadingText="책을 불러오는 중..." />;
   }
 
   if (error) {
@@ -116,14 +112,23 @@ const PublicBooksTab: React.FC = () => {
   }
 
   return (
-    <div className="public-books-tab">
-      <div className="container mx-auto px-4 pb-16 space-y-8">
-        {shelves.map((shelfBooks, index) => (
-          <div key={`shelf-${index}`}>
-            {/* 클릭 이벤트를 LibraryBookshelfRow에 직접 전달 */}
-            <LibraryBookshelfRow books={shelfBooks} onBookClick={handleBookClick} />
+    <div className="all-books-tab">
+      <div className="container mx-auto px-4 pb-16">
+        {/* 도서 수를 표시하는 헤더 */}
+        <div className="flex justify-end mt-3 mb-4">
+          <div className="text-sm font-medium text-gray-600">
+            공개 서재: <span className="text-primary">{books.length}권</span>
           </div>
-        ))}
+        </div>
+
+        {/* 책장 컨테이너 */}
+        <div className="space-y-8">
+          {shelves.map((shelfBooks, index) => (
+            <div key={`shelf-${index}`}>
+              <LibraryBookshelfRow books={shelfBooks} onBookClick={handleBookClick} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

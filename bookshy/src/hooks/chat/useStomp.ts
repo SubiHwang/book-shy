@@ -1,32 +1,45 @@
 import { useEffect, useRef } from 'react';
 import { useWebSocket } from '@/contexts/WebSocketProvider';
-import type { ChatMessage } from '@/types/chat/chat.ts';
+import type { ChatMessage, ReadPayload } from '@/types/chat/chat';
 import { IMessage } from '@stomp/stompjs';
 
-export const useStomp = (roomId: number, onMessage: (msg: ChatMessage) => void) => {
-  const { subscribeRoom, unsubscribe, sendMessage: sendWS, isConnected } = useWebSocket();
+export const useStomp = (
+  roomId: number,
+  onMessage: (msg: ChatMessage) => void,
+  onRead?: (payload: ReadPayload) => void,
+) => {
+  const {
+    subscribeRoom,
+    subscribeReadTopic,
+    unsubscribe,
+    sendMessage: sendWS,
+    isConnected,
+  } = useWebSocket();
 
-  const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
+  const roomSubRef = useRef<{ unsubscribe: () => void } | null>(null);
+  const readSubRef = useRef<{ unsubscribe: () => void } | null>(null);
 
   useEffect(() => {
     if (!isConnected || !roomId) return;
 
-    const sub = subscribeRoom(roomId, (frame: IMessage) => {
+    roomSubRef.current = subscribeRoom(roomId, (frame: IMessage) => {
       try {
         const payload = JSON.parse(frame.body) as ChatMessage;
         onMessage(payload);
       } catch (e) {
-        console.error('❌ STOMP 메시지 파싱 실패', e);
+        console.error('❌ 메시지 파싱 실패', e);
       }
     });
 
-    subscriptionRef.current = sub;
+    readSubRef.current = subscribeReadTopic(roomId, (payload: ReadPayload) => {
+      onRead?.(payload);
+    });
 
     return () => {
-      unsubscribe(subscriptionRef.current);
-      subscriptionRef.current = null;
+      unsubscribe(roomSubRef.current);
+      unsubscribe(readSubRef.current);
     };
-  }, [roomId, isConnected, subscribeRoom, unsubscribe, onMessage]);
+  }, [roomId, isConnected, onMessage, onRead, subscribeRoom, subscribeReadTopic, unsubscribe]);
 
   const sendMessage = (
     roomId: number,

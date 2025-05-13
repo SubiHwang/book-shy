@@ -115,20 +115,22 @@ const MyLibraryPage: React.FC = () => {
 
           {/* 탭 네비게이션 */}
           <TabNavBar pages={pages} />
-
-          {/* 중첩 라우트 컨텐츠 */}
-          <div className="tab-content mt-4">
-            <Outlet />
+          {/* 탭 네비게이션과 컨텐츠를 감싸는 흰색 박스 */}
+          <div className="bg-white rounded-lg shadow-md mt-4 pt-3 ">
+            {/* 중첩 라우트 컨텐츠 */}
+            <div className="tab-content ">
+              <Outlet />
+            </div>
           </div>
         </div>
 
         {/* 책 추가 플로팅 액션 버튼*/}
-        <div className="fixed bottom-28 right-5 md:right-10">
+        <div className="fixed bottom-24 right-6">
           <button
-            className="bg-primary hover:bg-primary-dark text-light-text-inverted rounded-full p-3 shadow-lg transition-colors"
+            className="w-14 h-14 rounded-xl bg-primary text-white flex justify-center items-center shadow-lg"
             onClick={openDialog}
           >
-            <img src="/icons/camera-upload.svg" alt="카메라 업로드" className="w-10 h-10" />
+            <img src="/icons/camera-upload.svg" alt="카메라 업로드" className="mt-1 w-10 h-10" />
           </button>
         </div>
 
