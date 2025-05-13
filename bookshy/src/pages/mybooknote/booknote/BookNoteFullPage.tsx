@@ -2,8 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchBookNote } from '@/services/mybooknote/booknote/booknote';
 import { fetchBookQuote } from '@/services/mybooknote/booknote/bookquote';
-import BookNoteHeaderCard from '@/components/mybooknote/booknote/BookNoteHeaderCard';
-import BookNoteLayout from '@/components/mybooknote/booknote/BookNoteLayout';
+import BookDetailHeader from '@/components/mybooknote/booknote/BookNoteHeader';
 import BookNoteView from '@/components/mybooknote/booknote/BookNoteView';
 
 const BookNoteFullPage: React.FC = () => {
@@ -26,23 +25,14 @@ const BookNoteFullPage: React.FC = () => {
   if (!bookId || !book) return <p className="p-4">잘못된 접근입니다.</p>;
 
   return (
-    <BookNoteLayout
-      header={
-        <>
-          <div className="flex justify-between items-center mb-4">
-            <button onClick={() => navigate(-1)}>&lt;</button>
-            <h1 className="text-lg font-semibold">독서 기록</h1>
-            <div className="w-6" />
-          </div>
-          <BookNoteHeaderCard
-            coverUrl={book.coverUrl}
-            title={book.title}
-            author={book.author}
-            publisher={book.publisher}
-          />
-        </>
-      }
-    >
+    <div>
+      <BookDetailHeader
+        coverImageUrl={book.coverUrl}
+        title={book.title}
+        author={book.author}
+        publisher={book.publisher}
+      />
+
       <div className="flex justify-end mb-6">
         <button
           onClick={() => navigate(`/booknotes/edit/${book.bookId}`)}
@@ -53,7 +43,7 @@ const BookNoteFullPage: React.FC = () => {
       </div>
 
       <BookNoteView quoteText={quote?.content} reviewText={book.content} />
-    </BookNoteLayout>
+    </div>
   );
 };
 
