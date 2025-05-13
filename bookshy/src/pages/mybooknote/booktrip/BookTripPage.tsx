@@ -71,7 +71,7 @@ const BookTripPage: React.FC = () => {
     <div className="bg-light-bg min-h-screen pb-28">
       <BookTripIntroCard />
       <div className="px-4 pt-4">
-        <div className="mt-2">
+        <div>
           <SearchFilterBar
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
