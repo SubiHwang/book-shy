@@ -80,23 +80,46 @@ public class AuthController {
     public ResponseEntity<JwtTokenDto> reissueAccessToken(@Parameter(description = "FCM 토큰 및 리프레시 토큰 정보", required = true)
                                                           @RequestBody RefreshDto refreshDto) {
 
+        log.info("🔵 토큰 재발행 요청 시작");
+        log.info("🔵 받은 RefreshDto - refreshToken: {}, fcmToken: {}",
+                refreshDto.getRefreshToken(), refreshDto.getFcmToken());
+
         // 이미 Bearer 접두사가 있는지 확인하고 없으면 추가
         String refreshToken = refreshDto.getRefreshToken();
+        log.info("🔵 원본 refreshToken: {}", refreshToken);
+
         if (!refreshToken.startsWith("Bearer ")) {
             refreshToken = "Bearer " + refreshToken;
+            log.info("🔵 Bearer 추가 후 refreshToken: {}", refreshToken);
+        } else {
+            log.info("🔵 이미 Bearer가 포함되어 있음");
         }
 
-        String newAccessToken = authTokenService.createNewAccessTokenByValidateRefreshToken(refreshToken);
-        String newRefreshToken = authTokenService.createNewRefreshTokenByValidateRefreshToken(refreshToken);
+        try {
+            log.info("🔵 새 액세스 토큰 생성 시작");
+            String newAccessToken = authTokenService.createNewAccessTokenByValidateRefreshToken(refreshToken);
+            log.info("✅ 새 액세스 토큰 생성 성공: {}", newAccessToken);
 
-        JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
-                .accessToken(newAccessToken)
-                .refreshToken(newRefreshToken)
-                .build();
+            log.info("🔵 새 리프레시 토큰 생성 시작");
+            String newRefreshToken = authTokenService.createNewRefreshTokenByValidateRefreshToken(refreshToken);
+            log.info("✅ 새 리프레시 토큰 생성 성공: {}", newRefreshToken);
 
-        authTokenService.create(jwtTokenDto, refreshDto.getFcmToken());
+            JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
+                    .accessToken(newAccessToken)
+                    .refreshToken(newRefreshToken)
+                    .build();
 
-        return ResponseEntity.ok(jwtTokenDto);
+            log.info("🔵 토큰 저장 시작");
+            authTokenService.create(jwtTokenDto, refreshDto.getFcmToken());
+            log.info("✅ 토큰 저장 완료");
+
+            log.info("✅ 토큰 재발행 요청 완료");
+            return ResponseEntity.ok(jwtTokenDto);
+
+        } catch (Exception e) {
+            log.error("❌ 토큰 재발행 중 에러 발생", e);
+            throw e;
+        }
     }
 
     @PostMapping("/sign-in/kakao")

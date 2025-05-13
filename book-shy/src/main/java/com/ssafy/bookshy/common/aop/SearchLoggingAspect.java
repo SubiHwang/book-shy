@@ -23,21 +23,32 @@ public class SearchLoggingAspect {
 
     private final LoggingService loggingService;
 
-    //(..)는 모든 파라미터를 의미
     @Pointcut("execution(* com.ssafy.bookshy.domain.book.controller.BookController.searchDetail(..))")
     public void bookSearchDetailListPointcut() {
     }
 
-    // Add a new pointcut for the addWish method
+    @Pointcut("execution(* com.ssafy.bookshy.domain.book.controller.BookController.searchList(..))")
+    public void bookSearchListPointcut() {
+    }
+
     @Pointcut("execution(* com.ssafy.bookshy.domain.book.controller.BookController.addWish(..))")
     public void bookAddWishPointcut() {
     }
 
+    @AfterReturning(
+            pointcut = "bookSearchListPointcut() && args(q, user)",
+            argNames = "q, user"
+    )
+    public void logBook(String q, Users user) {
+        log.info("🍙 도서 검색 실시간 검색어 로깅 시작");
+        loggingService.TredingLog(q);
+    }
+
     /**
-     * searchDetail 메서드가 정상적으로 실행 완료된 후에 실행되는 어드바이스
-     *
-     * @param itemId 도서 ID 파라미터
-     * @param result 메서드 실행 결과값
+     * * searchDetail 메서드가 정상적으로 실행 완료된 후에 실행되는 어드바이스
+     * *
+     * * @param itemId 도서 ID 파라미터
+     * * @param result 메서드 실행 결과값
      */
     @AfterReturning(
             pointcut = "bookSearchDetailListPointcut() && args(itemId, user)",

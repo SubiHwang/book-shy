@@ -5,9 +5,9 @@ import com.ssafy.bookshy.domain.users.dto.UserProfileUpdateRequestDto;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -33,16 +33,25 @@ public class UserService {
 
     /**
      * 🔍 사용자 ID로 사용자 엔티티를 조회합니다.
+     *
      * @param userId 사용자 ID
      * @return Users 사용자 엔티티
      */
     public Users getUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        log.debug("사용자 조회 시작: userId={}", userId);
+
+        Optional<Users> user = userRepository.findById(userId);
+        log.debug("조회 결과: {}", user.isPresent() ? "있음" : "없음");
+
+        return user.orElseThrow(() -> {
+            log.error("사용자를 찾을 수 없습니다: userId={}", userId);
+            return new RuntimeException("사용자를 찾을 수 없습니다. ID: " + userId);
+        });
     }
 
     /**
      * 🛡️ 현재 로그인한 사용자를 Spring Security 컨텍스트에서 추출합니다.
+     *
      * @return Users 로그인한 사용자 엔티티
      */
     public Users getCurrentUser() {
@@ -56,6 +65,7 @@ public class UserService {
 
     /**
      * 🧑‍💼 사용자 ID로 닉네임을 조회합니다.
+     *
      * @param userId 사용자 ID
      * @return String 닉네임
      */
@@ -65,6 +75,7 @@ public class UserService {
 
     /**
      * 🖼️ 사용자 ID로 프로필 이미지 URL을 조회합니다.
+     *
      * @param userId 사용자 ID
      * @return String 이미지 URL
      */
@@ -74,6 +85,7 @@ public class UserService {
 
     /**
      * 📄 사용자 프로필 정보를 DTO로 반환합니다.
+     *
      * @param userId 사용자 ID
      * @return UserProfileResponseDto 사용자 프로필 응답 DTO
      */
@@ -84,6 +96,7 @@ public class UserService {
 
     /**
      * 🧑‍💻 닉네임 기반으로 사용자 인증 정보를 로드합니다 (Spring Security).
+     *
      * @param nickname 사용자 닉네임
      * @return UserDetails Spring Security 사용자 객체
      */
@@ -98,8 +111,9 @@ public class UserService {
     /**
      * 📝 사용자 프로필 정보를 수정합니다.
      * 닉네임, 성별, 주소, 위도, 경도를 수정할 수 있습니다.
+     *
      * @param userId 사용자 ID
-     * @param dto 수정할 정보가 담긴 DTO
+     * @param dto    수정할 정보가 담긴 DTO
      */
     public void updateUserProfile(Long userId, UserProfileUpdateRequestDto dto) {
         Users user = getUserById(userId);
@@ -114,7 +128,8 @@ public class UserService {
 
     /**
      * 🖼️ 사용자 프로필 이미지를 수정하고, 이미지 URL을 반환합니다.
-     * @param userId 사용자 ID
+     *
+     * @param userId    사용자 ID
      * @param imageFile Multipart로 전송된 이미지
      * @return String 저장된 이미지 URL
      */
@@ -141,8 +156,9 @@ public class UserService {
     /**
      * 📁 이미지 파일을 서버 로컬 디렉토리에 저장합니다.
      * 저장 경로: /app/images/profile/
+     *
      * @param imageFile Multipart 이미지
-     * @param fileName 저장할 파일 이름
+     * @param fileName  저장할 파일 이름
      */
     private void uploadImageToServer(MultipartFile imageFile, String fileName) {
         try {
