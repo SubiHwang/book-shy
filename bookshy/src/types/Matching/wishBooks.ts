@@ -18,3 +18,13 @@ export interface WishBooksResponse {
   total: number;
   books: WishBook[];
 }
+
+export interface PopularSearchTermType {
+  keyword: string;
+  rank: number;
+  trend: string;
+}
+
+export interface PopularSearchTermResponse {
+  trendingKeywords: PopularSearchTermType[]
+}
