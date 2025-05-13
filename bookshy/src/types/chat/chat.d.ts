@@ -29,3 +29,8 @@ export interface RegisterSchedulePayload {
   startDate?: string;
   endDate?: string;
 }
+
+interface ReadPayload {
+  messageIds: number[];
+  readerId: number;
+}
