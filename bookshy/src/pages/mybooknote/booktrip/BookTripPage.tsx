@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import BookTripFilterBar from '@/components/mybooknote/booktrip/BookTripFilterBar';
 
 import {
   fetchLibraryBooksWithTrip,
@@ -14,11 +13,17 @@ import type {
 } from '@/types/mybooknote/booktrip/booktrip';
 import BookTripIntroCard from '@/components/mybooknote/booktrip/BookTripIntroCard';
 import BookTripBookList from '@/components/mybooknote/booktrip/BookTripBookList';
+import SearchFilterBar from '@/components/common/SearchFilterBar';
 
 const BookTripPage: React.FC = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState<'ALL' | 'WRITTEN' | 'UNWRITTEN'>('ALL');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState<string>('전체 보기');
+
+  // 필터 옵션 정의
+  const filterList = useMemo(() => {
+    return ['전체 보기', '여정이 있는 책', '여정이 없는 책'];
+  }, []);
 
   // ✅ 여정 여부 포함 서재 도서
   const { data: libraryBooks = [], isLoading: isLoadingLibrary } = useQuery<LibraryBookWithTrip[]>({
@@ -52,11 +57,11 @@ const BookTripPage: React.FC = () => {
   const allBooks = [...libraryMapped, ...extraMapped];
 
   const filteredBooks = allBooks.filter((book) => {
-    const matchSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchFilter =
-      selectedFilter === 'ALL' ||
-      (selectedFilter === 'WRITTEN' && book.hasTrip) ||
-      (selectedFilter === 'UNWRITTEN' && !book.hasTrip);
+      selectedFilter === '전체 보기' ||
+      (selectedFilter === '여정이 있는 책' && book.hasTrip) ||
+      (selectedFilter === '여정이 없는 책' && !book.hasTrip);
     return matchSearch && matchFilter;
   });
 
@@ -64,14 +69,17 @@ const BookTripPage: React.FC = () => {
 
   return (
     <div className="bg-light-bg min-h-screen pb-28">
-      <BookTripIntroCard />
-      <div className="px-4 pt-2">
-        <BookTripFilterBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          filter={selectedFilter}
+      <div className="px-4 pt-4">
+        <BookTripIntroCard />
+
+        <SearchFilterBar
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedFilter={selectedFilter}
           onFilterChange={setSelectedFilter}
+          filterList={filterList}
           totalCount={filteredBooks.length}
+          searchPlaceholder="책 여정 검색 (책 제목)"
         />
 
         {isLoading ? (

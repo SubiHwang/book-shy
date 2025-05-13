@@ -4,8 +4,8 @@ import { fetchLibraryBooks } from '@/services/mybooknote/booknote/library';
 import type { LibraryBook } from '@/types/mybooknote/booknote/library';
 import Header from '@/components/common/Header';
 import { useState, useMemo } from 'react';
-import { PlusCircle, Search, ChevronDown } from 'lucide-react';
 import Loading from '@/components/common/Loading';
+import SearchFilterBar from '@/components/common/SearchFilterBar';
 
 const LibraryBookListPage = () => {
   const navigate = useNavigate();
@@ -15,7 +15,6 @@ const LibraryBookListPage = () => {
   });
 
   const [selectedFilter, setSelectedFilter] = useState<string>('전체');
-  const [filterOpen, setFilterOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   const filterList = useMemo(() => {
@@ -41,7 +40,7 @@ const LibraryBookListPage = () => {
   }, [data, selectedFilter, searchTerm]);
 
   if (isLoading) {
-    <Loading loadingText={'읽은 책 목록 불러오는 중...'} />;
+    return <Loading loadingText={'읽은 책 목록 불러오는 중...'} />;
   }
 
   return (
@@ -49,54 +48,16 @@ const LibraryBookListPage = () => {
       <Header title="독서 기록" onBackClick={() => navigate(-1)} showBackButton showNotification />
 
       <div className="relative pb-16 px-4 pt-4">
-        <div className="mb-5">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search size={20} className="text-gray-400" />
-            </div>
-            <input
-              type="text"
-              placeholder="내가 읽은 도서 검색하기 (책 제목, 저자)"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-200 text-sm"
-            />
-          </div>
-        </div>
-
-        <div className="mb-4">
-          <div className="flex justify-between items-center mb-2">
-            <div className="font-light text-light-text-secondary">총 {filteredBooks.length} 권</div>
-            <div className="relative">
-              <button
-                className="flex items-center border rounded px-3 py-1 text-sm"
-                onClick={() => setFilterOpen(!filterOpen)}
-              >
-                <span>{selectedFilter}</span>
-                <ChevronDown size={16} className="ml-1" />
-              </button>
-
-              {filterOpen && (
-                <div className="absolute right-0 mt-1 bg-white border rounded shadow-lg z-10 w-32">
-                  <ul className="py-1">
-                    {filterList.map((filter) => (
-                      <li
-                        key={filter}
-                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm font-light"
-                        onClick={() => {
-                          setSelectedFilter(filter);
-                          setFilterOpen(false);
-                        }}
-                      >
-                        {filter}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        {/* 재사용 가능한 SearchFilterBar 컴포넌트 사용 */}
+        <SearchFilterBar
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedFilter={selectedFilter}
+          onFilterChange={setSelectedFilter}
+          filterList={filterList}
+          totalCount={filteredBooks.length}
+          searchPlaceholder="내가 읽은 도서 검색하기 (책 제목, 저자)"
+        />
 
         <div className="space-y-4">
           {filteredBooks.length > 0 ? (
@@ -134,14 +95,6 @@ const LibraryBookListPage = () => {
             </div>
           )}
         </div>
-      </div>
-      <div className="fixed bottom-24 right-6">
-        <button
-          onClick={() => navigate('/booknotes/create')}
-          className="w-14 h-14 rounded-xl bg-primary text-white flex justify-center items-center shadow-lg"
-        >
-          <PlusCircle size={32} strokeWidth={1} />
-        </button>
       </div>
     </div>
   );
