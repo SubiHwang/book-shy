@@ -39,38 +39,37 @@ const RecommandedWishBookList = () => {
   return (
     <div>
       {/* 도서 목록이 있을 때만 취향 분석 헤더 표시 */}
-      {recommandedBooks && recommandedBooks.length > 0 && (
-        <div className="flex flex-col text-light-text px-8 py-4">
-          <div className="flex justify-between items-center mb-1">
-            <div className="flex gap-2 items-center">
-              <FileQuestion size={24} />
-              <p className="text-lg font-medium">이런 책은 어때요?</p>
-            </div>
 
-            {/* 새로고침 버튼은 로딩 중이 아닐 때만 표시 */}
-            {!loading && (
-              <button
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="flex items-center gap-1 text-primary hover:text-primary-dark transition-colors"
-                aria-label="추천 도서 새로고침"
-              >
-                <RefreshCw size={18} className={`${refreshing ? 'animate-spin' : ''}`} />
-                <span className="text-sm">새로고침</span>
-              </button>
-            )}
+      <div className="flex flex-col text-light-text px-8 py-4">
+        <div className="flex justify-between items-center mb-1">
+          <div className="flex gap-2 items-center">
+            <FileQuestion size={24} />
+            <p className="text-lg font-medium">이런 책은 어때요?</p>
           </div>
-          <p className="text-md font-light">
-            회원님의 취향을 분석하고 비슷한 취향을 가진 회원들이 많이 담은 인기 도서를 분석하여
-            최적의 책을 추천해드려요.
-          </p>
+
+          {/* 새로고침 버튼은 로딩 중이 아닐 때만 표시 */}
+          {!loading && (
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="flex items-center gap-1 text-primary hover:text-primary-dark transition-colors"
+              aria-label="추천 도서 새로고침"
+            >
+              <RefreshCw size={18} className={`${refreshing ? 'animate-spin' : ''}`} />
+              <span className="text-sm">새로고침</span>
+            </button>
+          )}
         </div>
-      )}
+        <p className="text-md font-light">
+          회원님의 취향을 분석하고 비슷한 취향을 가진 회원들이 많이 담은 인기 도서를 분석하여 최적의
+          책을 추천해드려요.
+        </p>
+      </div>
 
       {/* 로딩 상태일 때는 로딩 컴포넌트 표시 */}
       {loading || refreshing ? (
         <div className="flex justify-center items-center py-12">
-          <Loading loadingText="추천 도서 불러오는 중..." />
+          <Loading loadingText="회원님의 취향에 맞는 도서를 분석 중..." />
         </div>
       ) : (
         <div>
