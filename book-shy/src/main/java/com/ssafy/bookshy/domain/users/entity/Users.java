@@ -11,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -66,6 +67,9 @@ public class Users extends TimeStampEntity implements UserDetails {
 
     @Column(name = "longitude")
     private Double longitude;
+
+    @Column(name = "last_active_at")
+    private LocalDateTime lastActiveAt;
 
 
     public void updateTokens(String refreshToken, String fcmToken) {
@@ -141,6 +145,10 @@ public class Users extends TimeStampEntity implements UserDetails {
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    public void updateLastActiveAt(LocalDateTime time) {
+        this.lastActiveAt = time;
     }
 
 }

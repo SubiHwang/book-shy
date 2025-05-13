@@ -33,8 +33,13 @@ public class Matching {
     private LocalDateTime matchedAt;
 
     public enum Status {
-        PENDING,
-        COMPLETED,
-        CANCELLED
+        PENDING,  // 대기 중
+        ACCEPTED, // 수락됨
+        REJECTED  // 거절됨
     }
+
+    public void updateStatus(Status status) {
+        this.status = status;
+    }
+
 }

@@ -15,14 +15,16 @@ public class MatchingDto {
     private Long bookBId;
     private String status;
     private LocalDateTime matchedAt;
+    private double score;
 
-    public static MatchingDto from(Matching entity) {
+    public static MatchingDto from(Matching entity, double score) {
         return MatchingDto.builder()
                 .matchId(entity.getMatchId())
                 .bookAId(entity.getBookAId())
                 .bookBId(entity.getBookBId())
                 .status(entity.getStatus().name())
                 .matchedAt(entity.getMatchedAt())
+                .score(score)
                 .build();
     }
 }
