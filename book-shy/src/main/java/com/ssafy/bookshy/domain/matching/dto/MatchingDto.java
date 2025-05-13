@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.matching.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ssafy.bookshy.domain.matching.entity.Matching;
 import lombok.*;
 
@@ -10,7 +11,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class MatchingDto {
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long matchId;
+
     private Long bookAId;
     private Long bookBId;
     private String status;

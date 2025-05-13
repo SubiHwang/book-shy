@@ -38,10 +38,17 @@ public class MatchingScoreCalculator {
     }
 
     public static double totalScore(Users me, Users other) {
+        // 거리 점수 계산 (위도/경도 null 체크)
+        if (me.getLatitude() == null || me.getLongitude() == null ||
+                other.getLatitude() == null || other.getLongitude() == null) {
+            return 0.0; // 위치 정보 없으면 거리 점수 제외
+        }
+
         double distKm = calculateDistance(
                 me.getLatitude(), me.getLongitude(),
                 other.getLatitude(), other.getLongitude()
         );
+
         return distanceScore(distKm)
                 + temperatureScore(other.getTemperature())
                 + activityScore(other.getLastActiveAt());

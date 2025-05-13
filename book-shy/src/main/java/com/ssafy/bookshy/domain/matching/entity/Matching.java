@@ -27,19 +27,18 @@ public class Matching {
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
     @Builder.Default
-    private Status status = Status.PENDING;
+    private Status status = Status.ACCEPTED;
 
     @Column(name = "matched_at")
     private LocalDateTime matchedAt;
 
+    @Column(name = "sender_id")
+    private Long senderId;
+
+    @Column(name = "receiver_id")
+    private Long receiverId;
+
     public enum Status {
-        PENDING,  // 대기 중
-        ACCEPTED, // 수락됨
-        REJECTED  // 거절됨
+        ACCEPTED // 수락됨
     }
-
-    public void updateStatus(Status status) {
-        this.status = status;
-    }
-
 }

@@ -2,12 +2,18 @@ package com.ssafy.bookshy.domain.matching.service;
 
 import com.ssafy.bookshy.domain.library.entity.Library;
 import com.ssafy.bookshy.domain.library.repository.LibraryRepository;
+import com.ssafy.bookshy.domain.matching.dto.MatchConfirmRequestDto;
 import com.ssafy.bookshy.domain.matching.dto.MatchingDto;
+import com.ssafy.bookshy.domain.matching.entity.Matching;
+import com.ssafy.bookshy.domain.matching.repository.MatchingRepository;
 import com.ssafy.bookshy.domain.matching.util.MatchingScoreCalculator;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
+import com.ssafy.bookshy.kafka.dto.MatchSuccessDto;
+import com.ssafy.bookshy.kafka.producer.KafkaProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,6 +26,8 @@ public class MatchingService {
 
     private final LibraryRepository libraryRepository;
     private final UserRepository userRepository;
+    private final MatchingRepository matchingRepository;
+    private final KafkaProducer kafkaProducer;
 
     public List<MatchingDto> findMatchingCandidates(Long myUserId) {
         // 🔹 1. 내 정보 가져오기
@@ -79,4 +87,30 @@ public class MatchingService {
                 .toList();
     }
 
+    @Transactional
+    public Long confirmMatching(Long senderId, MatchConfirmRequestDto dto) {
+        Matching match = Matching.builder()
+                .bookAId(dto.getBookAId())
+                .bookBId(dto.getBookBId())
+                .senderId(senderId)
+                .receiverId(dto.getReceiverId())
+                .matchedAt(LocalDateTime.now())
+                .status(Matching.Status.ACCEPTED)
+                .build();
+
+        matchingRepository.save(match);
+
+        MatchSuccessDto event = MatchSuccessDto.builder()
+                .matchId(match.getMatchId())
+                .userAId(senderId)
+                .userBId(dto.getReceiverId())
+                .bookAId(dto.getBookAId())
+                .bookBId(dto.getBookBId())
+                .matchedAt(match.getMatchedAt().toString())
+                .build();
+
+        kafkaProducer.sendMatchSuccessEvent(event);
+
+        return match.getMatchId();
+    }
 }

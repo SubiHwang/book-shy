@@ -4,6 +4,9 @@ import com.ssafy.bookshy.domain.chat.dto.ChatMessageResponseDto;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.service.ChatMessageService;
 import com.ssafy.bookshy.domain.chat.service.ChatRoomService;
+import com.ssafy.bookshy.domain.notification.service.NotificationService;
+import com.ssafy.bookshy.domain.users.entity.Users;
+import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import com.ssafy.bookshy.kafka.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,13 +38,14 @@ public class KafkaEventConsumer {
     private final ChatRoomService chatRoomService;
     private final SimpMessagingTemplate messagingTemplate;
     private final RestHighLevelClient elasticsearchClient;
+    private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Value("${app.developer.id}")
     private String developerId;
 
     @Value("${spring.profiles.active}")
     private String activeProfile;
-
 
     /**
      * 📘 책 등록 이벤트 수신 처리
@@ -77,14 +81,18 @@ public class KafkaEventConsumer {
             ChatRoom chatRoom = chatRoomService.createChatRoomFromMatch(event.getUserAId(), event.getUserBId());
             log.info("💬 ChatRoom created for matchId {} -> chatRoomId={}", event.getMatchId(), chatRoom.getId());
 
-            // TODO: Matching - ChatRoom 연결 관계가 필요하다면 여기서 저장 (ex. matching.setChatRoomId(chatRoom.getId()))
+            // 🔔 매칭 완료 알림 전송
+            String senderName = userRepository.findById(event.getUserAId())
+                    .map(Users::getNickname)
+                    .orElse("상대방");
+
+            notificationService.sendMatchCompleteNotification(event.getUserBId(), senderName);
 
             ack.acknowledge();
         } catch (Exception e) {
             log.error("❌ Error processing match.success event: {}", record.value(), e);
         }
     }
-
 
     /**
      * 📦 교환 완료 이벤트 수신 처리
@@ -104,7 +112,6 @@ public class KafkaEventConsumer {
             log.error("❌ Error processing trade.success event: {}", record.value(), e);
         }
     }
-
 
     /**
      * 💬 실시간 채팅 메시지 수신 처리

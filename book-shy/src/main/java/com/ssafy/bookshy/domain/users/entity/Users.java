@@ -154,5 +154,4 @@ public class Users extends TimeStampEntity implements UserDetails {
     public void updateLastActiveAt(LocalDateTime time) {
         this.lastActiveAt = time;
     }
-
 }
