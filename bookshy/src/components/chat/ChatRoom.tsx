@@ -7,7 +7,12 @@ import ScheduleModal from './ScheduleModal.tsx';
 import SystemMessage from './SystemMessage.tsx';
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchMessages, markMessagesAsRead, registerSchedule, sendEmoji } from '@/services/chat/chat.ts';
+import {
+  fetchMessages,
+  markMessagesAsRead,
+  registerSchedule,
+  sendEmoji,
+} from '@/services/chat/chat.ts';
 import { useStomp } from '@/hooks/chat/useStomp.ts';
 import { getUserIdFromToken } from '@/utils/jwt.ts';
 
@@ -21,7 +26,8 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const { roomId } = useParams();
   const numericRoomId = Number(roomId);
   const myUserId = getUserIdFromToken();
-  if (myUserId === null) return;
+  if (myUserId === null) return null;
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showOptions, setShowOptions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -31,39 +37,33 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
 
   const queryClient = useQueryClient();
 
-  const {
-    data: initialMessages = [],
-    isSuccess,
-    refetch,
-  } = useQuery({
+  const { data: initialMessages = [], isSuccess } = useQuery({
     queryKey: ['chatMessages', numericRoomId],
     queryFn: () => fetchMessages(numericRoomId),
     enabled: !isNaN(numericRoomId),
     retry: false,
+    staleTime: 0,
   });
 
   useEffect(() => {
     if (!isNaN(numericRoomId)) {
-      markMessagesAsRead(numericRoomId)
-        .then(() => {
-          refetch();
-          queryClient.setQueryData(['chatList'], (prev: any) => {
-            if (!Array.isArray(prev)) return prev;
-            return prev.map((room: any) =>
-              room.id === numericRoomId ? { ...room, unreadCount: 0 } : room,
-            );
-          });
-        })
-        .catch((err) => console.error('❌ 읽음 처리 실패:', err));
+      markMessagesAsRead(numericRoomId).catch((err) => console.error('❌ 읽음 처리 실패:', err));
+
+      queryClient.setQueryData(['chatList'], (prev: any) => {
+        if (!Array.isArray(prev)) return prev;
+        return prev.map((room: any) =>
+          room.id === numericRoomId ? { ...room, unreadCount: 0 } : room,
+        );
+      });
     }
-  }, [numericRoomId, refetch, queryClient]);
+  }, [numericRoomId, queryClient]);
 
   useEffect(() => {
     if (!isSuccess) return;
 
-    if (initialMessages.length > 0 && messages.length === 0) {
+    if (initialMessages.length > 0) {
       setMessages(initialMessages);
-    } else if (initialMessages.length === 0 && messages.length === 0) {
+    } else {
       const now = new Date();
       const noticeMessage: ChatMessage = {
         id: 'notice-' + Date.now(),
@@ -76,7 +76,20 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
       };
       setMessages([noticeMessage]);
     }
-  }, [initialMessages, messages.length, isSuccess, numericRoomId]);
+  }, [initialMessages, isSuccess, numericRoomId]);
+
+  const onRead = useCallback(
+    (payload: { readerId: number; messageIds: number[] }) => {
+      if (payload.readerId === myUserId) return;
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          payload.messageIds.includes(Number(msg.id)) ? { ...msg, isRead: true } : msg,
+        ),
+      );
+    },
+    [myUserId],
+  );
 
   const onMessage = useCallback(
     (newMessage: ChatMessage) => {
@@ -101,7 +114,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
     [queryClient],
   );
 
-  const { sendMessage } = useStomp(numericRoomId, onMessage);
+  const { sendMessage } = useStomp(numericRoomId, onMessage, onRead);
 
   useEffect(() => {
     scrollToBottom(messages.length === 1);
@@ -162,6 +175,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const handleLongPressOrRightClick = (messageId: string) => {
     setEmojiTargetId((prev) => (prev === messageId ? null : messageId));
   };
+
   const toggleOptions = () => {
     const shouldScroll = isScrolledToBottom();
     setShowOptions((prev) => !prev);
