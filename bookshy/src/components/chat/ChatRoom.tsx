@@ -222,7 +222,6 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
           lastDateLabel = dateLabel;
 
           const isSystem = ['info', 'notice', 'warning'].includes(msg.type ?? '');
-          console.log(`[UI] 렌더링 msg.id: ${msg.id}, isRead: ${msg.read}`);
           return (
             <div key={msg.id}>
               {showDate && (
