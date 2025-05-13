@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.recommend.service;
 
 import com.ssafy.bookshy.domain.recommend.dto.ClientLogRequestDto;
+import com.ssafy.bookshy.domain.trending.service.TrendingSearchService;
 import com.ssafy.bookshy.kafka.producer.KafkaProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 public class LoggingService {
 
     private final KafkaProducer kafkaProducer;
+    private final TrendingSearchService trendingSearchService;
 
     public void processClientLog(ClientLogRequestDto logDto) {
         try {
@@ -32,4 +34,14 @@ public class LoggingService {
             log.error("Failed to process client log: {}", logDto.getEventType(), e);
         }
     }
+
+    public void TredingLog(String q) {
+        try {
+            trendingSearchService.sendLog(q);
+
+        } catch (Exception e) {
+            log.error("로깅 실패 : {}", e);
+        }
+    }
+
 }
