@@ -1,8 +1,8 @@
 // src/components/Mylibrary/BookShelf/BannerCards/GenreBanner.tsx
 import React from 'react';
 import { GenreBannerData } from '@/types/mylibrary/components';
-import { getMatchingRateMessage } from '@/utils/genreUtils';
-import { BookOpen } from 'lucide-react';
+// import { getMatchingRateMessage } from '@/utils/genreUtils';
+// import { BookOpen } from 'lucide-react';
 
 interface GenreBannerProps {
   data: GenreBannerData;
