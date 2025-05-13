@@ -215,7 +215,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   return (
     <div className="flex flex-col h-[100dvh]">
       <ChatRoomHeader partnerName={partnerName} partnerProfileImage={partnerProfileImage} />
-      <div className="flex-1 overflow-y-auto bg-[#FFFCF9] px-3 py-2">
+      <div className="flex-1 overflow-y-auto bg-white px-4 sm:px-6 py-3">
         {messages.map((msg) => {
           const dateLabel = formatDateLabel(msg.sentAt);
           const showDate = dateLabel !== lastDateLabel;
@@ -226,10 +226,10 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
           return (
             <div key={msg.id}>
               {showDate && (
-                <div className="flex items-center gap-2 text-xs text-gray-400 my-4">
-                  <div className="flex-grow border-t border-gray-300" />
+                <div className="flex items-center gap-2 text-[11px] sm:text-xs text-light-text-muted my-4">
+                  <div className="flex-grow border-t border-light-bg-shade" />
                   <span className="px-2 whitespace-nowrap">{dateLabel}</span>
-                  <div className="flex-grow border-t border-gray-300" />
+                  <div className="flex-grow border-t border-light-bg-shade" />
                 </div>
               )}
               {isSystem ? (
@@ -264,7 +264,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
             </div>
           );
         })}
-        <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} className="h-4" />
       </div>
       <ChatInput
         onSend={handleSendMessage}
