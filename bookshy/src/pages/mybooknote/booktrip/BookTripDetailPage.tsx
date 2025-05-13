@@ -56,7 +56,12 @@ const BookTripDetailPage = () => {
         publisher={bookInfo!.publisher as string}
         coverUrl={bookInfo!.coverImageUrl}
       />
-      <div className="px-4 py-4">
+      <div className="px-4">
+        <p className="text-md text-light-text mb-2">
+          {'<'}
+          {bookInfo?.title}
+          {'>'} 도서의 여정 살펴보기
+        </p>
         <div className="flex flex-col gap-3">
           <OtherUserTripList trips={otherTrips} />
           {myTrip ? (
