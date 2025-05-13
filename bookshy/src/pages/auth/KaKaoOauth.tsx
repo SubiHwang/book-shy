@@ -15,7 +15,7 @@ const KaKaoOauth: FC = () => {
   useEffect(() => {
     // 로그인 상태 확인 및 스플래시 화면이 끝났을 때
     if (!isLoading && isLoggedIn) {
-      navigate('/');
+      navigate('/setting-location');
     } else if (!isLoading && !isLoggedIn) {
       // 로그인하지 않은 상태에서 스플래시 화면이 끝났을 때
       navigate('/login');
