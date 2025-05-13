@@ -71,16 +71,17 @@ const BookTripPage: React.FC = () => {
     <div className="bg-light-bg min-h-screen pb-28">
       <div className="px-4 pt-4">
         <BookTripIntroCard />
-
-        <SearchFilterBar
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          selectedFilter={selectedFilter}
-          onFilterChange={setSelectedFilter}
-          filterList={filterList}
-          totalCount={filteredBooks.length}
-          searchPlaceholder="책 여정 검색 (책 제목)"
-        />
+        <div className="mt-2">
+          <SearchFilterBar
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            selectedFilter={selectedFilter}
+            onFilterChange={setSelectedFilter}
+            filterList={filterList}
+            totalCount={filteredBooks.length}
+            searchPlaceholder="책 여정 검색 (책 제목)"
+          />
+        </div>
 
         {isLoading ? (
           <p className="text-center text-gray-500">불러오는 중...</p>
