@@ -206,7 +206,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   let lastDateLabel = '';
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-[100dvh]">
       <ChatRoomHeader partnerName={partnerName} partnerProfileImage={partnerProfileImage} />
       <div className="flex-1 overflow-y-auto bg-[#FFFCF9] px-3 py-2">
         {messages.map((msg) => {
