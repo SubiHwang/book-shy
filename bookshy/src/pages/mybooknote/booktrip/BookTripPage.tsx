@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 
@@ -11,22 +11,19 @@ import type {
   BookTripBookItem,
   BookTripListItem,
 } from '@/types/mybooknote/booktrip/booktrip';
-
-import Header from '@/components/common/Header';
-import TabNavBar from '@/components/common/TabNavBar';
 import BookTripIntroCard from '@/components/mybooknote/booktrip/BookTripIntroCard';
-import BookTripFilterBar from '@/components/mybooknote/booktrip/BookTripFilterBar';
 import BookTripBookList from '@/components/mybooknote/booktrip/BookTripBookList';
+import SearchFilterBar from '@/components/common/SearchFilterBar';
 
 const BookTripPage: React.FC = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<'ALL' | 'WRITTEN' | 'UNWRITTEN'>('ALL');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState<string>('전체 보기');
 
-  const pages = [
-    { path: '/booknotes', label: '내 독서 기록 보기' },
-    { path: '/booknotes/trip', label: '책의 여정 보기' },
-  ];
+  // 필터 옵션 정의
+  const filterList = useMemo(() => {
+    return ['전체 보기', '여정이 있는 책', '여정이 없는 책'];
+  }, []);
 
   // ✅ 여정 여부 포함 서재 도서
   const { data: libraryBooks = [], isLoading: isLoadingLibrary } = useQuery<LibraryBookWithTrip[]>({
@@ -60,11 +57,11 @@ const BookTripPage: React.FC = () => {
   const allBooks = [...libraryMapped, ...extraMapped];
 
   const filteredBooks = allBooks.filter((book) => {
-    const matchSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchFilter =
-      filter === 'ALL' ||
-      (filter === 'WRITTEN' && book.hasTrip) ||
-      (filter === 'UNWRITTEN' && !book.hasTrip);
+      selectedFilter === '전체 보기' ||
+      (selectedFilter === '여정이 있는 책' && book.hasTrip) ||
+      (selectedFilter === '여정이 없는 책' && !book.hasTrip);
     return matchSearch && matchFilter;
   });
 
@@ -72,16 +69,20 @@ const BookTripPage: React.FC = () => {
 
   return (
     <div className="bg-light-bg min-h-screen pb-28">
-      <Header title="독서 기록" showBackButton={false} showNotification />
-      <TabNavBar pages={pages} />
+      <BookTripIntroCard />
       <div className="px-4 pt-4">
-        <BookTripIntroCard />
-        <BookTripFilterBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          filter={filter}
-          onFilterChange={setFilter}
-        />
+        <div>
+          <SearchFilterBar
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            selectedFilter={selectedFilter}
+            onFilterChange={setSelectedFilter}
+            filterList={filterList}
+            totalCount={filteredBooks.length}
+            searchPlaceholder="책 여정 검색 (책 제목)"
+          />
+        </div>
+
         {isLoading ? (
           <p className="text-center text-gray-500">불러오는 중...</p>
         ) : filteredBooks.length === 0 ? (

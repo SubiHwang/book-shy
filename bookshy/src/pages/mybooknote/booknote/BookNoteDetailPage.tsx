@@ -7,6 +7,7 @@ import type { BookNote } from '@/types/mybooknote/booknote';
 import type { BookQuote } from '@/types/mybooknote/booknote/bookquote';
 import BookNoteCard from '@/components/mybooknote/booknote/BookNoteCard';
 import AdjacentBookPreview from '@/components/mybooknote/booknote/AdjacentBookPreview';
+import Header from '@/components/common/Header';
 
 const BookNoteDetailPage: React.FC = () => {
   const { bookId } = useParams();
@@ -50,38 +51,47 @@ const BookNoteDetailPage: React.FC = () => {
   };
 
   return (
-    <div
-      className="relative h-screen flex items-center justify-center bg-white overflow-hidden"
-      onClick={handleClick}
-    >
-      {/* 왼쪽 책 */}
-      {bookNotes[currentIndex - 1] && (
-        <AdjacentBookPreview
-          book={bookNotes[currentIndex - 1]}
-          direction="left"
-          onClick={() => goTo(-1)}
-        />
-      )}
-
-      {/* 중앙 카드 */}
-      <BookNoteCard
-        coverUrl={currentBook.coverUrl}
-        title={currentBook.title}
-        author={currentBook.author}
-        quote={bookQuote?.content}
-        review={currentBook.content}
-        stage={stage}
-        onMoreClick={() => navigate(`/booknotes/full/${bookId}`)}
+    <div>
+      <Header
+        title=""
+        showBackButton={true}
+        showNotification={false}
+        onBackClick={() => navigate(-1)}
+        className="bg-transparent shadow-none"
       />
+      <div
+        className="relative h-[80vh] flex items-center justify-center bg-white overflow-hidden"
+        onClick={handleClick}
+      >
+        {/* 왼쪽 책 */}
+        {bookNotes[currentIndex - 1] && (
+          <AdjacentBookPreview
+            book={bookNotes[currentIndex - 1]}
+            direction="left"
+            onClick={() => goTo(-1)}
+          />
+        )}
 
-      {/* 오른쪽 책 */}
-      {bookNotes[currentIndex + 1] && (
-        <AdjacentBookPreview
-          book={bookNotes[currentIndex + 1]}
-          direction="right"
-          onClick={() => goTo(1)}
+        {/* 중앙 카드 */}
+        <BookNoteCard
+          coverUrl={currentBook.coverUrl}
+          title={currentBook.title}
+          author={currentBook.author}
+          quote={bookQuote?.content}
+          review={currentBook.content}
+          stage={stage}
+          onMoreClick={() => navigate(`/booknotes/full/${bookId}`)}
         />
-      )}
+
+        {/* 오른쪽 책 */}
+        {bookNotes[currentIndex + 1] && (
+          <AdjacentBookPreview
+            book={bookNotes[currentIndex + 1]}
+            direction="right"
+            onClick={() => goTo(1)}
+          />
+        )}
+      </div>
     </div>
   );
 };
