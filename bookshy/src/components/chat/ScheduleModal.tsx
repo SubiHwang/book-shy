@@ -28,21 +28,26 @@ const ScheduleModal: FC<Props> = ({
   const [borrowTime, setBorrowTime] = useState('');
   const [returnTime, setReturnTime] = useState('');
   const [year, setYear] = useState(today.getFullYear());
-  const [month, setMonth] = useState(today.getMonth()); // 0-indexed
+  const [month, setMonth] = useState(today.getMonth());
 
   const startDay = new Date(year, month, 1).getDay();
   const lastDate = new Date(year, month + 1, 0).getDate();
 
   const handleDateClick = (day: string) => {
-    if (!startDate || (startDate && endDate)) {
+    if (tab === '교환') {
       setStartDate(day);
       setEndDate(null);
-    } else if (startDate && !endDate) {
-      if (day < startDate) {
-        setEndDate(startDate);
+    } else {
+      if (!startDate || (startDate && endDate)) {
         setStartDate(day);
-      } else {
-        setEndDate(day);
+        setEndDate(null);
+      } else if (startDate && !endDate) {
+        if (day < startDate) {
+          setEndDate(startDate);
+          setStartDate(day);
+        } else {
+          setEndDate(day);
+        }
       }
     }
   };
@@ -111,25 +116,25 @@ const ScheduleModal: FC<Props> = ({
         ? {
             roomId,
             requestId,
-            type: 'EXCHANGE' as const,
+            type: 'EXCHANGE',
             title: msg,
             eventDate: toISOString(startDate, borrowTime),
           }
         : {
             roomId,
             requestId,
-            type: 'RENTAL' as const,
+            type: 'RENTAL',
             title: msg,
             startDate: toISOString(startDate, borrowTime),
             endDate: toISOString(endDate!, returnTime!),
           };
 
-    console.log('일정 등록 payload', payload);
     onConfirm(msg, payload);
     onClose();
   };
 
-  const isCompleteDisabled = !startDate || !borrowTime || (tab === '대여' && !returnTime);
+  const isCompleteDisabled =
+    !startDate || !borrowTime || (tab === '대여' && (!returnTime || !endDate));
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -191,7 +196,6 @@ const ScheduleModal: FC<Props> = ({
               {Array.from({ length: startDay }).map((_, i) => (
                 <div key={`empty-${i}`} />
               ))}
-
               {Array.from({ length: lastDate }).map((_, i) => {
                 const day = i + 1;
                 const padded = String(day).padStart(2, '0');
