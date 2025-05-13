@@ -35,8 +35,8 @@ const LibraryBookListPage = () => {
     const term = searchTerm.toLowerCase().trim();
     return categoryFiltered.filter(
       (book) =>
-        book.title.toLowerCase().includes(term) || 
-        (book.author && book.author.toLowerCase().includes(term))
+        book.title.toLowerCase().includes(term) ||
+        (book.author && book.author.toLowerCase().includes(term)),
     );
   }, [data, selectedFilter, searchTerm]);
 
@@ -117,7 +117,10 @@ const LibraryBookListPage = () => {
 
                 {/* Book Info */}
                 <div className="flex-grow min-w-0 pr-2">
-                  <h3 className="text-base font-medium text-light-text mb-1 truncate" title={book.title}>
+                  <h3
+                    className="text-base font-medium text-light-text mb-1 truncate"
+                    title={book.title}
+                  >
                     {book.title}
                   </h3>
                   <p className="text-xs text-light-text-secondary mb-1 truncate">{book.author}</p>
