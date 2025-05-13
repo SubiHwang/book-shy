@@ -84,7 +84,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
 
       setMessages((prev) =>
         prev.map((msg) =>
-          payload.messageIds.includes(Number(msg.id)) ? { ...msg, isRead: true } : msg,
+          payload.messageIds.includes(Number(msg.id)) ? { ...msg, read: true } : msg,
         ),
       );
     },
@@ -97,6 +97,13 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
         const exists = prev.some((m) => m.id === newMessage.id);
         return exists ? prev : [...prev, newMessage];
       });
+
+      // 채팅방 열려 있고 내 메시지가 아닌 경우 즉시 읽음 처리
+      if (newMessage.senderId !== myUserId) {
+        markMessagesAsRead(numericRoomId).catch((err) =>
+          console.error('❌ 읽음 처리 실패 (수신 시점):', err),
+        );
+      }
 
       queryClient.setQueryData(['chatList'], (prev: any) => {
         if (!Array.isArray(prev)) return prev;
@@ -215,7 +222,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
           lastDateLabel = dateLabel;
 
           const isSystem = ['info', 'notice', 'warning'].includes(msg.type ?? '');
-
+          console.log(`[UI] 렌더링 msg.id: ${msg.id}, isRead: ${msg.read}`);
           return (
             <div key={msg.id}>
               {showDate && (
@@ -245,7 +252,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
                 />
               ) : (
                 <ChatMessageItem
-                  message={{ ...msg, sentAt: formatTime(msg.sentAt) }}
+                  message={{ ...msg, sentAt: formatTime(msg.sentAt), read: msg.read }}
                   isMyMessage={msg.senderId === myUserId}
                   showEmojiSelector={emojiTargetId === msg.id}
                   onLongPress={() => handleLongPressOrRightClick(msg.id)}

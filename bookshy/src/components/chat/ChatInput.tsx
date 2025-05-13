@@ -19,13 +19,13 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
   };
 
   return (
-    <div className="bg-[#FFFCF9] p-3 border-t">
+    <div className="bg-light-bg-secondary p-3 border-t">
       {/* 입력창 */}
       <form onSubmit={handleSubmit} className="flex items-center gap-2">
         <button
           type="button"
           onClick={onToggleOptions}
-          className="p-2 rounded-full text-primary hover:bg-red-100 transition"
+          className="p-2 rounded-full hover:bg-primary hover:text-white transition"
         >
           {showOptions ? <Minus size={20} /> : <Plus size={20} />}
         </button>
@@ -40,7 +40,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
 
         <button
           type="submit"
-          className="p-2 text-primary border border-primary rounded-full hover:bg-primary hover:text-white transition"
+          className="p-2 rounded-full hover:bg-primary hover:text-white transition"
         >
           <SendHorizonal size={18} />
         </button>
