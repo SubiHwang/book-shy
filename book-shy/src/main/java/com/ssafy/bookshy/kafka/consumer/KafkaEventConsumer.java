@@ -134,7 +134,6 @@ public class KafkaEventConsumer {
         }
     }
 
-
     /**
      * 💬 실시간 로깅 메시지 수신 처리
      * - 프로덕션 환경(prod)이거나 developerId가 비어있으면 "recommend.event" 토픽을 사용
@@ -146,12 +145,13 @@ public class KafkaEventConsumer {
             String topic = record.topic();
             RecommendMessageKafkaDto logDto = record.value();
 
+            log.info("🚀 Kafka 메시지 수신 시작 - 토픽: {}, 이벤트타입: {}", topic, logDto.getEventType());
+
             // 로그 데이터 추출
             Map<String, Object> logData = new HashMap<>();
             logData.put("eventType", logDto.getEventType());
             logData.put("eventData", logDto.getEventData());
             logData.put("timestamp", logDto.getTimestamp());
-
 
             // 💥 여기에 상세 로그 추가!
             log.info("🔍 받은 메시지 정보: 토픽={}, 파티션={}, 오프셋={}, 이벤트타입={}, 아이템ID={}, 타임스탬프={}",
@@ -162,41 +162,54 @@ public class KafkaEventConsumer {
                     logDto.getEventData().get("itemId"),
                     logDto.getTimestamp());
 
+            log.info("🔧 현재 설정 - developerId: {}, activeProfile: {}", developerId, activeProfile);
+
             // 인덱스 이름 - 공통 인덱스 사용
-            String indexName = "recommend.event"; //3개의 개발자들이 공통 인덱스 사용하게 하고 내 것만 저장하게 바꿈!
+            String indexName = "recommend.event";
 
             // 단순한 문서 ID 생성 - 타임스탬프만 사용 (프로덕션에서는 이 정도면 충분)
             String docId = logDto.getEventType() + "-" + System.currentTimeMillis();
 
+            log.info("📝 ES 저장 준비 - 인덱스: {}, 문서ID: {}", indexName, docId);
+
             try {
                 // 개발자 ID가 'subi'이거나 서버 환경일 경우에는
                 if ("subi".equals(developerId) || "prod".equals(activeProfile)) {
+                    log.info("✅ ES 저장 조건 충족: developerId={}, activeProfile={}", developerId, activeProfile);
+
                     // Elasticsearch에 저장
                     IndexRequest indexRequest = new IndexRequest(indexName)
                             .id(docId)
                             .source(logData, XContentType.JSON);
+
+                    log.info("📤 ES 인덱싱 요청 전송 중...");
                     IndexResponse response = elasticsearchClient.index(indexRequest, RequestOptions.DEFAULT);
-                    log.debug("ES에 로그 저장 성공: id={}, index={}", response.getId(), indexName);
+
+                    log.info("✨ ES에 로그 저장 성공: id={}, index={}, result={}",
+                            response.getId(), indexName, response.getResult());
                 } else {
                     // 다른 개발자인 경우 저장하지 않고 로그만 남김
-                    log.debug("개발자 ID '{}'는 'subi'가 아니므로 ES 저장 스킵", developerId);
+                    log.info("⏭️ 개발자 ID '{}'는 'subi'가 아니므로 ES 저장 스킵", developerId);
                 }
 
                 // 모든 경우에 메시지 처리 완료로 표시
+                log.info("✅ Kafka 메시지 처리 완료 - ACK 전송");
                 ack.acknowledge();
+
             } catch (IOException e) {
+                log.error("❌ ES 저장 중 IOException 발생: {}", e.getMessage());
+
                 // 응답 파싱 오류인 경우 저장 성공으로 간주
                 if (e.getMessage().contains("Unable to parse response body") &&
                         e.getMessage().contains("201 Created")) {
-                    log.debug("ES에 로그 저장 추정 성공 (응답 파싱 오류 무시): index={}", indexName);
-                    ack.acknowledge(); // 여기서도 ack
+                    log.info("⚠️ ES에 로그 저장 추정 성공 (응답 파싱 오류 무시): index={}", indexName);
+                    ack.acknowledge();
                 } else {
-                    log.error("ES에 로그 저장 실패: index={}, error={}", indexName, e.getMessage());
-                    // 심각한 오류가 아니라면 재시도하지 않음 (카프카가 자동으로 재시도)
+                    log.error("❌ ES에 로그 저장 실패: index={}, error={}", indexName, e.getMessage());
                 }
             }
         } catch (Exception e) {
-            log.error("로그 처리 중 예상치 못한 오류: {}", e.getMessage());
+            log.error("💥 로그 처리 중 예상치 못한 오류: ", e);
         }
     }
 }
