@@ -4,7 +4,7 @@ import { AllBannersData } from '@/types/mylibrary/components';
 import BooksBanner from './BannerCards/BooksBanner';
 import ExchangeBanner from './BannerCards/ExchangeBanner';
 import GenreBanner from './BannerCards/GenreBanner';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+// import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface BannerCarouselProps {
   data: AllBannersData | null;
@@ -94,8 +94,25 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ data, isLoading, error 
     { id: 'genre', component: <GenreBanner data={data.genreData} /> },
   ];
 
+  // 인디케이터 색상 설정
+  const getIndicatorColors = (index: number) => {
+    // 배너 타입에 따른 색상 설정
+    switch (index) {
+      case 0: // BooksBanner
+        return { active: 'bg-primary', inactive: 'bg-primary bg-opacity-30' };
+      case 1: // ExchangeBanner
+        return { active: 'bg-blue-500', inactive: 'bg-blue-500 bg-opacity-30' };
+      case 2: // GenreBanner
+        return { active: 'bg-green-600', inactive: 'bg-green-600 bg-opacity-30' };
+      default:
+        return { active: 'bg-primary', inactive: 'bg-gray-300' };
+    }
+  };
+
+  const indicatorColors = getIndicatorColors(activeIndex);
+
   return (
-    <div className="relative mb-5">
+    <div className="relative mb-1">
       {/* 배너 컨테이너 */}
       <div
         ref={carouselRef}
@@ -105,11 +122,25 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ data, isLoading, error 
         onTouchEnd={handleTouchEnd}
       >
         {/* 현재 활성화된 배너 */}
-        <div className="transition-all duration-300 ease-in-out">
+        <div className="transition-all duration-300 ease-in-out relative ">
           {banners[activeIndex].component}
+
+          {/* 인디케이터를 배너 내부 하단에 위치시킴 */}
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+            {banners.map((banner, index) => (
+              <button
+                key={banner.id}
+                className={`w-2 h-2 mx-1 rounded-full ${
+                  index === activeIndex ? indicatorColors.active : indicatorColors.inactive
+                }`}
+                onClick={() => goToBanner(index)}
+                aria-label={`${index + 1}번 배너`}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* 좌우 화살표 */}
+        {/* 좌우 화살표 
         <button
           className="absolute left-2 top-1/2 transform -translate-y-1/2 p-1 rounded-full bg-white bg-opacity-70 shadow"
           onClick={prevBanner}
@@ -125,21 +156,10 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ data, isLoading, error 
         >
           <ChevronRight size={20} />
         </button>
+          */}
       </div>
 
-      {/* 인디케이터 (점) */}
-      <div className="flex justify-center mt-3">
-        {banners.map((banner, index) => (
-          <button
-            key={banner.id}
-            className={`w-2 h-2 mx-1 rounded-full ${
-              index === activeIndex ? 'bg-primary' : 'bg-gray-300'
-            }`}
-            onClick={() => goToBanner(index)}
-            aria-label={`${index + 1}번 배너`}
-          />
-        ))}
-      </div>
+      {/* 외부 인디케이터 제거하고 내부 인디케이터만 사용 */}
     </div>
   );
 };
