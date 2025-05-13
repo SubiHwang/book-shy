@@ -19,7 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Optional;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static com.ssafy.bookshy.common.constants.ImageUrlConstants.PROFILE_IMAGE_BASE_URL;
@@ -170,5 +170,12 @@ public class UserService {
         } catch (IOException e) {
             throw new RuntimeException("이미지 업로드 중 오류 발생", e);
         }
+    }
+
+    @Transactional
+    public void updateLastActiveAt(Long userId) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+        user.updateLastActiveAt(LocalDateTime.now());
     }
 }

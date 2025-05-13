@@ -31,17 +31,17 @@ public class FcmMessageTemplate {
             }
 
             case CHAT_RECEIVE -> {
-                title = String.format("%s님에게서 새 메시지가 왔어요", data.get("senderName"));
+                title = String.format("\uD83D\uDCAC %s님에게서 새 메시지가 왔어요", data.get("senderName"));
                 body = String.format("%s: %s", data.get("senderName"), data.get("preview"));
             }
 
             case MATCH_COMPLETE -> {
-                title = "새로운 매칭이 성사되었어요";
+                title = "\uD83E\uDD1D 새로운 매칭이 성사되었어요";
                 body = String.format("%s님과 매칭이 완료되었습니다. 지금 대화를 시작해 보세요!", data.get("partnerName"));
             }
 
             case BOOK_RECOMMEND -> {
-                title = String.format("%s님, 이런 책은 어떤가요?", data.get("userName"));
+                title = String.format("\uD83D\uDCDA %s님, 이런 책은 어떤가요?", data.get("userName"));
                 body = String.format("『%s』을(를) 추천해 드립니다. 지금 확인해 보세요!", data.get("bookTitle"));
             }
         }
