@@ -41,6 +41,7 @@ import ChatListPage from '@/pages/chat/ChatListPage';
 import ChatRoomPage from '@/pages/chat/ChatRoomPage';
 import TradeReviewPage from '@/pages/chat/TradeReviewPage';
 import LocationSetting from '@/pages/auth/LocationSetting';
+import BookNotePage from '@/pages/mybooknote/booknote/BookNotePage';
 
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -119,8 +120,12 @@ const AppLayout: FC = () => {
                   <Route path="/chat/:roomId" element={<ChatRoomPage />} />
                   <Route path="/chat/:roomId/review" element={<TradeReviewPage />} />
 
-                  {/* 독서기록 페이지 */}
-                  <Route path="/booknotes" element={<MyBookNotesPage />} />
+                  {/* 독서기록 페이지 - 탭이 있는 부분은 중첩 라우팅 적용용 */}
+                  <Route path="/booknotes" element={<BookNotePage />}>
+                    <Route index element={<MyBookNotesPage />} />
+                    <Route path="/booknotes/trip" element={<BookTripPage />} />
+                  </Route>
+
                   <Route path="/booknotes/detail/:bookId" element={<BookNoteDetailPage />} />
                   <Route path="/booknotes/full/:bookId" element={<BookNoteFullPage />} />
                   <Route path="/booknotes/edit/:bookId" element={<BookNoteEditPage />} />
@@ -128,8 +133,6 @@ const AppLayout: FC = () => {
                   <Route path="/booknotes/select" element={<BookNoteSelectPage />} />
 
                   {/* 책의 여정 페이지 */}
-                  <Route path="/booknotes/trip" element={<BookTripPage />} />
-                  {/* <Route path="/booknotes/trip/:bookId" element={<BookTripDetailPage />} /> */}
                   <Route
                     path="/booknotes/trip/:bookId"
                     element={<BookTripDetailPage key={location.key} />}

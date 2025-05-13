@@ -25,9 +25,6 @@ const MyBookNoteGridPage: React.FC<BookGridPetalPageProps> = ({ bookNotes }) => 
 
   return (
     <div className="bg-light-bg min-h-screen pb-28">
-      <Header title="독서 기록" showBackButton={false} showNotification={true} />
-      <TabNavBar pages={pages} />
-
       <div className="px-4 pt-4">
         <p className="text-sm text-gray-500 mb-2">나의 독서 기록을 모아보세요.</p>
 

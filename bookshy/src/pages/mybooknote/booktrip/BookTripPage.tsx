@@ -23,11 +23,6 @@ const BookTripPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'ALL' | 'WRITTEN' | 'UNWRITTEN'>('ALL');
 
-  const pages = [
-    { path: '/booknotes', label: '내 독서 기록 보기' },
-    { path: '/booknotes/trip', label: '책의 여정 보기' },
-  ];
-
   // ✅ 여정 여부 포함 서재 도서
   const { data: libraryBooks = [], isLoading: isLoadingLibrary } = useQuery<LibraryBookWithTrip[]>({
     queryKey: ['libraryBooksWithTrip'],
@@ -72,8 +67,6 @@ const BookTripPage: React.FC = () => {
 
   return (
     <div className="bg-light-bg min-h-screen pb-28">
-      <Header title="독서 기록" showBackButton={false} showNotification />
-      <TabNavBar pages={pages} />
       <div className="px-4 pt-4">
         <BookTripIntroCard />
         <BookTripFilterBar
