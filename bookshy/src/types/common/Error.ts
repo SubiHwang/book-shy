@@ -3,4 +3,5 @@ export interface ErrorPageProps {
   type: ErrorType;
   message?: string;
   onRetry?: () => void;
+  bgHeight: string;
 }
