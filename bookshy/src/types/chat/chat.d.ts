@@ -34,3 +34,10 @@ interface ReadPayload {
   messageIds: number[];
   readerId: number;
 }
+
+export interface EmojiUpdatePayload {
+  messageId: number;
+  emoji: string;
+  type: 'ADD' | 'REMOVE';
+  updatedBy: number;
+}

@@ -23,6 +23,13 @@ interface Props {
   initialMessages?: ChatMessage[];
 }
 
+interface EmojiUpdatePayload {
+  messageId: number;
+  emoji: string;
+  type: 'ADD' | 'REMOVE';
+  updatedBy: number;
+}
+
 function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const { roomId } = useParams();
   const numericRoomId = Number(roomId);
@@ -101,7 +108,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   );
 
   const { sendMessage } = useStomp(numericRoomId, onMessage, onRead);
-  const { subscribeCalendarTopic, unsubscribe, isConnected } = useWebSocket();
+  const { subscribeCalendarTopic, subscribeEmojiTopic, unsubscribe, isConnected } = useWebSocket();
 
   useEffect(() => {
     if (!isConnected || isNaN(numericRoomId)) return;
@@ -137,6 +144,23 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
 
     return () => unsubscribe(sub);
   }, [numericRoomId, subscribeCalendarTopic, unsubscribe, isConnected]);
+
+  useEffect(() => {
+    if (!isConnected || isNaN(numericRoomId)) return;
+
+    const sub = subscribeEmojiTopic(
+      numericRoomId,
+      ({ messageId, emoji, type }: EmojiUpdatePayload) => {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            Number(msg.id) === messageId ? { ...msg, emoji: type === 'ADD' ? emoji : '' } : msg,
+          ),
+        );
+      },
+    );
+
+    return () => unsubscribe(sub);
+  }, [numericRoomId, subscribeEmojiTopic, unsubscribe, isConnected]);
 
   useEffect(() => {
     scrollToBottom(messages.length === 1);
@@ -177,11 +201,6 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   };
 
   const handleSelectEmoji = (messageId: string, emoji: string) => {
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg.id === messageId ? { ...msg, emoji: msg.emoji === emoji ? '' : emoji } : msg,
-      ),
-    );
     setEmojiTargetId(null);
     sendEmoji(Number(messageId), emoji);
   };

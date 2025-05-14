@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { ChatMessage } from '@/types/chat/chat';
 import { ThumbsUp, Smile, Check, HelpCircle } from 'lucide-react';
 
@@ -7,7 +7,7 @@ interface Props {
   isMyMessage: boolean;
   onLongPress?: () => void;
   onRightClick?: () => void;
-  onSelectEmoji?: (emoji: string) => void;
+  onSelectEmoji?: (emoji: string | null) => void;
   showEmojiSelector?: boolean;
   selectedEmoji?: string;
 }
@@ -22,8 +22,23 @@ function ChatMessageItem({
   selectedEmoji,
 }: Props) {
   const touchTimer = useRef<NodeJS.Timeout | null>(null);
+  const selectorRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!showEmojiSelector) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (selectorRef.current && !selectorRef.current.contains(e.target as Node)) {
+        onSelectEmoji?.(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showEmojiSelector, onSelectEmoji]);
 
   const handleTouchStart = () => {
+    if (isMyMessage) return;
     touchTimer.current = setTimeout(() => {
       onLongPress?.();
     }, 500);
@@ -37,6 +52,7 @@ function ChatMessageItem({
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {
+    if (isMyMessage) return;
     e.preventDefault();
     onRightClick?.();
   };
@@ -82,7 +98,10 @@ function ChatMessageItem({
       </div>
 
       {showEmojiSelector && (
-        <div className="absolute bottom-full mb-1 flex gap-1 bg-light-bg-card border border-light-bg-shade rounded-xl shadow p-1 z-20">
+        <div
+          ref={selectorRef}
+          className="absolute bottom-full mb-1 flex gap-1 bg-light-bg-card border border-light-bg-shade rounded-xl shadow p-1 z-20"
+        >
           {emojiList.map((emoji) => (
             <button
               key={emoji.label}
