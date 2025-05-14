@@ -12,10 +12,6 @@ export interface MatchingRecommendation {
   score: number;
 }
 
-export interface MatchingRecommendationResponse {
-  matchings: MatchingRecommendation[];
-}
-
 export interface Neighborhood {
   userId: number;
   name: string;
