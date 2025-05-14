@@ -122,7 +122,12 @@ const EditProfilePage = () => {
         <AddressInput
           address={address}
           onChange={setAddress}
-          onFetchLocation={fetchCurrentLocation}
+          onFetchLocation={async () => {
+            await fetchCurrentLocation();
+            setAddress(fetchedAddress);
+            setLatitude(currentLat);
+            setLongitude(currentLng);
+          }}
           loading={isLocating}
           error={locationError}
         />

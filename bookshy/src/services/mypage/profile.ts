@@ -29,5 +29,5 @@ export const uploadProfileImage = async (formData: FormData): Promise<{ imageUrl
 
 // 주소
 export const updateUserAddress = async (payload: AddressUpdateRequest): Promise<void> => {
-  await authAxiosInstance.put('/api/user/profile/address', payload);
+  await authAxiosInstance.put('/user/profile/address', payload);
 };
