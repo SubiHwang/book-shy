@@ -31,13 +31,10 @@ const MatchingRecommend: FC = () => {
     }
   };
 
-// matchingList 상태 업데이트 후 로그 추가
-useEffect(() => {
-  console.log('업데이트된 matchingList:', matchingList);
-  console.log('matchingList 길이:', matchingList.length);
-  console.log('hasFewMatches:', hasFewMatches); // true여야 함 (0 < 길이 <= 3)
-  console.log('hasSufficientMatches:', hasSufficientMatches); // false여야 함 (길이 <= 3)
-}, [matchingList]);
+  // matchingList 상태 업데이트 후 로그 추가
+  useEffect(() => {
+    getMatchings();
+  }, []);
 
   return (
     <div className="flex flex-col bg-light-bg">
