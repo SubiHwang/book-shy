@@ -14,12 +14,12 @@ import {
   sendEmoji,
 } from '@/services/chat/chat.ts';
 import { useStomp } from '@/hooks/chat/useStomp.ts';
+import { useWebSocket } from '@/contexts/WebSocketProvider';
 import { getUserIdFromToken } from '@/utils/jwt.ts';
 
 interface Props {
   partnerName: string;
   partnerProfileImage: string;
-  initialMessages: ChatMessage[];
 }
 
 function ChatRoom({ partnerName, partnerProfileImage }: Props) {
@@ -33,7 +33,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
-  const [emojiMap, setEmojiMap] = useState<Record<string, string>>({});
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -48,7 +48,6 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   useEffect(() => {
     if (!isNaN(numericRoomId)) {
       markMessagesAsRead(numericRoomId).catch((err) => console.error('❌ 읽음 처리 실패:', err));
-
       queryClient.setQueryData(['chatList'], (prev: any) => {
         if (!Array.isArray(prev)) return prev;
         return prev.map((room: any) =>
@@ -60,28 +59,16 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
 
   useEffect(() => {
     if (!isSuccess) return;
-
-    if (initialMessages.length > 0) {
-      setMessages(initialMessages);
-    } else {
-      const now = new Date();
-      const noticeMessage: ChatMessage = {
-        id: 'notice-' + Date.now(),
-        senderId: -1,
-        chatRoomId: numericRoomId,
-        content:
-          '도서 교환은 공공장소에서 진행하고, 책 상태를 미리 확인하세요.\n과도한 개인정보 요청이나 외부 연락 유도는 주의하세요.\n도서 상호 대여 서비스 사용 시 반납 기한을 꼭 지켜주세요!\n안전하고 즐거운 독서 문화 함께 만들어가요!',
-        sentAt: now.toISOString(),
-        type: 'notice',
-      };
-      setMessages([noticeMessage]);
-    }
-  }, [initialMessages, isSuccess, numericRoomId]);
+    setMessages((prev) => {
+      const existing = new Set(prev.map((m) => m.id));
+      const toAdd = initialMessages.filter((m) => !existing.has(m.id));
+      return [...prev, ...toAdd];
+    });
+  }, [initialMessages, isSuccess]);
 
   const onRead = useCallback(
     (payload: { readerId: number; messageIds: number[] }) => {
       if (payload.readerId === myUserId) return;
-
       setMessages((prev) =>
         prev.map((msg) =>
           payload.messageIds.includes(Number(msg.id)) ? { ...msg, read: true } : msg,
@@ -93,51 +80,86 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
 
   const onMessage = useCallback(
     (newMessage: ChatMessage) => {
-      setMessages((prev) => {
-        const exists = prev.some((m) => m.id === newMessage.id);
-        return exists ? prev : [...prev, newMessage];
-      });
-
-      // 채팅방 열려 있고 내 메시지가 아닌 경우 즉시 읽음 처리
+      setMessages((prev) =>
+        prev.some((m) => m.id === newMessage.id) ? prev : [...prev, newMessage],
+      );
       if (newMessage.senderId !== myUserId) {
-        markMessagesAsRead(numericRoomId).catch((err) =>
-          console.error('❌ 읽음 처리 실패 (수신 시점):', err),
-        );
+        markMessagesAsRead(numericRoomId).catch((err) => console.error('❌ 읽음 실패:', err));
       }
-
-      queryClient.setQueryData(['chatList'], (prev: any) => {
-        if (!Array.isArray(prev)) return prev;
-        return prev.map((room: any) =>
-          room.id === newMessage.chatRoomId
-            ? {
-                ...room,
-                lastMessage: newMessage.content,
-                lastMessageTime: newMessage.sentAt,
-              }
-            : room,
-        );
-      });
+      queryClient.setQueryData(['chatList'], (prev: any) =>
+        Array.isArray(prev)
+          ? prev.map((room: any) =>
+              room.id === newMessage.chatRoomId
+                ? { ...room, lastMessage: newMessage.content, lastMessageTime: newMessage.sentAt }
+                : room,
+            )
+          : prev,
+      );
     },
-    [queryClient],
+    [myUserId, numericRoomId, queryClient],
   );
 
   const { sendMessage } = useStomp(numericRoomId, onMessage, onRead);
+  const { subscribeCalendarTopic, unsubscribe, isConnected } = useWebSocket();
+
+  useEffect(() => {
+    if (!isConnected || isNaN(numericRoomId)) return;
+
+    const sub = subscribeCalendarTopic(numericRoomId, (calendarDto) => {
+      const rawDate =
+        calendarDto.exchangeDate || calendarDto.rentalStartDate || calendarDto.rentalEndDate;
+
+      if (!rawDate) return;
+
+      const formattedDate = new Date(rawDate).toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+
+      const sysMsg: ChatMessage = {
+        id: calendarDto.id || Date.now(),
+        chatRoomId: numericRoomId,
+        senderId: 0,
+        content: `📌 일정 등록됨: ${formattedDate}`,
+        type: 'info',
+        sentAt: new Date().toISOString(),
+        read: false,
+        emoji: '',
+      };
+
+      setMessages((prev) => [...prev, sysMsg]);
+    });
+
+    return () => unsubscribe(sub);
+  }, [numericRoomId, subscribeCalendarTopic, unsubscribe, isConnected]);
 
   useEffect(() => {
     scrollToBottom(messages.length === 1);
   }, [messages]);
 
+  useEffect(() => {
+    const container = messagesEndRef.current?.parentElement;
+    if (!container) return;
+    const onScroll = () => {
+      const show = container.scrollHeight - container.scrollTop - container.clientHeight > 100;
+      setShowScrollToBottom(show);
+    };
+    container.addEventListener('scroll', onScroll);
+    return () => container.removeEventListener('scroll', onScroll);
+  }, []);
+
   const scrollToBottom = (smooth = true) => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: smooth ? 'smooth' : 'auto',
-    });
+    messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
   };
 
-  const isScrolledToBottom = (): boolean => {
+  const isScrolledToBottom = () => {
     const container = messagesEndRef.current?.parentElement;
-    if (!container) return false;
-    const threshold = 100;
-    return container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
+    if (!container) return true;
+    return container.scrollHeight - container.scrollTop - container.clientHeight < 100;
   };
 
   const handleSendMessage = (content: string) => {
@@ -145,36 +167,20 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
     sendMessage(numericRoomId, myUserId, content, 'chat');
   };
 
-  const handleSendSystemMessage = (
-    content: string,
-    type: 'notice' | 'info' | 'warning' = 'info',
-  ) => {
-    const now = new Date();
-    const newMessage: ChatMessage = {
-      id: `system-${Date.now()}`,
-      senderId: -1,
-      chatRoomId: numericRoomId,
-      content,
-      sentAt: now.toISOString(),
-      type,
-    };
-    setMessages((prev) => [...prev, newMessage]);
-  };
-
-  const registerScheduleAndNotify = async (message: string, payload: RegisterSchedulePayload) => {
+  const registerScheduleAndNotify = async (_message: string, payload: RegisterSchedulePayload) => {
     try {
       await registerSchedule(payload);
-      handleSendSystemMessage(message, 'info');
-    } catch (error) {
-      console.error('❌ 일정 등록 실패:', error);
+    } catch (e) {
+      console.error('❌ 일정 등록 실패:', e);
     }
   };
 
   const handleSelectEmoji = (messageId: string, emoji: string) => {
-    setEmojiMap((prev) => ({
-      ...prev,
-      [messageId]: prev[messageId] === emoji ? '' : emoji,
-    }));
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === messageId ? { ...msg, emoji: msg.emoji === emoji ? '' : emoji } : msg,
+      ),
+    );
     setEmojiTargetId(null);
     sendEmoji(Number(messageId), emoji);
   };
@@ -186,16 +192,14 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const toggleOptions = () => {
     const shouldScroll = isScrolledToBottom();
     setShowOptions((prev) => !prev);
-    setTimeout(() => {
-      if (shouldScroll) scrollToBottom(true);
-    }, 0);
+    setTimeout(() => shouldScroll && scrollToBottom(true), 0);
   };
 
-  const formatDateLabel = (isoTimestamp: string) => {
-    const date = new Date(isoTimestamp);
-    return isNaN(date.getTime())
+  const formatDateLabel = (iso: string) => {
+    const d = new Date(iso);
+    return isNaN(d.getTime())
       ? ''
-      : date.toLocaleDateString('ko-KR', {
+      : d.toLocaleDateString('ko-KR', {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
@@ -203,27 +207,27 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
         });
   };
 
-  const formatTime = (isoTimestamp: string) => {
-    const date = new Date(isoTimestamp);
-    return isNaN(date.getTime())
+  const formatTime = (iso: string) => {
+    const d = new Date(iso);
+    return isNaN(d.getTime())
       ? ''
-      : date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+      : d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
   };
 
   let lastDateLabel = '';
 
   return (
-    <div className="flex flex-col h-[100dvh]">
+    <div className="relative flex flex-col h-[100dvh]">
       <ChatRoomHeader partnerName={partnerName} partnerProfileImage={partnerProfileImage} />
-      <div className="flex-1 overflow-y-auto bg-white px-4 sm:px-6 py-3">
-        {messages.map((msg) => {
+      <div className="relative flex-1 overflow-y-auto bg-white px-4 sm:px-6 py-3">
+        {messages.map((msg, idx) => {
           const dateLabel = formatDateLabel(msg.sentAt);
           const showDate = dateLabel !== lastDateLabel;
           lastDateLabel = dateLabel;
 
           const isSystem = ['info', 'notice', 'warning'].includes(msg.type ?? '');
           return (
-            <div key={msg.id}>
+            <div key={`${msg.id}-${idx}`}>
               {showDate && (
                 <div className="flex items-center gap-2 text-[11px] sm:text-xs text-light-text-muted my-4">
                   <div className="flex-grow border-t border-light-bg-shade" />
@@ -238,16 +242,10 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
                       ? '거래 시 주의해주세요!'
                       : msg.type === 'info'
                         ? '약속이 등록되었습니다!'
-                        : msg.type === 'warning'
-                          ? '알림'
-                          : undefined
+                        : '알림'
                   }
                   content={msg.content}
-                  variant={
-                    msg.type === 'notice' || msg.type === 'info' || msg.type === 'warning'
-                      ? msg.type
-                      : undefined
-                  }
+                  variant={msg.type as 'notice' | 'info' | 'warning'}
                 />
               ) : (
                 <ChatMessageItem
@@ -257,7 +255,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
                   onLongPress={() => handleLongPressOrRightClick(msg.id)}
                   onRightClick={() => handleLongPressOrRightClick(msg.id)}
                   onSelectEmoji={(emoji) => handleSelectEmoji(msg.id, emoji)}
-                  selectedEmoji={emojiMap[msg.id]}
+                  selectedEmoji={Array.isArray(msg.emoji) ? msg.emoji[0] : msg.emoji}
                 />
               )}
             </div>
@@ -265,12 +263,27 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
         })}
         <div ref={messagesEndRef} className="h-4" />
       </div>
-      <ChatInput
-        onSend={handleSendMessage}
-        showOptions={showOptions}
-        onToggleOptions={toggleOptions}
-        onScheduleClick={() => setShowScheduleModal(true)}
-      />
+
+      <div className="relative">
+        {showScrollToBottom && (
+          <div className="absolute -top-[60px] left-1/2 -translate-x-1/2 z-30">
+            <button
+              className="bg-black/60 hover:bg-black/80 text-white text-xl px-3 py-1.5 rounded-full shadow-md transition"
+              onClick={() => scrollToBottom(true)}
+              aria-label="맨 아래로 스크롤"
+            >
+              ↓
+            </button>
+          </div>
+        )}
+
+        <ChatInput
+          onSend={handleSendMessage}
+          showOptions={showOptions}
+          onToggleOptions={toggleOptions}
+          onScheduleClick={() => setShowScheduleModal(true)}
+        />
+      </div>
 
       {showScheduleModal && (
         <ScheduleModal
