@@ -29,17 +29,15 @@ public class ExchangePromiseService {
     private final BookRepository bookRepository;
 
     /**
-     * 로그인한 사용자의 예정된 교환/대여 거래 약속을 페이지네이션으로 조회합니다.
+     * 로그인한 사용자의 예정된 교환/대여 거래 약속을 조회합니다.
      *
-     * @param userId   사용자 ID
-     * @param pageable 페이지 정보
      * @return 거래 약속 목록 (Page 객체로 반환)
      */
-    public Page<ExchangePromiseDto> getPromiseList(Long userId, Pageable pageable) {
-        List<ExchangeRequest> requests = exchangeRequestRepository.findPromiseByUserId(userId, pageable);
+    public List<ExchangePromiseDto> getPromiseList(Users user) {
+        Long userId = user.getUserId();
+        List<ExchangeRequest> requests = exchangeRequestRepository.findPromiseByUserId(userId, Pageable.unpaged());
 
-        List<ExchangePromiseDto> dtos = requests.stream().map(request -> {
-            // 상대방 ID 구분
+        return requests.stream().map(request -> {
             Long counterpartId = request.getRequesterId().equals(userId)
                     ? request.getResponderId()
                     : request.getRequesterId();
@@ -47,7 +45,6 @@ public class ExchangePromiseService {
             Users counterpart = userRepository.findById(counterpartId)
                     .orElseThrow(() -> new RuntimeException("상대방을 찾을 수 없습니다."));
 
-            // 상대방 책 ID (내가 responder면 상대방 책은 bookA)
             Long bookId = request.getRequesterId().equals(userId)
                     ? request.getBookBId()
                     : request.getBookAId();
@@ -55,7 +52,6 @@ public class ExchangePromiseService {
             Book book = bookRepository.findById(bookId)
                     .orElseThrow(() -> new RuntimeException("도서를 찾을 수 없습니다."));
 
-            // 남은 시간 계산
             TimeLeftDto timeLeft = calculateTimeLeft(request.getRequestedAt());
 
             return ExchangePromiseDto.builder()
@@ -71,9 +67,8 @@ public class ExchangePromiseService {
                     .timeLeft(timeLeft)
                     .build();
         }).toList();
-
-        return new PageImpl<>(dtos, pageable, dtos.size());
     }
+
 
     /**
      * 주어진 시간까지 남은 시간을 계산하고, 사람이 보기 쉬운 표시 문자열로 구성합니다.

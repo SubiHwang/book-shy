@@ -7,6 +7,7 @@ import com.ssafy.bookshy.domain.exchange.dto.ExchangeHistoryGroupDto;
 import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequest;
 import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequest.RequestStatus;
 import com.ssafy.bookshy.domain.exchange.repository.ExchangeRequestRepository;
+import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,14 +31,13 @@ public class ExchangeHistoryService {
     /**
      * 완료된 교환 요청 내역을 조회합니다.
      * 완료된 요청만 가져오며, 사용자 ID 기준으로 필터링됩니다.
-     * @param userId 현재 로그인한 사용자 ID
-     * @param pageable 페이지네이션 정보
-     * @return 완료된 교환 내역 그룹 (연월별)
+     * @return 완료된 교환 내역 그룹
      */
     @Transactional
-    public Page<ExchangeHistoryGroupDto> getCompletedExchanges(Long userId, Pageable pageable) {
+    public List<ExchangeHistoryGroupDto> getCompletedExchanges(Users user) {
+        Long userId = user.getUserId();
         List<ExchangeRequest> completedRequests =
-                exchangeRequestRepository.findByUserAndStatus(userId, RequestStatus.COMPLETED, pageable);
+                exchangeRequestRepository.findByUserAndStatus(userId, RequestStatus.COMPLETED, Pageable.unpaged());
 
         List<ExchangeHistoryDto> dtoList = completedRequests.stream().map(request -> {
             Long counterpartId = request.getRequesterId().equals(userId)
@@ -76,22 +76,19 @@ public class ExchangeHistoryService {
                     .build();
         }).toList();
 
-        Map<String, List<ExchangeHistoryDto>> grouped = dtoList.stream()
+        return dtoList.stream()
                 .collect(Collectors.groupingBy(
                         dto -> dto.getCompletedAt().format(DateTimeFormatter.ofPattern("yyyy.MM")),
                         LinkedHashMap::new,
-                        Collectors.toList()
-                ));
-
-        List<ExchangeHistoryGroupDto> groupedDtos = grouped.entrySet().stream()
+                        Collectors.toList()))
+                .entrySet().stream()
                 .map(entry -> ExchangeHistoryGroupDto.builder()
                         .yearMonth(entry.getKey())
                         .trades(entry.getValue())
                         .build())
                 .toList();
-
-        return new PageImpl<>(groupedDtos, pageable, groupedDtos.size());
     }
+
 
 
 }

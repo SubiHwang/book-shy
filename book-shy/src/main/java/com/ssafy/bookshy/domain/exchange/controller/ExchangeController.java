@@ -7,6 +7,7 @@ import com.ssafy.bookshy.domain.exchange.dto.ReviewRequestDto;
 import com.ssafy.bookshy.domain.exchange.service.ExchangeHistoryService;
 import com.ssafy.bookshy.domain.exchange.service.ExchangePromiseService;
 import com.ssafy.bookshy.domain.exchange.service.ExchangeService;
+import com.ssafy.bookshy.domain.users.entity.Users;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -69,45 +71,45 @@ public class ExchangeController {
     }
 
     @Operation(
-            summary = "📆 예정된 거래 약속 목록 조회",
-            description = "사용자가 참여하고 있는 예정된 거래 약속 목록을 조회합니다. (요청 상태: PENDING 또는 ACCEPTED)",
-            parameters = {
-                    @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", example = "0"),
-                    @Parameter(name = "size", description = "페이지 크기", example = "10")
-            },
+            summary = "📅 나의 교환 약속 조회",
+            description = """
+                📌 <b>로그인 사용자</b>가 잡아놓은 <b>예정된 도서 교환 약속 목록</b>을 조회합니다.<br>
+                - 상대방 정보와 약속된 도서, 예정된 시간 등이 함께 제공됩니다.
+                """,
             responses = {
-                    @ApiResponse(responseCode = "200", description = "✅ 예정된 거래 약속 조회 성공")
+                    @ApiResponse(responseCode = "200", description = "조회 성공"),
+                    @ApiResponse(responseCode = "401", description = "인증 실패"),
+                    @ApiResponse(responseCode = "500", description = "서버 오류")
             }
     )
-    @GetMapping("/promises")
-    public ResponseEntity<Page<ExchangePromiseDto>> getExchangePromises(
-            @RequestHeader("X-User-Id") Long userId,
-            @ParameterObject Pageable pageable
+    @GetMapping("/promise")
+    public ResponseEntity<List<ExchangePromiseDto>> getPromiseList(
+            @AuthenticationPrincipal Users user
     ) {
-        Page<ExchangePromiseDto> promises = exchangePromiseService.getPromiseList(userId, pageable);
-        return ResponseEntity.ok(promises);
+        return ResponseEntity.ok(exchangePromiseService.getPromiseList(user));
     }
 
 
     @Operation(
-            summary = "📜 완료된 교환/대여 내역 조회",
-            description = "사용자가 참여한 완료된 거래 내역을 연월별로 그룹화하여 조회합니다.",
-            parameters = {
-                    @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", example = "0"),
-                    @Parameter(name = "size", description = "페이지 크기", example = "10")
-            },
+            summary = "📜 나의 교환 이력 조회",
+            description = """
+                ✅ <b>로그인 사용자의 인증 정보를 기반으로</b> 완료된 도서 교환 이력을 조회합니다.<br>
+                - 상대방 정보와 교환한 도서(받은 책/준 책)의 정보가 함께 제공됩니다.<br>
+                - 연도-월 단위로 그룹화되어 반환됩니다.
+                """,
             responses = {
-                    @ApiResponse(responseCode = "200", description = "✅ 거래 내역 조회 성공")
+                    @ApiResponse(responseCode = "200", description = "조회 성공"),
+                    @ApiResponse(responseCode = "401", description = "인증 실패"),
+                    @ApiResponse(responseCode = "500", description = "서버 오류")
             }
     )
     @GetMapping("/history")
-    public ResponseEntity<Page<ExchangeHistoryGroupDto>> getExchangeHistory(
-            @RequestHeader("X-User-Id") Long userId,
-            @ParameterObject Pageable pageable
+    public ResponseEntity<List<ExchangeHistoryGroupDto>> getCompletedExchanges(
+            @AuthenticationPrincipal Users user
     ) {
-        Page<ExchangeHistoryGroupDto> result = exchangeHistoryService.getCompletedExchanges(userId, pageable);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(exchangeHistoryService.getCompletedExchanges(user));
     }
+
 
 
     @Operation(summary = "✅ 거래 완료 처리", description = "사용자가 교환 완료 버튼을 눌러 거래를 완료 처리합니다.")
