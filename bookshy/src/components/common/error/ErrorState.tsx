@@ -15,7 +15,7 @@ const ErrorState: FC<ErrorPageProps> = ({ type, message, onRetry }) => {
         onClick: () => navigate('/'),
       },
     },
-    unauthorized: {
+    'unauthorized': {
       title: '로그인이 필요합니다',
       description: message || '이 페이지에 접근하려면 로그인이 필요합니다.',
       logoData: '/logo/error/401Error.svg',
