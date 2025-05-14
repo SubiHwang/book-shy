@@ -15,6 +15,7 @@ import {
 } from '@/services/chat/chat.ts';
 import { useStomp } from '@/hooks/chat/useStomp.ts';
 import { getUserIdFromToken } from '@/utils/jwt.ts';
+import { mkdirSync } from 'fs';
 
 interface Props {
   partnerName: string;
@@ -34,6 +35,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [emojiMap, setEmojiMap] = useState<Record<string, string>>({});
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -59,7 +61,9 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   }, [numericRoomId, queryClient]);
 
   useEffect(() => {
-    if (!isSuccess) return;
+    if (isSuccess) {
+      console.log('🧪 initialMessages 수신:', initialMessages);
+    }
 
     if (initialMessages.length > 0) {
       setMessages(initialMessages);
@@ -67,7 +71,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
       const now = new Date();
       const noticeMessage: ChatMessage = {
         id: 'notice-' + Date.now(),
-        senderId: -1,
+        senderId: myUserId,
         chatRoomId: numericRoomId,
         content:
           '도서 교환은 공공장소에서 진행하고, 책 상태를 미리 확인하세요.\n과도한 개인정보 요청이나 외부 연락 유도는 주의하세요.\n도서 상호 대여 서비스 사용 시 반납 기한을 꼭 지켜주세요!\n안전하고 즐거운 독서 문화 함께 만들어가요!',
@@ -76,7 +80,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
       };
       setMessages([noticeMessage]);
     }
-  }, [initialMessages, isSuccess, numericRoomId]);
+  }, [initialMessages, isSuccess, myUserId, numericRoomId]);
 
   const onRead = useCallback(
     (payload: { readerId: number; messageIds: number[] }) => {
@@ -98,7 +102,6 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
         return exists ? prev : [...prev, newMessage];
       });
 
-      // 채팅방 열려 있고 내 메시지가 아닌 경우 즉시 읽음 처리
       if (newMessage.senderId !== myUserId) {
         markMessagesAsRead(numericRoomId).catch((err) =>
           console.error('❌ 읽음 처리 실패 (수신 시점):', err),
@@ -118,7 +121,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
         );
       });
     },
-    [queryClient],
+    [myUserId, numericRoomId, queryClient],
   );
 
   const { sendMessage } = useStomp(numericRoomId, onMessage, onRead);
@@ -126,6 +129,22 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   useEffect(() => {
     scrollToBottom(messages.length === 1);
   }, [messages]);
+
+  useEffect(() => {
+    const container = messagesEndRef.current?.parentElement;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const shouldShow =
+        container.scrollHeight - container.scrollTop - container.clientHeight > 100;
+      setShowScrollToBottom(shouldShow);
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const scrollToBottom = (smooth = true) => {
     messagesEndRef.current?.scrollIntoView({
@@ -149,16 +168,8 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
     content: string,
     type: 'notice' | 'info' | 'warning' = 'info',
   ) => {
-    const now = new Date();
-    const newMessage: ChatMessage = {
-      id: `system-${Date.now()}`,
-      senderId: -1,
-      chatRoomId: numericRoomId,
-      content,
-      sentAt: now.toISOString(),
-      type,
-    };
-    setMessages((prev) => [...prev, newMessage]);
+    if (isNaN(numericRoomId)) return;
+    sendMessage(numericRoomId, -1, content, type);
   };
 
   const registerScheduleAndNotify = async (message: string, payload: RegisterSchedulePayload) => {
@@ -171,10 +182,16 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   };
 
   const handleSelectEmoji = (messageId: string, emoji: string) => {
-    setEmojiMap((prev) => ({
-      ...prev,
-      [messageId]: prev[messageId] === emoji ? '' : emoji,
-    }));
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === messageId
+          ? {
+              ...msg,
+              emoji: msg.emoji === emoji ? '' : emoji,
+            }
+          : msg,
+      ),
+    );
     setEmojiTargetId(null);
     sendEmoji(Number(messageId), emoji);
   };
@@ -213,9 +230,9 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
   let lastDateLabel = '';
 
   return (
-    <div className="flex flex-col h-[100dvh]">
+    <div className="relative flex flex-col h-[100dvh]">
       <ChatRoomHeader partnerName={partnerName} partnerProfileImage={partnerProfileImage} />
-      <div className="flex-1 overflow-y-auto bg-white px-4 sm:px-6 py-3">
+      <div className="relative flex-1 overflow-y-auto bg-white px-4 sm:px-6 py-3">
         {messages.map((msg) => {
           const dateLabel = formatDateLabel(msg.sentAt);
           const showDate = dateLabel !== lastDateLabel;
@@ -257,7 +274,7 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
                   onLongPress={() => handleLongPressOrRightClick(msg.id)}
                   onRightClick={() => handleLongPressOrRightClick(msg.id)}
                   onSelectEmoji={(emoji) => handleSelectEmoji(msg.id, emoji)}
-                  selectedEmoji={emojiMap[msg.id]}
+                  selectedEmoji={Array.isArray(msg.emoji) ? msg.emoji[0] : msg.emoji}
                 />
               )}
             </div>
@@ -265,12 +282,27 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
         })}
         <div ref={messagesEndRef} className="h-4" />
       </div>
-      <ChatInput
-        onSend={handleSendMessage}
-        showOptions={showOptions}
-        onToggleOptions={toggleOptions}
-        onScheduleClick={() => setShowScheduleModal(true)}
-      />
+
+      <div className="relative">
+        {showScrollToBottom && (
+          <div className="absolute -top-14 left-1/2 -translate-x-1/2 z-30">
+            <button
+              className="bg-black/60 hover:bg-black/80 text-white text-xl px-3 py-1.5 rounded-full shadow-md transition pointer-events-auto"
+              onClick={() => scrollToBottom(true)}
+              aria-label="맨 아래로 스크롤"
+            >
+              ↓
+            </button>
+          </div>
+        )}
+
+        <ChatInput
+          onSend={handleSendMessage}
+          showOptions={showOptions}
+          onToggleOptions={toggleOptions}
+          onScheduleClick={() => setShowScheduleModal(true)}
+        />
+      </div>
 
       {showScheduleModal && (
         <ScheduleModal
