@@ -4,12 +4,45 @@ import { AllBannersData } from '@/types/mylibrary/components';
 import BooksBanner from './BannerCards/BooksBanner';
 import ExchangeBanner from './BannerCards/ExchangeBanner';
 import GenreBanner from './BannerCards/GenreBanner';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 interface BannerCarouselProps {
   data: AllBannersData | null;
   isLoading: boolean;
   error: string | null;
 }
+
+// 스켈레톤 배너 컴포넌트
+const BannerSkeleton: React.FC = () => {
+  return (
+    <div className="bg-card-bg-pink rounded-xl p-4 mb-5 shadow-sm h-32">
+      <div className="flex items-center h-full">
+        <div className="flex-1 min-w-0 flex flex-col justify-center m-1">
+          {/* 제목 스켈레톤 */}
+          <Skeleton width={60} height={14} baseColor="#f9e1e8" highlightColor="#fef2f5" />
+
+          {/* 본문 텍스트 스켈레톤 */}
+          <Skeleton
+            width="80%"
+            height={20}
+            style={{ marginTop: 8, marginBottom: 8 }}
+            baseColor="#f9e1e8"
+            highlightColor="#fef2f5"
+          />
+
+          {/* 설명 텍스트 스켈레톤 */}
+          <Skeleton width="60%" height={14} baseColor="#f9e1e8" highlightColor="#fef2f5" />
+        </div>
+
+        {/* 이미지 스켈레톤 */}
+        <div className="ml-2 flex-shrink-0 w-20 h-20 flex items-center justify-center">
+          <Skeleton circle width={80} height={80} baseColor="#f9e1e8" highlightColor="#fef2f5" />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const BannerCarousel: React.FC<BannerCarouselProps> = ({ data, isLoading, error }) => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -59,18 +92,14 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ data, isLoading, error 
 
     const interval = setInterval(() => {
       nextBanner();
-    }, 4000); // 5초마다 슬라이드
+    }, 4000); // 4초마다 슬라이드
 
     return () => clearInterval(interval);
   }, [nextBanner, data]);
 
-  // 로딩 및 에러 처리
+  // 로딩 상태에서 스켈레톤 UI 표시
   if (isLoading) {
-    return (
-      <div className="bg-card-bg-pink rounded-xl p-8 mb-5 shadow-sm flex justify-center items-center h-32">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <BannerSkeleton />;
   }
 
   if (error) {
