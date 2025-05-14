@@ -1,8 +1,8 @@
 import { authAxiosInstance } from '../axiosInstance';
-import { MatchingRecommendation } from '@/types/Matching';
+import { MatchingRecommendationResponse } from '@/types/Matching';
 export const getMatchingList = async () => {
   try {
-    const response = await authAxiosInstance.get<string, MatchingRecommendation[]>(
+    const response = await authAxiosInstance.get<string, MatchingRecommendationResponse>(
       '/matching/candidates',
     );
     console.log('매칭 목록 api 조회', response);
