@@ -20,9 +20,12 @@ const MyBookNoteGridPage: React.FC<BookGridPetalPageProps> = ({ bookNotes }) => 
   ];
 
   const filteredNotes = bookNotes.filter((book) => {
+    const hasReview =
+      book.reviewId !== undefined && book.reviewId !== null && book.content.trim() !== '';
+
     if (selectedFilter === 'all') return true;
-    if (selectedFilter === 'has') return book.reviewId;
-    if (selectedFilter === 'none') return !book.reviewId;
+    if (selectedFilter === 'has') return hasReview;
+    if (selectedFilter === 'none') return !hasReview;
     return true;
   });
 
