@@ -4,5 +4,6 @@ public enum FcmNotificationType {
     TRANSACTION_DATE,
     CHAT_RECEIVE,
     MATCH_COMPLETE,
-    BOOK_RECOMMEND
+    BOOK_RECOMMEND,
+    MATCH_REJECTED
 }

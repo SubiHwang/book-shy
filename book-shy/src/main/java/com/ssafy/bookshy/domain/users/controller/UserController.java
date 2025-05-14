@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.users.controller;
 
+import com.ssafy.bookshy.domain.users.dto.UserAddressUpdateRequestDto;
 import com.ssafy.bookshy.domain.users.dto.UserProfileResponseDto;
 import com.ssafy.bookshy.domain.users.dto.UserProfileUpdateRequestDto;
 import com.ssafy.bookshy.domain.users.entity.Users;
@@ -120,4 +121,43 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "📍 주소 및 위치 정보 수정 API",
+            description = """
+                사용자의 주소와 위치(위도, 경도)를 별도로 수정합니다.  
+                주로 서비스 최초 사용 시 위치 설정에 활용됩니다.  
+                🔐 인증된 사용자만 접근 가능합니다.
+                """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "주소 수정 성공 🎉"),
+            @ApiResponse(responseCode = "400", description = "필드 누락 또는 유효하지 않은 값 ⚠️"),
+            @ApiResponse(responseCode = "401", description = "인증 실패 또는 토큰 만료 🔐"),
+            @ApiResponse(responseCode = "500", description = "서버 오류 또는 DB 저장 실패 ❌")
+    })
+    @PutMapping("/profile/address")
+    public ResponseEntity<Map<String, Object>> updateAddressOnly(
+            @AuthenticationPrincipal Users user,
+            @RequestBody(
+                    description = "📦 주소 및 위치 정보",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(implementation = UserAddressUpdateRequestDto.class),
+                            examples = @ExampleObject(value = """
+                                {
+                                  "address": "서울특별시 강남구 역삼동",
+                                  "latitude": 37.5012743,
+                                  "longitude": 127.039585
+                                }
+                                """)
+                    )
+            )
+            @org.springframework.web.bind.annotation.RequestBody UserAddressUpdateRequestDto requestDto
+    ) {
+        userService.updateUserAddress(user.getUserId(), requestDto.getAddress(), requestDto.getLatitude(), requestDto.getLongitude());
+        return ResponseEntity.ok(Map.of(
+                "status", "SUCCESS",
+                "message", "주소가 성공적으로 수정되었습니다."
+        ));
+    }
 }

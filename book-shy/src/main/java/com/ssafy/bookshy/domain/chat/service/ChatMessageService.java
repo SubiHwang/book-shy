@@ -120,10 +120,9 @@ public class ChatMessageService {
     }
 
     /**
-     * 🧸 특정 메시지에 이모지를 추가
+     * 🧸 특정 메시지에 이모지를 추가 (덮어쓰기)
      *
      * - 메시지 존재 여부 확인
-     * - 이모지 리스트에 추가
      *
      * @param messageId 메시지 ID
      * @param emoji 추가할 이모지
@@ -132,8 +131,10 @@ public class ChatMessageService {
     public void addEmojiToMessage(Long messageId, String emoji) {
         ChatMessage message = chatMessageRepository.findById(messageId)
                 .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다."));
-        message.addEmoji(emoji);
+
+        message.addEmoji(emoji); // 항상 덮어씀 (addEmoji 내부 수정 필요)
     }
+
 
     /**
      * ✅ 채팅방 내 읽지 않은 메시지들을 읽음 처리

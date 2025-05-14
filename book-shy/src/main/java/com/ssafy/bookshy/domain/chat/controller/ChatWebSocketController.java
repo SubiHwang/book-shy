@@ -22,6 +22,7 @@ public class ChatWebSocketController {
                 .chatRoomId(requestDto.getChatRoomId())
                 .senderId(requestDto.getSenderId())
                 .content(requestDto.getContent())
+                .type(requestDto.getType())
                 .build();
         kafkaProducer.sendChatMessage(kafkaDto);
     }

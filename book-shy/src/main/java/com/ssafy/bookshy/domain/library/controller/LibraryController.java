@@ -6,6 +6,8 @@ import com.ssafy.bookshy.domain.library.dto.LibrarySelfAddRequestDto;
 import com.ssafy.bookshy.domain.library.dto.LibraryWithTripResponseDto;
 import com.ssafy.bookshy.domain.library.service.LibraryService;
 import com.ssafy.bookshy.domain.users.entity.Users;
+import com.ssafy.bookshy.domain.users.repository.UserRepository;
+import com.ssafy.bookshy.domain.users.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,6 +20,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +31,8 @@ import java.util.Map;
 public class LibraryController {
 
     private final LibraryService libraryService;
+    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Operation(summary = "📘 ISBN 기반 도서 등록", description = "사용자 ID와 ISBN13을 파라미터로 받아 도서를 등록하고 서재에 추가합니다.")
     @ApiResponses({
@@ -76,8 +81,11 @@ public class LibraryController {
     @Operation(summary = "📗 전체 서재 조회", description = "특정 사용자의 전체 서재 도서를 조회합니다.")
     @GetMapping
     public ResponseEntity<List<LibraryResponseDto>> getLibrary(
-            @AuthenticationPrincipal Users user) {
-        Long userId = user.getUserId();
+            @AuthenticationPrincipal Users userDetails) {
+
+        Long userId = userDetails.getUserId();
+        userService.updateLastActiveAt(userId);
+
         return ResponseEntity.ok(libraryService.findLibraryByUser(userId));
     }
 
