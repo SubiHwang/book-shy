@@ -4,7 +4,6 @@ import { AllBannersData } from '@/types/mylibrary/components';
 import BooksBanner from './BannerCards/BooksBanner';
 import ExchangeBanner from './BannerCards/ExchangeBanner';
 import GenreBanner from './BannerCards/GenreBanner';
-// import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface BannerCarouselProps {
   data: AllBannersData | null;
@@ -18,12 +17,12 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ data, isLoading, error 
   const [touchEnd, setTouchEnd] = useState<number>(0);
   const carouselRef = useRef<HTMLDivElement>(null);
 
-  // 이전 배너로 이동 (useCallback 사용)
+  // 이전 배너로 이동
   const prevBanner = useCallback(() => {
     setActiveIndex((current) => (current === 0 ? (data ? 3 - 1 : 0) : current - 1));
   }, [data]);
 
-  // 다음 배너로 이동 (useCallback 사용)
+  // 다음 배너로 이동
   const nextBanner = useCallback(() => {
     setActiveIndex((current) => (current === (data ? 3 - 1 : 0) ? 0 : current + 1));
   }, [data]);
@@ -54,16 +53,16 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ data, isLoading, error 
     }
   }, [touchStart, touchEnd, nextBanner, prevBanner]);
 
-  // 자동 슬라이드 - 컴포넌트 최상위 레벨에 배치
+  // 자동 슬라이드
   useEffect(() => {
     if (!data) return; // 데이터가 없으면 실행하지 않음
 
     const interval = setInterval(() => {
       nextBanner();
-    }, 5000); // 5초마다 슬라이드
+    }, 4000); // 5초마다 슬라이드
 
     return () => clearInterval(interval);
-  }, [nextBanner, data, activeIndex]);
+  }, [nextBanner, data]);
 
   // 로딩 및 에러 처리
   if (isLoading) {
@@ -122,7 +121,7 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ data, isLoading, error 
         onTouchEnd={handleTouchEnd}
       >
         {/* 현재 활성화된 배너 */}
-        <div className="transition-all duration-300 ease-in-out relative ">
+        <div className="transition-all duration-300 ease-in-out relative">
           {banners[activeIndex].component}
 
           {/* 인디케이터를 배너 내부 하단에 위치시킴 */}
@@ -139,27 +138,7 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ data, isLoading, error 
             ))}
           </div>
         </div>
-
-        {/* 좌우 화살표 
-        <button
-          className="absolute left-2 top-1/2 transform -translate-y-1/2 p-1 rounded-full bg-white bg-opacity-70 shadow"
-          onClick={prevBanner}
-          aria-label="이전 배너"
-        >
-          <ChevronLeft size={20} />
-        </button>
-
-        <button
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 rounded-full bg-white bg-opacity-70 shadow"
-          onClick={nextBanner}
-          aria-label="다음 배너"
-        >
-          <ChevronRight size={20} />
-        </button>
-          */}
       </div>
-
-      {/* 외부 인디케이터 제거하고 내부 인디케이터만 사용 */}
     </div>
   );
 };
