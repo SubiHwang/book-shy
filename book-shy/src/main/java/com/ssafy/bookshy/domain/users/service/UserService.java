@@ -180,4 +180,28 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
         user.updateLastActiveAt(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
     }
+
+    /**
+     * 📍 사용자 주소 및 위치 정보를 수정합니다.
+     * 주로 최초 위치 설정 시 사용됩니다.
+     *
+     * @param userId 사용자 ID
+     * @param address 주소 문자열
+     * @param latitude 위도 (null 허용)
+     * @param longitude 경도 (null 허용)
+     */
+    @Transactional
+    public void updateUserAddress(Long userId, String address, Double latitude, Double longitude) {
+        Users user = getUserById(userId);
+
+        // ⚠️ 닉네임/성별은 유지하고 주소 관련 필드만 수정
+        user.updateProfile(
+                user.getNickname(),
+                user.getGender(),
+                address,
+                latitude,
+                longitude
+        );
+    }
+
 }
