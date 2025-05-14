@@ -34,7 +34,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
     if (stage === 'quote') {
       setStage('review');
     } else {
-      navigate(`/booknotes/full/${currentBook.libraryId}`);
+      navigate(`/booknotes/full/${currentBook.bookId}`);
     }
   };
 
@@ -125,7 +125,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
           quote={currentBook.quoteContent}
           review={currentBook.content}
           stage={hasReview ? stage : 'quote'}
-          onMoreClick={() => navigate(`/booknotes/full/${currentBook.libraryId}`)}
+          onMoreClick={() => navigate(`/booknotes/full/${currentBook.bookId}`)}
         />
 
         {filteredNotes[currentIndex + 1] && (

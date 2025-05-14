@@ -10,35 +10,35 @@ import { Edit2 } from 'lucide-react';
 import Loading from '@/components/common/Loading';
 
 const BookNoteFullPage: React.FC = () => {
-  const { libraryId } = useParams();
+  const { bookId } = useParams();
   const navigate = useNavigate();
-  const numericLibraryId = libraryId ? Number(libraryId) : null;
+  const numericBookId = bookId ? Number(bookId) : null;
 
   const [redirecting, setRedirecting] = useState(false);
 
   const { data: book, isLoading: loadingBook } = useQuery({
-    queryKey: ['book-note', numericLibraryId],
-    queryFn: () => fetchBookNote(numericLibraryId!),
-    enabled: numericLibraryId !== null,
+    queryKey: ['book-note', numericBookId],
+    queryFn: () => fetchBookNote(numericBookId!),
+    enabled: numericBookId !== null,
   });
 
   const { data: quote, isLoading: loadingQuote } = useQuery({
-    queryKey: ['book-quote', numericLibraryId],
-    queryFn: () => fetchBookQuote(numericLibraryId!),
-    enabled: numericLibraryId !== null,
+    queryKey: ['book-quote', numericBookId],
+    queryFn: () => fetchBookQuote(numericBookId!),
+    enabled: numericBookId !== null,
   });
 
   useEffect(() => {
     const noReview = !book || !book.content || book.content.trim() === '';
     const noQuote = !quote || !quote.content || quote.content.trim() === '';
 
-    if (!loadingBook && !loadingQuote && noReview && noQuote && numericLibraryId) {
+    if (!loadingBook && !loadingQuote && noReview && noQuote && numericBookId) {
       setRedirecting(true);
-      navigate(`/booknotes/create?libraryId=${numericLibraryId}`);
+      navigate(`/booknotes/create?libraryId=${numericBookId}`);
     }
-  }, [book, quote, loadingBook, loadingQuote, navigate, numericLibraryId]);
+  }, [book, quote, loadingBook, loadingQuote, navigate, numericBookId]);
 
-  if (!numericLibraryId) {
+  if (!numericBookId) {
     return <p className="p-4">잘못된 접근입니다.</p>;
   }
 
@@ -68,7 +68,7 @@ const BookNoteFullPage: React.FC = () => {
         <div className="flex justify-between items-center mb-4 mt-3">
           <h2 className="text-base font-medium text-gray-800">나의 독서 기록</h2>
           <button
-            onClick={() => navigate(`/booknotes/edit/${numericLibraryId}`)}
+            onClick={() => navigate(`/booknotes/edit/${numericBookId}`)}
             className="flex items-center gap-1 text-sm text-primary-accent border border-primary-accent px-3 py-1.5 rounded-md"
           >
             <Edit2 size={16} strokeWidth={1.5} />

@@ -27,8 +27,8 @@ const MyBookNotePage = () => {
   });
 
   const enrichedBooks = libraries.map((book) => {
-    const note = notes.find((n) => n.bookId === book.libraryId);
-    const quote = quotes.find((q) => q.bookId === book.libraryId);
+    const note = notes.find((n) => n.bookId === book.bookId);
+    const quote = quotes.find((q) => q.bookId === book.bookId);
 
     return {
       libraryId: book.libraryId,

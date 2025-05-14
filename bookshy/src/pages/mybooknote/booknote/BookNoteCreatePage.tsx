@@ -41,7 +41,8 @@ const BookNoteCreatePage: React.FC = () => {
         reviewContent: reviewText,
         quoteContent: quoteText,
       });
-      queryClient.invalidateQueries({ queryKey: ['my-booknotes'] });
+      queryClient.invalidateQueries({ queryKey: ['book-note', libraryId] });
+      queryClient.invalidateQueries({ queryKey: ['book-quote', libraryId] });
       alert('📚 독서기록 등록이 완료되었습니다.');
       navigate('/booknotes');
     } catch (error) {
