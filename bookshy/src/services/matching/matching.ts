@@ -5,7 +5,7 @@ export const getMatchingList = async () => {
     const response = await authAxiosInstance.get<string, MatchingRecommendation[]>(
       '/matching/candidates',
     );
-    console.log('매칭 목록 api 조회 중 에러 발생', response);
+    console.log('매칭 목록 api 조회', response);
     return response;
   } catch (error) {
     console.log('매칭 목록 api 조회 중 에러 발생', error);
