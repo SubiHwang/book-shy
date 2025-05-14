@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.ZoneId;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -177,6 +178,6 @@ public class UserService {
     public void updateLastActiveAt(Long userId) {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
-        user.updateLastActiveAt(LocalDateTime.now());
+        user.updateLastActiveAt(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
     }
 }
