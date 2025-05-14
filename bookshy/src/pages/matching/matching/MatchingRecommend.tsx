@@ -73,7 +73,7 @@ const MatchingRecommend: FC = () => {
             <p className="text-light-text-secondary font-light text-xs sm:text-sm mb-4">
               더 많은 매칭 기회를 찾을 수 있어요!
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 p-3 sm:p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 sm:p-4">
               <NeighborhoodList />
             </div>
           </div>
