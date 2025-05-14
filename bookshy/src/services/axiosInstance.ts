@@ -76,7 +76,6 @@ authAxiosInstance.interceptors.response.use(
         try {
           const refresh_token = localStorage.getItem('refresh_token');
           const fcmToken = localStorage.getItem('firebase_token');
-          const auth_token = localStorage.getItem('auth_token');
 
           if (!refresh_token) {
             // 로그아웃 처리
