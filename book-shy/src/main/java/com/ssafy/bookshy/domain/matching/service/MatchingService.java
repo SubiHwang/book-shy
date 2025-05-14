@@ -77,13 +77,12 @@ public class MatchingService {
                 .toList();
     }
 
-    // 점수 순 + 거리 순 정렬 후 상위 3명만 반환
-    public List<MatchingDto> findTop3Candidates(Long myUserId) {
+    // 점수 순 + 거리 순 정렬 후 목록 반환
+    public List<MatchingDto> findCandidates(Long myUserId) {
         List<MatchingDto> all = findMatchingCandidates(myUserId);
 
         return all.stream()
                 .sorted(Comparator.comparingDouble(MatchingDto::getScore).reversed())
-                .limit(3)
                 .toList();
     }
 

@@ -2,8 +2,6 @@ package com.ssafy.bookshy.domain.matching.controller;
 
 import com.ssafy.bookshy.domain.matching.dto.MatchConfirmRequestDto;
 import com.ssafy.bookshy.domain.matching.dto.MatchingDto;
-import com.ssafy.bookshy.domain.matching.entity.Matching;
-import com.ssafy.bookshy.domain.matching.repository.MatchingRepository;
 import com.ssafy.bookshy.domain.matching.service.MatchingService;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,14 +23,13 @@ import java.util.List;
 public class MatchingController {
 
     private final MatchingService matchingService;
-    private final MatchingRepository matchingRepository;
 
-    @Operation(summary = "📋 매칭 후보 3명 조회", description = "도서 조건이 맞는 상대방 중, 점수 높은 순으로 3명을 반환합니다.")
+    @Operation(summary = "📋 매칭 후보 조회", description = "도서 조건이 맞는 상대방 중, 점수 높은 순으로 목록을 반환합니다.")
     @ApiResponse(responseCode = "200", description = "매칭 후보 조회 성공")
     @GetMapping("/candidates")
     public ResponseEntity<List<MatchingDto>> getMatchingCandidates(
             @Parameter(hidden = true) @AuthenticationPrincipal Users user) {
-        List<MatchingDto> candidates = matchingService.findTop3Candidates(user.getUserId());
+        List<MatchingDto> candidates = matchingService.findCandidates(user.getUserId());
         return ResponseEntity.ok(candidates);
     }
 
@@ -58,16 +55,5 @@ public class MatchingController {
 
         Long matchId = matchingService.confirmMatching(user.getUserId(), requestDto);
         return ResponseEntity.ok(matchId);
-    }
-
-    @Operation(summary = "📜 나의 매칭 내역 조회", description = "내가 참여한 모든 매칭 목록을 조회합니다.")
-    @ApiResponse(responseCode = "200", description = "조회 성공")
-    @GetMapping("/my")
-    public ResponseEntity<List<MatchingDto>> getMyMatchings(
-            @Parameter(hidden = true) @AuthenticationPrincipal Users user) {
-        List<Matching> matches = matchingRepository.findByUserId(user.getUserId());
-        return ResponseEntity.ok(matches.stream()
-                .map(m -> MatchingDto.from(m, 0.0)) // 점수는 단순히 0으로 처리
-                .toList());
     }
 }
