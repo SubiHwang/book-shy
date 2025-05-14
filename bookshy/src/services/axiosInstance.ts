@@ -76,6 +76,7 @@ authAxiosInstance.interceptors.response.use(
         try {
           const refresh_token = localStorage.getItem('refresh_token');
           const fcmToken = localStorage.getItem('firebase_token');
+          const auth_token = localStorage.getItem('auth_token');
 
           if (!refresh_token) {
             // 로그아웃 처리
@@ -92,6 +93,14 @@ authAxiosInstance.interceptors.response.use(
           });
 
           const { accessToken, refreshToken } = response.data;
+          if (!accessToken) {
+            // 로그아웃 처리
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('refresh_token');
+            window.location.href = '/login';
+            return Promise.reject(error);
+          }
+
           localStorage.setItem('auth_token', accessToken);
 
           if (refreshToken) {
