@@ -3,7 +3,7 @@ import { fetchBookNoteList } from '@/services/mybooknote/booknote/booknote';
 import { fetchBookQuoteList } from '@/services/mybooknote/booknote/bookquote';
 import { fetchUserAllLibrary } from '@/services/mylibrary/libraryApi';
 
-import MyBookNoteGridPage from './MyBookNoteGridPage';
+import BookNoteSwiperPage from './BookNoteSwiperPage';
 import LibraryBookListPage from './LibraryBookListPage';
 
 import type { BookNote } from '@/types/mybooknote/booknote';
@@ -45,7 +45,7 @@ const MyBookNotePage = () => {
   if (libLoading) return <p className="p-4">불러오는 중...</p>;
 
   return enrichedBooks.length > 0 ? (
-    <MyBookNoteGridPage bookNotes={enrichedBooks} />
+    <BookNoteSwiperPage bookNotes={enrichedBooks} />
   ) : (
     <LibraryBookListPage />
   );

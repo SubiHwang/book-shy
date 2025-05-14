@@ -105,7 +105,7 @@ const BookNoteEditPage: React.FC = () => {
   return (
     <div>
       <Header
-        title="독서 감상 수정하기기"
+        title="독서 감상 수정하기"
         showBackButton={true}
         showNotification={true}
         onBackClick={() => {
