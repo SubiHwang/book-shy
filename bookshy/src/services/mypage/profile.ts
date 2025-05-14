@@ -1,5 +1,5 @@
 import { authAxiosInstance } from '@/services/axiosInstance';
-import type { UserProfile } from '@/types/User/user';
+import type { UserProfile, AddressUpdateRequest } from '@/types/User/user';
 
 // 프로필 조회
 export const fetchUserProfile = async (): Promise<UserProfile> => {
@@ -25,4 +25,9 @@ export const uploadProfileImage = async (formData: FormData): Promise<{ imageUrl
     },
   });
   return res.data;
+};
+
+// 주소
+export const updateUserAddress = async (payload: AddressUpdateRequest): Promise<void> => {
+  await authAxiosInstance.put('/user/profile/address', payload);
 };
