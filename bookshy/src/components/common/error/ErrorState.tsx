@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ErrorPageProps } from '@/types/common';
 
-const ErrorPage: FC<ErrorPageProps> = ({ type, message, onRetry }) => {
+const ErrorState: FC<ErrorPageProps> = ({ type, message, onRetry }) => {
   const navigate = useNavigate();
 
   const errorConfig = {
@@ -70,4 +70,4 @@ const ErrorPage: FC<ErrorPageProps> = ({ type, message, onRetry }) => {
   );
 };
 
-export default ErrorPage;
+export default ErrorState;
