@@ -148,7 +148,7 @@ const AppLayout: FC = () => {
                   <Route path="/mypage/edit" element={<EditProfilePage />} />
 
                   {/* 그 외 경로는 홈으로 리다이렉션 */}
-                  <Route path="*" element={<ErrorState type={'not-found'} />} />
+                  <Route path="*" element={<ErrorState type={'not-found'} bgHeight='min-h-screen'/>} />
                 </Routes>
               </PrivateRoute>
             }
