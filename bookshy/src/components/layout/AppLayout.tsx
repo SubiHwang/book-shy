@@ -42,7 +42,7 @@ import ChatRoomPage from '@/pages/chat/ChatRoomPage';
 import TradeReviewPage from '@/pages/chat/TradeReviewPage';
 import LocationSetting from '@/pages/auth/LocationSetting';
 import BookNotePage from '@/pages/mybooknote/booknote/BookNotePage';
-
+import ErrorState from '../common/error/ErrorState';
 const AppLayout: FC = () => {
   const navigate = useNavigate();
   const { isLoading } = useAuth();
@@ -148,7 +148,7 @@ const AppLayout: FC = () => {
                   <Route path="/mypage/edit" element={<EditProfilePage />} />
 
                   {/* 그 외 경로는 홈으로 리다이렉션 */}
-                  <Route path="*" element={<Navigate to="/bookshelf" />} />
+                  <Route path="*" element={<ErrorState type={'not-found'} />} />
                 </Routes>
               </PrivateRoute>
             }
