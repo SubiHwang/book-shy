@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.ssafy.bookshy.domain.book.entity.Book;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 
 @Data
+@Getter
 @Builder
 public class BookListResponseDto {
 
