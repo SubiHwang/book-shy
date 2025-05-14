@@ -117,6 +117,7 @@ public class UserService {
      * @param userId 사용자 ID
      * @param dto    수정할 정보가 담긴 DTO
      */
+    @Transactional
     public void updateUserProfile(Long userId, UserProfileUpdateRequestDto dto) {
         Users user = getUserById(userId);
         user.updateProfile(
