@@ -14,6 +14,10 @@ interface WebSocketContextValue {
     roomId: number,
     onRead: (payload: ReadPayload) => void,
   ) => { unsubscribe: () => void } | null;
+  subscribeCalendarTopic: (
+    roomId: number,
+    onCalendar: (payload: any) => void,
+  ) => { unsubscribe: () => void } | null;
   unsubscribe: (sub: { unsubscribe: () => void } | null) => void;
   sendMessage: (roomId: number, senderId: number, content: string, type: string) => void;
   isConnected: boolean;
@@ -150,9 +154,61 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ c
     [],
   );
 
+  const subscribeCalendarTopic = useCallback(
+    (roomId: number, onCalendar: (payload: any) => void) => {
+      const topic = `/topic/calendar/${roomId}`;
+      const client = clientRef.current;
+
+      if (!client?.connected) {
+        console.warn('🛑 WebSocket not connected yet. Delaying calendar subscription.');
+        return null;
+      }
+
+      if (subscriptions.current.has(topic)) {
+        console.log(`🟡 Already subscribed to ${topic}`);
+        return {
+          unsubscribe: () => {
+            subscriptions.current.get(topic)?.unsubscribe();
+            subscriptions.current.delete(topic);
+            console.log(`❌ Unsubscribed from ${topic}`);
+          },
+        };
+      }
+
+      console.log(`📡 Subscribing to calendar topic: ${topic}`);
+      const sub = client.subscribe(topic, (frame) => {
+        try {
+          const payload = JSON.parse(frame.body);
+          onCalendar(payload);
+        } catch (e) {
+          console.error('❌ Calendar message parsing failed', e);
+        }
+      });
+
+      subscriptions.current.set(topic, sub);
+      console.log(`✅ Subscribed to ${topic}`);
+
+      return {
+        unsubscribe: () => {
+          sub.unsubscribe();
+          subscriptions.current.delete(topic);
+          console.log(`❌ Unsubscribed from ${topic}`);
+        },
+      };
+    },
+    [],
+  );
+
   return (
     <WebSocketContext.Provider
-      value={{ subscribeRoom, subscribeReadTopic, unsubscribe, sendMessage, isConnected }}
+      value={{
+        subscribeRoom,
+        subscribeReadTopic,
+        subscribeCalendarTopic,
+        unsubscribe,
+        sendMessage,
+        isConnected,
+      }}
     >
       {children}
     </WebSocketContext.Provider>
