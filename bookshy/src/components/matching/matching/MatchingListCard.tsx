@@ -25,20 +25,20 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
     try {
       console.log('📡 createChatRoom 요청 시작:', {
         user1Id: myUserId,
-        user2Id: matching.id,
+        user2Id: matching.userId,
       });
 
       const { roomId } = await createChatRoom({
         user1Id: myUserId,
-        user2Id: matching.id,
+        user2Id: matching.userId,
       });
 
       console.log('✅ 채팅방 생성 성공, roomId:', roomId);
 
       navigate(`/chat/${roomId}`, {
         state: {
-          partnerName: matching.name,
-          partnerProfileImage: matching.profileImage,
+          partnerName: matching.nickname,
+          partnerProfileImage: matching.profileImageUrl,
         },
       });
       console.log('🚀 채팅방으로 이동 완료');
@@ -87,8 +87,8 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
           {/* 프로필 이미지 */}
           <div className="w-10 h-10 sm:w-12 sm:h-12 overflow-hidden flex-shrink-0">
             <img
-              src={matching.profileImage || '#'}
-              alt={matching.name}
+              src={matching.profileImageUrl || '#'}
+              alt={matching.nickname}
               className="w-full h-full object-cover rounded-full border"
             />
           </div>
@@ -97,16 +97,16 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
           <div className="flex flex-col justify-center">
             <div className="flex items-center flex-wrap gap-1 sm:gap-2">
               <div className="text-light-text">
-                <span className="text-base sm:text-lg font-bold">{matching.name}</span>
+                <span className="text-base sm:text-lg font-bold">{matching.nickname}</span>
                 <span className="text-sm sm:text-md font-medium"> 님</span>
               </div>
 
               <div className="badge bg-primary-light/30">
-                <p className="text-primary text-xs sm:text-sm">북끄지수 {matching.shyScore}</p>
+                <p className="text-primary text-xs sm:text-sm">북끄지수 {matching.temperature}</p>
               </div>
             </div>
             <div className="text-xs sm:text-sm text-light-text-muted mt-0.5 sm:mt-1">
-              <p>{matching.location}</p>
+              <p>{matching.address}</p>
             </div>
           </div>
         </div>
@@ -114,7 +114,7 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
         {/* 매칭률 배지 */}
         <div className="badge bg-primary-light/30 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full ml-auto">
           <p className="text-primary text-xs sm:text-sm font-medium">
-            {matching.matchingPercent || '?'}% 매칭률
+            {matching.score || '?'}% 매칭률
           </p>
         </div>
       </div>
@@ -127,7 +127,7 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
             내가 읽고 싶은 책 :{' '}
           </span>
           <div className="flex flex-wrap">
-            {matching.myWishBooks.map((myWishBook, index) => (
+            {matching.myBookName.map((myWishBook, index) => (
               <div
                 key={index}
                 className="badge bg-light-status-success/20 mx-0.5 sm:mx-1 mb-1 whitespace-nowrap"
@@ -146,7 +146,7 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
             상대가 읽고 싶은 책:{' '}
           </span>
           <div className="flex flex-wrap">
-            {matching.yourWishBooks.map((yourWishBook, index) => (
+            {matching.otherBookName.map((yourWishBook, index) => (
               <div
                 key={index}
                 className="badge bg-light-status-info/20 mx-0.5 sm:mx-1 mb-1 whitespace-nowrap"
@@ -176,19 +176,19 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
         <div className="bg-light-bg-shade rounded-b">
           <div className="text-center py-2 px-3 sm:m-4 font-light flex flex-col gap-1">
             <p className="text-xs sm:text-sm">
-              {matching.name} 님은 내 책{' '}
-              <span className="text-light-status-info">{matching.yourWishBooks.length} 권</span>에
+              {matching.nickname} 님은 내 책{' '}
+              <span className="text-light-status-info">{matching.otherBookName.length} 권</span>에
               관심이 있고
             </p>
             <p className="text-xs sm:text-sm">
               내가 원하는 책{' '}
-              <span className="text-light-status-success">{matching.myWishBooks.length} 권</span>을
+              <span className="text-light-status-success">{matching.myBookName.length} 권</span>을
               가지고 있어요.
             </p>
           </div>
           <div className="flex justify-center gap-2 sm:gap-0 flex-wrap pb-3 sm:mb-4 px-2">
             <button
-              onClick={() => handleClickNeighborsBookshelf(matching.id)}
+              onClick={() => handleClickNeighborsBookshelf(matching.userId)}
               className="bg-white text-light-text-secondary mx-1 sm:mx-3 text-xs sm:text-sm font-extralight px-2 sm:px-4 py-1 rounded-md border border-light-text-secondary/30 flex items-center"
             >
               <BookMarked width={16} height={16} strokeWidth={0.5} className="mx-1 sm:mx-2" />
