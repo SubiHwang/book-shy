@@ -13,11 +13,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -186,7 +188,7 @@ public class BookController {
             @AuthenticationPrincipal Users user
     ) {
         Library library = libraryRepository.findById(libraryId)
-                .orElseThrow(() -> new RuntimeException("서재 항목이 존재하지 않습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "서재 항목이 존재하지 않습니다."));
         Book book = library.getBook();
         boolean isLiked = bookService.isBookLiked(user.getUserId(), book);
         return ResponseEntity.ok(BookLibraryResponseDto.from(book, library.isPublic(), isLiked));

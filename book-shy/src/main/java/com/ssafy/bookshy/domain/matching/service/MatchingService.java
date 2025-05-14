@@ -1,17 +1,22 @@
 package com.ssafy.bookshy.domain.matching.service;
 
+import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
+import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
 import com.ssafy.bookshy.domain.library.entity.Library;
 import com.ssafy.bookshy.domain.library.repository.LibraryRepository;
-import com.ssafy.bookshy.domain.matching.dto.MatchConfirmRequestDto;
+import com.ssafy.bookshy.domain.matching.dto.MatchChatRequestDto;
+import com.ssafy.bookshy.domain.matching.dto.MatchResponseDto;
 import com.ssafy.bookshy.domain.matching.dto.MatchingDto;
+import com.ssafy.bookshy.domain.matching.dto.MatchingPageResponseDto;
 import com.ssafy.bookshy.domain.matching.entity.Matching;
+import com.ssafy.bookshy.domain.matching.event.MatchCreatedEvent;
 import com.ssafy.bookshy.domain.matching.repository.MatchingRepository;
 import com.ssafy.bookshy.domain.matching.util.MatchingScoreCalculator;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
-import com.ssafy.bookshy.kafka.dto.MatchSuccessDto;
 import com.ssafy.bookshy.kafka.producer.KafkaProducer;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +34,8 @@ public class MatchingService {
     private final UserRepository userRepository;
     private final MatchingRepository matchingRepository;
     private final KafkaProducer kafkaProducer;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public List<MatchingDto> findMatchingCandidates(Long myUserId) {
         // 🔹 1. 내 정보 가져오기
@@ -52,17 +60,33 @@ public class MatchingService {
 
             // 🔹 5. 서로 조건이 맞는다면 매칭 후보 생성
             if (!theirBooksIMightWant.isEmpty() && !myBooksTheyMightWant.isEmpty()) {
-                Library myBook = myBooksTheyMightWant.get(0);
-                Library theirBook = theirBooksIMightWant.get(0);
 
-                // 🔹 6. 점수 계산
+                List<Long> myBookIds = new ArrayList<>();
+                List<String> myBookNames = new ArrayList<>();
+                for (Library l : myBooksTheyMightWant) {
+                    myBookIds.add(l.getBook().getId());
+                    myBookNames.add(l.getBook().getTitle());
+                }
+
+                List<Long> otherBookIds = new ArrayList<>();
+                List<String> otherBookNames = new ArrayList<>();
+                for (Library l : theirBooksIMightWant) {
+                    otherBookIds.add(l.getBook().getId());
+                    otherBookNames.add(l.getBook().getTitle());
+                }
+
                 double score = MatchingScoreCalculator.totalScore(me, other);
 
-                // 🔹 7. DTO 생성
                 MatchingDto dto = MatchingDto.builder()
-                        .bookAId(myBook.getBook().getId())          // 내가 줄 책
-                        .bookBId(theirBook.getBook().getId())       // 내가 받을 책
-                        .status("PENDING")
+                        .userId(other.getUserId())
+                        .nickname(other.getNickname())
+                        .address(other.getAddress())
+                        .profileImageUrl(other.getProfileImageUrl())
+                        .temperature(other.getTemperature() != null ? Math.round(other.getTemperature()) : 36)
+                        .myBookId(myBookIds)
+                        .myBookName(myBookNames)
+                        .otherBookId(otherBookIds)
+                        .otherBookName(otherBookNames)
                         .matchedAt(LocalDateTime.now())
                         .score(score)
                         .build();
@@ -71,27 +95,23 @@ public class MatchingService {
             }
         }
 
-        // 🔹 8. 점수 높은 순으로 정렬해서 반환
         return result.stream()
                 .sorted(Comparator.comparingDouble(MatchingDto::getScore).reversed())
                 .toList();
     }
 
-    // 점수 순 + 거리 순 정렬 후 상위 3명만 반환
-    public List<MatchingDto> findTop3Candidates(Long myUserId) {
+    // 점수 순 + 거리 순 정렬 후 목록 반환
+    public List<MatchingDto> findCandidates(Long myUserId) {
         List<MatchingDto> all = findMatchingCandidates(myUserId);
 
         return all.stream()
                 .sorted(Comparator.comparingDouble(MatchingDto::getScore).reversed())
-                .limit(3)
                 .toList();
     }
 
     @Transactional
-    public Long confirmMatching(Long senderId, MatchConfirmRequestDto dto) {
+    public MatchResponseDto chatMatching(Long senderId, MatchChatRequestDto dto) {
         Matching match = Matching.builder()
-                .bookAId(dto.getBookAId())
-                .bookBId(dto.getBookBId())
                 .senderId(senderId)
                 .receiverId(dto.getReceiverId())
                 .matchedAt(LocalDateTime.now())
@@ -100,17 +120,48 @@ public class MatchingService {
 
         matchingRepository.save(match);
 
-        MatchSuccessDto event = MatchSuccessDto.builder()
+        applicationEventPublisher.publishEvent(new MatchCreatedEvent(match));
+
+        Long chatRoomId = waitForChatRoomCreation(match.getMatchId());
+
+        return MatchResponseDto.builder()
                 .matchId(match.getMatchId())
-                .userAId(senderId)
-                .userBId(dto.getReceiverId())
-                .bookAId(dto.getBookAId())
-                .bookBId(dto.getBookBId())
-                .matchedAt(match.getMatchedAt().toString())
+                .chatRoomId(chatRoomId)
                 .build();
+    }
 
-        kafkaProducer.sendMatchSuccessEvent(event);
+    public MatchingPageResponseDto findPagedCandidates(Long myUserId, int page, int size) {
+        List<MatchingDto> all = findMatchingCandidates(myUserId);
+        int total = all.size();
 
-        return match.getMatchId();
+        int fromIndex = Math.min((page - 1) * size, total);
+        int toIndex = Math.min(page * size, total);
+        List<MatchingDto> pageResult = all.subList(fromIndex, toIndex);
+
+        return MatchingPageResponseDto.builder()
+                .candidates(pageResult)
+                .totalPages((int) Math.ceil((double) total / size))
+                .currentPage(page)
+                .results(total)
+                .build();
+    }
+
+    private Long waitForChatRoomCreation(Long matchId) {
+        int retries = 20;
+        int delayMillis = 500;
+
+        for (int i = 0; i < retries; i++) {
+            Optional<ChatRoom> roomOpt = chatRoomRepository.findByMatching_MatchId(matchId);
+            if (roomOpt.isPresent()) {
+                return roomOpt.get().getId();
+            }
+            try {
+                Thread.sleep(delayMillis);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        throw new IllegalStateException("채팅방 생성이 지연되고 있습니다.");
     }
 }

@@ -18,12 +18,6 @@ public class Matching {
     @Column(name = "match_id")
     private Long matchId;
 
-    @Column(name = "book_a_id", nullable = false)
-    private Long bookAId;
-
-    @Column(name = "book_b_id", nullable = false)
-    private Long bookBId;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
     @Builder.Default
