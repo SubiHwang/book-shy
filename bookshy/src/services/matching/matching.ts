@@ -13,11 +13,16 @@ export const getMatchingList = async () => {
   }
 };
 
-export const getChatId = async () => {
+export const getChatId = async (receiverId: number) => {
   try {
-    const response = await authAxiosInstance.get<string, MatchingConfirmResponse>('/matching/chat');
+    const response = await authAxiosInstance.post<string, MatchingConfirmResponse>(
+      '/matching/chat',
+      {
+        receiverId: receiverId,
+      },
+    );
     console.log('매칭 확정 요청 api 호출 응답', response);
-    return response
+    return response;
   } catch (error) {
     console.log('매칭 확정 요청 api 조회 중 에러 발생', error);
     throw error;
