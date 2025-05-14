@@ -51,7 +51,6 @@ public class ChatRoom extends TimeStampEntity {
         this.lastMessageTimestamp = timestamp;
     }
 
-    @Builder
     public ChatRoom(Long id) {
         this.id = id;
     }

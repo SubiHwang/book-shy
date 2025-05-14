@@ -100,15 +100,6 @@ public class MatchingService {
                 .toList();
     }
 
-    // 점수 순 + 거리 순 정렬 후 목록 반환
-    public List<MatchingDto> findCandidates(Long myUserId) {
-        List<MatchingDto> all = findMatchingCandidates(myUserId);
-
-        return all.stream()
-                .sorted(Comparator.comparingDouble(MatchingDto::getScore).reversed())
-                .toList();
-    }
-
     @Transactional
     public MatchResponseDto chatMatching(Long senderId, MatchChatRequestDto dto) {
         Matching match = Matching.builder()
@@ -117,16 +108,21 @@ public class MatchingService {
                 .matchedAt(LocalDateTime.now())
                 .status(Matching.Status.ACCEPTED)
                 .build();
-
         matchingRepository.save(match);
+
+        ChatRoom chatRoom = chatRoomRepository.save(
+                ChatRoom.builder()
+                        .matching(match)
+                        .userAId(match.getSenderId())
+                        .userBId(match.getReceiverId())
+                        .build()
+        );
 
         applicationEventPublisher.publishEvent(new MatchCreatedEvent(match));
 
-        Long chatRoomId = waitForChatRoomCreation(match.getMatchId());
-
         return MatchResponseDto.builder()
                 .matchId(match.getMatchId())
-                .chatRoomId(chatRoomId)
+                .chatRoomId(chatRoom.getId())
                 .build();
     }
 
@@ -144,24 +140,5 @@ public class MatchingService {
                 .currentPage(page)
                 .results(total)
                 .build();
-    }
-
-    private Long waitForChatRoomCreation(Long matchId) {
-        int retries = 20;
-        int delayMillis = 500;
-
-        for (int i = 0; i < retries; i++) {
-            Optional<ChatRoom> roomOpt = chatRoomRepository.findByMatching_MatchId(matchId);
-            if (roomOpt.isPresent()) {
-                return roomOpt.get().getId();
-            }
-            try {
-                Thread.sleep(delayMillis);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-
-        throw new IllegalStateException("채팅방 생성이 지연되고 있습니다.");
     }
 }
