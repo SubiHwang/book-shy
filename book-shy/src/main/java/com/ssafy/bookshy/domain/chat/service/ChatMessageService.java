@@ -75,7 +75,7 @@ public class ChatMessageService {
                 .chatRoom(chatRoom)
                 .senderId(userId)
                 .content(request.getContent())
-                .timestamp(LocalDateTime.now())
+                .timestamp(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
                 .type(request.getType())
                 .build();
 
