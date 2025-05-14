@@ -79,4 +79,9 @@ public class BookQuoteService {
         return BookQuoteResponseDto.from(quote, book);
     }
 
+    // userId, bookId로 인용구 존재 여부 확인
+    public BookQuote findEntityByUserIdAndBookId(Long userId, Long bookId) {
+        return bookQuoteRepository.findByUserIdAndBookId(userId, bookId);
+    }
+
 }

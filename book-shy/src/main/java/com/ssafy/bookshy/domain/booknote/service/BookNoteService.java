@@ -85,6 +85,9 @@ public class BookNoteService {
         return BookNoteResponseDto.from(note, book);
     }
 
-
+    // userId, bookId로 독후감 존재 여부 확인
+    public BookNote findEntityByUserIdAndBookId(Long userId, Long bookId) {
+        return bookNoteRepository.findByUserIdAndBookId(userId, bookId);
+    }
 
 }
