@@ -10,6 +10,10 @@ spring:
       ddl-auto: validate  # ✅ 운영에서는 테이블 구조 변경을 금지하고 유효성만 검사
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false       # ✅ 운영에서는 SQL 로그 미출력
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Seoul
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
