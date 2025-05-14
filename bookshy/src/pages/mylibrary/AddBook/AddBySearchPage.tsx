@@ -84,7 +84,6 @@ const AddBySearchPage: FC = () => {
 
       // 성공 알림 및 서재 페이지로 이동
       toast.success('책이 성공적으로 등록되었습니다!');
-      navigate('/bookshelf');
     } catch (error) {
       console.error('책 추가 중 오류 발생:', error);
       toast.error('책 추가에 실패했습니다. 다시 시도해주세요.');
