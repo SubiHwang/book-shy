@@ -13,6 +13,8 @@ spring:
     properties:
       hibernate:
         format_sql: true # ✅ SQL을 보기 좋게 포맷팅
+        jdbc:
+          time_zone: Asia/Seoul
 
   kafka:
     bootstrap-servers: ${KAFKA.BOOTSTRAP-SERVERS}

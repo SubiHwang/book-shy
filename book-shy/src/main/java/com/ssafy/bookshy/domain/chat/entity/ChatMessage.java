@@ -54,6 +54,10 @@ public class ChatMessage extends TimeStampEntity {
         this.emoji = emoji;
     }
 
+    public void removeEmoji() {
+        this.emoji = null;
+    }
+
     public void markAsRead() {
         this.isRead = true;
     }

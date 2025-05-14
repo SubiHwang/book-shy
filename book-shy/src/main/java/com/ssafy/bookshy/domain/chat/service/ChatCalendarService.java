@@ -5,6 +5,7 @@ import com.ssafy.bookshy.domain.chat.entity.ChatCalendar;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatCalendarRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ public class ChatCalendarService {
 
     private final ChatCalendarRepository chatCalendarRepository;
     private final ChatMessageService chatMessageService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     /**
      * 📆 특정 날짜에 해당하는 사용자의 거래 일정을 조회합니다.
@@ -71,9 +73,13 @@ public class ChatCalendarService {
                 .type("info")
                 .build(), userId);
 
-        // ✅ 응답 반환
+        // ✅ 캘린더 정보 실시간 전송
+        ChatCalendarEventDto CalendarCreatedDto = ChatCalendarEventDto.from(saved);
+        long chatRoomId = dto.getRoomId();
+        messagingTemplate.convertAndSend("/topic/calendar/" + chatRoomId, CalendarCreatedDto); // 📡 소켓 전송
+
         return ChatCalendarCreateResponseDto.builder()
-                .eventId(saved.getCalendarId())
+                .eventId(chatRoomId)
                 .status("SUCCESS")
                 .message("일정이 등록되었습니다.")
                 .build();
