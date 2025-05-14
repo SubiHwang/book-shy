@@ -1,4 +1,6 @@
-export interface ErrorStateProps {
-  error: Error | null;
-  onRetry: () => void;
+export type ErrorType = 'not-found' | 'unauthorized' | 'server-error';
+export interface ErrorPageProps {
+  type: ErrorType;
+  message?: string;
+  onRetry?: () => void;
 }
