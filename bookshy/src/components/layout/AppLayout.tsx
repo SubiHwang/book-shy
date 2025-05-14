@@ -127,7 +127,7 @@ const AppLayout: FC = () => {
                   </Route>
 
                   <Route path="/booknotes/detail/:bookId" element={<BookNoteDetailPage />} />
-                  <Route path="/booknotes/full/:bookId" element={<BookNoteFullPage />} />
+                  <Route path="/booknotes/full/:libraryId" element={<BookNoteFullPage />} />
                   <Route path="/booknotes/edit/:bookId" element={<BookNoteEditPage />} />
                   <Route path="/booknotes/create" element={<BookNoteCreatePage />} />
                   <Route path="/booknotes/select" element={<BookNoteSelectPage />} />

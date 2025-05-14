@@ -31,7 +31,8 @@ const MyBookNotePage = () => {
     const quote = quotes.find((q) => q.bookId === book.libraryId);
 
     return {
-      bookId: book.libraryId,
+      libraryId: book.libraryId,
+      bookId: book.bookId,
       title: book.title,
       author: book.author,
       coverUrl: book.coverImageUrl,
