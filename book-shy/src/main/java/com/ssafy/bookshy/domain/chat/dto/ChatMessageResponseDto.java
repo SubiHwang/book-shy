@@ -25,7 +25,7 @@ public class ChatMessageResponseDto {
     private String type;
     private LocalDateTime sentAt;
     private boolean isRead;
-    private List<String> emojis;
+    private String emoji;
 
     public static ChatMessageResponseDto from(ChatMessage message, String senderNickname) {
         return ChatMessageResponseDto.builder()
@@ -37,7 +37,7 @@ public class ChatMessageResponseDto {
                 .sentAt(message.getTimestamp())
                 .type(message.getType())
                 .isRead(message.isRead())
-                .emojis(message.getEmojis())
+                .emoji(message.getEmoji())
                 .build();
     }
 }
