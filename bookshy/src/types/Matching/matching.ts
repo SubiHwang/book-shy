@@ -12,6 +12,13 @@ export interface MatchingRecommendation {
   score: number;
 }
 
+export interface MatchingRecommendationResponse {
+  candidates: MatchingRecommendation[];
+  currentPage: number;
+  results: number;
+  totalPages: number;
+}
+
 export interface Neighborhood {
   userId: number;
   name: string;
