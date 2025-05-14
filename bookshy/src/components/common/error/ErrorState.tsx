@@ -26,7 +26,7 @@ const ErrorState: FC<ErrorPageProps> = ({ type, message, onRetry, bgHeight="" })
     },
     'server-error': {
       title: '일시적인 오류가 발생했습니다',
-      description: message || '서버 또는 네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+      description: message || `서버 또는 네트워크 오류가 발생했습니다. \n잠시 후 다시 시도해주세요.`,
       logoData: '/logo/error/500Error.svg',
       primaryAction: {
         label: '다시 시도',
@@ -38,15 +38,15 @@ const ErrorState: FC<ErrorPageProps> = ({ type, message, onRetry, bgHeight="" })
   const { title, description, logoData, primaryAction } = errorConfig[type];
 
   return (
-    <div className={`flex flex-col items-center justify-center px-4 py-12 ${bgHeight}`}>
+    <div className={`flex flex-col items-center justify-center px-16 py-12 ${bgHeight}`}>
       <div className="w-full max-w-md mx-auto text-center">
-        <div className="mb-6 mx-auto w-52 h-52">
+        <div className="mx-auto w-40 h-40">
           <img src={logoData} alt={`${type} 오류 이미지`} />
         </div>
 
         <h1 className="text-2xl font-bold text-[#5e4b39] mb-2">{title}</h1>
 
-        <p className="text-sm text-[#8a7b70] mb-8">{description}</p>
+        <p className="text-sm text-[#8a7b70] mb-8 whitespace-pre-line">{description}</p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
