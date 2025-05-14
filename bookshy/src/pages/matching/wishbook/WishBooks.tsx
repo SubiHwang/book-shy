@@ -97,7 +97,7 @@ const WishBooks: FC = () => {
         </div>
       </div>
 
-      <div>
+      <div className="pb-4">
         {filteredBooks.length > 0 ? (
           <div>
             {filteredBooks.map((book: WishBook) => (

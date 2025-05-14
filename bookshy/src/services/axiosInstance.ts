@@ -92,6 +92,14 @@ authAxiosInstance.interceptors.response.use(
           });
 
           const { accessToken, refreshToken } = response.data;
+          if (!accessToken) {
+            // 로그아웃 처리
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('refresh_token');
+            window.location.href = '/login';
+            return Promise.reject(error);
+          }
+
           localStorage.setItem('auth_token', accessToken);
 
           if (refreshToken) {
