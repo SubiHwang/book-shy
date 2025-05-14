@@ -134,6 +134,10 @@ public class KafkaEventConsumer {
             messagingTemplate.convertAndSend(destination, saved);
             log.info("📢 [KafkaConsumer] ChatMessage sent to WebSocket destination '{}'", destination);
 
+            // 🔥 채팅 목록 갱신용 브로드캐스트
+            messagingTemplate.convertAndSend("/topic/chat/-1", saved);
+            log.info("📢 [KafkaConsumer] ChatMessage also sent to '/topic/chat/-1'");
+
             ack.acknowledge(); // ✅ 커밋
             log.info("✅ [KafkaConsumer] Offset committed for topic '{}'", record.topic());
         } catch (Exception e) {
