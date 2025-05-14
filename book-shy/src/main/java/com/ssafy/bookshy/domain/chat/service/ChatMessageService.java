@@ -2,6 +2,7 @@ package com.ssafy.bookshy.domain.chat.service;
 
 import com.ssafy.bookshy.domain.chat.dto.ChatMessageRequestDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatMessageResponseDto;
+import com.ssafy.bookshy.domain.chat.dto.EmojiUpdatePayload;
 import com.ssafy.bookshy.domain.chat.dto.ReadReceiptPayload;
 import com.ssafy.bookshy.domain.chat.entity.ChatMessage;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
@@ -132,7 +133,16 @@ public class ChatMessageService {
         ChatMessage message = chatMessageRepository.findById(messageId)
                 .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다."));
 
-        message.addEmoji(emoji); // 항상 덮어씀 (addEmoji 내부 수정 필요)
+        message.addEmoji(emoji);
+
+        // WebSocket 발행
+        EmojiUpdatePayload payload = new EmojiUpdatePayload(
+                message.getId(),
+                emoji,
+                "ADD",
+                message.getSenderId() // 또는 현재 유저 ID
+        );
+        messagingTemplate.convertAndSend("/topic/chat/emoji/" + message.getChatRoom().getId(), payload);
     }
 
     /**
@@ -148,6 +158,15 @@ public class ChatMessageService {
                 .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다."));
 
         message.removeEmoji();
+
+        // WebSocket 발행
+        EmojiUpdatePayload payload = new EmojiUpdatePayload(
+                message.getId(),
+                null,
+                "REMOVE",
+                message.getSenderId() // 또는 현재 유저 ID
+        );
+        messagingTemplate.convertAndSend("/topic/chat/emoji/" + message.getChatRoom().getId(), payload);
     }
 
     /**
