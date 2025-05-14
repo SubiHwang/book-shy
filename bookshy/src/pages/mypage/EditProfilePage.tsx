@@ -76,7 +76,7 @@ const EditProfilePage = () => {
 
   const handleImageChange = async (file: File) => {
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('imageFile', file);
 
     try {
       const res = await uploadProfileImage(formData);
