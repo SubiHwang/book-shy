@@ -3,9 +3,12 @@ import { FC, useEffect, useState } from 'react';
 import { MapPin, Locate, Search } from 'lucide-react';
 import { useLocationFetcher } from '@/hooks/location/useLocationFetcher';
 import { useNavigate } from 'react-router-dom';
+import { updateUserAddress } from '@/services/mypage/profile';
+import type { AddressUpdateRequest } from '@/types/User/user';
 
 const LocationSetting: FC = () => {
   const { fetchCurrentLocation, address, loading, error } = useLocationFetcher();
+
   const [isGpasEnabled, setIsGpsEnabled] = useState<boolean>(true);
   const navigate = useNavigate();
 
@@ -41,12 +44,21 @@ const LocationSetting: FC = () => {
     checkGpsAvailability();
   }, []);
 
-  const handleAddressSelect = () => {
-    // 주소 선택 처리 로직
-    if (address) {
-      // 여기에 주소 저장 로직 추가
-      // 저장 후 메인 페이지로 이동
+  const handleAddressSelect = async () => {
+    try {
+      if (!address) return;
+
+      const payload: AddressUpdateRequest = {
+        address,
+        latitude: 0, // 여기에 실 GPS 위도값 넣기
+        longitude: 0, // 여기에 실 GPS 경도값 넣기
+      };
+
+      await updateUserAddress(payload);
       navigate('/');
+    } catch (err) {
+      console.error('주소 저장 중 오류 발생:', err);
+      alert('주소 저장에 실패했습니다.');
     }
   };
 

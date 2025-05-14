@@ -9,3 +9,9 @@ export interface UserProfile {
   latitude: number | null;
   longitude: number | null;
 }
+
+export interface AddressUpdateRequest {
+  address: string;
+  latitude: number;
+  longitude: number;
+}
