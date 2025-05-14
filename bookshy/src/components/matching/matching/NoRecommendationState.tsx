@@ -21,7 +21,13 @@ const NoRecommendationState: FC<NoRecommendationStateProps> = ({ onRetry }) => {
           <span className="text-xs sm:text-sm">매칭 다시 시도하기</span>
         </button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 p-3 sm:p-4">
+      <div className="px-5 sm:px-8 md:px-10 py-3 sm:py-4">
+        <h2 className="text-primary-dark font-medium text-base mb-2">
+              주변 이웃들의 서재를 둘러보세요
+            </h2>
+            <p className="text-light-text-secondary font-light text-xs sm:text-sm mb-4">
+              더 많은 매칭 기회를 찾을 수 있어요!
+            </p>
         <NeighborhoodList />
       </div>
     </div>
