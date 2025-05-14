@@ -59,7 +59,7 @@ const ErrorState: FC<ErrorPageProps> = ({ type, message, onRetry, bgHeight="" })
           {type !== 'not-found' && (
             <button
               onClick={() => navigate(-1)}
-              className="px-6 py-3 bg-[#F8F0E5] text-[#5e4b39] border border-primary-accent rounded-lg shadow-sm font-medium"
+              className="px-6 py-3 bg-transparent text-[#5e4b39] border border-primary-accent rounded-lg shadow-sm font-medium"
             >
               이전 페이지로
             </button>
