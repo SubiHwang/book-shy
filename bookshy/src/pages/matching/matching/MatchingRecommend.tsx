@@ -7,33 +7,9 @@ import NeighborhoodList from '@/components/matching/matching/NeighborhoodList';
 import Loading from '@/components/common/Loading';
 import { getMatchingList } from '@/services/matching/matching';
 
-// 에러 상태를 표시하는 컴포넌트
-interface ErrorStateProps {
-  error: Error | null;
-  onRetry: () => void;
-}
-
-const ErrorState: FC<ErrorStateProps> = ({ error, onRetry }) => {
-  return (
-    <div className="flex flex-col items-center justify-center p-10 text-center">
-      <p className="text-red-500 mb-4">데이터를 불러오는 중 오류가 발생했습니다.</p>
-      <p className="text-light-text-secondary text-sm mb-6">
-        {error?.message || '알 수 없는 오류'}
-      </p>
-      <button
-        onClick={onRetry}
-        className="px-4 py-2 bg-primary-dark text-white rounded-md hover:bg-primary-dark/90 transition-colors"
-      >
-        다시 시도
-      </button>
-    </div>
-  );
-};
-
 const MatchingRecommend: FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [matchingList, setMatchingList] = useState<MatchingRecommendation[]>([]);
-  const [error, setError] = useState<Error | null>(null);
 
   // 매칭이 충분한지 확인하는 상수 (3개 이하면 적다고 판단)
   const MIN_SUFFICIENT_MATCHES = 3;
@@ -42,21 +18,26 @@ const MatchingRecommend: FC = () => {
 
   const getMatchings = async () => {
     setIsLoading(true);
-    setError(null);
     try {
       const response = await getMatchingList();
-      setMatchingList(response || []);
+      console.log('API 응답:', response); // 응답 전체 확인
+      console.log('candidates 존재 여부:', !!response.candidates); // candidates가 있는지 확인
+      console.log('candidates 내용:', response.candidates); // candidates 내용 확인
+      setMatchingList(response.candidates || []);
     } catch (error) {
       console.log('retry 실패', error);
-      setError(error instanceof Error ? error : new Error('알 수 없는 오류가 발생했습니다'));
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    getMatchings();
-  }, []);
+// matchingList 상태 업데이트 후 로그 추가
+useEffect(() => {
+  console.log('업데이트된 matchingList:', matchingList);
+  console.log('matchingList 길이:', matchingList.length);
+  console.log('hasFewMatches:', hasFewMatches); // true여야 함 (0 < 길이 <= 3)
+  console.log('hasSufficientMatches:', hasSufficientMatches); // false여야 함 (길이 <= 3)
+}, [matchingList]);
 
   return (
     <div className="flex flex-col bg-light-bg">
@@ -83,8 +64,6 @@ const MatchingRecommend: FC = () => {
       </div>
       {isLoading ? (
         <Loading loadingText="매칭 추천을 불러오는 중..." />
-      ) : error ? (
-        <ErrorState error={error} onRetry={getMatchings} />
       ) : hasSufficientMatches ? (
         <MatchingList matchings={matchingList} />
       ) : hasFewMatches ? (
