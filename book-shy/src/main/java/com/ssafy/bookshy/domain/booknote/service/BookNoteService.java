@@ -71,15 +71,20 @@ public class BookNoteService {
     @Transactional(readOnly = true)
     public BookNoteResponseDto findNoteResponseByUserIdAndBookId(Long userId, Long bookId) {
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new IllegalArgumentException("도서 정보를 찾을 수 없습니다."));
+                .orElse(null);
+
+        if (book == null) {
+            return null; // 도서 자체가 존재하지 않으면 null
+        }
 
         BookNote note = bookNoteRepository.findByUserIdAndBookId(userId, bookId);
         if (note == null) {
-            throw new IllegalArgumentException("해당 도서에 대한 독후감이 존재하지 않습니다.");
+            return null; // 독후감이 없으면 null
         }
 
         return BookNoteResponseDto.from(note, book);
     }
+
 
 
 }

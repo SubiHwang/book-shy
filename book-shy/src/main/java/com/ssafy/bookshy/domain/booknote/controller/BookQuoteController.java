@@ -131,7 +131,8 @@ public class BookQuoteController {
             @RequestParam Long bookId,
             @AuthenticationPrincipal Users user
     ) {
-        return ResponseEntity.ok(bookQuoteService.findOneQuoteResponseByUserIdAndBookId(user.getUserId(), bookId));
+        BookQuoteResponseDto response = bookQuoteService.findOneQuoteResponseByUserIdAndBookId(user.getUserId(), bookId);
+        return ResponseEntity.ok(response); // response == null 이면, JSON null 응답
     }
 
 }
