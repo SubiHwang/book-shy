@@ -133,7 +133,9 @@ public class BookNoteController {
             @RequestParam Long bookId,
             @AuthenticationPrincipal Users user
     ) {
-        return ResponseEntity.ok(bookNoteService.findNoteResponseByUserIdAndBookId(user.getUserId(), bookId));
+        BookNoteResponseDto dto = bookNoteService.findNoteResponseByUserIdAndBookId(user.getUserId(), bookId);
+
+        return ResponseEntity.ok(dto); // null이면 JSON null 반환
     }
 
 }
