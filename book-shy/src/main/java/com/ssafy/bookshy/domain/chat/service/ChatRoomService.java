@@ -98,4 +98,8 @@ public class ChatRoomService {
                 .build();
         return chatRoomRepository.save(chatRoom);
     }
+
+    public Optional<ChatRoom> findByMatchId(Long matchId) {
+        return chatRoomRepository.findByMatching_MatchId(matchId);
+    }
 }
