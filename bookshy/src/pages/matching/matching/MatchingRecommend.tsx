@@ -1,43 +1,62 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Zap } from 'lucide-react';
 import { MatchingRecommendation } from '@/types/Matching';
 import NoRecommendationState from '@/components/matching/matching/NoRecommendationState';
 import MatchingList from '@/components/matching/matching/MatchingList';
+import NeighborhoodList from '@/components/matching/matching/NeighborhoodList';
 import Loading from '@/components/common/Loading';
+import { getMatchingList } from '@/services/matching/matching';
+
+// 에러 상태를 표시하는 컴포넌트
+interface ErrorStateProps {
+  error: Error | null;
+  onRetry: () => void;
+}
+
+const ErrorState: FC<ErrorStateProps> = ({ error, onRetry }) => {
+  return (
+    <div className="flex flex-col items-center justify-center p-10 text-center">
+      <p className="text-red-500 mb-4">데이터를 불러오는 중 오류가 발생했습니다.</p>
+      <p className="text-light-text-secondary text-sm mb-6">
+        {error?.message || '알 수 없는 오류'}
+      </p>
+      <button
+        onClick={onRetry}
+        className="px-4 py-2 bg-primary-dark text-white rounded-md hover:bg-primary-dark/90 transition-colors"
+      >
+        다시 시도
+      </button>
+    </div>
+  );
+};
 
 const MatchingRecommend: FC = () => {
-  const dummyData: MatchingRecommendation[] = [
-    {
-      id: 1,
-      name: '마이콜',
-      profileImage: '/images/profile.png',
-      matchingPercent: 85,
-      shyScore: 85,
-      location: '구미시 진평동',
-      myWishBooks: ['이기적 유전자', '자존감 수업', '어떻게 원하는 것을 얻는가'],
-      yourWishBooks: ['호모데우스', '정의란 무엇인가'],
-    },
-    {
-      id: 2,
-      name: '제니',
-      profileImage: '/images/profile.png',
-      matchingPercent: 65,
-      shyScore: 85,
-      location: '구미시 진평동',
-      myWishBooks: ['이기적 유전자'],
-      yourWishBooks: ['호모데우스'],
-    },
-  ];
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [matchingList, setMatchingList] = useState<MatchingRecommendation[]>([]);
+  const [error, setError] = useState<Error | null>(null);
 
-  const handleRetryMatching = (): void => {
+  // 매칭이 충분한지 확인하는 상수 (3개 이하면 적다고 판단)
+  const MIN_SUFFICIENT_MATCHES = 3;
+  const hasSufficientMatches = matchingList.length > MIN_SUFFICIENT_MATCHES;
+  const hasFewMatches = matchingList.length > 0 && matchingList.length <= MIN_SUFFICIENT_MATCHES;
+
+  const getMatchings = async () => {
     setIsLoading(true);
-    // API 호출을 시뮬레이션합니다
-    setTimeout(() => {
+    setError(null);
+    try {
+      const response = await getMatchingList();
+      setMatchingList(response || []);
+    } catch (error) {
+      console.log('retry 실패', error);
+      setError(error instanceof Error ? error : new Error('알 수 없는 오류가 발생했습니다'));
+    } finally {
       setIsLoading(false);
-      // 필요에 따라 데이터를 업데이트합니다
-    }, 1500);
+    }
   };
+
+  useEffect(() => {
+    getMatchings();
+  }, []);
 
   return (
     <div className="flex flex-col bg-light-bg">
@@ -51,10 +70,11 @@ const MatchingRecommend: FC = () => {
         <p className="text-light-text-secondary font-light text-xs sm:text-sm leading-tight sm:leading-normal">
           읽고 싶은 책, 보유 도서, 위치, 북끄 지수 등을 고려한 알고리즘으로 최적의 교환 상대를 추천
           해드려요.{' '}
-          {dummyData.length > 0 ? (
+          {matchingList.length > 0 ? (
             <span>
-              현재 <span className="text-primary-accent font-medium">총 {dummyData.length}명</span>
-              의 사용자와 매칭 되었어요.
+              현재{' '}
+              <span className="text-primary-accent font-medium">총 {matchingList.length}명</span>의
+              사용자와 매칭 되었어요.
             </span>
           ) : (
             <span>현재 매칭된 사용자가 없어요.</span>
@@ -63,10 +83,27 @@ const MatchingRecommend: FC = () => {
       </div>
       {isLoading ? (
         <Loading loadingText="매칭 추천을 불러오는 중..." />
-      ) : dummyData.length > 0 ? (
-        <MatchingList matchings={dummyData} />
+      ) : error ? (
+        <ErrorState error={error} onRetry={getMatchings} />
+      ) : hasSufficientMatches ? (
+        <MatchingList matchings={matchingList} />
+      ) : hasFewMatches ? (
+        <>
+          <MatchingList matchings={matchingList} />
+          <div className="px-5 sm:px-8 md:px-10 py-3 sm:py-4">
+            <h2 className="text-primary-dark font-medium text-base mb-2">
+              주변 이웃들의 서재도 둘러보세요
+            </h2>
+            <p className="text-light-text-secondary font-light text-xs sm:text-sm mb-4">
+              더 많은 매칭 기회를 찾을 수 있어요!
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 p-3 sm:p-4">
+              <NeighborhoodList />
+            </div>
+          </div>
+        </>
       ) : (
-        <NoRecommendationState onRetry={handleRetryMatching} />
+        <NoRecommendationState onRetry={getMatchings} />
       )}
     </div>
   );
