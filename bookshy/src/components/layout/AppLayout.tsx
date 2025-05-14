@@ -64,6 +64,7 @@ const AppLayout: FC = () => {
           {/* 공개 라우트 - 로그인하지 않아도 접근 가능 */}
           <Route path="/login" element={<Login />} />
           <Route path="/oauth" element={<KaKaoOauth />} />
+          <Route path="/500" element={<ErrorState type="server-error" bgHeight="min-h-screen" />} />
 
           {/* 보호된 라우트 - 로그인해야만 접근 가능 */}
           <Route
@@ -147,8 +148,11 @@ const AppLayout: FC = () => {
                   {/* ✅ 독립적인 프로필 수정 페이지 (레이아웃 없음) */}
                   <Route path="/mypage/edit" element={<EditProfilePage />} />
 
-                  {/* 그 외 경로는 홈으로 리다이렉션 */}
-                  <Route path="*" element={<ErrorState type={'not-found'} bgHeight='min-h-screen'/>} />
+                  {/* 그 외 경로는 404 not found 에러 처리 컴포넌트 보여주기 */}
+                  <Route
+                    path="*"
+                    element={<ErrorState type={'not-found'} bgHeight="min-h-screen" />}
+                  />
                 </Routes>
               </PrivateRoute>
             }
