@@ -37,7 +37,7 @@ const MyLibraryPage: React.FC = () => {
 
   // 배너 데이터 상태를 초기값으로 바로 설정
   const [bannerData] = useState<AllBannersData>(initialBannerData);
-  const [isLoading, setIsLoading] = useState(false); // 기본값을 false로 설정
+  const [isLoading] = useState(false); // 기본값을 false로 설정
   const [error] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 
