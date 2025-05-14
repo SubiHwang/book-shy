@@ -64,6 +64,13 @@ function ChatMessageItem({
           >
             {message.content}
           </div>
+
+          {selectedEmoji && (
+            <div className="mt-2 flex justify-end items-center gap-1 text-xs">
+              <span>{selectedEmoji}</span>
+              <span className="text-[10px] text-black/70">1</span>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col justify-end gap-[2px] pb-1">
