@@ -14,13 +14,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.ZoneId;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -164,7 +164,7 @@ public class UserService {
      */
     private void uploadImageToServer(MultipartFile imageFile, String fileName) {
         try {
-            Path uploadPath = Paths.get("/app/images/profile"); // 🛣️ 저장 경로
+            Path uploadPath = Paths.get("/home/ubuntu/bookshy/images/profile"); // 🛣️ 저장 경로
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
@@ -185,9 +185,9 @@ public class UserService {
      * 📍 사용자 주소 및 위치 정보를 수정합니다.
      * 주로 최초 위치 설정 시 사용됩니다.
      *
-     * @param userId 사용자 ID
-     * @param address 주소 문자열
-     * @param latitude 위도 (null 허용)
+     * @param userId    사용자 ID
+     * @param address   주소 문자열
+     * @param latitude  위도 (null 허용)
      * @param longitude 경도 (null 허용)
      */
     @Transactional

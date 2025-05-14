@@ -98,9 +98,9 @@ public class UserController {
     @Operation(
             summary = "🖼️ 프로필 이미지 수정 API",
             description = """
-        ✅ 사용자의 프로필 이미지를 수정합니다.  
-        🔐 인증된 사용자만 접근 가능하며, 이미지 업로드 후 URL을 반환합니다.
-        """
+                    ✅ 사용자의 프로필 이미지를 수정합니다.  
+                    🔐 인증된 사용자만 접근 가능하며, 이미지 업로드 후 URL을 반환합니다.
+                    """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "업로드 성공 🎉"),
@@ -111,7 +111,7 @@ public class UserController {
     @PutMapping(value = "/profile/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, Object>> updateProfileImage(
             @AuthenticationPrincipal Users user,
-            @RequestPart("image") MultipartFile imageFile
+            @RequestPart("imageFile") MultipartFile imageFile
     ) {
         String imageUrl = userService.updateProfileImage(user.getUserId(), imageFile);
         Map<String, Object> response = new HashMap<>();
@@ -124,10 +124,10 @@ public class UserController {
     @Operation(
             summary = "📍 주소 및 위치 정보 수정 API",
             description = """
-                사용자의 주소와 위치(위도, 경도)를 별도로 수정합니다.  
-                주로 서비스 최초 사용 시 위치 설정에 활용됩니다.  
-                🔐 인증된 사용자만 접근 가능합니다.
-                """
+                    사용자의 주소와 위치(위도, 경도)를 별도로 수정합니다.  
+                    주로 서비스 최초 사용 시 위치 설정에 활용됩니다.  
+                    🔐 인증된 사용자만 접근 가능합니다.
+                    """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "주소 수정 성공 🎉"),
@@ -144,12 +144,12 @@ public class UserController {
                     content = @Content(
                             schema = @Schema(implementation = UserAddressUpdateRequestDto.class),
                             examples = @ExampleObject(value = """
-                                {
-                                  "address": "서울특별시 강남구 역삼동",
-                                  "latitude": 37.5012743,
-                                  "longitude": 127.039585
-                                }
-                                """)
+                                    {
+                                      "address": "서울특별시 강남구 역삼동",
+                                      "latitude": 37.5012743,
+                                      "longitude": 127.039585
+                                    }
+                                    """)
                     )
             )
             @org.springframework.web.bind.annotation.RequestBody UserAddressUpdateRequestDto requestDto
