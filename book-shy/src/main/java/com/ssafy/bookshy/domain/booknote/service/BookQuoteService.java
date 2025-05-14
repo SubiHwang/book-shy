@@ -72,9 +72,11 @@ public class BookQuoteService {
 
         BookQuote quote = bookQuoteRepository.findByUserIdAndBookId(userId, bookId);
         if (quote == null) {
-            throw new IllegalArgumentException("해당 도서에 대한 인용구가 존재하지 않습니다.");
+            // 인용구가 없는 경우 null 반환 (컨트롤러에서 200 OK로 처리됨)
+            return null;
         }
 
         return BookQuoteResponseDto.from(quote, book);
     }
+
 }
