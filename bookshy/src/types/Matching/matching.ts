@@ -19,6 +19,11 @@ export interface MatchingRecommendationResponse {
   totalPages: number;
 }
 
+export interface MatchingConfirmResponse {
+  matchId: number;
+  chatRoomId: number;
+}
+
 export interface Neighborhood {
   userId: number;
   name: string;
