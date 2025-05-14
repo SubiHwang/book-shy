@@ -34,4 +34,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             "AND DATE(m.timestamp) = :date")
     List<ChatRoom> findChatRoomsByUserIdAndDate(@Param("userId") Long userId,
                                                 @Param("date") LocalDate date);
+
+    Optional<ChatRoom> findByMatching_MatchId(Long matchId);
 }

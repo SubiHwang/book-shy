@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.matching.controller;
 
 import com.ssafy.bookshy.domain.matching.dto.MatchChatRequestDto;
+import com.ssafy.bookshy.domain.matching.dto.MatchResponseDto;
 import com.ssafy.bookshy.domain.matching.dto.MatchingPageResponseDto;
 import com.ssafy.bookshy.domain.matching.service.MatchingService;
 import com.ssafy.bookshy.domain.users.entity.Users;
@@ -36,25 +37,21 @@ public class MatchingController {
 
     @Operation(
             summary = "✅ 매칭 확정 요청",
-            description = "선택한 책과 상대방 ID를 기반으로 매칭 요청을 보냅니다. Kafka 이벤트를 통해 채팅방이 생성됩니다."
+            description = "매칭 조건에 맞는 상대방 ID를 기반으로 매칭 요청을 보냅니다. Kafka 이벤트를 통해 채팅방이 생성됩니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "매칭 요청 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
     })
     @PostMapping("/chat")
-    public ResponseEntity<Long> chatMatching(
+    public ResponseEntity<MatchResponseDto> chatMatching(
             @Parameter(hidden = true) @AuthenticationPrincipal Users user,
-            @RequestParam @Parameter(description = "내가 줄 책의 ID", example = "10") Long bookAId,
-            @RequestParam @Parameter(description = "상대가 가진 책의 ID", example = "20") Long bookBId,
-            @RequestParam @Parameter(description = "상대 사용자 ID", example = "2") Long receiverId) {
+            @RequestParam @Parameter(description = "상대 사용자 ID", example = "1") Long receiverId) {
 
         MatchChatRequestDto requestDto = new MatchChatRequestDto();
-        requestDto.setBookAId(bookAId);
-        requestDto.setBookBId(bookBId);
         requestDto.setReceiverId(receiverId);
 
-        Long matchId = matchingService.chatMatching(user.getUserId(), requestDto);
-        return ResponseEntity.ok(matchId);
+        MatchResponseDto response = matchingService.chatMatching(user.getUserId(), requestDto);
+        return ResponseEntity.ok(response);
     }
 }

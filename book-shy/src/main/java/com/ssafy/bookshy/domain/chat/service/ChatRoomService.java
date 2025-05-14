@@ -5,6 +5,7 @@ import com.ssafy.bookshy.domain.chat.dto.CreateChatRoomRequestDto;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatMessageRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
+import com.ssafy.bookshy.domain.matching.entity.Matching;
 import com.ssafy.bookshy.domain.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -82,7 +83,7 @@ public class ChatRoomService {
      * @return 생성되거나 기존의 채팅방
      */
     @Transactional
-    public ChatRoom createChatRoomFromMatch(Long userAId, Long userBId) {
+    public ChatRoom createChatRoomFromMatch(Long userAId, Long userBId, Long matchId) {
         // 🔄 1. 이미 존재하는 채팅방이 있는지 확인
         Optional<ChatRoom> existing = chatRoomRepository.findByParticipants(userAId, userBId);
         if (existing.isPresent()) {
@@ -90,7 +91,11 @@ public class ChatRoomService {
         }
 
         // 🆕 2. 새로운 채팅방 생성 및 저장
-        ChatRoom chatRoom = new ChatRoom(userAId, userBId);
+        ChatRoom chatRoom = ChatRoom.builder()
+                .userAId(userAId)
+                .userBId(userBId)
+                .matching(Matching.builder().matchId(matchId).build())
+                .build();
         return chatRoomRepository.save(chatRoom);
     }
 }

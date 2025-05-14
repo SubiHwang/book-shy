@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.chat.entity;
 
 import com.ssafy.bookshy.common.entity.TimeStampEntity;
+import com.ssafy.bookshy.domain.matching.entity.Matching;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,8 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "chat_room")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class ChatRoom extends TimeStampEntity {
 
     @Id
@@ -27,6 +31,10 @@ public class ChatRoom extends TimeStampEntity {
 
     private String lastMessage;              // ✅ 마지막 메시지
     private LocalDateTime lastMessageTimestamp; // ✅ 마지막 메시지 시간
+
+    @OneToOne
+    @JoinColumn(name = "match_id", unique = true)
+    private Matching matching;
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatMessage> messages = new ArrayList<>();

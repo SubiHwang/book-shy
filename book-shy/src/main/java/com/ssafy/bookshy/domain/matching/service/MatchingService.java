@@ -1,18 +1,22 @@
 package com.ssafy.bookshy.domain.matching.service;
 
+import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
+import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
 import com.ssafy.bookshy.domain.library.entity.Library;
 import com.ssafy.bookshy.domain.library.repository.LibraryRepository;
 import com.ssafy.bookshy.domain.matching.dto.MatchChatRequestDto;
+import com.ssafy.bookshy.domain.matching.dto.MatchResponseDto;
 import com.ssafy.bookshy.domain.matching.dto.MatchingDto;
 import com.ssafy.bookshy.domain.matching.dto.MatchingPageResponseDto;
 import com.ssafy.bookshy.domain.matching.entity.Matching;
+import com.ssafy.bookshy.domain.matching.event.MatchCreatedEvent;
 import com.ssafy.bookshy.domain.matching.repository.MatchingRepository;
 import com.ssafy.bookshy.domain.matching.util.MatchingScoreCalculator;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
-import com.ssafy.bookshy.kafka.dto.MatchSuccessDto;
 import com.ssafy.bookshy.kafka.producer.KafkaProducer;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +34,8 @@ public class MatchingService {
     private final UserRepository userRepository;
     private final MatchingRepository matchingRepository;
     private final KafkaProducer kafkaProducer;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public List<MatchingDto> findMatchingCandidates(Long myUserId) {
         // 🔹 1. 내 정보 가져오기
@@ -103,10 +110,8 @@ public class MatchingService {
     }
 
     @Transactional
-    public Long chatMatching(Long senderId, MatchChatRequestDto dto) {
+    public MatchResponseDto chatMatching(Long senderId, MatchChatRequestDto dto) {
         Matching match = Matching.builder()
-                .bookAId(dto.getBookAId())
-                .bookBId(dto.getBookBId())
                 .senderId(senderId)
                 .receiverId(dto.getReceiverId())
                 .matchedAt(LocalDateTime.now())
@@ -115,18 +120,14 @@ public class MatchingService {
 
         matchingRepository.save(match);
 
-        MatchSuccessDto event = MatchSuccessDto.builder()
+        applicationEventPublisher.publishEvent(new MatchCreatedEvent(match));
+
+        Long chatRoomId = waitForChatRoomCreation(match.getMatchId());
+
+        return MatchResponseDto.builder()
                 .matchId(match.getMatchId())
-                .userAId(senderId)
-                .userBId(dto.getReceiverId())
-                .bookAId(dto.getBookAId())
-                .bookBId(dto.getBookBId())
-                .matchedAt(match.getMatchedAt().toString())
+                .chatRoomId(chatRoomId)
                 .build();
-
-        kafkaProducer.sendMatchSuccessEvent(event);
-
-        return match.getMatchId();
     }
 
     public MatchingPageResponseDto findPagedCandidates(Long myUserId, int page, int size) {
@@ -143,5 +144,24 @@ public class MatchingService {
                 .currentPage(page)
                 .results(total)
                 .build();
+    }
+
+    private Long waitForChatRoomCreation(Long matchId) {
+        int retries = 20;
+        int delayMillis = 500;
+
+        for (int i = 0; i < retries; i++) {
+            Optional<ChatRoom> roomOpt = chatRoomRepository.findByMatching_MatchId(matchId);
+            if (roomOpt.isPresent()) {
+                return roomOpt.get().getId();
+            }
+            try {
+                Thread.sleep(delayMillis);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        throw new IllegalStateException("채팅방 생성이 지연되고 있습니다.");
     }
 }

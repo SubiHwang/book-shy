@@ -78,7 +78,7 @@ public class KafkaEventConsumer {
             log.info("🤝 Match Success Event received: {}", event);
 
             // 🎯 채팅방 생성
-            ChatRoom chatRoom = chatRoomService.createChatRoomFromMatch(event.getUserAId(), event.getUserBId());
+            ChatRoom chatRoom = chatRoomService.createChatRoomFromMatch(event.getUserAId(), event.getUserBId(), event.getMatchId());
             log.info("💬 ChatRoom created for matchId {} -> chatRoomId={}", event.getMatchId(), chatRoom.getId());
 
             // 🔔 매칭 완료 알림 전송
