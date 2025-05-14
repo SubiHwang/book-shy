@@ -138,6 +138,12 @@ authAxiosInstance.interceptors.response.use(
       }
     }
 
+    // 500 에러 확인 
+    if (!error.response || error.response.status >= 500) {
+      // 서버 에러이면 에러 페이지로 이동
+      window.location.href = '/500';
+    }
+
     return Promise.reject(error);
   },
 );
@@ -165,6 +171,11 @@ publicAxiosInstance.interceptors.response.use(
     return response.data; // 응답 데이터만 반환
   },
   (error: AxiosError) => {
+    // 500 에러 확인 
+    if (!error.response || error.response.status >= 500) {
+      // 서버 에러이면 에러 페이지로 이동
+      window.location.href = '/500';
+    }
     return Promise.reject(error);
   },
 );
