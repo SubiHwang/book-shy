@@ -2,8 +2,9 @@ package com.ssafy.bookshy.domain.matching.service;
 
 import com.ssafy.bookshy.domain.library.entity.Library;
 import com.ssafy.bookshy.domain.library.repository.LibraryRepository;
-import com.ssafy.bookshy.domain.matching.dto.MatchConfirmRequestDto;
+import com.ssafy.bookshy.domain.matching.dto.MatchChatRequestDto;
 import com.ssafy.bookshy.domain.matching.dto.MatchingDto;
+import com.ssafy.bookshy.domain.matching.dto.MatchingPageResponseDto;
 import com.ssafy.bookshy.domain.matching.entity.Matching;
 import com.ssafy.bookshy.domain.matching.repository.MatchingRepository;
 import com.ssafy.bookshy.domain.matching.util.MatchingScoreCalculator;
@@ -52,17 +53,33 @@ public class MatchingService {
 
             // 🔹 5. 서로 조건이 맞는다면 매칭 후보 생성
             if (!theirBooksIMightWant.isEmpty() && !myBooksTheyMightWant.isEmpty()) {
-                Library myBook = myBooksTheyMightWant.get(0);
-                Library theirBook = theirBooksIMightWant.get(0);
 
-                // 🔹 6. 점수 계산
+                List<Long> myBookIds = new ArrayList<>();
+                List<String> myBookNames = new ArrayList<>();
+                for (Library l : myBooksTheyMightWant) {
+                    myBookIds.add(l.getBook().getId());
+                    myBookNames.add(l.getBook().getTitle());
+                }
+
+                List<Long> otherBookIds = new ArrayList<>();
+                List<String> otherBookNames = new ArrayList<>();
+                for (Library l : theirBooksIMightWant) {
+                    otherBookIds.add(l.getBook().getId());
+                    otherBookNames.add(l.getBook().getTitle());
+                }
+
                 double score = MatchingScoreCalculator.totalScore(me, other);
 
-                // 🔹 7. DTO 생성
                 MatchingDto dto = MatchingDto.builder()
-                        .bookAId(myBook.getBook().getId())          // 내가 줄 책
-                        .bookBId(theirBook.getBook().getId())       // 내가 받을 책
-                        .status("PENDING")
+                        .userId(other.getUserId())
+                        .nickname(other.getNickname())
+                        .address(other.getAddress())
+                        .profileImageUrl(other.getProfileImageUrl())
+                        .temperature(other.getTemperature() != null ? Math.round(other.getTemperature()) : 36)
+                        .myBookId(myBookIds)
+                        .myBookName(myBookNames)
+                        .otherBookId(otherBookIds)
+                        .otherBookName(otherBookNames)
                         .matchedAt(LocalDateTime.now())
                         .score(score)
                         .build();
@@ -71,7 +88,6 @@ public class MatchingService {
             }
         }
 
-        // 🔹 8. 점수 높은 순으로 정렬해서 반환
         return result.stream()
                 .sorted(Comparator.comparingDouble(MatchingDto::getScore).reversed())
                 .toList();
@@ -87,7 +103,7 @@ public class MatchingService {
     }
 
     @Transactional
-    public Long confirmMatching(Long senderId, MatchConfirmRequestDto dto) {
+    public Long chatMatching(Long senderId, MatchChatRequestDto dto) {
         Matching match = Matching.builder()
                 .bookAId(dto.getBookAId())
                 .bookBId(dto.getBookBId())
@@ -111,5 +127,21 @@ public class MatchingService {
         kafkaProducer.sendMatchSuccessEvent(event);
 
         return match.getMatchId();
+    }
+
+    public MatchingPageResponseDto findPagedCandidates(Long myUserId, int page, int size) {
+        List<MatchingDto> all = findMatchingCandidates(myUserId);
+        int total = all.size();
+
+        int fromIndex = Math.min((page - 1) * size, total);
+        int toIndex = Math.min(page * size, total);
+        List<MatchingDto> pageResult = all.subList(fromIndex, toIndex);
+
+        return MatchingPageResponseDto.builder()
+                .candidates(pageResult)
+                .totalPages((int) Math.ceil((double) total / size))
+                .currentPage(page)
+                .results(total)
+                .build();
     }
 }
