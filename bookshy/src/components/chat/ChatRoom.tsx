@@ -20,6 +20,7 @@ import { getUserIdFromToken } from '@/utils/jwt.ts';
 interface Props {
   partnerName: string;
   partnerProfileImage: string;
+  initialMessages?: ChatMessage[];
 }
 
 function ChatRoom({ partnerName, partnerProfileImage }: Props) {
