@@ -38,6 +38,22 @@ public class ChatMessageController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(
+            summary = "❌ 이모지 삭제",
+            description = "😢 채팅 메시지에 등록된 이모지를 삭제합니다.",
+            parameters = {
+                    @Parameter(name = "messageId", description = "💬 이모지를 삭제할 메시지 ID", required = true, example = "123")
+            }
+    )
+    @DeleteMapping("/{messageId}/emoji")
+    public ResponseEntity<Void> removeEmoji(
+            @PathVariable Long messageId
+    ) {
+        chatMessageService.removeEmojiFromMessage(messageId);
+        return ResponseEntity.ok().build();
+    }
+
+
     /**
      * ✅ 채팅방 메시지 읽음 처리
      */

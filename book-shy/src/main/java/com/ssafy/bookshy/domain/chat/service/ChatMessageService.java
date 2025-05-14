@@ -135,6 +135,20 @@ public class ChatMessageService {
         message.addEmoji(emoji); // 항상 덮어씀 (addEmoji 내부 수정 필요)
     }
 
+    /**
+     * 🧸 특정 메시지에 이모지를 삭제
+     *
+     * - 메시지 존재 여부 확인
+     *
+     * @param messageId 메시지 ID
+     */
+    @Transactional
+    public void removeEmojiFromMessage(Long messageId) {
+        ChatMessage message = chatMessageRepository.findById(messageId)
+                .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다."));
+
+        message.removeEmoji();
+    }
 
     /**
      * ✅ 채팅방 내 읽지 않은 메시지들을 읽음 처리
