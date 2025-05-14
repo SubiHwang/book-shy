@@ -1,7 +1,9 @@
 import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import Lottie from 'lottie-react';
 import { ErrorPageProps } from '@/types/common';
+import Error401 from '@/assets/logo/error/401Error.svg'
+import Error500 from '@/assets/logo/error/500Error.svg'
+import Error404 from '@/assets/logo/error/404Error.svg'
 
 const ErrorPage: FC<ErrorPageProps> = ({ type, message, onRetry }) => {
   const navigate = useNavigate();
@@ -10,7 +12,7 @@ const ErrorPage: FC<ErrorPageProps> = ({ type, message, onRetry }) => {
     'not-found': {
       title: '페이지를 찾을 수 없습니다',
       description: message || '요청하신 페이지가 존재하지 않거나 이동되었습니다.',
-      // animationData: notFoundAnimation,
+      logoData: Error404,
       primaryAction: {
         label: '홈으로 돌아가기',
         onClick: () => navigate('/'),
@@ -19,7 +21,7 @@ const ErrorPage: FC<ErrorPageProps> = ({ type, message, onRetry }) => {
     unauthorized: {
       title: '로그인이 필요합니다',
       description: message || '이 페이지에 접근하려면 로그인이 필요합니다.',
-      // animationData: unauthorizedAnimation,
+      logoData: Error401,
       primaryAction: {
         label: '로그인하기',
         onClick: () => navigate('/login'),
@@ -28,7 +30,7 @@ const ErrorPage: FC<ErrorPageProps> = ({ type, message, onRetry }) => {
     'server-error': {
       title: '일시적인 오류가 발생했습니다',
       description: message || '서버 또는 네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
-      // animationData: serverErrorAnimation,
+      logoData: Error500,
       primaryAction: {
         label: '다시 시도',
         onClick: onRetry || (() => window.location.reload()),
@@ -36,12 +38,12 @@ const ErrorPage: FC<ErrorPageProps> = ({ type, message, onRetry }) => {
     },
   };
 
-  const { title, description, primaryAction } = errorConfig[type];
+  const { title, description, logoData, primaryAction } = errorConfig[type];
 
   const defaultOptions = {
     loop: true,
     autoplay: true,
-    // animationData: animationData,
+    logoData: logoData,
     rendererSettings: {
       preserveAspectRatio: 'xMidYMid slice',
     },
@@ -50,9 +52,9 @@ const ErrorPage: FC<ErrorPageProps> = ({ type, message, onRetry }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4 py-12">
       <div className="w-full max-w-md mx-auto text-center">
-        {/* <div className="mb-8 mx-auto w-52 h-52">
-          <Lottie options={defaultOptions} />
-        </div> */}
+        <div className="mb-8 mx-auto w-52 h-52">
+          <img src={defaultOptions.logoData} alt="" />
+        </div>
 
         <h1 className="text-2xl font-bold text-gray-800 mb-2">{title}</h1>
 
