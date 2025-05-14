@@ -118,7 +118,7 @@ const AddBySearchPage: FC = () => {
         </div>
         <p className="text-xl font-light text-white text-center mb-3">등록할 책을 검색하세요.</p>
         {/* 직접 구현한 검색바 */}
-        <div className="relative flex items-center w-full px-4">
+        <div className="relative flex items-center w-full px-4 mb-5">
           <input
             type="text"
             placeholder="등록할 책 검색(책 제목, 저자, 출판사)"
@@ -135,9 +135,6 @@ const AddBySearchPage: FC = () => {
           </button>
         </div>
       </div>
-
-      {/* 인기검색어 섹션 대신 추가하는 빈 공간 */}
-      <div className="bg-primary-light py-5"></div>
 
       {/* 메인 콘텐츠 영역 */}
       <div>
