@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ErrorPageProps } from '@/types/common';
 
-const ErrorState: FC<ErrorPageProps> = ({ type, message, onRetry }) => {
+const ErrorState: FC<ErrorPageProps> = ({ type, message, onRetry, bgHeight="" }) => {
   const navigate = useNavigate();
 
   const errorConfig = {
@@ -38,20 +38,20 @@ const ErrorState: FC<ErrorPageProps> = ({ type, message, onRetry }) => {
   const { title, description, logoData, primaryAction } = errorConfig[type];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4 py-12">
+    <div className={`flex flex-col items-center justify-center px-4 py-12 ${bgHeight}`}>
       <div className="w-full max-w-md mx-auto text-center">
-        <div className="mb-8 mx-auto w-52 h-52">
+        <div className="mb-6 mx-auto w-52 h-52">
           <img src={logoData} alt={`${type} 오류 이미지`} />
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">{title}</h1>
+        <h1 className="text-2xl font-bold text-[#5e4b39] mb-2">{title}</h1>
 
-        <p className="text-gray-600 mb-8">{description}</p>
+        <p className="text-sm text-[#8a7b70] mb-8">{description}</p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
             onClick={primaryAction.onClick}
-            className="px-6 py-3 bg-primary-dark text-white rounded-lg hover:bg-primary-dark/90 transition-colors shadow-sm font-medium"
+            className="px-6 py-3 bg-primary-accent text-white rounded-lg shadow-sm font-medium"
           >
             {primaryAction.label}
           </button>
@@ -59,7 +59,7 @@ const ErrorState: FC<ErrorPageProps> = ({ type, message, onRetry }) => {
           {type !== 'not-found' && (
             <button
               onClick={() => navigate(-1)}
-              className="px-6 py-3 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm font-medium"
+              className="px-6 py-3 bg-[#F8F0E5] text-[#5e4b39] border border-primary-accent rounded-lg shadow-sm font-medium"
             >
               이전 페이지로
             </button>
