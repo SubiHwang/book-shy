@@ -4,10 +4,7 @@ import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
 import com.ssafy.bookshy.domain.library.entity.Library;
 import com.ssafy.bookshy.domain.library.repository.LibraryRepository;
-import com.ssafy.bookshy.domain.matching.dto.MatchChatRequestDto;
-import com.ssafy.bookshy.domain.matching.dto.MatchResponseDto;
-import com.ssafy.bookshy.domain.matching.dto.MatchingDto;
-import com.ssafy.bookshy.domain.matching.dto.MatchingPageResponseDto;
+import com.ssafy.bookshy.domain.matching.dto.*;
 import com.ssafy.bookshy.domain.matching.entity.Matching;
 import com.ssafy.bookshy.domain.matching.event.MatchCreatedEvent;
 import com.ssafy.bookshy.domain.matching.repository.MatchingRepository;
@@ -20,10 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -194,5 +189,24 @@ public class MatchingService {
                 .currentPage(page)
                 .results(total)
                 .build();
+    }
+
+    public List<NearbyUserResponseDto> findNearbyUsers(Users me) {
+        List<Users> others = userRepository.findAllExcept(me.getUserId());
+
+        return others.stream()
+                .filter(u -> u.getLatitude() != null && u.getLongitude() != null)
+                .map(u -> {
+                    double distance = MatchingScoreCalculator.calculateDistance(
+                            me.getLatitude(), me.getLongitude(),
+                            u.getLatitude(), u.getLongitude()
+                    );
+                    return new AbstractMap.SimpleEntry<Users, Double>(u, distance);
+                })
+                .filter(entry -> entry.getValue() <= 20.0)
+                .sorted(Map.Entry.comparingByValue())
+                .limit(10)
+                .map(entry -> new NearbyUserResponseDto(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
     }
 }

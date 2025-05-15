@@ -19,8 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -179,7 +178,7 @@ public class UserService {
     public void updateLastActiveAt(Long userId) {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
-        user.updateLastActiveAt(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
+        user.updateLastActiveAt(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime());
     }
 
     /**
