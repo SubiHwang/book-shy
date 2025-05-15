@@ -111,16 +111,35 @@ public class KakaoService {
     public String getKakaoAccessTokenForUser(String authorizationCode) {
         log.info("카카오 액세스 토큰 발급 시작 - 인가 코드: {}", authorizationCode);
 
+        // 디버깅을 위한 시스템 정보 출력
+        log.info("=== 환경 정보 ===");
+        log.info("spring.profiles.active: {}", System.getProperty("spring.profiles.active"));
+        log.info("SPRING_PROFILES_ACTIVE: {}", System.getenv("SPRING_PROFILES_ACTIVE"));
+        log.info("server.port: {}", System.getProperty("server.port"));
+        log.info("user.name: {}", System.getProperty("user.name"));
+        log.info("os.name: {}", System.getProperty("os.name"));
+        log.info("java.command: {}", System.getProperty("sun.java.command"));
+
+        try {
+            log.info("hostname: {}", java.net.InetAddress.getLocalHost().getHostName());
+            log.info("host address: {}", java.net.InetAddress.getLocalHost().getHostAddress());
+        } catch (Exception e) {
+            log.error("Failed to get host info", e);
+        }
+
+        // 환경 판별
+        boolean isLocal = isLocalEnvironment();
+        log.info("로컬 환경 여부: {}", isLocal);
+
         // 현재 환경에 따라 리다이렉트 URL 결정
         String currentRedirectUri = kakaoConfig.getRedirectUri();
         log.info("🟡 기본 리다이렉트 URI: {}", currentRedirectUri);
 
-        // 로컬 환경 감지
-        if (isLocalEnvironment()) {
-            currentRedirectUri = "http://localhost:5173/oauth";  // 프론트엔드 URL에 맞게
-            log.info("🔵 로컬 환경 감지 - 리다이렉트 URI를 localhost로 변경: {}", currentRedirectUri);
+        if (isLocal) {
+            currentRedirectUri = "http://localhost:5173/oauth";
+            log.info("🔵 로컬 환경 감지 - 리다이렉트 URI 변경: {}", currentRedirectUri);
         } else {
-            log.info("🟢 운영 환경 - 기본 리다이렉트 URI 사용: {}", currentRedirectUri);
+            log.info("🟢 운영 환경 - 기본 URI 유지: {}", currentRedirectUri);
         }
 
         try {
