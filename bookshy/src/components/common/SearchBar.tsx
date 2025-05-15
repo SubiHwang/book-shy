@@ -1,7 +1,7 @@
 import { ChangeEvent, FC, KeyboardEvent } from 'react';
 import { Search } from 'lucide-react';
 import { SearchBarProps } from '@/types/Matching';
-const SearchBar: FC<SearchBarProps> = ({ onSearch, value, onChange }) => {
+const SearchBar: FC<SearchBarProps> = ({ onSearch, value, onChange, placeholder }) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
   };
@@ -16,7 +16,7 @@ const SearchBar: FC<SearchBarProps> = ({ onSearch, value, onChange }) => {
     <div className="relative flex items-center w-full">
       <input
         type="text"
-        placeholder="읽고 싶은 책 검색(책 제목, 저자, 출판사)"
+        placeholder={placeholder}
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
