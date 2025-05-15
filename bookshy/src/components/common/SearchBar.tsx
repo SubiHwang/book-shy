@@ -1,31 +1,13 @@
-import { ChangeEvent, FC, KeyboardEvent, useState, useEffect, useRef, ReactNode } from 'react';
+import { ChangeEvent, FC, KeyboardEvent, useState, useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { SearchBarProps } from '@/types/Matching';
 import { useBookSuggestions } from '@/hooks/wishbook/useBookSuggestions';
-
+import highlightMatch from '@/utils/highlightMatch';
 interface AutocompleteSearchBarProps extends SearchBarProps {
   suggestions?: string[]; // 정적 제안 목록 (선택적)
   maxSuggestions?: number; // 최대 표시할 제안 수
   minQueryLength?: number; // 자동완성 시작을 위한 최소 글자 수
 }
-
-// 하이라이트 유틸리티 함수
-const highlightMatch = (text: string, query: string): ReactNode => {
-  if (!query || query.length < 2) return text;
-  
-  // 특수문자 이스케이프 처리
-  const safeQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp(`(${safeQuery})`, 'gi');
-  const parts = text.split(regex);
-  
-  return parts.map((part, i) => {
-    // 대소문자 구분 없이 일치 여부 확인
-    if (part.toLowerCase() === query.toLowerCase()) {
-      return <span key={i} className="text-primary font-medium">{part}</span>;
-    }
-    return part;
-  });
-};
 
 const SearchBar: FC<AutocompleteSearchBarProps> = ({ 
   onSearch, 
