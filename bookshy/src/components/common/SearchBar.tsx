@@ -2,7 +2,8 @@ import { ChangeEvent, FC, KeyboardEvent, useState, useEffect, useRef } from 'rea
 import { Search } from 'lucide-react';
 import { SearchBarProps } from '@/types/Matching';
 import { useBookSuggestions } from '@/hooks/wishbook/useBookSuggestions';
-import highlightMatch from '@/utils/highlightMatch';
+import SuggestionList from '@/components/common/SearchBarSuggestionList';
+
 interface AutocompleteSearchBarProps extends SearchBarProps {
   suggestions?: string[]; // 정적 제안 목록 (선택적)
   maxSuggestions?: number; // 최대 표시할 제안 수
@@ -22,6 +23,7 @@ const SearchBar: FC<AutocompleteSearchBarProps> = ({
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<number>(-1);
   
+  // 참조 객체들
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -49,6 +51,9 @@ const SearchBar: FC<AutocompleteSearchBarProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  /**
+   * 입력값 변경 핸들러
+   */
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     onChange(newValue);
@@ -62,8 +67,11 @@ const SearchBar: FC<AutocompleteSearchBarProps> = ({
     setActiveSuggestionIndex(-1);
   };
 
+  /**
+   * 키보드 이벤트 핸들러
+   */
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    // 자동완성 선택 및 탐색 기능
+    // 엔터 키 - 선택 또는 검색 실행
     if (e.key === 'Enter') {
       if (activeSuggestionIndex >= 0 && allSuggestions[activeSuggestionIndex]) {
         e.preventDefault();
@@ -93,11 +101,21 @@ const SearchBar: FC<AutocompleteSearchBarProps> = ({
     }
   };
 
-  // 제안 선택 함수
+  /**
+   * 제안 선택 함수
+   */
   const selectSuggestion = (suggestion: string) => {
     onChange(suggestion);
     setShowSuggestions(false);
     inputRef.current?.focus();
+  };
+
+  /**
+   * 검색 버튼 클릭 핸들러
+   */
+  const handleSearchClick = () => {
+    onSearch({ key: 'Enter' } as KeyboardEvent<HTMLInputElement>);
+    setShowSuggestions(false);
   };
 
   return (
@@ -113,41 +131,32 @@ const SearchBar: FC<AutocompleteSearchBarProps> = ({
           onFocus={() => value && value.length >= minQueryLength && setShowSuggestions(true)}
           className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-200"
         />
+        
+        {/* 로딩 인디케이터 */}
         {isLoading && (
           <div className="absolute right-12 top-1/2 transform -translate-y-1/2">
             <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-gray-500"></div>
           </div>
         )}
+        
+        {/* 검색 버튼 */}
         <button
           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-          onClick={() => {
-            onSearch({ key: 'Enter' } as KeyboardEvent<HTMLInputElement>);
-            setShowSuggestions(false);
-          }}
+          onClick={handleSearchClick}
         >
           <Search size={20} className="text-gray-400" />
         </button>
       </div>
 
-      {/* 자동완성 제안 목록 - 하이라이트 기능 추가 */}
+      {/* 자동완성 제안 목록 컴포넌트 */}
       {showSuggestions && allSuggestions.length > 0 && (
-        <div 
-          ref={suggestionsRef}
-          className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto"
-        >
-          {allSuggestions.map((suggestion, index) => (
-            <div
-              key={index}
-              className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${
-                index === activeSuggestionIndex ? 'bg-gray-100' : ''
-              }`}
-              onClick={() => selectSuggestion(suggestion)}
-            >
-              {/* 검색어와 일치하는 부분을 하이라이트 */}
-              {highlightMatch(suggestion, value)}
-            </div>
-          ))}
-        </div>
+        <SuggestionList
+          suggestions={allSuggestions}
+          query={value}
+          activeSuggestionIndex={activeSuggestionIndex}
+          onSelect={selectSuggestion}
+          suggestionsRef={suggestionsRef}
+        />
       )}
     </div>
   );
