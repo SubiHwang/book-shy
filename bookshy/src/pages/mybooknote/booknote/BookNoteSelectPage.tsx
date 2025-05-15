@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { searchBooksByKeyword, addBookFromSearch } from '@/services/mylibrary/bookSearchService';
@@ -6,6 +6,7 @@ import BookSelectCard from '@/components/mybooknote/booknote/BookSelectCard';
 
 const BookNoteSelectPage: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [keyword, setKeyword] = useState('');
   const [submittedKeyword, setSubmittedKeyword] = useState('');
 
@@ -56,6 +57,7 @@ const BookNoteSelectPage: React.FC = () => {
             onSelect={async () => {
               try {
                 const added = await addBookFromSearch(book.itemId);
+                await queryClient.invalidateQueries({ queryKey: ['user-library'] });
                 alert(`📚 "${added.title}" 서재에 등록되었습니다.`);
                 navigate(`/booknotes/create?libraryId=${added.libraryId}`);
               } catch (err) {
