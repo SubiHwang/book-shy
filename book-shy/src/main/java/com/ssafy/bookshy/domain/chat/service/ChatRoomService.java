@@ -12,6 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -119,7 +120,18 @@ public class ChatRoomService {
     public Pair<Long, Long> getUserIdsByChatRoomId(Long chatRoomId) {
         Object[] result = chatRoomRepository.findUserIdsByChatRoomId(chatRoomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
-        return Pair.of((Long) result[0], (Long) result[1]);
+
+        Long userAId = convertToLong(result[0]);
+        Long userBId = convertToLong(result[1]);
+
+        return Pair.of(userAId, userBId);
     }
 
+    private Long convertToLong(Object value) {
+        if (value instanceof Long) return (Long) value;
+        if (value instanceof Integer) return ((Integer) value).longValue();
+        if (value instanceof Short) return ((Short) value).longValue();
+        if (value instanceof BigInteger) return ((BigInteger) value).longValue();
+        throw new IllegalArgumentException("지원되지 않는 ID 타입: " + value.getClass());
+    }
 }
