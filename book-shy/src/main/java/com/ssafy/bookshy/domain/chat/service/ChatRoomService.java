@@ -1,11 +1,11 @@
 package com.ssafy.bookshy.domain.chat.service;
 
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomDto;
-import com.ssafy.bookshy.domain.chat.dto.CreateChatRoomRequestDto;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatMessageRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
 import com.ssafy.bookshy.domain.matching.entity.Matching;
+import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -53,8 +53,7 @@ public class ChatRoomService {
                             : room.getUserAId();
 
                     // 상대방 사용자 정보 조회
-                    String partnerName = userService.getNicknameById(partnerId);
-                    String partnerProfileImage = userService.getProfileImageUrlById(partnerId);
+                    Users partner = userService.getUserById(partnerId);
 
                     // 📩 안 읽은 메시지 수 계산
                     int unreadCount = chatMessageRepository.countUnreadMessages(room.getId(), userId);
@@ -62,12 +61,14 @@ public class ChatRoomService {
                     // ✅ DTO 생성 및 반환
                     return ChatRoomDto.from(
                             room,
-                            userId,
+                            userId, // 내 userId
                             partnerId,
-                            partnerName,
-                            partnerProfileImage,
+                            partner.getNickname(),
+                            partner.getProfileImageUrl(),
+                            partner.getTemperature(), // bookshyScore로 사용됨
                             unreadCount
                     );
+
                 })
                 .collect(Collectors.toList());
     }
