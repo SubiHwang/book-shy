@@ -15,6 +15,11 @@ const BookNoteSelectPage: React.FC = () => {
     enabled: submittedKeyword.trim().length > 0,
   });
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSubmittedKeyword(keyword);
+  };
+
   return (
     <div className="min-h-screen bg-[#fffaf7] pb-20">
       <div className="bg-[#f4b9c3] px-4 py-6 text-white">
@@ -22,7 +27,7 @@ const BookNoteSelectPage: React.FC = () => {
           {'<'} 뒤로가기
         </button>
         <h1 className="text-xl font-bold">읽었던 책을 검색 하세요.</h1>
-        <div className="mt-4 flex gap-2">
+        <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
           <input
             type="text"
             placeholder="구병모"
@@ -31,12 +36,12 @@ const BookNoteSelectPage: React.FC = () => {
             className="w-full px-4 py-2 rounded-md text-black"
           />
           <button
-            onClick={() => setSubmittedKeyword(keyword)}
-            className="bg-white text-[#f4b9c3] px-6 py-2 rounded-md font-bold"
+            type="submit"
+            className="bg-white text-[#f4b9c3] px-6 py-2 rounded-md font-bold whitespace-nowrap"
           >
             검색
           </button>
-        </div>
+        </form>
       </div>
 
       <div className="px-4 mt-4 space-y-4">

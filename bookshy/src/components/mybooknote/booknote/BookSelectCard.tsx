@@ -1,4 +1,5 @@
 import type { BookSearchItem } from '@/types/mylibrary/bookSearch';
+import { Plus } from 'lucide-react';
 
 interface SearchResultCardProps {
   book: BookSearchItem;
@@ -6,13 +7,23 @@ interface SearchResultCardProps {
 }
 
 const SearchResultCard: React.FC<SearchResultCardProps> = ({ book, onSelect }) => (
-  <div className="p-4 border rounded bg-white shadow">
-    <img src={book.coverImageUrl} alt={book.title} className="w-20 h-28 object-cover mb-2" />
-    <h2 className="text-md font-bold">{book.title}</h2>
-    <p className="text-sm text-gray-700">{book.author}</p>
-    <p className="text-sm text-gray-500">{book.publisher}</p>
-    <button className="mt-2 px-3 py-1 bg-primary text-white rounded" onClick={onSelect}>
-      등록하기
+  <div className="flex items-center p-4 bg-white rounded-xl shadow-md">
+    <img
+      src={book.coverImageUrl}
+      alt={book.title}
+      className="w-20 h-28 object-cover rounded-md mr-4"
+    />
+    <div className="flex-1">
+      <h2 className="text-lg font-semibold text-gray-800 mb-1">{book.title}</h2>
+      <p className="text-sm text-gray-600">작가: {book.author}</p>
+      <p className="text-sm text-gray-500 mb-1">{book.publisher}</p>
+      <p className="text-sm text-gray-500 line-clamp-2">{book.description}</p>
+    </div>
+    <button
+      onClick={onSelect}
+      className="w-10 h-10 rounded-full bg-[#faf7f2] text-gray-600 flex items-center justify-center shadow"
+    >
+      <Plus size={20} strokeWidth={2} />
     </button>
   </div>
 );
