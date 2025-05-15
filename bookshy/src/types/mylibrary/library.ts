@@ -7,7 +7,6 @@ export interface Library {
   author: string;
   coverImageUrl: string;
   public: boolean;
-  bookId: number;
 }
 export interface LibraryBookProps {
   books: (Library | null)[];
