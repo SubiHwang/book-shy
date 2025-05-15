@@ -3,11 +3,14 @@ import ChatListItem from './ChatListItem';
 import { fetchChatList } from '@/services/chat/chat';
 import { useWebSocket } from '@/contexts/WebSocketProvider';
 import { useEffect } from 'react';
-import type { ChatMessage } from '@/types/chat/chat';
+import { getUserIdFromToken } from '@/utils/jwt';
+import { ChatMessage } from '@/types/chat/chat';
 
 function ChatList() {
   const queryClient = useQueryClient();
-  const { subscribeRoom, unsubscribe } = useWebSocket();
+  const { subscribeUser, unsubscribe } = useWebSocket();
+  const myUserId = getUserIdFromToken();
+  if (!myUserId) return;
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['chatList'],
@@ -15,9 +18,10 @@ function ChatList() {
   });
 
   useEffect(() => {
-    const subscription = subscribeRoom(-1, (frame) => {
+    const subscription = subscribeUser(myUserId, (frame) => {
       try {
-        const msg: ChatMessage = JSON.parse(frame.body);
+        const msg: ChatMessage = frame;
+        console.log('📨 WebSocket 수신:', msg);
 
         queryClient.setQueryData(['chatList'], (prev: any) => {
           if (!Array.isArray(prev)) return prev;
@@ -58,7 +62,7 @@ function ChatList() {
     });
 
     return () => unsubscribe(subscription);
-  }, [queryClient, subscribeRoom, unsubscribe]);
+  }, [myUserId, queryClient, subscribeUser, unsubscribe]);
 
   if (isLoading) {
     return (
