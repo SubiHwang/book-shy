@@ -22,6 +22,22 @@ function ChatList() {
         queryClient.setQueryData(['chatList'], (prev: any) => {
           if (!Array.isArray(prev)) return prev;
 
+          const exists = prev.some((room: any) => room.id === msg.chatRoomId);
+
+          if (!exists) {
+            return [
+              ...prev,
+              {
+                id: msg.chatRoomId,
+                partnerName: msg.senderNickname || '상대방',
+                partnerProfileImage: '',
+                lastMessage: msg.content,
+                lastMessageTime: msg.sentAt,
+                unreadCount: 1,
+              },
+            ];
+          }
+
           return prev.map((room: any) =>
             room.id === msg.chatRoomId
               ? {

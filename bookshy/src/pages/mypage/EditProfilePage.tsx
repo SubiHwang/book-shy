@@ -76,7 +76,7 @@ const EditProfilePage = () => {
 
   const handleImageChange = async (file: File) => {
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('imageFile', file);
 
     try {
       const res = await uploadProfileImage(formData);
@@ -122,7 +122,12 @@ const EditProfilePage = () => {
         <AddressInput
           address={address}
           onChange={setAddress}
-          onFetchLocation={fetchCurrentLocation}
+          onFetchLocation={async () => {
+            await fetchCurrentLocation();
+            setAddress(fetchedAddress);
+            setLatitude(currentLat);
+            setLongitude(currentLng);
+          }}
           loading={isLocating}
           error={locationError}
         />
