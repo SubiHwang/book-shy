@@ -1,21 +1,30 @@
-// scripts/prepare-sw.js
 /* eslint-disable */
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createRequire } from 'module';
 
 // ES 모듈에서 __dirname 구현
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// dotenv 동적 로드 (선택적)
+// dotenv 동적 로드 및 환경 변수 설정
 let dotenvConfigured = false;
 try {
   const { default: dotenv } = await import('dotenv');
-  dotenv.config();
-  dotenvConfigured = true;
-  console.log('환경 변수가 .env 파일에서 로드되었습니다.');
+
+  // 먼저 .env.production 파일 시도
+  const prodEnvPath = path.resolve(process.cwd(), '.env.production');
+  if (fs.existsSync(prodEnvPath)) {
+    dotenv.config({ path: prodEnvPath });
+    dotenvConfigured = true;
+    console.log('환경 변수가 .env.production 파일에서 로드되었습니다.');
+  }
+  // 그 다음 .env 파일 시도
+  else {
+    dotenv.config();
+    dotenvConfigured = true;
+    console.log('환경 변수가 .env 파일에서 로드되었습니다.');
+  }
 } catch (err) {
   console.log('dotenv 로드 중 오류 발생, 시스템 환경 변수만 사용합니다:', err.message);
 }
