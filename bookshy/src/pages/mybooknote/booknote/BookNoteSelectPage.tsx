@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { searchBooksByKeyword } from '@/services/mylibrary/bookSearchService';
+import { searchBooksByKeyword, addBookFromSearch } from '@/services/mylibrary/bookSearchService';
 import BookSelectCard from '@/components/mybooknote/booknote/BookSelectCard';
 
 const BookNoteSelectPage: React.FC = () => {
@@ -49,7 +49,21 @@ const BookNoteSelectPage: React.FC = () => {
         {!isLoading && data?.books?.length === 0 && (
           <p className="text-center text-gray-500">검색 결과가 없습니다.</p>
         )}
-        {data?.books?.map((book) => <BookSelectCard key={book.itemId} book={book} />)}
+        {data?.books?.map((book) => (
+          <BookSelectCard
+            key={book.itemId}
+            book={book}
+            onSelect={async () => {
+              try {
+                const added = await addBookFromSearch(book.itemId);
+                alert(`📚 "${added.title}" 서재에 등록되었습니다.`);
+                navigate(`/booknotes/create?libraryId=${added.libraryId}`);
+              } catch (err) {
+                alert('❌ 등록에 실패했습니다. 다시 시도해주세요.');
+              }
+            }}
+          />
+        ))}
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ interface SearchResultCardProps {
   onSelect?: () => void; // 등록 버튼 클릭 시 실행할 콜백
 }
 
-const SearchResultCard: React.FC<SearchResultCardProps> = ({ book, onSelect }) => (
+const BookSelectCard: React.FC<SearchResultCardProps> = ({ book, onSelect }) => (
   <div className="flex items-center p-4 bg-white rounded-xl shadow-md">
     <img
       src={book.coverImageUrl}
@@ -28,4 +28,4 @@ const SearchResultCard: React.FC<SearchResultCardProps> = ({ book, onSelect }) =
   </div>
 );
 
-export default SearchResultCard;
+export default BookSelectCard;
