@@ -64,6 +64,9 @@ export default {
           yellow: '#FFFDE7', // 카드 배경 (옐로우)
         },
       },
+      padding: {
+        safe: 'env(safe-area-inset-bottom)',
+      },
     },
   },
   plugins: [],

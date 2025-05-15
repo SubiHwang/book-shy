@@ -90,8 +90,11 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
 
   // 하단 탭바 - 동적 높이 적용 및 미묘한 음영 효과 추가
   return (
-    <div className="fixed bottom-0 left-0 right-0 pb-2 bg-tabBackground border-t border-light-text-muted/10 z-50 shadow-[0_-3px_6px_0_rgba(0,0,0,0.1)]">
-      <nav className={`flex justify-around items-center ${tabHeight} pt-2`}>
+    <div className="fixed bottom-0 left-0 right-0 bg-tabBackground border-t border-light-text-muted/10 z-50 shadow-[0_-3px_6px_0_rgba(0,0,0,0.1)] pb-safe">
+      {/* 매우 미묘한 상단 그림자 효과 */}
+      <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-b from-black/[0.02] to-transparent transform -translate-y-full"></div>
+
+      <nav className={`flex justify-around items-center ${tabHeight} pt-2 pb-2`}>
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -114,9 +117,6 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
           );
         })}
       </nav>
-
-      {/* 하단 패딩 추가 - 안전 영역(safe area) 대응 */}
-      <div className="h-safe-bottom bg-tabBackground"></div>
     </div>
   );
 };
