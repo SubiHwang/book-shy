@@ -38,8 +38,18 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     Optional<ChatRoom> findByMatching_MatchId(Long matchId);
 
-    // 두 명의 사용자 ID를 반환 (sender, receiver)
-    @Query("SELECT c.userAId, c.userBId FROM ChatRoom c WHERE c.id = :chatRoomId")
+    /**
+     * 🧑‍🤝‍🧑 채팅방 ID로 참여자들의 사용자 ID를 조회합니다 (Native Query).
+     *
+     * @param chatRoomId 채팅방 ID
+     * @return ChatRoomUserIds projection
+     */
+    @Query(value = """
+        SELECT user_a_id AS userAId, user_b_id AS userBId
+        FROM chat_room
+        WHERE id = :chatRoomId
+    """, nativeQuery = true)
     Optional<ChatRoomUserIds> findUserIdsByChatRoomId(@Param("chatRoomId") Long chatRoomId);
+
 
 }
