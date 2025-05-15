@@ -43,7 +43,7 @@ public class MatchingController {
     }
 
     @Operation(
-            summary = "✅ 매칭 확정 요청",
+            summary = "✅ 매칭 후 채팅방 생성",
             description = "매칭 조건에 맞는 상대방 ID를 기반으로 매칭 요청을 보냅니다. Kafka 이벤트를 통해 채팅방이 생성됩니다."
     )
     @ApiResponses({
@@ -80,7 +80,7 @@ public class MatchingController {
     }
 
     @Operation(
-            summary = "📗 특정 사용자의 공개 서재 조회",
+            summary = "📗 이웃 주민의 공개 서재 조회",
             description = "사용자 ID를 기반으로 해당 사용자의 공개된 도서를 최신순으로 조회합니다."
     )
     @ApiResponses({
@@ -90,7 +90,7 @@ public class MatchingController {
     })
     @GetMapping("/public/{userId}")
     public ResponseEntity<List<LibraryResponseDto>> getPublicLibraryByUserId(
-            @Parameter(description = "공개 서재를 조회할 사용자 ID", example = "1")
+            @Parameter(description = "공개 서재를 조회할 이웃 주민 ID", example = "1")
             @PathVariable Long userId
     ) {
         return ResponseEntity.ok(libraryService.findPublicLibraryByUser(userId));
