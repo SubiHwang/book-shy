@@ -20,7 +20,8 @@ public class ChatRoomDto {
     private Long participantId;          // 현재 사용자의 ID
     private Long partnerId;              // 상대방 사용자 ID
     private String partnerName;          // 상대방 이름
-    private String partnerProfileImage;  // 상대방 프로필 이미지 URL
+    private String partnerProfileImage;  // 상대방 프리포일 이미지 URL
+    private Float bookshyScore;          // 상대방 온도 점수
     private String lastMessage;          // 마지막 메시지
     private String lastMessageTime;      // 마지막 메시지 시간 (ISO 포맷)
     private int unreadCount;             // 안 읽은 메시지 수
@@ -30,6 +31,7 @@ public class ChatRoomDto {
                                    Long partnerId,
                                    String partnerName,
                                    String partnerProfileImage,
+                                   Float bookshyScore,
                                    int unreadCount) {
         String lastMessage = room.getLastMessage();
         String lastMessageTime = room.getLastMessageTimestamp() != null
@@ -42,6 +44,7 @@ public class ChatRoomDto {
                 .partnerId(partnerId)
                 .partnerName(partnerName)
                 .partnerProfileImage(partnerProfileImage)
+                .bookshyScore(bookshyScore)
                 .lastMessage(lastMessage)
                 .lastMessageTime(lastMessageTime)
                 .unreadCount(unreadCount)
