@@ -111,6 +111,17 @@ public class KakaoService {
     public String getKakaoAccessTokenForUser(String authorizationCode) {
         log.info("카카오 액세스 토큰 발급 시작 - 인가 코드: {}", authorizationCode);
 
+        // 현재 환경에 따라 리다이렉트 URL 결정
+        String currentRedirectUri = kakaoConfig.getRedirectUri();
+
+        // 로컬 환경 감지 - 여러 방법으로 체크
+        if (isLocalEnvironment()) {
+            currentRedirectUri = "http://localhost:3000/setting-location";
+            log.info("🔵 로컬 환경 감지 - 리다이렉트 URI를 localhost로 변경");
+        }
+
+        log.info("💚 사용할 리다이렉트 URI: {}", currentRedirectUri);
+
         try {
             URL url = new URL("https://kauth.kakao.com/oauth/token");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -181,6 +192,16 @@ public class KakaoService {
         } catch (IOException e) {
             log.error("토큰 발급 중 I/O 오류: {}", e.getMessage(), e);
             throw new GlobalException(GlobalErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private boolean isLocalEnvironment() {
+        try {
+            String hostname = java.net.InetAddress.getLocalHost().getHostName();
+            return hostname.startsWith("localhost") ||
+                    hostname.startsWith("127.0.0.1");
+        } catch (Exception e) {
+            return false;
         }
     }
 
