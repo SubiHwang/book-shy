@@ -8,7 +8,7 @@ import type { Book } from '@/types/book/book';
 import type { UserProfile } from '@/types/User/user';
 import Header from '@/components/common/Header';
 import BookTripHeaderSection from '@/components/mybooknote/BookDetailHeaderSection';
-import OtherUserTripList from '@/components/mybooknote/booktrip/OtherUserTripList';
+import OtherUserTripItem from '@/components/mybooknote/booktrip/OtherUserTripItem';
 import MyTripBox from '@/components/mybooknote/booktrip/MyTripBox';
 import MyTripEditor from '@/components/mybooknote/booktrip/MyTripEditor';
 import Loading from '@/components/common/Loading';
@@ -18,31 +18,25 @@ const BookTripDetailPage = () => {
   const { bookId } = useParams<{ bookId: string }>();
   const navigate = useNavigate();
 
-  // 여정 데이터 가져오기
   const { data: trips = [], isLoading: isTripsLoading } = useQuery<BookTripWithUser[]>({
     queryKey: ['bookTrips', bookId],
     queryFn: () => fetchBookTripsByBookId(Number(bookId)),
     enabled: !!bookId,
   });
 
-  // 책 정보 가져오기
   const { data: bookInfo, isLoading: isBookLoading } = useQuery<Book>({
     queryKey: ['bookInfo', bookId],
     queryFn: () => fetchBookDetailByBookId(Number(bookId)),
     enabled: !!bookId,
   });
 
-  // 사용자 프로필 가져오기
   const { data: myProfile, isLoading: isUserLoading } = useQuery<UserProfile>({
     queryKey: ['myProfile'],
     queryFn: fetchUserProfile,
   });
 
-  // 내 여정과 다른 사용자 여정 분리
-  const myTrip = trips.find((trip) => trip.mine);
-  const otherTrips = trips.filter((trip) => !trip.mine);
+  const hasMyTrip = trips.some((trip) => trip.mine);
 
-  // 로딩 중 처리
   if (isTripsLoading || isBookLoading || isUserLoading) {
     return (
       <div className="bg-[#f9f4ec] min-h-screen flex items-center justify-center">
@@ -51,14 +45,13 @@ const BookTripDetailPage = () => {
     );
   }
 
-  // 책 정보가 없는 경우 처리
   if (!bookInfo) {
     return (
       <div className="bg-[#f9f4ec] min-h-screen">
         <Header
           title="독서 기록"
-          showBackButton={true}
-          showNotification={true}
+          showBackButton
+          showNotification
           onBackClick={() => navigate(-1)}
           className="bg-light-bg shadow-none"
         />
@@ -82,21 +75,20 @@ const BookTripDetailPage = () => {
     <div className="bg-[#f9f4ec] min-h-screen pb-20">
       <Header
         title="독서 기록"
-        showBackButton={true}
-        showNotification={true}
+        showBackButton
+        showNotification
         onBackClick={() => navigate(-1)}
         className="bg-light-bg shadow-none"
       />
 
-      {/* 책 헤더 정보 */}
       <BookTripHeaderSection
         title={bookInfo.title || '제목 없음'}
         author={bookInfo.author || '저자 미상'}
         publisher={bookInfo.publisher || '출판사 정보 없음'}
         coverUrl={bookInfo.coverImageUrl}
       />
+
       <div className="px-4">
-        {/* 여정 섹션 제목 */}
         <div className="flex items-center my-4">
           <BookIcon size={18} className="text-primary mr-2" />
           <h2 className="text-base font-medium text-gray-800">
@@ -104,27 +96,22 @@ const BookTripDetailPage = () => {
           </h2>
         </div>
 
-        {/* 여정 목록 */}
         <div className="flex flex-col gap-4 mb-6">
-          {/* 다른 사용자 여정 */}
-          {otherTrips.length > 0 ? (
-            <OtherUserTripList trips={otherTrips} />
-          ) : myTrip ? (
+          {trips.length === 0 ? (
             <div className="bg-white rounded-lg p-4 text-center text-sm text-gray-500">
-              아직 다른 사용자의 여정이 없습니다. 첫 번째 여정을 남겨주셔서 감사합니다!
+              아직 이 책에 대한 여정이 없습니다. 첫 번째 여정을 남겨보세요!
             </div>
           ) : (
-            <div className="bg-white rounded-lg p-4 text-center text-sm text-gray-500">
-              이 책의 첫 번째 여정을 남겨보세요!
-            </div>
+            trips.map((trip) =>
+              trip.mine ? (
+                <MyTripBox key={trip.tripId} trip={trip} />
+              ) : (
+                <OtherUserTripItem key={trip.tripId} trip={trip} />
+              ),
+            )
           )}
 
-          {/* 내 여정 또는 작성 에디터 */}
-          {myTrip ? (
-            <MyTripBox trip={myTrip} />
-          ) : (
-            <MyTripEditor profileImageUrl={myProfile?.profileImageUrl} />
-          )}
+          {!hasMyTrip && <MyTripEditor profileImageUrl={myProfile?.profileImageUrl} />}
         </div>
       </div>
     </div>
