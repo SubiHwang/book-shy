@@ -1,3 +1,4 @@
+import { AxiosResponse } from 'axios';
 import { authAxiosInstance } from '../axiosInstance';
 import { MatchingRecommendationResponse, MatchingConfirmResponse } from '@/types/Matching';
 export const getMatchingList = async () => {
@@ -16,10 +17,7 @@ export const getMatchingList = async () => {
 export const getChatId = async (receiverId: number) => {
   try {
     const response = await authAxiosInstance.post<string, MatchingConfirmResponse>(
-      '/matching/chat',
-      {
-        receiverId: receiverId,
-      },
+      `/matching/chat?receiverId=${receiverId}`,
     );
     console.log('매칭 확정 요청 api 호출 응답', response);
     return response;
