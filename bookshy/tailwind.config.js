@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+import safeArea from 'tailwindcss-safe-area';
+
 export default {
   content: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
   theme: {
@@ -64,10 +66,7 @@ export default {
           yellow: '#FFFDE7', // 카드 배경 (옐로우)
         },
       },
-      padding: {
-        safe: 'env(safe-area-inset-bottom)',
-      },
     },
   },
-  plugins: [],
+  plugins: [safeArea],
 };
