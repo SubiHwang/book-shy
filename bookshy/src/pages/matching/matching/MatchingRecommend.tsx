@@ -6,7 +6,7 @@ import NeighborhoodList from '@/components/matching/matching/NeighborhoodList';
 import Loading from '@/components/common/Loading';
 import { getMatchingList } from '@/services/matching/matching';
 import { useQuery } from '@tanstack/react-query';
-
+import { RefreshCw } from 'lucide-react';
 // 분리된 컴포넌트 임포트
 import MatchingHeader from '@/components/matching/matching/MatchingHeader';
 import MatchingEndMessage from '@/components/matching/matching/MatchingEndMessage';
@@ -71,6 +71,25 @@ const MatchingRecommend: FC = () => {
   return (
     <div className="flex flex-col bg-light-bg">
       <MatchingHeader matchingCount={matchingList.length} />
+
+      <div className="flex flex-col px-5 sm:px-8 md:px-10 pt-3 sm:pt-4">
+        <div className="flex justify-between items-center">
+          <div className="flex gap-1 items-center">
+            <h2 className="text-primary-dark font-medium text-base">매칭된 이웃들을 둘러보세요</h2>
+          </div>
+
+          {!isLoading && (
+            <button
+              onClick={() => refetch()}
+              disabled={isLoading}
+              className="text-primary hover:text-primary-dark transition-colors"
+              aria-label="추천 도서 새로고침"
+            >
+              <RefreshCw size={16} className={`${isLoading ? 'animate-spin' : ''}`} />
+            </button>
+          )}
+        </div>
+      </div>
 
       {isLoading ? (
         <Loading loadingText="매칭 추천을 불러오는 중..." />
