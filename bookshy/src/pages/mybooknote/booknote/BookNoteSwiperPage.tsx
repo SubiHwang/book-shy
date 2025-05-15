@@ -134,7 +134,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
         )}
       </div>
 
-      <div className="fixed bottom-24 right-6">
+      <div className="fixed bottom-24 right-6 z-50">
         <button
           onClick={() => navigate('/booknotes/select')}
           className="w-14 h-14 rounded-xl bg-primary text-white flex justify-center items-center shadow-lg"
