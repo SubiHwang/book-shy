@@ -40,8 +40,11 @@ const BookDetailHeader: React.FC<BookDetailHeaderProps> = ({
       <div className="flex flex-col justify-end p-4 shadow-sm min-h-[25vh]" style={gradientStyle}>
         {/* 내용물을 하단에 배치 */}
         <div className="flex flex-row items-start mt-auto">
-          {/* 책 표지 이미지 */}
-          <div className="w-26 h-36 flex-shrink-0 mr-4 rounded-md overflow-hidden shadow-md bg-white">
+          {/* 책 표지 이미지 - 비율 고정 추가 */}
+          <div
+            className="w-26 h-36 flex-shrink-0 mr-4 rounded-md overflow-hidden shadow-md bg-white"
+            style={{ aspectRatio: '3/4', maxWidth: '26%' }}
+          >
             {isLoading ? (
               <Skeleton width="100%" height="100%" />
             ) : (
