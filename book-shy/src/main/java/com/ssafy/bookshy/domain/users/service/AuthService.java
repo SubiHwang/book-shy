@@ -45,9 +45,9 @@ public class AuthService {
      * @param oAuthTokenDto
      * @return
      */
-    public JwtTokenDto signIn(OAuthTokenDto oAuthTokenDto) {
+    public JwtTokenDto signIn(OAuthTokenDto oAuthTokenDto, String redirect) {
 
-        OAuthUserInfoDto oAuthUserInfoDto = oAuthService.getUserInfo(oAuthTokenDto);
+        OAuthUserInfoDto oAuthUserInfoDto = oAuthService.getUserInfo(oAuthTokenDto, redirect);
 
         //회원가입 안 한 유저일 경우 -> 자동 회원가입
         Users user = userRepository.findByEmail(oAuthUserInfoDto.getEmail())

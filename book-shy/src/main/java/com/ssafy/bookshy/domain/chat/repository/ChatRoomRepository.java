@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.chat.repository;
 
+import com.ssafy.bookshy.domain.chat.dto.ChatRoomUserIds;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -36,4 +37,19 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
                                                 @Param("date") LocalDate date);
 
     Optional<ChatRoom> findByMatching_MatchId(Long matchId);
+
+    /**
+     * 🧑‍🤝‍🧑 채팅방 ID로 참여자들의 사용자 ID를 조회합니다 (Native Query).
+     *
+     * @param chatRoomId 채팅방 ID
+     * @return ChatRoomUserIds projection
+     */
+    @Query(value = """
+        SELECT user_a_id AS userAId, user_b_id AS userBId
+        FROM chat_room
+        WHERE id = :chatRoomId
+    """, nativeQuery = true)
+    Optional<ChatRoomUserIds> findUserIdsByChatRoomId(@Param("chatRoomId") Long chatRoomId);
+
+
 }
