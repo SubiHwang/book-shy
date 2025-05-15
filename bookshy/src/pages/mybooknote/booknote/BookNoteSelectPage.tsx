@@ -1,15 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { fetchUnwrittenBooks } from '@/services/mybooknote/booknote/library';
-import type { UnwrittenLibraryBook } from '@/types/mybooknote/booknote/library';
+import { useState } from 'react';
+import { searchBooksByKeyword } from '@/services/mylibrary/bookSearchService';
 import BookSelectCard from '@/components/mybooknote/booknote/BookSelectCard';
 
 const BookNoteSelectPage: React.FC = () => {
   const navigate = useNavigate();
+  const [keyword, setKeyword] = useState('');
+  const [submittedKeyword, setSubmittedKeyword] = useState('');
 
-  const { data: books = [] } = useQuery<UnwrittenLibraryBook[]>({
-    queryKey: ['unwritten-books'],
-    queryFn: fetchUnwrittenBooks,
+  const { data, isLoading } = useQuery({
+    queryKey: ['search-books', submittedKeyword],
+    queryFn: () => searchBooksByKeyword(submittedKeyword),
+    enabled: submittedKeyword.trim().length > 0,
   });
 
   return (
@@ -19,17 +22,29 @@ const BookNoteSelectPage: React.FC = () => {
           {'<'} 뒤로가기
         </button>
         <h1 className="text-xl font-bold">읽었던 책을 검색 하세요.</h1>
-        <input
-          type="text"
-          placeholder="구병모"
-          className="mt-4 w-full px-4 py-2 rounded-md text-black"
-        />
+        <div className="mt-4 flex gap-2">
+          <input
+            type="text"
+            placeholder="구병모"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            className="w-full px-4 py-2 rounded-md text-black"
+          />
+          <button
+            onClick={() => setSubmittedKeyword(keyword)}
+            className="bg-white text-[#f4b9c3] px-6 py-2 rounded-md font-bold"
+          >
+            검색
+          </button>
+        </div>
       </div>
 
       <div className="px-4 mt-4 space-y-4">
-        {books.map((book) => (
-          <BookSelectCard key={book.bookId} book={book} />
-        ))}
+        {isLoading && <p className="text-center">불러오는 중...</p>}
+        {!isLoading && data?.books?.length === 0 && (
+          <p className="text-center text-gray-500">검색 결과가 없습니다.</p>
+        )}
+        {data?.books?.map((book) => <BookSelectCard key={book.itemId} book={book} />)}
       </div>
     </div>
   );
