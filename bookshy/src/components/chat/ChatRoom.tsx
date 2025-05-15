@@ -21,6 +21,7 @@ interface Props {
   partnerName: string;
   partnerProfileImage: string;
   initialMessages?: ChatMessage[];
+  bookShyScore: number;
 }
 
 interface EmojiUpdatePayload {
@@ -30,7 +31,7 @@ interface EmojiUpdatePayload {
   updatedBy: number;
 }
 
-function ChatRoom({ partnerName, partnerProfileImage }: Props) {
+function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   const { roomId } = useParams();
   const numericRoomId = Number(roomId);
   const myUserId = getUserIdFromToken();
@@ -238,7 +239,11 @@ function ChatRoom({ partnerName, partnerProfileImage }: Props) {
 
   return (
     <div className="relative flex flex-col h-[100dvh]">
-      <ChatRoomHeader partnerName={partnerName} partnerProfileImage={partnerProfileImage} />
+      <ChatRoomHeader
+        partnerName={partnerName}
+        partnerProfileImage={partnerProfileImage}
+        bookShyScore={bookShyScore}
+      />
       <div className="relative flex-1 overflow-y-auto bg-white px-4 sm:px-6 py-3">
         {messages.map((msg, idx) => {
           const dateLabel = formatDateLabel(msg.sentAt);

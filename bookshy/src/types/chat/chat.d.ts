@@ -5,6 +5,7 @@ export interface ChatRoomSummary {
   lastMessage: string;
   lastMessageTime: string;
   unreadCount: number;
+  bookshyScore: number;
 }
 
 export interface ChatMessage {
