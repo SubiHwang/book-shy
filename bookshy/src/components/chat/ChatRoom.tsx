@@ -287,13 +287,14 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   let lastDateLabel = '';
 
   return (
-    <div className="relative flex flex-col h-[100dvh]">
+    <div className="relative flex flex-col h-screen max-h-screen overflow-hidden w-full max-w-md mx-auto">
       <ChatRoomHeader
         partnerName={partnerName}
         partnerProfileImage={partnerProfileImage}
         bookShyScore={bookShyScore}
       />
-      <div className="relative flex-1 overflow-y-auto bg-white px-4 sm:px-6 py-3">
+
+      <div className="flex-1 overflow-y-auto bg-white px-4 sm:px-6 py-3">
         {messages.map((msg, idx) => {
           const dateLabel = formatDateLabel(msg.sentAt);
           const showDate = dateLabel !== lastDateLabel;
@@ -338,7 +339,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
         <div ref={messagesEndRef} className="h-4" />
       </div>
 
-      <div className="relative">
+      <div className="relative sticky bottom-0 bg-white">
         {showScrollToBottom && (
           <div className="absolute -top-[60px] left-1/2 -translate-x-1/2 z-30">
             <button
