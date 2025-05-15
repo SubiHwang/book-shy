@@ -20,3 +20,7 @@ export async function sendEmoji(messageId: number, emoji: string) {
 export async function registerSchedule(payload: RegisterSchedulePayload): Promise<void> {
   await authAxiosInstance.post('/chats/calendar', payload);
 }
+
+export async function deleteEmoji(messageId: number): Promise<void> {
+  await authAxiosInstance.delete(`/messages/${messageId}/emoji`);
+}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useLayoutEffect } from 'react';
 import { ChatMessage, RegisterSchedulePayload } from '@/types/chat/chat.ts';
 import ChatMessageItem from './ChatMessageItem.tsx';
 import ChatInput from './ChatInput.tsx';
@@ -8,6 +8,7 @@ import SystemMessage from './SystemMessage.tsx';
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  deleteEmoji,
   fetchMessages,
   markMessagesAsRead,
   registerSchedule,
@@ -55,6 +56,41 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
     staleTime: 0,
   });
 
+  const prevMessageCountRef = useRef(messages.length);
+  const isInitialLoadRef = useRef(true);
+
+  useLayoutEffect(() => {
+    const prevCount = prevMessageCountRef.current;
+    const currentCount = messages.length;
+
+    if (currentCount > prevCount) {
+      requestAnimationFrame(() => {
+        const container = messagesEndRef.current?.parentElement;
+        if (!container) return;
+
+        const distanceFromBottom =
+          container.scrollHeight - container.scrollTop - container.clientHeight;
+
+        const isAtBottom = distanceFromBottom < 100;
+
+        if (isInitialLoadRef.current) {
+          scrollToBottom(false);
+          isInitialLoadRef.current = false;
+        } else {
+          if (isAtBottom) {
+            scrollToBottom(false);
+          } else {
+            setShowScrollToBottom(true);
+          }
+        }
+
+        prevMessageCountRef.current = currentCount;
+      });
+    } else {
+      prevMessageCountRef.current = currentCount;
+    }
+  }, [messages]);
+
   useEffect(() => {
     if (!isNaN(numericRoomId)) {
       markMessagesAsRead(numericRoomId).catch((err) => console.error('❌ 읽음 처리 실패:', err));
@@ -69,11 +105,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
 
   useEffect(() => {
     if (!isSuccess) return;
-    setMessages((prev) => {
-      const existing = new Set(prev.map((m) => m.id));
-      const toAdd = initialMessages.filter((m) => !existing.has(m.id));
-      return [...prev, ...toAdd];
-    });
+    setMessages(initialMessages);
   }, [initialMessages, isSuccess]);
 
   const onRead = useCallback(
@@ -165,10 +197,6 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   }, [numericRoomId, subscribeEmojiTopic, unsubscribe, isConnected]);
 
   useEffect(() => {
-    scrollToBottom(messages.length === 1);
-  }, [messages]);
-
-  useEffect(() => {
     const container = messagesEndRef.current?.parentElement;
     if (!container) return;
     const onScroll = () => {
@@ -202,9 +230,29 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
     }
   };
 
-  const handleSelectEmoji = (messageId: string, emoji: string) => {
+  const handleSelectEmoji = async (messageId: string, emoji: string) => {
     setEmojiTargetId(null);
-    sendEmoji(Number(messageId), emoji);
+
+    const targetMessage = messages.find((m) => m.id === messageId);
+    if (!targetMessage) return;
+
+    const currentEmoji = Array.isArray(targetMessage.emoji)
+      ? targetMessage.emoji[0]
+      : targetMessage.emoji;
+
+    if (currentEmoji === emoji) {
+      try {
+        await deleteEmoji(Number(messageId));
+      } catch (e) {
+        console.error('❌ 이모지 삭제 실패:', e);
+      }
+    } else {
+      try {
+        await sendEmoji(Number(messageId), emoji);
+      } catch (e) {
+        console.error('❌ 이모지 추가 실패:', e);
+      }
+    }
   };
 
   const handleLongPressOrRightClick = (messageId: string) => {
