@@ -79,6 +79,10 @@ public class MatchingService {
                         other.getLatitude(), other.getLongitude()
                 );
 
+                if (distKm > 20.0) {
+                    continue;
+                }
+
                 MatchingDto dto = MatchingDto.builder()
                         .userId(other.getUserId())
                         .nickname(other.getNickname())
