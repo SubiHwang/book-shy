@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ErrorPageProps } from '@/types/common';
 
-const ErrorState: FC<ErrorPageProps> = ({ type, message, onRetry, bgHeight="" }) => {
+const ErrorState: FC<ErrorPageProps> = ({ type, message, onRetry, bgHeight = '' }) => {
   const navigate = useNavigate();
 
   const errorConfig = {
@@ -15,7 +15,7 @@ const ErrorState: FC<ErrorPageProps> = ({ type, message, onRetry, bgHeight="" })
         onClick: () => navigate('/'),
       },
     },
-    'unauthorized': {
+    unauthorized: {
       title: '로그인이 필요합니다',
       description: message || '이 페이지에 접근하려면 로그인이 필요합니다.',
       logoData: '/logo/error/401Error.svg',
@@ -26,7 +26,8 @@ const ErrorState: FC<ErrorPageProps> = ({ type, message, onRetry, bgHeight="" })
     },
     'server-error': {
       title: '일시적인 오류가 발생했습니다',
-      description: message || `서버 또는 네트워크 오류가 발생했습니다. \n잠시 후 다시 시도해주세요.`,
+      description:
+        message || `서버 또는 네트워크 오류가 발생했습니다. \n잠시 후 다시 시도해주세요.`,
       logoData: '/logo/error/500Error.svg',
       primaryAction: {
         label: '다시 시도',
