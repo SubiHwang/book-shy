@@ -27,6 +27,7 @@ public class MatchingDto {
 
     private LocalDateTime matchedAt;
     private double score;
+    private double distanceKm;
 
     public static MatchingDto from(
             Long userId,
@@ -39,7 +40,8 @@ public class MatchingDto {
             List<Long> otherBookId,
             List<String> otherBookName,
             LocalDateTime matchedAt,
-            double score
+            double score,
+            double distanceKm
     ) {
         return MatchingDto.builder()
                 .userId(userId)
@@ -53,6 +55,7 @@ public class MatchingDto {
                 .otherBookName(otherBookName)
                 .matchedAt(matchedAt)
                 .score(score)
+                .distanceKm(distanceKm)
                 .build();
     }
 }

@@ -74,6 +74,11 @@ public class MatchingService {
 
                 double score = MatchingScoreCalculator.totalScore(me, other);
 
+                double distKm = MatchingScoreCalculator.calculateDistance(
+                        me.getLatitude(), me.getLongitude(),
+                        other.getLatitude(), other.getLongitude()
+                );
+
                 MatchingDto dto = MatchingDto.builder()
                         .userId(other.getUserId())
                         .nickname(other.getNickname())
@@ -86,6 +91,7 @@ public class MatchingService {
                         .otherBookName(otherBookNames)
                         .matchedAt(LocalDateTime.now())
                         .score(Math.round(MatchingScoreCalculator.totalScore(me, other) * 10.0) / 10.0)
+                        .distanceKm(Math.round(distKm * 100.0) / 100.0)
                         .build();
 
                 result.add(dto);
@@ -123,10 +129,19 @@ public class MatchingService {
                 .build();
     }
 
-    public MatchingPageResponseDto findPagedCandidates(Long myUserId, int page, int size) {
+    public MatchingPageResponseDto findPagedCandidates(Long myUserId, int page, int size, String sort) {
         List<MatchingDto> all = findMatchingCandidates(myUserId);
-        int total = all.size();
 
+        all = switch (sort.toLowerCase()) {
+            case "distance" -> all.stream()
+                    .sorted(Comparator.comparingDouble(MatchingDto::getDistanceKm))
+                    .toList();
+            default -> all.stream()
+                    .sorted(Comparator.comparingDouble(MatchingDto::getScore).reversed())
+                    .toList();
+        };
+
+        int total = all.size();
         int fromIndex = Math.min((page - 1) * size, total);
         int toIndex = Math.min(page * size, total);
         List<MatchingDto> pageResult = all.subList(fromIndex, toIndex);
