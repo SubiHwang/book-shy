@@ -120,7 +120,7 @@ const BookNoteEditPage: React.FC = () => {
         coverUrl={book.coverUrl || undefined}
       />
 
-      <div className="bg-white">
+      <div className="bg-white pb-28">
         <div className="border-b border-gray-200 py-3 px-4">
           <h1 className="text-lg font-medium text-gray-800">독서 기록 수정</h1>
           <p className="text-sm text-gray-500">인용구와 감상 기록을 자유롭게 수정하세요.</p>

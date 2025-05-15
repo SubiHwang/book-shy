@@ -36,6 +36,9 @@ const BookNoteCreatePage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['book-note', bookId] });
       queryClient.invalidateQueries({ queryKey: ['book-quote', bookId] });
 
+      queryClient.invalidateQueries({ queryKey: ['my-bookquotes'] });
+      queryClient.invalidateQueries({ queryKey: ['my-booknotes'] });
+
       alert('📚 독서기록 등록이 완료되었습니다.');
       navigate('/booknotes');
     } catch (error) {
@@ -47,7 +50,9 @@ const BookNoteCreatePage: React.FC = () => {
   if (!bookId) return <p className="p-4">잘못된 접근입니다.</p>;
 
   return (
-    <div>
+    <div className="pb-32">
+      {' '}
+      {/* 👈 하단 탭바만큼 여백 확보 */}
       <Header
         title="독서 기록 작성하기"
         onBackClick={() => navigate(-1)}
