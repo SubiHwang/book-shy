@@ -8,9 +8,11 @@ import com.ssafy.bookshy.domain.matching.entity.Matching;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -100,7 +102,36 @@ public class ChatRoomService {
         return chatRoomRepository.save(chatRoom);
     }
 
+
     public Optional<ChatRoom> findByMatchId(Long matchId) {
         return chatRoomRepository.findByMatching_MatchId(matchId);
+    }
+
+    /**
+     * 🧑‍🤝‍🧑 채팅방 ID로 참여자들의 사용자 ID를 조회합니다.
+     *
+     * - senderId를 알고 있는 상태에서 상대방(receiverId)을 알기 위한 메서드입니다.
+     * - 채팅방에 참여한 두 사람의 userId(userAId, userBId)를 반환합니다.
+     *
+     * @param chatRoomId 채팅방 ID
+     * @return (userAId, userBId) 형태의 Pair 객체
+     * @throws IllegalArgumentException 채팅방이 존재하지 않을 경우 예외 발생
+     */
+    public Pair<Long, Long> getUserIdsByChatRoomId(Long chatRoomId) {
+        Object[] result = chatRoomRepository.findUserIdsByChatRoomId(chatRoomId)
+                .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
+
+        Long userAId = convertToLong(result[0]);
+        Long userBId = convertToLong(result[1]);
+
+        return Pair.of(userAId, userBId);
+    }
+
+    private Long convertToLong(Object value) {
+        if (value instanceof Long) return (Long) value;
+        if (value instanceof Integer) return ((Integer) value).longValue();
+        if (value instanceof Short) return ((Short) value).longValue();
+        if (value instanceof BigInteger) return ((BigInteger) value).longValue();
+        throw new IllegalArgumentException("지원되지 않는 ID 타입: " + value.getClass());
     }
 }

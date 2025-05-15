@@ -36,4 +36,9 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
                                                 @Param("date") LocalDate date);
 
     Optional<ChatRoom> findByMatching_MatchId(Long matchId);
+
+    // 두 명의 사용자 ID를 반환 (sender, receiver)
+    @Query("SELECT c.userAId, c.userBId FROM ChatRoom c WHERE c.id = :chatRoomId")
+    Optional<Object[]> findUserIdsByChatRoomId(@Param("chatRoomId") Long chatRoomId);
+
 }
