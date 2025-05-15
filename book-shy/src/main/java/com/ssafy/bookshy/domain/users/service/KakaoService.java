@@ -137,7 +137,7 @@ public class KakaoService {
             StringBuilder params = new StringBuilder();
             params.append("grant_type=authorization_code");
             params.append("&client_id=").append(kakaoConfig.getClientId());
-            params.append("&redirect_uri=").append(kakaoConfig.getRedirectUri());
+            params.append("&redirect_uri=").append(currentRedirectUri);
             log.info("💚 kakao_redirect_uri : {}", kakaoConfig.getRedirectUri());
             params.append("&code=").append(authorizationCode);
 
