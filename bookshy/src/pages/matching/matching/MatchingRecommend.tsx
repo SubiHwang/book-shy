@@ -8,10 +8,10 @@ import { getMatchingList } from '@/services/matching/matching';
 import { useQuery } from '@tanstack/react-query';
 
 // 분리된 컴포넌트 임포트
-import MatchingHeader from './MatchingHeader';
-import MatchingEndMessage from './MatchingEndMessage';
-import ScrollToTopButton from './ScrollToTopButton';
-import LoadingIndicator from './LoadingIndicator';
+import MatchingHeader from '@/components/matching/matching/MatchingHeader';
+import MatchingEndMessage from '@/components/matching/matching/MatchingEndMessage';
+import ScrollToTopButton from '@/components/matching/matching/ScrollToTopButton';
+import LoadingIndicator from '@/components/matching/matching/LoadingIndicator';
 
 const MatchingRecommend: FC = () => {
   const ITEMS_PER_PAGE = 10;
