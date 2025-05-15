@@ -1,68 +1,110 @@
-import { FC, useEffect, useState } from 'react';
-import { Zap } from 'lucide-react';
-import { MatchingRecommendation } from '@/types/Matching';
+import { FC, useState, useEffect, useRef } from 'react';
+import { MatchingRecommendation, MatchingRecommendationResponse } from '@/types/Matching';
 import NoRecommendationState from '@/components/matching/matching/NoRecommendationState';
 import MatchingList from '@/components/matching/matching/MatchingList';
 import NeighborhoodList from '@/components/matching/matching/NeighborhoodList';
 import Loading from '@/components/common/Loading';
 import { getMatchingList } from '@/services/matching/matching';
+import { useQuery } from '@tanstack/react-query';
+
+// 분리된 컴포넌트 임포트
+import MatchingHeader from './MatchingHeader';
+import MatchingEndMessage from './MatchingEndMessage';
+import ScrollToTopButton from './ScrollToTopButton';
+import LoadingIndicator from './LoadingIndicator';
 
 const MatchingRecommend: FC = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [matchingList, setMatchingList] = useState<MatchingRecommendation[]>([]);
+  const ITEMS_PER_PAGE = 10;
+  const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  // useQuery로 데이터 가져오기
+  const { data, isLoading, refetch } = useQuery<MatchingRecommendationResponse>({
+    queryKey: ['matching-list'],
+    queryFn: async () => {
+      return await getMatchingList(1);
+    },
+  });
+  const matchingList: MatchingRecommendation[] = data?.candidates || [];
+
+  const visibleMatchings = matchingList.slice(0, visibleItems);
+  const hasMoreItems = visibleItems < matchingList.length;
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // 바닥 감지를 위한 Intersection Observer 설정
+  useEffect(() => {
+    if (!bottomRef.current || isLoading) return;
+
+    const currentRef = bottomRef.current;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasMoreItems && !isLoadingMore) {
+          setIsLoadingMore(true);
+
+          setTimeout(() => {
+            setVisibleItems((prev) => Math.min(prev + ITEMS_PER_PAGE, matchingList.length));
+            setIsLoadingMore(false);
+          }, 500);
+        }
+      },
+      { threshold: 0.5 },
+    );
+
+    observer.observe(currentRef);
+
+    return () => {
+      observer.unobserve(currentRef);
+    };
+  }, [bottomRef, hasMoreItems, isLoading, isLoadingMore, matchingList.length]);
 
   // 매칭이 충분한지 확인하는 상수 (3개 이하면 적다고 판단)
   const MIN_SUFFICIENT_MATCHES = 3;
   const hasSufficientMatches = matchingList.length > MIN_SUFFICIENT_MATCHES;
   const hasFewMatches = matchingList.length > 0 && matchingList.length <= MIN_SUFFICIENT_MATCHES;
 
-  const getMatchings = async () => {
-    setIsLoading(true);
-    try {
-      const response = await getMatchingList();
-      console.log('API 응답:', response); // 응답 전체 확인
-      console.log('candidates 존재 여부:', !!response.candidates); // candidates가 있는지 확인
-      console.log('candidates 내용:', response.candidates); // candidates 내용 확인
-      setMatchingList(response.candidates || []);
-    } catch (error) {
-      console.log('retry 실패', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // matchingList 상태 업데이트 후 로그 추가
-  useEffect(() => {
-    getMatchings();
-  }, []);
-
   return (
     <div className="flex flex-col bg-light-bg">
-      <div className="bg-primary-light/20 px-5 sm:px-8 md:px-10 py-3 sm:py-4">
-        <div className="flex items-center gap-1 mb-1 sm:mb-2">
-          <Zap className="text-primary-dark w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1} />
-          <h1 className="text-primary-dark font-medium text-sm sm:text-base md:text-lg">
-            북끄북끄 매칭 시스템
-          </h1>
-        </div>
-        <p className="text-light-text-secondary font-light text-xs sm:text-sm leading-tight sm:leading-normal">
-          읽고 싶은 책, 보유 도서, 위치, 북끄 지수 등을 고려한 알고리즘으로 최적의 교환 상대를 추천
-          해드려요.{' '}
-          {matchingList.length > 0 ? (
-            <span>
-              현재{' '}
-              <span className="text-primary-accent font-medium">총 {matchingList.length}명</span>의
-              사용자와 매칭 되었어요.
-            </span>
-          ) : (
-            <span>현재 매칭된 사용자가 없어요.</span>
-          )}
-        </p>
-      </div>
+      <MatchingHeader matchingCount={matchingList.length} />
+
       {isLoading ? (
         <Loading loadingText="매칭 추천을 불러오는 중..." />
       ) : hasSufficientMatches ? (
-        <MatchingList matchings={matchingList} />
+        <>
+          {/* 매칭 목록 표시 */}
+          <MatchingList matchings={visibleMatchings} />
+
+          {/* 바닥 감지 영역 및 로딩 표시기 */}
+          <div className="py-4 px-5 sm:px-8 md:px-10">
+            <div ref={bottomRef} className="flex justify-center items-center py-4 min-h-[60px]">
+              {isLoadingMore ? (
+                <LoadingIndicator loadingText="더 많은 매칭을 불러오는 중..." />
+              ) : hasMoreItems ? (
+                <p className="text-light-text-secondary text-sm text-center">
+                  스크롤하여 더 많은 매칭을 확인하세요
+                </p>
+              ) : (
+                <MatchingEndMessage
+                  matchingCount={matchingList.length}
+                  onScrollToTop={scrollToTop}
+                />
+              )}
+            </div>
+
+            {/* 추가 여백으로 스크롤 끝 표시 */}
+            {!hasMoreItems && <div className="h-16"></div>}
+          </div>
+
+          {/* 위로 스크롤 버튼 */}
+          {visibleItems > ITEMS_PER_PAGE && hasMoreItems && (
+            <ScrollToTopButton onClick={scrollToTop} />
+          )}
+        </>
       ) : hasFewMatches ? (
         <>
           <MatchingList matchings={matchingList} />
@@ -79,7 +121,7 @@ const MatchingRecommend: FC = () => {
           </div>
         </>
       ) : (
-        <NoRecommendationState onRetry={getMatchings} />
+        <NoRecommendationState onRetry={refetch} />
       )}
     </div>
   );
