@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -109,13 +110,50 @@ public class MatchingService {
 
     @Transactional
     public MatchResponseDto chatMatching(Long senderId, MatchChatRequestDto dto) {
-        Matching match = Matching.builder()
-                .senderId(senderId)
-                .receiverId(dto.getReceiverId())
-                .matchedAt(LocalDateTime.now())
-                .status(Matching.Status.ACCEPTED)
-                .build();
-        matchingRepository.save(match);
+        Long receiverId = dto.getReceiverId();
+
+        // 🔍 기존 Matching 존재 여부 확인 (양방향 체크 필요)
+        Optional<Matching> existingMatchOpt = matchingRepository
+                .findByUsers(senderId, receiverId);
+
+        if (existingMatchOpt.isPresent()) {
+            Matching existingMatch = existingMatchOpt.get();
+
+            // 🔍 해당 매칭에 대한 채팅방이 이미 있는지 확인
+            Optional<ChatRoom> existingChatRoomOpt = chatRoomRepository
+                    .findByMatching(existingMatch);
+
+            if (existingChatRoomOpt.isPresent()) {
+                return MatchResponseDto.builder()
+                        .matchId(existingMatch.getMatchId())
+                        .chatRoomId(existingChatRoomOpt.get().getId())
+                        .build();
+            }
+
+            // 채팅방만 없는 경우 → 채팅방 생성
+            ChatRoom chatRoom = chatRoomRepository.save(
+                    ChatRoom.builder()
+                            .matching(existingMatch)
+                            .userAId(existingMatch.getSenderId())
+                            .userBId(existingMatch.getReceiverId())
+                            .build()
+            );
+
+            return MatchResponseDto.builder()
+                    .matchId(existingMatch.getMatchId())
+                    .chatRoomId(chatRoom.getId())
+                    .build();
+        }
+
+        // ❌ 매칭 자체가 없다면 새로 생성
+        Matching match = matchingRepository.save(
+                Matching.builder()
+                        .senderId(senderId)
+                        .receiverId(receiverId)
+                        .matchedAt(LocalDateTime.now())
+                        .status(Matching.Status.ACCEPTED)
+                        .build()
+        );
 
         ChatRoom chatRoom = chatRoomRepository.save(
                 ChatRoom.builder()
