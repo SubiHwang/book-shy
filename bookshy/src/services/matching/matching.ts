@@ -1,4 +1,3 @@
-import { AxiosResponse } from 'axios';
 import { authAxiosInstance } from '../axiosInstance';
 import { MatchingRecommendationResponse, MatchingConfirmResponse } from '@/types/Matching';
 export const getMatchingList = async () => {
