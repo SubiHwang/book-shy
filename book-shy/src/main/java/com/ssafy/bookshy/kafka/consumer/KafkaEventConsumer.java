@@ -10,6 +10,7 @@ import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import com.ssafy.bookshy.kafka.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -135,8 +136,12 @@ public class KafkaEventConsumer {
             log.info("📢 [KafkaConsumer] ChatMessage sent to WebSocket destination '{}'", destination);
 
             // 🔥 채팅 목록 갱신용 브로드캐스트
-            messagingTemplate.convertAndSend("/topic/chat/-1", saved);
-            log.info("📢 [KafkaConsumer] ChatMessage also sent to '/topic/chat/-1'");
+            Pair<Long, Long> users = chatRoomService.getUserIdsByChatRoomId(dto.getChatRoomId());
+            Long senderId = dto.getSenderId();
+            Long receiverId = users.getLeft().equals(senderId) ? users.getRight() : users.getLeft();
+
+            messagingTemplate.convertAndSend("/topic/chat/user/" + senderId, saved);
+            messagingTemplate.convertAndSend("/topic/chat/user/" + receiverId, saved);
 
             ack.acknowledge(); // ✅ 커밋
             log.info("✅ [KafkaConsumer] Offset committed for topic '{}'", record.topic());

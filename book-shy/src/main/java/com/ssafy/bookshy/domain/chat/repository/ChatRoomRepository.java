@@ -34,4 +34,9 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             "AND DATE(m.timestamp) = :date")
     List<ChatRoom> findChatRoomsByUserIdAndDate(@Param("userId") Long userId,
                                                 @Param("date") LocalDate date);
+
+    // 두 명의 사용자 ID를 반환 (sender, receiver)
+    @Query("SELECT c.userAId, c.userBId FROM ChatRoom c WHERE c.id = :chatRoomId")
+    Optional<Object[]> findUserIdsByChatRoomId(@Param("chatRoomId") Long chatRoomId);
+
 }
