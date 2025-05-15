@@ -21,7 +21,7 @@ export const highlightMatch = (text: string, query: string): ReactNode => {
   return parts.map((part, i) => {
     // 대소문자 구분 없이 일치 여부 확인
     if (part.toLowerCase() === query.toLowerCase()) {
-      return <span key={i} className="bg-yellow-200 text-gray-800 font-medium">{part}</span>;
+      return <span key={i} className="text-primary font-semibold">{part}</span>;
     }
     return part;
   });

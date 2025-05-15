@@ -21,7 +21,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({
   return (
     <div 
       ref={suggestionsRef}
-      className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto"
+      className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-10 max-h-60 overflow-y-auto"
     >
       {suggestions.map((suggestion, index) => (
         <div
