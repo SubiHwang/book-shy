@@ -22,7 +22,13 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
     try {
       const response = await getChatId(matching.userId);
       if (response.chatRoomId) {
-        navigate(`/chat/${response.chatRoomId}`);
+        navigate(`/chat/${response.chatRoomId}`, {
+          state: {
+            partnerName: matching.nickname,
+            partnerProfileImage: matching.profileImageUrl,
+            bookShyScore: matching.score,
+          },
+        });
       } else {
         toast.error('채팅방에 진입할 수 없습니다. 다시 시도 해주세요.');
       }
