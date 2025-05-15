@@ -53,6 +53,17 @@ const addRefreshSubscriber = (callback: RefreshCallback): void => {
 // 응답 인터셉터
 authAxiosInstance.interceptors.response.use(
   (response: AxiosResponse) => {
+    if (response.status !== 200) {
+      const error = response.data.error;
+      const statusCode = error.status;
+      const errorDetail: ErrorDetail = {
+        message: error.message || '오류가 발생 했습니다.',
+        statusCode,
+        data: response.data,
+      };
+      dispatchBusinessError(statusCode, errorDetail);
+      return Promise.reject(error);
+    }
     return response.data;
   },
   async (error: AxiosError) => {
@@ -202,7 +213,18 @@ publicAxiosInstance.interceptors.request.use(
 
 publicAxiosInstance.interceptors.response.use(
   (response: AxiosResponse) => {
-    return response.data; // 응답 데이터만 반환
+    if (response.status !== 200) {
+      const error = response.data.error;
+      const statusCode = error.status;
+      const errorDetail: ErrorDetail = {
+        message: error.message || '오류가 발생 했습니다.',
+        statusCode,
+        data: response.data,
+      };
+      dispatchBusinessError(statusCode, errorDetail);
+      return Promise.reject(error);
+    }
+    return response.data;
   },
   (error: AxiosError) => {
     // originalRequest 접근을 위한 타입 캐스팅

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import BookNoteCard from '@/components/mybooknote/booknote/BookNoteCard';
 import AdjacentBookPreview from '@/components/mybooknote/booknote/AdjacentBookPreview';
-import Header from '@/components/common/Header';
 import { ChevronDown, PlusCircle } from 'lucide-react';
 
 interface BookNoteSwiperPageProps {
@@ -48,12 +47,6 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
 
   return (
     <div className="min-h-screen bg-light-bg pb-28">
-      <Header
-        title="독서 기록"
-        showBackButton
-        showNotification={false}
-        onBackClick={() => navigate(-1)}
-      />
       <div className="px-4 pt-4">
         <div className="mb-2 flex justify-between items-center">
           <div className="font-light text-light-text-secondary">총 {filteredNotes.length}권</div>
@@ -98,11 +91,15 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
           </div>
         </div>
 
-        <div className="bg-[#FFF3F3] border border-[#FF8080] rounded-md px-4 py-3 text-sm text-[#FF4040] mb-3">
-          <strong className="block mb-1">📢 책의 여정 보기 시스템</strong>
-          내가 좋아하거나, 내던 책들을 다른 사람은 어떻게 읽었을까요?
-          <br />
-          책의 여정 보기를 통해 다른 사람들의 감성평을 알아보세요.
+        <div className="bg-[#FFF3F3] border border-[#FF8080] rounded-md px-5 py-3 mb-4">
+          <div className="flex items-center gap-1 mb-1">
+            <span className="text-[#FF4040]">📢</span>
+            <h1 className="text-[#FF4040] font-medium text-sm">내 독서 기록 보기 시스템</h1>
+          </div>
+          <p className="text-[gray] text-xs sm:text-sm leading-relaxed">
+            내가 남긴 감상과 인용구를 다시 떠올려보세요. <br />한 줄 한 줄에 담긴 감정과 생각을
+            되새겨볼 수 있어요.
+          </p>
         </div>
       </div>
 

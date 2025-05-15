@@ -3,11 +3,14 @@ import ChatListItem from './ChatListItem';
 import { fetchChatList } from '@/services/chat/chat';
 import { useWebSocket } from '@/contexts/WebSocketProvider';
 import { useEffect } from 'react';
-import type { ChatMessage } from '@/types/chat/chat';
+import { getUserIdFromToken } from '@/utils/jwt';
+import { ChatMessage } from '@/types/chat/chat';
 
 function ChatList() {
   const queryClient = useQueryClient();
-  const { subscribeRoom, unsubscribe } = useWebSocket();
+  const { subscribeUser, unsubscribe } = useWebSocket();
+  const myUserId = getUserIdFromToken();
+  if (!myUserId) return;
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['chatList'],
@@ -15,9 +18,10 @@ function ChatList() {
   });
 
   useEffect(() => {
-    const subscription = subscribeRoom(-1, (frame) => {
+    const subscription = subscribeUser(myUserId, (frame) => {
       try {
-        const msg: ChatMessage = JSON.parse(frame.body);
+        const msg: ChatMessage = frame;
+        console.log('📨 WebSocket 수신:', msg);
 
         queryClient.setQueryData(['chatList'], (prev: any) => {
           if (!Array.isArray(prev)) return prev;
@@ -58,11 +62,11 @@ function ChatList() {
     });
 
     return () => unsubscribe(subscription);
-  }, [queryClient, subscribeRoom, unsubscribe]);
+  }, [myUserId, queryClient, subscribeUser, unsubscribe]);
 
   if (isLoading) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center bg-light-bg px-4">
+      <div className="h-[100svh] flex items-center justify-center bg-light-bg px-4">
         <span className="text-sm text-light-text-muted">불러오는 중...</span>
       </div>
     );
@@ -70,7 +74,7 @@ function ChatList() {
 
   if (isError || !data) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center bg-light-bg px-4">
+      <div className="h-[100svh] flex items-center justify-center bg-light-bg px-4">
         <span className="text-sm text-light-status-error">채팅 목록을 불러올 수 없습니다.</span>
       </div>
     );

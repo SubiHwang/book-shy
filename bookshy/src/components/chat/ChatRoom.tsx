@@ -259,12 +259,6 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
     setEmojiTargetId((prev) => (prev === messageId ? null : messageId));
   };
 
-  const toggleOptions = () => {
-    const shouldScroll = isScrolledToBottom();
-    setShowOptions((prev) => !prev);
-    setTimeout(() => shouldScroll && scrollToBottom(true), 0);
-  };
-
   const formatDateLabel = (iso: string) => {
     const d = new Date(iso);
     return isNaN(d.getTime())
@@ -287,13 +281,16 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   let lastDateLabel = '';
 
   return (
-    <div className="relative flex flex-col h-[100dvh]">
+    <div className="h-[100svh] max-h-[100svh] flex flex-col overflow-hidden bg-white relative pb-safe">
+      {/* 헤더 */}
       <ChatRoomHeader
         partnerName={partnerName}
         partnerProfileImage={partnerProfileImage}
         bookShyScore={bookShyScore}
       />
-      <div className="relative flex-1 overflow-y-auto bg-white px-4 sm:px-6 py-3">
+
+      {/* 채팅 메시지 영역 */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3">
         {messages.map((msg, idx) => {
           const dateLabel = formatDateLabel(msg.sentAt);
           const showDate = dateLabel !== lastDateLabel;
@@ -338,11 +335,12 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
         <div ref={messagesEndRef} className="h-4" />
       </div>
 
-      <div className="relative">
+      {/* ↓ 버튼: 입력창 바로 위에 반응형 위치 */}
+      <div className="relative shrink-0">
         {showScrollToBottom && (
-          <div className="absolute -top-[60px] left-1/2 -translate-x-1/2 z-30">
+          <div className="absolute inset-x-0 -top-12 sm:-top-14 flex justify-center z-30">
             <button
-              className="bg-black/60 hover:bg-black/80 text-white text-xl px-3 py-1.5 rounded-full shadow-md transition"
+              className="bg-black/60 hover:bg-black/80 text-white text-lg sm:text-xl px-3 py-1.5 rounded-full shadow-md transition"
               onClick={() => scrollToBottom(true)}
               aria-label="맨 아래로 스크롤"
             >
@@ -351,14 +349,23 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
           </div>
         )}
 
+        {/* 입력창 */}
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
-          onToggleOptions={toggleOptions}
+          onToggleOptions={() => {
+            const wasAtBottom = isScrolledToBottom();
+            setShowOptions((prev) => !prev);
+
+            setTimeout(() => {
+              if (wasAtBottom) scrollToBottom(true);
+            }, 0);
+          }}
           onScheduleClick={() => setShowScheduleModal(true)}
         />
       </div>
 
+      {/* 일정 등록 모달 */}
       {showScheduleModal && (
         <ScheduleModal
           partnerName={partnerName}

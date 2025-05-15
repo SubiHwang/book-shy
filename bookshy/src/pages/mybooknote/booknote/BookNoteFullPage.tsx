@@ -34,7 +34,7 @@ const BookNoteFullPage: React.FC = () => {
 
     if (!loadingBook && !loadingQuote && noReview && noQuote && numericBookId) {
       setRedirecting(true);
-      navigate(`/booknotes/create?libraryId=${numericBookId}`);
+      navigate(`/booknotes/create?bookId=${numericBookId}`);
     }
   }, [book, quote, loadingBook, loadingQuote, navigate, numericBookId]);
 

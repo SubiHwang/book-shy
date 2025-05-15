@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 import SockJS from 'sockjs-client';
 import { CompatClient, IMessage, Stomp } from '@stomp/stompjs';
-import { EmojiUpdatePayload, ReadPayload } from '@/types/chat/chat';
+import { ChatMessage, EmojiUpdatePayload, ReadPayload } from '@/types/chat/chat';
 
 const SOCKET_URL = 'https://k12d204.p.ssafy.io/ws-chat';
 
@@ -9,6 +9,10 @@ interface WebSocketContextValue {
   subscribeRoom: (
     roomId: number,
     onMessage: (msg: IMessage) => void,
+  ) => { unsubscribe: () => void } | null;
+  subscribeUser: (
+    userId: number,
+    onMessage: (msg: ChatMessage) => void,
   ) => { unsubscribe: () => void } | null;
   subscribeReadTopic: (
     roomId: number,
@@ -93,6 +97,55 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ c
 
   const unsubscribe = useCallback((sub: { unsubscribe: () => void } | null) => {
     if (sub) sub.unsubscribe();
+  }, []);
+
+  const subscribeUser = useCallback((userId: number, onMessage: (message: ChatMessage) => void) => {
+    const topic = `/topic/chat/user/${userId}`;
+    const client = clientRef.current;
+
+    if (!client?.connected) {
+      console.warn('🛑 WebSocket not connected yet. Delaying user subscription.');
+      return null;
+    }
+
+    if (subscriptions.current.has(topic)) {
+      console.log(`🟡 Already subscribed to ${topic}`);
+      return {
+        unsubscribe: () => {
+          subscriptions.current.get(topic)?.unsubscribe();
+          subscriptions.current.delete(topic);
+          console.log(`❌ Unsubscribed from ${topic}`);
+        },
+      };
+    }
+
+    console.log(`📡 Subscribing to user topic: ${topic}`);
+
+    const sub = client.subscribe(topic, (frame) => {
+      console.log('📩 [WebSocket 수신]', frame.body);
+      try {
+        if (!frame.body || frame.body === 'undefined' || frame.body === 'null') {
+          throw new Error('❗ WebSocket frame.body is empty or invalid');
+        }
+
+        const msg = JSON.parse(frame.body);
+        console.log('✅ JSON.parse 성공:', msg);
+        onMessage(msg);
+      } catch (e) {
+        console.error('❌ User message parsing failed', e);
+      }
+    });
+
+    subscriptions.current.set(topic, sub);
+    console.log(`✅ Subscribed to ${topic}`);
+
+    return {
+      unsubscribe: () => {
+        sub.unsubscribe();
+        subscriptions.current.delete(topic);
+        console.log(`❌ Unsubscribed from ${topic}`);
+      },
+    };
   }, []);
 
   const sendMessage = useCallback(
@@ -251,6 +304,7 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ c
     <WebSocketContext.Provider
       value={{
         subscribeRoom,
+        subscribeUser,
         subscribeReadTopic,
         subscribeCalendarTopic,
         subscribeEmojiTopic,
