@@ -1,5 +1,6 @@
 export interface Library {
   libraryId: number;
+  bookId: number;
   aladinItemId: number;
   isbn13: string;
   title: string;
