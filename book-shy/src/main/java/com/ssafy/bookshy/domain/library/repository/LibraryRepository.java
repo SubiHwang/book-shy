@@ -51,4 +51,5 @@ public interface LibraryRepository extends JpaRepository<Library, Long> {
     """)
     List<Library> findMyLibrariesMatchingTheirWishes(@Param("myUserId") Long myUserId, @Param("otherUserId") Long otherUserId);
 
+    boolean existsByUserUserIdAndBookItemId(Long userId, Long itemId);
 }
