@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.users.controller;
 
+import com.ssafy.bookshy.domain.users.config.KakaoConfig;
 import com.ssafy.bookshy.domain.users.dto.JwtTokenDto;
 import com.ssafy.bookshy.domain.users.dto.OAuthTokenDto;
 import com.ssafy.bookshy.domain.users.dto.RefreshDto;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final AuthTokenService authTokenService;
+    private final KakaoConfig kakaoConfig;
 
 //    @PostMapping("/sign-up")
 //    @Operation(
@@ -146,10 +149,29 @@ public class AuthController {
     })
     public ResponseEntity<JwtTokenDto> kakaoSignIn(
             @Parameter(description = "카카오 OAuth 토큰 정보", required = true)
-            @RequestBody OAuthTokenDto oAuthTokenDto) {
+            @RequestBody OAuthTokenDto oAuthTokenDto,
+            HttpServletRequest request) {
 
-        JwtTokenDto jwtTokenDto = authService.signIn(oAuthTokenDto);
+
+        // Referer 또는 Origin 헤더로 프론트엔드 URL 파악
+        String origin = request.getHeader("Origin");
+        String referer = request.getHeader("Referer");
+
+        log.info("Origin: {}, Referer: {}", origin, referer);
+
+        // 프론트엔드 위치에 따라 리다이렉트 URI 결정
+        String frontendUrl = origin != null ? origin : referer;
+        String redirectUri = determineRedirectUri(frontendUrl);
+
+        JwtTokenDto jwtTokenDto = authService.signIn(oAuthTokenDto, redirectUri);
         return ResponseEntity.ok(jwtTokenDto);
+    }
+
+    private String determineRedirectUri(String frontendUrl) {
+        if (frontendUrl != null && frontendUrl.contains("localhost:5173")) {
+            return "http://localhost:5173/oauth";
+        }
+        return kakaoConfig.getRedirectUri();
     }
 
     @PostMapping("/sign-out")

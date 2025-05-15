@@ -15,8 +15,8 @@ public class OAuthService {
      * @param oAuthTokenDto
      * @return
      */
-    public OAuthUserInfoDto getUserInfo(OAuthTokenDto oAuthTokenDto) {
-        String kakaoAccessToken = kakaoService.getKakaoAccessTokenForUser(oAuthTokenDto.getToken());
+    public OAuthUserInfoDto getUserInfo(OAuthTokenDto oAuthTokenDto, String redirect) {
+        String kakaoAccessToken = kakaoService.getKakaoAccessTokenForUser(oAuthTokenDto.getToken(), redirect);
         return kakaoService.getUserInfo(kakaoAccessToken);
     }
 
