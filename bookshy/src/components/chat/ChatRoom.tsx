@@ -36,6 +36,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   const numericRoomId = Number(roomId);
   const myUserId = getUserIdFromToken();
   if (myUserId === null) return null;
+  const userId = Number(myUserId);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showOptions, setShowOptions] = useState(false);
@@ -77,14 +78,14 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
 
   const onRead = useCallback(
     (payload: { readerId: number; messageIds: number[] }) => {
-      if (payload.readerId === myUserId) return;
+      if (payload.readerId === userId) return;
       setMessages((prev) =>
         prev.map((msg) =>
           payload.messageIds.includes(Number(msg.id)) ? { ...msg, read: true } : msg,
         ),
       );
     },
-    [myUserId],
+    [userId],
   );
 
   const onMessage = useCallback(
@@ -279,7 +280,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
                   showEmojiSelector={emojiTargetId === msg.id}
                   onLongPress={() => handleLongPressOrRightClick(msg.id)}
                   onRightClick={() => handleLongPressOrRightClick(msg.id)}
-                  onSelectEmoji={(emoji) => handleSelectEmoji(msg.id, emoji)}
+                  onSelectEmoji={(emoji) => handleSelectEmoji(msg.id, emoji ?? '')}
                   selectedEmoji={Array.isArray(msg.emoji) ? msg.emoji[0] : msg.emoji}
                 />
               )}
