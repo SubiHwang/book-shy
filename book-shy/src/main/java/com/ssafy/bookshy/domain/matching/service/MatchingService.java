@@ -14,7 +14,6 @@ import com.ssafy.bookshy.domain.matching.repository.MatchingRepository;
 import com.ssafy.bookshy.domain.matching.util.MatchingScoreCalculator;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
-import com.ssafy.bookshy.kafka.producer.KafkaProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +31,6 @@ public class MatchingService {
     private final LibraryRepository libraryRepository;
     private final UserRepository userRepository;
     private final MatchingRepository matchingRepository;
-    private final KafkaProducer kafkaProducer;
     private final ChatRoomRepository chatRoomRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -88,7 +85,7 @@ public class MatchingService {
                         .otherBookId(otherBookIds)
                         .otherBookName(otherBookNames)
                         .matchedAt(LocalDateTime.now())
-                        .score(score)
+                        .score(Math.round(MatchingScoreCalculator.totalScore(me, other) * 10.0) / 10.0)
                         .build();
 
                 result.add(dto);

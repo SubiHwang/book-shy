@@ -25,9 +25,12 @@ public class MatchingScoreCalculator {
 
     public static double temperatureScore(Float temperature) {
         if (temperature == null) return 0.0;
-        if (temperature >= 30) return (temperature - 30) * 0.1;
+        if (temperature >= 30) {
+            return Math.min((temperature - 30) * 0.1, 6.0);
+        }
         return 0.0;
     }
+
 
     public static double activityScore(LocalDateTime lastActiveAt) {
         if (lastActiveAt == null) return 0.0;
@@ -38,10 +41,9 @@ public class MatchingScoreCalculator {
     }
 
     public static double totalScore(Users me, Users other) {
-        // 거리 점수 계산 (위도/경도 null 체크)
         if (me.getLatitude() == null || me.getLongitude() == null ||
                 other.getLatitude() == null || other.getLongitude() == null) {
-            return 0.0; // 위치 정보 없으면 거리 점수 제외
+            return 0.0;
         }
 
         double distKm = calculateDistance(
@@ -49,8 +51,14 @@ public class MatchingScoreCalculator {
                 other.getLatitude(), other.getLongitude()
         );
 
-        return distanceScore(distKm)
-                + temperatureScore(other.getTemperature())
-                + activityScore(other.getLastActiveAt());
+        double distScore = distanceScore(distKm);
+        double tempScore = temperatureScore(other.getTemperature());
+        double actScore = activityScore(other.getLastActiveAt());
+
+        double rawScore = distScore + tempScore + actScore;
+
+        double percentScore = (rawScore / 12.0) * 100.0;
+
+        return Math.min(percentScore, 100.0);
     }
 }
