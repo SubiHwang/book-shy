@@ -5,6 +5,7 @@ export interface ChatRoomSummary {
   lastMessage: string;
   lastMessageTime: string;
   unreadCount: number;
+  bookshyScore: number;
 }
 
 export interface ChatMessage {
@@ -33,4 +34,11 @@ export interface RegisterSchedulePayload {
 interface ReadPayload {
   messageIds: number[];
   readerId: number;
+}
+
+export interface EmojiUpdatePayload {
+  messageId: number;
+  emoji: string;
+  type: 'ADD' | 'REMOVE';
+  updatedBy: number;
 }
