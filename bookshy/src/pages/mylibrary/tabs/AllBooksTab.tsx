@@ -38,10 +38,24 @@ const AllMyBooksTab: React.FC = () => {
   }, [user]);
 
   // 책 선택 처리 함수 => 책 상세 페이지로 이동
+  // src/pages/mylibrary/tabs/AllBooksTab.tsx
+  // 책 선택 처리 함수 => 책 상세 페이지로 이동
   const handleBookClick = (libraryId: number) => {
+    // 현재는 bookId와 libraryId가 같다고 가정하거나,
+    // 또는 books 배열에서 해당 libraryId의 책을 찾아서 bookId를 추출할 수 있음
+    const book = books.find((b) => b.libraryId === libraryId);
+
+    // 책을 찾았고, bookId 필드가 있다면 사용
+    if (book && book.bookId) {
+      // bookId를 세션 스토리지에 저장 (문자열이 아닌 숫자 값 저장)
+      sessionStorage.setItem(`bookId_for_${libraryId}`, book.bookId.toString());
+    } else {
+      // 찾지 못했거나 bookId가 없으면 libraryId 사용
+      sessionStorage.setItem(`bookId_for_${libraryId}`, libraryId.toString());
+    }
+
     navigate(`/bookshelf/books/${libraryId}`);
   };
-
   if (isLoading) {
     return <Loading loadingText="책을 불러오는 중..." />;
   }
