@@ -3,11 +3,13 @@ import ChatListItem from './ChatListItem';
 import { fetchChatList } from '@/services/chat/chat';
 import { useWebSocket } from '@/contexts/WebSocketProvider';
 import { useEffect } from 'react';
+import { getUserIdFromToken } from '@/utils/jwt';
 import type { ChatMessage } from '@/types/chat/chat';
 
 function ChatList() {
   const queryClient = useQueryClient();
-  const { subscribeRoom, unsubscribe } = useWebSocket();
+  const { subscribeUser, unsubscribe } = useWebSocket();
+  const myUserId = getUserIdFromToken();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['chatList'],
@@ -15,9 +17,10 @@ function ChatList() {
   });
 
   useEffect(() => {
-    const subscription = subscribeRoom(-1, (frame) => {
+    const subscription = subscribeUser(myUserId ?? 0, (frame) => {
       try {
         const msg: ChatMessage = JSON.parse(frame.body);
+        console.log('📨 WebSocket 수신:', msg);
 
         queryClient.setQueryData(['chatList'], (prev: any) => {
           if (!Array.isArray(prev)) return prev;
@@ -58,7 +61,7 @@ function ChatList() {
     });
 
     return () => unsubscribe(subscription);
-  }, [queryClient, subscribeRoom, unsubscribe]);
+  }, [queryClient, subscribeUser, unsubscribe, myUserId]);
 
   if (isLoading) {
     return (
