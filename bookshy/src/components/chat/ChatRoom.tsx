@@ -287,14 +287,14 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   let lastDateLabel = '';
 
   return (
-    <div className="relative flex flex-col h-screen max-h-screen overflow-hidden w-full max-w-md mx-auto">
+    <div className="h-[100svh] max-h-[100svh] flex flex-col overflow-hidden bg-white relative">
       <ChatRoomHeader
         partnerName={partnerName}
         partnerProfileImage={partnerProfileImage}
         bookShyScore={bookShyScore}
       />
 
-      <div className="flex-1 overflow-y-auto bg-white px-4 sm:px-6 py-3">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3">
         {messages.map((msg, idx) => {
           const dateLabel = formatDateLabel(msg.sentAt);
           const showDate = dateLabel !== lastDateLabel;
@@ -339,19 +339,19 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
         <div ref={messagesEndRef} className="h-4" />
       </div>
 
-      <div className="relative sticky bottom-0 bg-white">
-        {showScrollToBottom && (
-          <div className="absolute -top-[60px] left-1/2 -translate-x-1/2 z-30">
-            <button
-              className="bg-black/60 hover:bg-black/80 text-white text-xl px-3 py-1.5 rounded-full shadow-md transition"
-              onClick={() => scrollToBottom(true)}
-              aria-label="맨 아래로 스크롤"
-            >
-              ↓
-            </button>
-          </div>
-        )}
+      {showScrollToBottom && (
+        <div className="absolute bottom-[72px] sm:bottom-[80px] left-1/2 -translate-x-1/2 z-30">
+          <button
+            className="bg-black/60 hover:bg-black/80 text-white text-xl px-3 py-1.5 rounded-full shadow-md transition"
+            onClick={() => scrollToBottom(true)}
+            aria-label="맨 아래로 스크롤"
+          >
+            ↓
+          </button>
+        </div>
+      )}
 
+      <div className="relative shrink-0">
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
