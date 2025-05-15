@@ -91,7 +91,7 @@ const BookNotesTab: React.FC = () => {
   const reviewText = note?.content || '';
 
   return (
-    <div>
+    <div className="px-4 ">
       <BookNoteView quoteText={quoteText} reviewText={reviewText} />
     </div>
   );
