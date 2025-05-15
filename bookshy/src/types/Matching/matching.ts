@@ -1,12 +1,27 @@
 export interface MatchingRecommendation {
-  id: number;
-  name: string;
-  profileImage: string;
-  matchingPercent: number;
-  shyScore: number;
-  location: string;
-  myWishBooks: string[];
-  yourWishBooks: string[];
+  userId: number;
+  nickname: string;
+  address: string;
+  profileImageUrl: string;
+  temperature: number;
+  myBookId: number[];
+  myBookName: string[];
+  otherBookId: number[];
+  otherBookName: string[];
+  matchedAt: string;
+  score: number;
+}
+
+export interface MatchingRecommendationResponse {
+  candidates: MatchingRecommendation[];
+  currentPage: number;
+  results: number;
+  totalPages: number;
+}
+
+export interface MatchingConfirmResponse {
+  matchId: number;
+  chatRoomId: number;
 }
 
 export interface Neighborhood {

@@ -8,7 +8,7 @@ COPY package.json package-lock.json ./
 RUN npm install --legacy-peer-deps
 
 COPY . .
-RUN npm run build
+RUN NODE_ENV=production npm run build
 
 # 2. nginx 환경에서 react 빌드 결과물 배포
 FROM nginx:alpine

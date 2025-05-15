@@ -1,4 +1,4 @@
-import {  WishBooksResponse } from '@/types/Matching/wishBooks';
+import { PopularSearchTermResponse, WishBooksResponse } from '@/types/Matching/wishBooks';
 import { WishBook } from '@/types/book';
 import { authAxiosInstance } from '../axiosInstance';
 
@@ -65,13 +65,22 @@ export const getWishBookDetail = async (itemId: number): Promise<WishBook> => {
 
 export const getRecommandationBooks = async (): Promise<WishBooksResponse> => {
   try {
-    const response = await authAxiosInstance.get<string, WishBooksResponse>(
-      '/recommendations',
-    );
+    const response = await authAxiosInstance.get<string, WishBooksResponse>('/recommendations');
     console.log('추천 도서 API 응답:', response);
     return response;
   } catch (error) {
     console.error('추천 도서 API 호출 중 오류 발생:', error);
+    throw error;
+  }
+};
+
+export const getPopularSearchTerms = async (): Promise<PopularSearchTermResponse> => {
+  try {
+    const response = await authAxiosInstance.get<string, PopularSearchTermResponse>('/trending');
+    console.log('실시간 인기 검색어 호출 응답', response);
+    return response;
+  } catch (error) {
+    console.error('실시간 인기 검색어 호출 오류 발생:', error);
     throw error;
   }
 };

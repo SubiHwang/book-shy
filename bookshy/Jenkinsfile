@@ -80,24 +80,24 @@ pipeline {
                             try {
                                 // 환경 변수 파일 생성
                                 sh """
-                                    echo "VITE_BASE_URL=${VITE_BASE_URL}" >> .env
-                                    echo "VITE_KAKAO_CLIENT_ID=${VITE_KAKAO_CLIENT_ID}" >> .env
-                                    echo "VITE_KAKAO_REDIRECT_URI=${VITE_KAKAO_REDIRECT_URI}" >> .env
-                                    echo "VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}" >> .env
-                                    echo "VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN}" >> .env
-                                    echo "VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}" >> .env
-                                    echo "VITE_FIREBASE_STORAGE_BUCKET=${VITE_FIREBASE_STORAGE_BUCKET}" >> .env
-                                    echo "VITE_FIREBASE_MESSAGING_SENDER_ID=${VITE_FIREBASE_MESSAGING_SENDER_ID}" >> .env
-                                    echo "VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}" >> .env
-                                    echo "VITE_FIREBASE_MEASUREMENT_ID=${VITE_FIREBASE_MEASUREMENT_ID}" >> .env
-                                    echo "VITE_FIREBASE_VAPID_KEY=${VITE_FIREBASE_VAPID_KEY}" >> .env
-                                    echo "VITE_KAKAO_REST_API_KEY=${VITE_KAKAO_REST_API_KEY}" >> .env
+                                    echo "VITE_BASE_URL=${VITE_BASE_URL}" >> .env.production
+                                    echo "VITE_KAKAO_CLIENT_ID=${VITE_KAKAO_CLIENT_ID}" >> .env.production
+                                    echo "VITE_KAKAO_REDIRECT_URI=${VITE_KAKAO_REDIRECT_URI}" >> .env.production
+                                    echo "VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}" >> .env.production
+                                    echo "VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN}" >> .env.production
+                                    echo "VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}" >> .env.production
+                                    echo "VITE_FIREBASE_STORAGE_BUCKET=${VITE_FIREBASE_STORAGE_BUCKET}" >> .env.production
+                                    echo "VITE_FIREBASE_MESSAGING_SENDER_ID=${VITE_FIREBASE_MESSAGING_SENDER_ID}" >> .env.production
+                                    echo "VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}" >> .env.production
+                                    echo "VITE_FIREBASE_MEASUREMENT_ID=${VITE_FIREBASE_MEASUREMENT_ID}" >> .env.production
+                                    echo "VITE_FIREBASE_VAPID_KEY=${VITE_FIREBASE_VAPID_KEY}" >> .env.production
+                                    echo "VITE_KAKAO_REST_API_KEY=${VITE_KAKAO_REST_API_KEY}" >> .env.production
                                     
                                     echo "===== ✅ .env 파일 출력 ====="
-                                    cat .env
+                                    cat .env.production
 
                                     echo "===== ✅ VITE_KAKAO_REST_API_KEY 로그 ====="
-                                    grep VITE_KAKAO_REST_API_KEY .env || echo "⚠️ 키가 존재하지 않습니다!"
+                                    grep VITE_KAKAO_REST_API_KEY .env.production || echo "⚠️ 키가 존재하지 않습니다!"
 
                                 """
                                 

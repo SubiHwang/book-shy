@@ -1,72 +1,146 @@
-import { FC, useState } from 'react';
-import { Zap } from 'lucide-react';
-import { MatchingRecommendation } from '@/types/Matching';
+import { FC, useState, useEffect, useRef } from 'react';
+import { MatchingRecommendation, MatchingRecommendationResponse } from '@/types/Matching';
 import NoRecommendationState from '@/components/matching/matching/NoRecommendationState';
 import MatchingList from '@/components/matching/matching/MatchingList';
+import NeighborhoodList from '@/components/matching/matching/NeighborhoodList';
 import Loading from '@/components/common/Loading';
+import { getMatchingList } from '@/services/matching/matching';
+import { useQuery } from '@tanstack/react-query';
+import { RefreshCw } from 'lucide-react';
+// 분리된 컴포넌트 임포트
+import MatchingHeader from '@/components/matching/matching/MatchingHeader';
+import MatchingEndMessage from '@/components/matching/matching/MatchingEndMessage';
+import ScrollToTopButton from '@/components/matching/matching/ScrollToTopButton';
+import LoadingIndicator from '@/components/matching/matching/LoadingIndicator';
 
 const MatchingRecommend: FC = () => {
-  const dummyData: MatchingRecommendation[] = [
-    {
-      id: 1,
-      name: '마이콜',
-      profileImage: '/images/profile.png',
-      matchingPercent: 85,
-      shyScore: 85,
-      location: '구미시 진평동',
-      myWishBooks: ['이기적 유전자', '자존감 수업', '어떻게 원하는 것을 얻는가'],
-      yourWishBooks: ['호모데우스', '정의란 무엇인가'],
-    },
-    {
-      id: 2,
-      name: '제니',
-      profileImage: '/images/profile.png',
-      matchingPercent: 65,
-      shyScore: 85,
-      location: '구미시 진평동',
-      myWishBooks: ['이기적 유전자'],
-      yourWishBooks: ['호모데우스'],
-    },
-  ];
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const ITEMS_PER_PAGE = 10;
+  const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
-  const handleRetryMatching = (): void => {
-    setIsLoading(true);
-    // API 호출을 시뮬레이션합니다
-    setTimeout(() => {
-      setIsLoading(false);
-      // 필요에 따라 데이터를 업데이트합니다
-    }, 1500);
+  // useQuery로 데이터 가져오기
+  const { data, isLoading, refetch } = useQuery<MatchingRecommendationResponse>({
+    queryKey: ['matching-list'],
+    queryFn: async () => {
+      return await getMatchingList(1);
+    },
+  });
+  const matchingList: MatchingRecommendation[] = data?.candidates || [];
+
+  const visibleMatchings = matchingList.slice(0, visibleItems);
+  const hasMoreItems = visibleItems < matchingList.length;
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // 바닥 감지를 위한 Intersection Observer 설정
+  useEffect(() => {
+    if (!bottomRef.current || isLoading) return;
+
+    const currentRef = bottomRef.current;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasMoreItems && !isLoadingMore) {
+          setIsLoadingMore(true);
+
+          setTimeout(() => {
+            setVisibleItems((prev) => Math.min(prev + ITEMS_PER_PAGE, matchingList.length));
+            setIsLoadingMore(false);
+          }, 500);
+        }
+      },
+      { threshold: 0.5 },
+    );
+
+    observer.observe(currentRef);
+
+    return () => {
+      observer.unobserve(currentRef);
+    };
+  }, [bottomRef, hasMoreItems, isLoading, isLoadingMore, matchingList.length]);
+
+  // 매칭이 충분한지 확인하는 상수 (3개 이하면 적다고 판단)
+  const MIN_SUFFICIENT_MATCHES = 3;
+  const hasSufficientMatches = matchingList.length > MIN_SUFFICIENT_MATCHES;
+  const hasFewMatches = matchingList.length > 0 && matchingList.length <= MIN_SUFFICIENT_MATCHES;
 
   return (
     <div className="flex flex-col bg-light-bg">
-      <div className="bg-primary-light/20 px-5 sm:px-8 md:px-10 py-3 sm:py-4">
-        <div className="flex items-center gap-1 mb-1 sm:mb-2">
-          <Zap className="text-primary-dark w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1} />
-          <h1 className="text-primary-dark font-medium text-sm sm:text-base md:text-lg">
-            북끄북끄 매칭 시스템
-          </h1>
-        </div>
-        <p className="text-light-text-secondary font-light text-xs sm:text-sm leading-tight sm:leading-normal">
-          읽고 싶은 책, 보유 도서, 위치, 북끄 지수 등을 고려한 알고리즘으로 최적의 교환 상대를 추천
-          해드려요.{' '}
-          {dummyData.length > 0 ? (
-            <span>
-              현재 <span className="text-primary-accent font-medium">총 {dummyData.length}명</span>
-              의 사용자와 매칭 되었어요.
-            </span>
-          ) : (
-            <span>현재 매칭된 사용자가 없어요.</span>
+      <MatchingHeader matchingCount={matchingList.length} />
+
+      <div className="flex flex-col px-5 sm:px-8 md:px-10 pt-3 sm:pt-4">
+        <div className="flex justify-between items-center">
+          <div className="flex gap-1 items-center">
+            <h2 className="text-primary-dark font-medium text-base">매칭된 이웃들을 둘러보세요</h2>
+          </div>
+
+          {!isLoading && (
+            <button
+              onClick={() => refetch()}
+              disabled={isLoading}
+              className="text-primary hover:text-primary-dark transition-colors"
+              aria-label="추천 도서 새로고침"
+            >
+              <RefreshCw size={16} className={`${isLoading ? 'animate-spin' : ''}`} />
+            </button>
           )}
-        </p>
+        </div>
       </div>
+
       {isLoading ? (
         <Loading loadingText="매칭 추천을 불러오는 중..." />
-      ) : dummyData.length > 0 ? (
-        <MatchingList matchings={dummyData} />
+      ) : hasSufficientMatches ? (
+        <>
+          {/* 매칭 목록 표시 */}
+          <MatchingList matchings={visibleMatchings} />
+
+          {/* 바닥 감지 영역 및 로딩 표시기 */}
+          <div className="py-4 px-5 sm:px-8 md:px-10">
+            <div ref={bottomRef} className="flex justify-center items-center py-4 min-h-[60px]">
+              {isLoadingMore ? (
+                <LoadingIndicator loadingText="더 많은 매칭을 불러오는 중..." />
+              ) : hasMoreItems ? (
+                <p className="text-light-text-secondary text-sm text-center">
+                  스크롤하여 더 많은 매칭을 확인하세요
+                </p>
+              ) : (
+                <MatchingEndMessage
+                  matchingCount={matchingList.length}
+                  onScrollToTop={scrollToTop}
+                />
+              )}
+            </div>
+
+            {/* 추가 여백으로 스크롤 끝 표시 */}
+            {!hasMoreItems && <div className="h-16"></div>}
+          </div>
+
+          {/* 위로 스크롤 버튼 */}
+          {visibleItems > ITEMS_PER_PAGE && hasMoreItems && (
+            <ScrollToTopButton onClick={scrollToTop} />
+          )}
+        </>
+      ) : hasFewMatches ? (
+        <>
+          <MatchingList matchings={matchingList} />
+          <div className="px-5 sm:px-8 md:px-10 py-3 sm:py-4">
+            <h2 className="text-primary-dark font-medium text-base mb-2">
+              주변 이웃들의 서재도 둘러보세요
+            </h2>
+            <p className="text-light-text-secondary font-light text-xs sm:text-sm mb-4">
+              더 많은 매칭 기회를 찾을 수 있어요!
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 sm:p-4">
+              <NeighborhoodList />
+            </div>
+          </div>
+        </>
       ) : (
-        <NoRecommendationState onRetry={handleRetryMatching} />
+        <NoRecommendationState onRetry={refetch} />
       )}
     </div>
   );

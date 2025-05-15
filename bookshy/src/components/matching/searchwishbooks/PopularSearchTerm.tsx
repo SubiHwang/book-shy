@@ -1,43 +1,50 @@
 import { useState, useEffect } from 'react';
 import { TrendingUp, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Minus } from 'lucide-react';
+import { PopularSearchTermType } from '@/types/Matching';
+import { getPopularSearchTerms } from '@/services/matching/wishbooks';
 
 const PopularSearchTerm = () => {
-  const dummyData = [
-    { rank: 1, keyword: '책 제목 2', trend: 'up' },
-    { rank: 2, keyword: '책 제목 1', trend: 'up' },
-    { rank: 3, keyword: '책 제목 3', trend: 'down' },
-    { rank: 4, keyword: '책 제목 4', trend: 'down' },
-    { rank: 5, keyword: '책 제목 5', trend: 'steady' },
-    { rank: 6, keyword: '책 제목 6', trend: 'down' },
-    { rank: 7, keyword: '책 제목 7', trend: 'down' },
-    { rank: 8, keyword: '책 제목 8', trend: 'down' },
-    { rank: 9, keyword: '책 제목 9', trend: 'down' },
-    { rank: 10, keyword: '책 제목 10', trend: 'down' },
-  ];
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [searchTermList, setSearchTermList] = useState<PopularSearchTermType[] | []>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  useEffect(() => {
+    const fetchSearchTerm = async () => {
+      try {
+        setIsLoading(true);
+        const response = await getPopularSearchTerms();
+        setSearchTermList(response.trendingKeywords || []);
+      } catch (error) {
+        console.log('trending 가져오다가 에러 발생');
+        setSearchTermList([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchSearchTerm();
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
-    if (!isOpen) {
+    if (!isOpen && searchTermList.length > 0) {
       interval = setInterval(() => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % dummyData.length);
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % searchTermList.length);
       }, 2000);
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isOpen, dummyData.length]);
+  }, [isOpen, searchTermList.length]);
 
   const toggleOpen = () => {
     setIsOpen(!isOpen);
   };
 
   const renderTrendIcon = (trend: string) => {
-    switch (trend) {
+    switch (trend?.toLowerCase()) {
       case 'up':
         return <ArrowUp className="text-green-500" size={16} />;
       case 'down':
@@ -49,7 +56,7 @@ const PopularSearchTerm = () => {
     }
   };
 
-  const currentItem = dummyData[currentIndex];
+  const currentItem = searchTermList.length > 0 ? searchTermList[currentIndex] : null;
 
   return (
     <div className={`flex flex-col ${isOpen ? 'pb-0' : 'pb-2'}`}>
@@ -60,8 +67,16 @@ const PopularSearchTerm = () => {
         </div>
         {!isOpen && (
           <div className="flex items-center flex-1 text-white ml-2 mr-1">
-            <div className="text-center font-medium w-8">{currentItem.rank}</div>
-            <div className="truncate max-w-full px-2">{currentItem.keyword}</div>
+            {isLoading ? (
+              <div className="text-center w-full">불러오는 중...</div>
+            ) : currentItem ? (
+              <>
+                <div className="text-center font-medium w-8">{currentItem.rank}</div>
+                <div className="truncate max-w-full px-2">{currentItem.keyword}</div>
+              </>
+            ) : (
+              <div className="text-center w-full">데이터가 없습니다</div>
+            )}
           </div>
         )}
         <button
@@ -75,13 +90,19 @@ const PopularSearchTerm = () => {
 
       {isOpen && (
         <div className="flex flex-col mt-2 space-y-1 py-2 bg-white px-4 shadow-md">
-          {dummyData.map((item) => (
-            <div key={item.rank} className="flex items-center text-light-text py-1 px-1">
-              <div className="w-8 text-center font-medium">{item.rank}</div>
-              <div className="truncate flex-1 px-2">{item.keyword}</div>
-              <div className="w-8 flex justify-center">{renderTrendIcon(item.trend)}</div>
-            </div>
-          ))}
+          {isLoading ? (
+            <div className="py-2 text-center">불러오는 중...</div>
+          ) : searchTermList.length > 0 ? (
+            searchTermList.map((item) => (
+              <div key={item.rank} className="flex items-center text-light-text py-1 px-1">
+                <div className="w-8 text-center font-medium">{item?.rank}</div>
+                <div className="truncate flex-1 px-2">{item?.keyword}</div>
+                <div className="w-8 flex justify-center">{renderTrendIcon(item?.trend)}</div>
+              </div>
+            ))
+          ) : (
+            <div className="py-2 text-center">데이터가 없습니다</div>
+          )}
         </div>
       )}
     </div>

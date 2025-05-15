@@ -21,7 +21,7 @@ const SearchWishBooks = () => {
     <div>
       <div className="bg-primary-light px-4 py-3">
         <div>
-          <button onClick={() => navigate(-1)} className="mr-4 p-1 text-white" aria-label="Go back">
+          <button onClick={() => navigate('/matching/wish-books')} className="mr-4 p-1 text-white" aria-label="Go back">
             <ArrowLeft size={24} />
           </button>
         </div>

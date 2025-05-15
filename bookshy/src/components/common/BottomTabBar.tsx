@@ -11,6 +11,9 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
 
   // 숨길 경로 목록
   const hiddenPaths = [
+    '/login',
+    '/oauth',
+    '/setting-location',
     '/bookshelf/add/title',
     '/bookshelf/add/isbn',
     '/bookshelf/add/self',
@@ -74,10 +77,7 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
             >
               <div className="flex items-center justify-center">
                 {/* 활성화 상태에 따라 아이콘 스타일 변경 */}
-                <Icon
-                  size={24}
-                  strokeWidth={isActive ? 2 : 0.5}
-                />
+                <Icon size={24} strokeWidth={isActive ? 2 : 0.5} />
               </div>
               <p className={`text-xs mt-1 ${isActive ? 'font-semibold' : 'font-medium'}`}>
                 {tab.name}
