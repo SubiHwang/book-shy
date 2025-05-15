@@ -41,15 +41,29 @@ const LibraryBookshelfRow: FC<LibraryBookshelfRowProps> = ({ books, onBookClick 
             <div key={index} className="flex flex-col items-center" style={{ width: '28%' }}>
               {book ? (
                 <div
-                  className="w-full aspect-[3/4] bg-yellow-50 border border-yellow-200 shadow-md flex flex-col justify-center items-center rounded overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                  className="w-full aspect-[3/4] bg-white border border-gray-300 shadow-md flex flex-col justify-center items-center rounded overflow-hidden cursor-pointer hover:shadow-lg transition-shadow focus:outline-none"
                   onClick={() => book && handleBookClick(book)}
                 >
                   {book.coverImageUrl ? (
-                    <img
-                      src={book.coverImageUrl}
-                      alt={book.title}
-                      className="w-full h-full object-cover"
-                    />
+                    <div className="w-full h-full overflow-hidden bg-white">
+                      <img
+                        src={book.coverImageUrl}
+                        alt={book.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        onError={(e) => {
+                          // 이미지 로드 실패 시 대체 내용 표시
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          target.parentElement!.innerHTML = `
+                            <div class="text-center p-2 w-full h-full flex flex-col justify-center">
+                              <p class="text-sm font-medium">${book.title}</p>
+                              <p class="text-xs text-gray-500 mt-1">${book.author}</p>
+                            </div>
+                          `;
+                        }}
+                      />
+                    </div>
                   ) : (
                     <div className="text-center p-2">
                       <p className="text-sm font-medium">{book.title}</p>
@@ -66,7 +80,7 @@ const LibraryBookshelfRow: FC<LibraryBookshelfRowProps> = ({ books, onBookClick 
       </div>
 
       {/* 선반 디자인 */}
-      <div className="w-full h-2 bg-gradient-to-b from-gray-300 to-gray-200 rounded-sm shadow-md"></div>
+      <div className="w-full h-2 bg-gradient-to-b from-gray-400 to-gray-300 rounded-sm shadow-md"></div>
     </div>
   );
 };

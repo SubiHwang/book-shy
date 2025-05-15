@@ -1,110 +1,98 @@
+// src/components/mylibrary/BookDetail/BookNotesTab.tsx
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
+import { fetchBookNote } from '@/services/mybooknote/booknote/booknote';
+import { fetchBookQuote } from '@/services/mybooknote/booknote/bookquote';
+import Loading from '@/components/common/Loading';
+import BookNoteView from '@/components/mybooknote/booknote/BookNoteView';
 
-interface ReadingNote {
-  id: number;
+// API 응답 구조에 맞게 인터페이스 수정
+interface BookNoteResponse {
   content: string;
-  createdAt: string;
-  page?: number;
+  // 필요한 다른 필드만 명시
+}
+
+interface BookQuoteResponse {
+  content: string;
+  // 필요한 다른 필드만 명시
+}
+
+interface OutletContextType {
+  bookId: number | undefined;
 }
 
 const BookNotesTab: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const [notes, setNotes] = useState<ReadingNote[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  // Outlet 컨텍스트에서 bookDetail과 bookId 가져오기
+  const { bookId } = useOutletContext<OutletContextType>();
 
+  console.log('BookNotesTab - 받은 bookId:', bookId);
+
+  const [note, setNote] = useState<BookNoteResponse | null>(null);
+  const [quote, setQuote] = useState<BookQuoteResponse | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 독후감과 인용구 가져오기
   useEffect(() => {
-    // 데이터 가져오기
-    const fetchReadingNotes = async () => {
-      if (!id) return;
+    const loadBookNoteAndQuote = async () => {
+      if (!bookId) {
+        setError('책 ID가 유효하지 않습니다.');
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
+        setError(null);
 
-        // 실제 API 호출로 대체 필요
-        setTimeout(() => {
-          // 임시로 빈 배열 반환 (독서 노트 없음)
-          setNotes([]);
-          setLoading(false);
-        }, 300);
-      } catch (error) {
-        console.error('독서 기록을 가져오는 중 오류 발생:', error);
+        // 병렬로 독후감과 인용구 데이터 가져오기
+        const [noteResponse, quoteResponse] = await Promise.all([
+          fetchBookNote(bookId).catch((err) => {
+            console.error('독후감 가져오기 오류:', err);
+            return null; // 오류 발생 시 null 반환
+          }),
+          fetchBookQuote(bookId).catch((err) => {
+            console.error('인용구 가져오기 오류:', err);
+            return null; // 오류 발생 시 null 반환
+          }),
+        ]);
+
+        console.log('독후감 데이터:', noteResponse);
+        console.log('인용구 데이터:', quoteResponse);
+
+        // 타입 캐스팅 또는 응답 구조에 맞게 값 설정
+        setNote(noteResponse as BookNoteResponse);
+        setQuote(quoteResponse as BookQuoteResponse);
+      } catch (err) {
+        console.error('데이터를 가져오는 중 오류 발생:', err);
+        setError('데이터를 불러오는 중 문제가 발생했습니다.');
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchReadingNotes();
-  }, [id]);
-
-  const handleAddNote = () => {
-    // 독서 기록 추가 페이지로 이동하거나 모달 열기
-    alert('독서 기록 추가 기능은 아직 구현되지 않았습니다.');
-  };
+    loadBookNoteAndQuote();
+  }, [bookId]);
 
   if (loading) {
+    return <Loading loadingText="독서 기록을 불러오는 중..." />;
+  }
+
+  if (error) {
     return (
-      <div className="flex justify-center py-6">
-        <div className="w-8 h-8 border-4 border-gray-200 border-t-red-500 rounded-full animate-spin"></div>
+      <div className="text-center p-6">
+        <p className="text-red-500">{error}</p>
       </div>
     );
   }
 
-  if (notes.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-6">
-        <div className="text-center my-8">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-16 w-16 text-gray-300 mx-auto mb-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1}
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-          <p className="text-center text-gray-500 mb-2">독서 기록이 없습니다</p>
-          <p className="text-center text-gray-400 text-sm mb-6">
-            책을 읽으면서 느낀 점이나 기억하고 싶은 문장을 기록해보세요.
-          </p>
-        </div>
-        <button
-          className="bg-primary-light text-white rounded-md py-2 px-6 shadow-md hover:bg-primary-dark transition-colors"
-          onClick={handleAddNote}
-        >
-          독서 기록 추가하기
-        </button>
-      </div>
-    );
-  }
+  // 독후감 내용과 인용구 내용 추출
+  const quoteText = quote?.content || '';
+  const reviewText = note?.content || '';
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium">나의 독서 기록</h3>
-        <button
-          className="text-sm text-primary-light hover:text-primary-dark"
-          onClick={handleAddNote}
-        >
-          + 새 기록 추가
-        </button>
-      </div>
-
-      <div className="space-y-4">
-        {notes.map((note) => (
-          <div key={note.id} className="bg-white rounded-lg p-4 shadow-sm">
-            <div className="flex justify-between text-sm text-gray-500 mb-2">
-              <span>{note.createdAt}</span>
-              {note.page && <span>p.{note.page}</span>}
-            </div>
-            <p className="text-light-text">{note.content}</p>
-          </div>
-        ))}
-      </div>
+    <div className="px-4 ">
+      <BookNoteView quoteText={quoteText} reviewText={reviewText} />
     </div>
   );
 };

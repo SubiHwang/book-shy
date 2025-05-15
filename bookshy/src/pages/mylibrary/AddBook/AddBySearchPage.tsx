@@ -84,7 +84,6 @@ const AddBySearchPage: FC = () => {
 
       // 성공 알림 및 서재 페이지로 이동
       toast.success('책이 성공적으로 등록되었습니다!');
-      navigate('/bookshelf');
     } catch (error) {
       console.error('책 추가 중 오류 발생:', error);
       toast.error('책 추가에 실패했습니다. 다시 시도해주세요.');
@@ -119,7 +118,7 @@ const AddBySearchPage: FC = () => {
         </div>
         <p className="text-xl font-light text-white text-center mb-3">등록할 책을 검색하세요.</p>
         {/* 직접 구현한 검색바 */}
-        <div className="relative flex items-center w-full px-4">
+        <div className="relative flex items-center w-full px-4 mb-5">
           <input
             type="text"
             placeholder="등록할 책 검색(책 제목, 저자, 출판사)"
@@ -136,9 +135,6 @@ const AddBySearchPage: FC = () => {
           </button>
         </div>
       </div>
-
-      {/* 인기검색어 섹션 대신 추가하는 빈 공간 */}
-      <div className="bg-primary-light py-5"></div>
 
       {/* 메인 콘텐츠 영역 */}
       <div>

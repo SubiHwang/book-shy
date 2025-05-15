@@ -30,12 +30,12 @@ const AddBookDialog: React.FC<AddBookDialogProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div className="fixed inset-0 z-[100] overflow-hidden">
       {/* 어두운 배경 오버레이 */}
       <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
 
       {/* 바텀 시트 컨테이너 */}
-      <div className="fixed bottom-0 inset-x-0 z-10">
+      <div className="fixed bottom-0 inset-x-0 z-[100]">
         <div className="transform transition-all">
           <div className="bg-white rounded-t-xl shadow-xl w-full">
             {/* 다이얼로그 헤더 */}
