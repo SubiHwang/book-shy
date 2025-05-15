@@ -88,10 +88,10 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
     return null; // 경로가 숨김 목록에 포함되면 탭바를 렌더링하지 않음
   }
 
-  // 하단 탭바 - 동적 높이 적용
+  // 하단 탭바 - 동적 높이 적용 및 미묘한 음영 효과 추가
   return (
-    <div className="fixed bottom-0 left-0 right-0 pb-2 bg-tabBackground border-t border-light-text-muted/30 z-50 shadow-[0_-3px_6px_-1px_rgba(0,0,0,0.1)]">
-      <nav className={`flex justify-around items-center ${tabHeight}`}>
+    <div className="fixed bottom-0 left-0 right-0 pb-2 bg-tabBackground border-t border-light-text-muted/10 z-50 shadow-[0_-3px_6px_0_rgba(0,0,0,0.1)]">
+      <nav className={`flex justify-around items-center ${tabHeight} pt-2`}>
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -101,21 +101,20 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
               key={tab.id}
               className={`flex flex-col items-center justify-center w-full h-full ${
                 isActive ? 'text-primary' : 'text-light-text-secondary'
-              }`}
+              } py-1`}
               onClick={() => handleTabChange(tab.id)}
             >
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center mb-1">
                 {/* 활성화 상태에 따라 아이콘 스타일 변경 */}
                 <Icon size={window.innerHeight < 667 ? 20 : 24} strokeWidth={isActive ? 2 : 0.5} />
               </div>
-              <p className={`text-xs mt-1 ${isActive ? 'font-semibold' : 'font-medium'}`}>
-                {tab.name}
-              </p>
+              <p className={`text-xs ${isActive ? 'font-semibold' : 'font-medium'}`}>{tab.name}</p>
               {isActive && <div className="bg-primary h-1 w-3 rounded-sm mt-1"></div>}
             </button>
           );
         })}
       </nav>
+
       {/* 하단 패딩 추가 - 안전 영역(safe area) 대응 */}
       <div className="h-safe-bottom bg-tabBackground"></div>
     </div>
