@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { SendHorizonal, Plus, Minus, Camera, Image, CalendarDays, Phone } from 'lucide-react';
 
 interface Props {
@@ -10,6 +10,7 @@ interface Props {
 
 function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Props) {
   const [content, setContent] = useState('');
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,10 +19,22 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
     setContent('');
   };
 
+  const handleFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    console.log('[📷 업로드됨]', file);
+
+    // TODO: 이미지 업로드 처리
+  };
+
   return (
-    <div className="bg-light-bg-secondary p-3 border-t">
+    <div className="bg-light-bg-secondary pt-2 border-t w-full">
       {/* 입력창 */}
-      <form onSubmit={handleSubmit} className="flex items-center gap-2">
+      <form onSubmit={handleSubmit} className="flex items-center gap-2 px-4 pb-2">
         <button
           type="button"
           onClick={onToggleOptions}
@@ -46,11 +59,35 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
         </button>
       </form>
 
-      {/* 확장 기능 버튼 */}
-      {showOptions && (
-        <div className="h-[25vh] mt-2 px-6 flex items-center justify-around transition-all duration-300">
-          <OptionButton icon={<Camera size={28} strokeWidth={1.5} />} label="카메라" />
-          <OptionButton icon={<Image size={28} strokeWidth={1.5} />} label="앨범" />
+      {/* 확장 기능 옵션 */}
+      <div
+        className={`transition-all duration-300 overflow-hidden ${
+          showOptions ? 'h-[25vh]' : 'h-0'
+        }`}
+      >
+        <div className="h-full flex items-center justify-around px-6">
+          <OptionButton
+            icon={<Camera size={28} strokeWidth={1.5} />}
+            label="카메라"
+            onClick={() => {
+              if (fileInputRef.current) {
+                fileInputRef.current.accept = 'image/*';
+                fileInputRef.current.capture = 'environment';
+              }
+              handleFileSelect();
+            }}
+          />
+          <OptionButton
+            icon={<Image size={28} strokeWidth={1.5} />}
+            label="앨범"
+            onClick={() => {
+              if (fileInputRef.current) {
+                fileInputRef.current.accept = 'image/*';
+                fileInputRef.current.removeAttribute('capture');
+              }
+              handleFileSelect();
+            }}
+          />
           <OptionButton
             icon={<CalendarDays size={28} strokeWidth={1.5} />}
             label="약속"
@@ -58,7 +95,15 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
           />
           <OptionButton icon={<Phone size={28} strokeWidth={1.5} />} label="전화" />
         </div>
-      )}
+      </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
     </div>
   );
 }
