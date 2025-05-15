@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import BookNoteCard from '@/components/mybooknote/booknote/BookNoteCard';
 import AdjacentBookPreview from '@/components/mybooknote/booknote/AdjacentBookPreview';
-import Header from '@/components/common/Header';
 import { ChevronDown, PlusCircle } from 'lucide-react';
 
 interface BookNoteSwiperPageProps {
