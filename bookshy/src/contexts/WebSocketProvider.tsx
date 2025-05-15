@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 import SockJS from 'sockjs-client';
 import { CompatClient, IMessage, Stomp } from '@stomp/stompjs';
-import { ReadPayload } from '@/types/chat/chat';
+import { EmojiUpdatePayload, ReadPayload } from '@/types/chat/chat';
 
 const SOCKET_URL = 'https://k12d204.p.ssafy.io/ws-chat';
 
@@ -18,11 +18,14 @@ interface WebSocketContextValue {
     roomId: number,
     onCalendar: (payload: any) => void,
   ) => { unsubscribe: () => void } | null;
+  subscribeEmojiTopic: (
+    roomId: number,
+    onEmojiUpdate: (payload: EmojiUpdatePayload) => void,
+  ) => { unsubscribe: () => void } | null;
   unsubscribe: (sub: { unsubscribe: () => void } | null) => void;
   sendMessage: (roomId: number, senderId: number, content: string, type: string) => void;
   isConnected: boolean;
 }
-
 const WebSocketContext = createContext<WebSocketContextValue | null>(null);
 
 export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ children }) => {
@@ -199,12 +202,58 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ c
     [],
   );
 
+  const subscribeEmojiTopic = useCallback(
+    (roomId: number, onEmojiUpdate: (payload: EmojiUpdatePayload) => void) => {
+      const topic = `/topic/chat/emoji/${roomId}`;
+      const client = clientRef.current;
+
+      if (!client?.connected) {
+        console.warn('🛑 WebSocket not connected yet. Delaying emoji subscription.');
+        return null;
+      }
+
+      if (subscriptions.current.has(topic)) {
+        console.log(`🟡 Already subscribed to ${topic}`);
+        return {
+          unsubscribe: () => {
+            subscriptions.current.get(topic)?.unsubscribe();
+            subscriptions.current.delete(topic);
+            console.log(`❌ Unsubscribed from ${topic}`);
+          },
+        };
+      }
+
+      console.log(`📡 Subscribing to emoji topic: ${topic}`);
+      const sub = client.subscribe(topic, (frame) => {
+        try {
+          const payload = JSON.parse(frame.body) as EmojiUpdatePayload;
+          onEmojiUpdate(payload);
+        } catch (e) {
+          console.error('❌ Emoji message parsing failed', e);
+        }
+      });
+
+      subscriptions.current.set(topic, sub);
+      console.log(`✅ Subscribed to ${topic}`);
+
+      return {
+        unsubscribe: () => {
+          sub.unsubscribe();
+          subscriptions.current.delete(topic);
+          console.log(`❌ Unsubscribed from ${topic}`);
+        },
+      };
+    },
+    [],
+  );
+
   return (
     <WebSocketContext.Provider
       value={{
         subscribeRoom,
         subscribeReadTopic,
         subscribeCalendarTopic,
+        subscribeEmojiTopic,
         unsubscribe,
         sendMessage,
         isConnected,

@@ -14,6 +14,7 @@ function ChatListItem({ room }: Props) {
       state: {
         partnerName: room.partnerName,
         partnerProfileImage: room.partnerProfileImage,
+        bookShyScore: room.bookshyScore,
       },
     });
   };
@@ -30,9 +31,16 @@ function ChatListItem({ room }: Props) {
       />
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-center mb-1">
-          <h3 className="text-sm sm:text-base font-semibold text-light-text truncate">
-            {room.partnerName}
-          </h3>
+          <div className="flex items-center gap-2 min-w-0">
+            <h3 className="text-xl sm:text-base font-semibold text-light-text truncate max-w-[110px] sm:max-w-[140px]">
+              {room.partnerName}
+            </h3>
+            {room.bookshyScore !== undefined && (
+              <span className="text-[10px] sm:text-xs px-2 py-[2px] rounded-full bg-[#FAE7EB] text-primary-light font-medium whitespace-nowrap">
+                북끄지수 {room.bookshyScore}
+              </span>
+            )}
+          </div>
           <span className="text-xs text-light-text-muted whitespace-nowrap">
             {formatLastMessageTime(room.lastMessageTime)}
           </span>

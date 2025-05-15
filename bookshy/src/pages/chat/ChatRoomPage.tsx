@@ -11,6 +11,7 @@ function ChatRoomPage() {
   const partnerName = state?.partnerName || '상대방';
   const partnerProfileImage =
     state?.partnerProfileImage || 'https://cdn.bookshy.com/profile/user5.jpg';
+  const bookShyScore = state?.bookShyScore || 100.0;
 
   if (!roomId) return <div className="p-4 text-center text-gray-500">잘못된 접근입니다.</div>;
 
@@ -19,6 +20,7 @@ function ChatRoomPage() {
       partnerName={partnerName}
       partnerProfileImage={partnerProfileImage}
       initialMessages={initialMessages}
+      bookShyScore={bookShyScore}
     />
   );
 }

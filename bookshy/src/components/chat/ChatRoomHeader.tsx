@@ -5,13 +5,13 @@ import { ArrowLeft, Calendar, Bell } from 'lucide-react';
 interface ChatRoomHeaderProps {
   partnerName: string;
   partnerProfileImage: string;
-  reputationScore?: number; // 북끄지수
+  bookShyScore: number; // 북끄지수
 }
 
 const ChatRoomHeader: FC<ChatRoomHeaderProps> = ({
   partnerName,
   partnerProfileImage,
-  reputationScore = 123,
+  bookShyScore,
 }) => {
   const navigate = useNavigate();
 
@@ -34,9 +34,9 @@ const ChatRoomHeader: FC<ChatRoomHeaderProps> = ({
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-base sm:text-lg text-black">{partnerName}</span>
-            {reputationScore !== undefined && (
+            {bookShyScore !== undefined && (
               <span className="text-xs sm:text-sm text-pink-600 bg-pink-100 px-2 py-0.5 rounded-full">
-                북끄지수 {reputationScore}
+                북끄지수 {bookShyScore}
               </span>
             )}
           </div>
