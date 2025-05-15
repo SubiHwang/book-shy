@@ -48,12 +48,6 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
 
   return (
     <div className="min-h-screen bg-light-bg pb-28">
-      <Header
-        title="독서 기록"
-        showBackButton
-        showNotification={false}
-        onBackClick={() => navigate(-1)}
-      />
       <div className="px-4 pt-4">
         <div className="mb-2 flex justify-between items-center">
           <div className="font-light text-light-text-secondary">총 {filteredNotes.length}권</div>
