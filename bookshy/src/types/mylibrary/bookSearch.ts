@@ -6,6 +6,7 @@ export interface BookSearchItem {
   publisher: string;
   coverImageUrl: string;
   description: string;
+  inLibrary: boolean;
 }
 
 export interface BookSearchResponse {
