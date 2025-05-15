@@ -66,46 +66,46 @@ function ChatMessageItem({
 
   return (
     <div
-      className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'} px-3 py-1 mb-2 relative`}
+      className={`relative flex flex-col px-3 py-1 mb-2 ${isMyMessage ? 'items-end' : 'items-start'}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onContextMenu={handleContextMenu}
     >
-      <div className={`flex ${isMyMessage ? 'flex-row-reverse' : 'flex-row'} items-end gap-1`}>
-        <div className="relative max-w-[85%] sm:max-w-[70%]">
-          <div
-            className={`px-4 py-2 rounded-2xl text-sm sm:text-base whitespace-pre-wrap break-words ${
-              isMyMessage ? 'bg-primary-light text-white' : 'bg-light-bg-secondary text-gray-900'
-            }`}
-          >
-            {message.content}
-          </div>
-
-          {selectedEmoji && (
-            <div className="mt-2 flex justify-end items-center gap-1 text-xs">
-              <span>{selectedEmoji}</span>
-              <span className="text-[10px] text-black/70">1</span>
-            </div>
-          )}
+      {/* 말풍선 + 시간 */}
+      <div className={`flex items-end gap-1 ${isMyMessage ? 'flex-row-reverse' : 'flex-row'}`}>
+        <div
+          className={`max-w-[85%] sm:max-w-[70%] px-4 py-2 rounded-2xl text-sm sm:text-base whitespace-pre-wrap break-words ${
+            isMyMessage ? 'bg-primary-light text-white' : 'bg-light-bg-secondary text-gray-900'
+          }`}
+        >
+          {message.content}
         </div>
-
-        <div className="flex flex-col justify-end gap-[2px] pb-1">
-          {isMyMessage && !message.read && (
-            <span className="text-[10px] text-primary text-right">1</span>
-          )}
-          <span className="text-[10px] text-light-text-muted text-right">{message.sentAt}</span>
+        <div className="flex flex-col gap-[2px] text-right text-[10px] text-light-text-muted pb-[1px]">
+          {isMyMessage && !message.read && <span className="text-primary text-[10px]">1</span>}
+          <span>{message.sentAt}</span>
         </div>
       </div>
 
+      {/* 이모지 - 말풍선 아래에 따로 */}
+      {selectedEmoji && (
+        <div
+          className={`mt-1 px-3 py-1 rounded-xl bg-white text-gray-800 text-sm flex items-center gap-1 shadow-sm`}
+        >
+          <span>{selectedEmoji}</span>
+          <span className="text-[11px] text-gray-600">1</span>
+        </div>
+      )}
+
+      {/* 이모지 선택 팝업 */}
       {showEmojiSelector && (
         <div
           ref={selectorRef}
-          className="absolute bottom-full mb-1 flex gap-1 bg-light-bg-card border border-light-bg-shade rounded-xl shadow p-1 z-20"
+          className="absolute bottom-full mb-1 flex gap-1 bg-white border border-gray-300 rounded-xl shadow-lg p-1 z-30"
         >
           {emojiList.map((emoji) => (
             <button
               key={emoji.label}
-              className="p-1 hover:bg-light-bg-shade rounded-full transition"
+              className="p-1 hover:bg-gray-100 rounded-full transition"
               onClick={() => onSelectEmoji?.(emoji.label)}
             >
               {emoji.icon}
