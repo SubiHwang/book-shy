@@ -15,33 +15,52 @@ import { toast } from 'react-toastify';
 
 interface BookDetailState extends BookDetailResponse {
   libraryId: number;
+  bookId?: number; // bookId 필드 추가 (undefined일 수 있음)
   isPublic: boolean;
 }
 
 const BookDetailPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id: libraryIdStr } = useParams<{ id: string }>();
   const [bookDetail, setBookDetail] = useState<BookDetailState | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [bookId, setBookId] = useState<number | undefined>(undefined); // null 대신 undefined 사용
   const navigate = useNavigate();
   const location = useLocation();
 
   // ID 유효성 확인
-  const isValidId = !!id;
-  const bookId = isValidId ? parseInt(id) : 0;
+  const isValidId = !!libraryIdStr;
+  const libraryId = isValidId ? parseInt(libraryIdStr) : 0;
 
+  // 세션 스토리지에서 bookId 가져오기
+  useEffect(() => {
+    if (isValidId) {
+      const storedBookId = sessionStorage.getItem(`bookId_for_${libraryId}`);
+      console.log('세션 스토리지에서 가져온 bookId:', storedBookId);
+
+      if (storedBookId) {
+        const parsedBookId = parseInt(storedBookId);
+        setBookId(parsedBookId);
+        console.log('상태로 설정된 bookId:', parsedBookId);
+      } else {
+        // bookId가 없으면 libraryId를 사용 (기존 동작과 호환성 유지)
+        setBookId(libraryId);
+        console.log('libraryId를 bookId로 사용:', libraryId);
+      }
+    }
+  }, [libraryId, isValidId]);
   // 탭 페이지 설정
   const pages = [
-    { path: `/bookshelf/books/${bookId}`, label: '정보' },
-    { path: `/bookshelf/books/${bookId}/notes`, label: '내 독서 기록' },
+    { path: `/bookshelf/books/${libraryId}`, label: '정보' },
+    { path: `/bookshelf/books/${libraryId}/notes`, label: '내 독서 기록' },
   ];
 
-  // 현재 경로가 기본 경로인지 확인 (/bookshelf/books/:id)
+  // 현재 경로가 기본 경로인지 확인
   useEffect(() => {
-    if (isValidId && location.pathname === `/bookshelf/books/${bookId}`) {
-      navigate(`/bookshelf/books/${bookId}`, { replace: true });
+    if (isValidId && location.pathname === `/bookshelf/books/${libraryId}`) {
+      navigate(`/bookshelf/books/${libraryId}`, { replace: true });
     }
-  }, [bookId, location.pathname, navigate, isValidId]);
+  }, [libraryId, location.pathname, navigate, isValidId]);
 
   const handleDeleteBook = async () => {
     if (!bookDetail) return;
@@ -49,6 +68,8 @@ const BookDetailPage: React.FC = () => {
     if (window.confirm('정말로 이 책을 삭제하시겠습니까?')) {
       try {
         await deleteLibraryBook(bookDetail.libraryId);
+        // 삭제 후 세션 스토리지에서도 제거
+        sessionStorage.removeItem(`bookId_for_${libraryId}`);
         toast.success('책이 성공적으로 삭제되었습니다.');
         navigate('/bookshelf'); // 서재 페이지로 이동
       } catch (error) {
@@ -71,13 +92,15 @@ const BookDetailPage: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        // API를 통해 책 상세 정보 가져오기
-        const response = await fetchBookDetail(bookId);
+        // API를 통해 책 상세 정보 가져오기 (libraryId 사용)
+        const response = await fetchBookDetail(libraryId);
 
         // 응답 데이터를 상태에 설정
         setBookDetail({
           ...response,
-          libraryId: bookId,
+          libraryId: libraryId,
+          bookId: bookId, // 여기가 문제가 되었던 부분, 이제 타입이 일치함
+          isPublic: response.isPublic || false,
         });
 
         console.log('책 상세 정보 로드 완료:', response);
@@ -90,8 +113,11 @@ const BookDetailPage: React.FC = () => {
       }
     };
 
-    loadBookDetail();
-  }, [bookId, isValidId]);
+    // bookId가 설정된 후에만 데이터 로드 (확인 방식 변경)
+    if (bookId !== undefined) {
+      loadBookDetail();
+    }
+  }, [libraryId, bookId, isValidId]);
 
   const handleBack = () => {
     navigate('/bookshelf'); // 서재 페이지로 돌아가기
@@ -172,7 +198,8 @@ const BookDetailPage: React.FC = () => {
         {/* 중첩 라우트 컨텐츠 - overflow 설정으로 스크롤 가능 */}
         <div className="bg-light-bg flex-1 overflow-y-auto overflow-x-hidden">
           <div className="max-w-screen-md mx-auto">
-            <Outlet context={{ bookDetail }} />
+            {/* bookId도 함께 전달 */}
+            <Outlet context={{ bookDetail, bookId }} />
           </div>
         </div>
       </div>
