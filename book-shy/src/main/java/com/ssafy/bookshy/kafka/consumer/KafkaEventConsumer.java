@@ -151,6 +151,7 @@ public class KafkaEventConsumer {
 
             messagingTemplate.convertAndSend("/topic/chat/user/" + senderId, saved);
             messagingTemplate.convertAndSend("/topic/chat/user/" + receiverId, saved);
+            log.info("✅ [KafkaConsumer] 채팅 보낸이 Id : '{}', 받는이 Id : '{}'", senderId, receiverId);
 
             ack.acknowledge(); // ✅ 커밋
             log.info("✅ [KafkaConsumer] Offset committed for topic '{}'", record.topic());
