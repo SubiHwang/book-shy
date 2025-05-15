@@ -9,9 +9,6 @@ interface SuggestionListProps {
   suggestionsRef?: React.RefObject<HTMLDivElement>;
 }
 
-/**
- * 자동완성 제안 목록 컴포넌트
- */
 const SuggestionList: React.FC<SuggestionListProps> = ({
   suggestions,
   query,
