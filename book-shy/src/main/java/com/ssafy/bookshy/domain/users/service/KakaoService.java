@@ -116,7 +116,7 @@ public class KakaoService {
 
         // 로컬 환경 감지 - 여러 방법으로 체크
         if (isLocalEnvironment()) {
-            currentRedirectUri = "http://localhost:3000/setting-location";
+            currentRedirectUri = "http://localhost:5173/oauth";
             log.info("🔵 로컬 환경 감지 - 리다이렉트 URI를 localhost로 변경");
         }
 
