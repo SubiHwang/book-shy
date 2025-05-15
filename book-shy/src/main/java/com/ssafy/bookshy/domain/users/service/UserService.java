@@ -178,7 +178,8 @@ public class UserService {
     public void updateLastActiveAt(Long userId) {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
-        user.updateLastActiveAt(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime());
+        user.updateLastActiveAt(LocalDateTime.now());
+//        user.updateLastActiveAt(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime());
     }
 
     /**
