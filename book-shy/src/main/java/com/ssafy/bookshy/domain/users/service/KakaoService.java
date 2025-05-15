@@ -113,14 +113,15 @@ public class KakaoService {
 
         // 현재 환경에 따라 리다이렉트 URL 결정
         String currentRedirectUri = kakaoConfig.getRedirectUri();
+        log.info("🟡 기본 리다이렉트 URI: {}", currentRedirectUri);
 
-        // 로컬 환경 감지 - 여러 방법으로 체크
+        // 로컬 환경 감지
         if (isLocalEnvironment()) {
-            currentRedirectUri = "http://localhost:5173/oauth";
-            log.info("🔵 로컬 환경 감지 - 리다이렉트 URI를 localhost로 변경");
+            currentRedirectUri = "http://localhost:5173/oauth";  // 프론트엔드 URL에 맞게
+            log.info("🔵 로컬 환경 감지 - 리다이렉트 URI를 localhost로 변경: {}", currentRedirectUri);
+        } else {
+            log.info("🟢 운영 환경 - 기본 리다이렉트 URI 사용: {}", currentRedirectUri);
         }
-
-        log.info("💚 사용할 리다이렉트 URI: {}", currentRedirectUri);
 
         try {
             URL url = new URL("https://kauth.kakao.com/oauth/token");
@@ -137,14 +138,16 @@ public class KakaoService {
             StringBuilder params = new StringBuilder();
             params.append("grant_type=authorization_code");
             params.append("&client_id=").append(kakaoConfig.getClientId());
-            params.append("&redirect_uri=").append(currentRedirectUri);
-            log.info("💚 kakao_redirect_uri : {}", kakaoConfig.getRedirectUri());
+            params.append("&redirect_uri=").append(currentRedirectUri);  // ⭐ currentRedirectUri 사용
             params.append("&code=").append(authorizationCode);
 
             // 클라이언트 시크릿이 있다면 추가
             if (kakaoConfig.getClientId() != null && !kakaoConfig.getClientId().isEmpty()) {
-                params.append("&client_secret=").append(kakaoConfig.getClientId());
+                params.append("&client_secret=").append(kakaoConfig.getClientId());  // ⭐ clientSecret 사용
             }
+
+            log.info("💚 최종 사용할 리다이렉트 URI: {}", currentRedirectUri);
+            log.info("🔍 전체 요청 파라미터: {}", params.toString());
 
             // 요청 본문 작성
             try (var wr = new OutputStreamWriter(conn.getOutputStream())) {
@@ -178,11 +181,6 @@ public class KakaoService {
             JsonElement element = JsonParser.parseString(response.toString());
 
             String accessToken = element.getAsJsonObject().get("access_token").getAsString();
-            String refreshToken = element.getAsJsonObject().has("refresh_token") ?
-                    element.getAsJsonObject().get("refresh_token").getAsString() : null;
-            String tokenType = element.getAsJsonObject().get("token_type").getAsString();
-            Long expiresIn = element.getAsJsonObject().get("expires_in").getAsLong();
-
             log.info("발급된 액세스 토큰: {}", accessToken);
 
             return accessToken;
@@ -195,14 +193,40 @@ public class KakaoService {
         }
     }
 
+    // 로컬 환경 감지 개선
     private boolean isLocalEnvironment() {
+        // 1. 시스템 프로퍼티로 프로파일 체크
+        String profile = System.getProperty("spring.profiles.active");
+        if (profile != null && profile.contains("local")) {
+            log.info("Spring Profile이 local입니다: {}", profile);
+            return true;
+        }
+
+        // 2. 호스트명 체크
         try {
             String hostname = java.net.InetAddress.getLocalHost().getHostName();
-            return hostname.startsWith("localhost") ||
-                    hostname.startsWith("127.0.0.1");
+            log.info("호스트명: {}", hostname);
+
+            // 호스트명이 localhost나 개발자 PC 이름인 경우
+            if (hostname.toLowerCase().contains("localhost") ||
+                    hostname.equals("127.0.0.1") ||
+                    hostname.toLowerCase().contains("local")) {
+                return true;
+            }
         } catch (Exception e) {
-            return false;
+            log.error("호스트명 확인 실패", e);
         }
+
+        // 3. IDE 실행 감지
+        String javaCommand = System.getProperty("sun.java.command");
+        if (javaCommand != null &&
+                (javaCommand.contains("intellij") ||
+                        System.getProperty("idea.home.path") != null)) {
+            log.info("IDE에서 실행 중입니다");
+            return true;
+        }
+
+        return false;
     }
 
 }
