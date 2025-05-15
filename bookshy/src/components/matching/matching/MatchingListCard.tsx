@@ -18,16 +18,17 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
   };
 
   const handleChatClick = async () => {
-    console.log('✅ handleChatClick 호출됨');
+    console.log('✅ handleChatClick 호출됨', matching.userId);
     try {
       const response = await getChatId(matching.userId);
-      if (response.chatRoomId){
-        navigate(`/chat/${response.chatRoomId}`)
+      if (response.chatRoomId) {
+        navigate(`/chat/${response.chatRoomId}`);
       } else {
-        toast.error("채팅방에 진입할 수 없습니다. 다시 시도 해주세요.")
+        toast.error('채팅방에 진입할 수 없습니다. 다시 시도 해주세요.');
       }
     } catch (error) {
-      toast.error("채팅방에 진입할 수 없습니다. 다시 시도 해주세요.")
+      console.log('채팅방 진입 실패', error);
+      toast.error('채팅방에 진입할 수 없습니다. 다시 시도 해주세요.');
     }
   };
 
