@@ -10,32 +10,22 @@ interface WebSocketContextValue {
     roomId: number,
     onMessage: (msg: IMessage) => void,
   ) => { unsubscribe: () => void } | null;
-
-  subscribeUser: (
-    userId: number,
-    onMessage: (msg: IMessage) => void,
-  ) => { unsubscribe: () => void } | null;
-
   subscribeReadTopic: (
     roomId: number,
     onRead: (payload: ReadPayload) => void,
   ) => { unsubscribe: () => void } | null;
-
   subscribeCalendarTopic: (
     roomId: number,
     onCalendar: (payload: any) => void,
   ) => { unsubscribe: () => void } | null;
-
   subscribeEmojiTopic: (
     roomId: number,
     onEmojiUpdate: (payload: EmojiUpdatePayload) => void,
   ) => { unsubscribe: () => void } | null;
-
   unsubscribe: (sub: { unsubscribe: () => void } | null) => void;
   sendMessage: (roomId: number, senderId: number, content: string, type: string) => void;
   isConnected: boolean;
 }
-
 const WebSocketContext = createContext<WebSocketContextValue | null>(null);
 
 export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ children }) => {
@@ -101,49 +91,6 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ c
     };
   }, []);
 
-  const subscribeUser = useCallback((userId: number, onMessage: (message: IMessage) => void) => {
-    const topic = `/topic/chat/user/${userId}`;
-    const client = clientRef.current;
-
-    if (!client?.connected) {
-      console.warn('🛑 WebSocket not connected yet. Delaying user subscription.');
-      return null;
-    }
-
-    if (subscriptions.current.has(topic)) {
-      console.log(`🟡 Already subscribed to ${topic}`);
-      return {
-        unsubscribe: () => {
-          subscriptions.current.get(topic)?.unsubscribe();
-          subscriptions.current.delete(topic);
-          console.log(`❌ Unsubscribed from ${topic}`);
-        },
-      };
-    }
-
-    console.log(`📡 Subscribing to user topic: ${topic}`);
-
-    const sub = client.subscribe(topic, (frame) => {
-      try {
-        const msg = JSON.parse(frame.body) as IMessage;
-        onMessage(msg);
-      } catch (e) {
-        console.error('❌ User message parsing failed', e);
-      }
-    });
-
-    subscriptions.current.set(topic, sub);
-    console.log(`✅ Subscribed to ${topic}`);
-
-    return {
-      unsubscribe: () => {
-        sub.unsubscribe();
-        subscriptions.current.delete(topic);
-        console.log(`❌ Unsubscribed from ${topic}`);
-      },
-    };
-  }, []);
-
   const unsubscribe = useCallback((sub: { unsubscribe: () => void } | null) => {
     if (sub) sub.unsubscribe();
   }, []);
@@ -190,7 +137,7 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ c
       const sub = client.subscribe(topic, (frame) => {
         try {
           const payload = JSON.parse(frame.body) as ReadPayload;
-          onRead(payload);
+          onRead(payload); // ✅ 타입에 맞게 직접 전달
         } catch (e) {
           console.error('❌ 읽음 메시지 파싱 실패', e);
         }
@@ -304,7 +251,6 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ c
     <WebSocketContext.Provider
       value={{
         subscribeRoom,
-        subscribeUser,
         subscribeReadTopic,
         subscribeCalendarTopic,
         subscribeEmojiTopic,
