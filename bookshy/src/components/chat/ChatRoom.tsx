@@ -259,12 +259,6 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
     setEmojiTargetId((prev) => (prev === messageId ? null : messageId));
   };
 
-  const toggleOptions = () => {
-    const shouldScroll = isScrolledToBottom();
-    setShowOptions((prev) => !prev);
-    setTimeout(() => shouldScroll && scrollToBottom(true), 0);
-  };
-
   const formatDateLabel = (iso: string) => {
     const d = new Date(iso);
     return isNaN(d.getTime())
