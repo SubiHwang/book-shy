@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.chat.repository;
 
+import com.ssafy.bookshy.domain.chat.dto.ChatRoomUserIds;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -39,6 +40,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     // 두 명의 사용자 ID를 반환 (sender, receiver)
     @Query("SELECT c.userAId, c.userBId FROM ChatRoom c WHERE c.id = :chatRoomId")
-    Optional<Object[]> findUserIdsByChatRoomId(@Param("chatRoomId") Long chatRoomId);
+    Optional<ChatRoomUserIds> findUserIdsByChatRoomId(@Param("chatRoomId") Long chatRoomId);
 
 }

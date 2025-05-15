@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.kafka.consumer;
 
 import com.ssafy.bookshy.domain.chat.dto.ChatMessageResponseDto;
+import com.ssafy.bookshy.domain.chat.dto.ChatRoomUserIds;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.service.ChatMessageService;
 import com.ssafy.bookshy.domain.chat.service.ChatRoomService;
@@ -145,13 +146,17 @@ public class KafkaEventConsumer {
             log.info("📢 [KafkaConsumer] ChatMessage sent to WebSocket destination '{}'", destination);
 
             // 🔥 채팅 목록 갱신용 브로드캐스트
-            Pair<Long, Long> users = chatRoomService.getUserIdsByChatRoomId(dto.getChatRoomId());
+            ChatRoomUserIds userIds = chatRoomService.getUserIdsByChatRoomId(dto.getChatRoomId());
             Long senderId = dto.getSenderId();
-            Long receiverId = users.getLeft().equals(senderId) ? users.getRight() : users.getLeft();
+            Long receiverId = userIds.getUserAId().equals(senderId)
+                    ? userIds.getUserBId()
+                    : userIds.getUserAId();
 
+// 👥 각 사용자에게 채팅 목록 갱신 WebSocket 전송
             messagingTemplate.convertAndSend("/topic/chat/user/" + senderId, saved);
             messagingTemplate.convertAndSend("/topic/chat/user/" + receiverId, saved);
-            log.info("✅ [KafkaConsumer] 채팅 보낸이 Id : '{}', 받는이 Id : '{}'", senderId, receiverId);
+
+            log.info("✅ [KafkaConsumer] 채팅 보낸이 Id: '{}', 받는이 Id: '{}'", senderId, receiverId);
 
             ack.acknowledge(); // ✅ 커밋
             log.info("✅ [KafkaConsumer] Offset committed for topic '{}'", record.topic());

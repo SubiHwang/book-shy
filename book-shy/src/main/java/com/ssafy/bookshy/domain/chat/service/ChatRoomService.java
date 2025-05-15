@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.chat.service;
 
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomDto;
+import com.ssafy.bookshy.domain.chat.dto.ChatRoomUserIds;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatMessageRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
@@ -117,21 +118,9 @@ public class ChatRoomService {
      * @return (userAId, userBId) 형태의 Pair 객체
      * @throws IllegalArgumentException 채팅방이 존재하지 않을 경우 예외 발생
      */
-    public Pair<Long, Long> getUserIdsByChatRoomId(Long chatRoomId) {
-        Object[] result = chatRoomRepository.findUserIdsByChatRoomId(chatRoomId)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
-
-        Long userAId = convertToLong(result[0]);
-        Long userBId = convertToLong(result[1]);
-
-        return Pair.of(userAId, userBId);
+    public ChatRoomUserIds getUserIdsByChatRoomId(Long chatRoomId) {
+        return chatRoomRepository.findUserIdsByChatRoomId(chatRoomId)
+                .orElseThrow(() -> new IllegalArgumentException("❌ 채팅방이 존재하지 않습니다. ID=" + chatRoomId));
     }
 
-    private Long convertToLong(Object value) {
-        if (value instanceof Long) return (Long) value;
-        if (value instanceof Integer) return ((Integer) value).longValue();
-        if (value instanceof Short) return ((Short) value).longValue();
-        if (value instanceof BigInteger) return ((BigInteger) value).longValue();
-        throw new IllegalArgumentException("지원되지 않는 ID 타입: " + value.getClass());
-    }
 }
