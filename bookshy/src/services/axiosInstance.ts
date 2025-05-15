@@ -1,6 +1,14 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestConfig } from 'axios';
+import {
+  dispatchSystemError,
+  dispatchBusinessError,
+  dispatchHttpError,
+} from '@/utils/error/errorEventUtils';
 
-const API_BASE_URL = import.meta.env.VITE_BASE_URL as string; // .env 파일에서 가져온 API 기본 URL
+// 타입만 import
+import type { ErrorDetail } from '@/types/common/error/Error';
+
+const API_BASE_URL = import.meta.env.VITE_BASE_URL as string;
 const API_TIMEOUT = 30000;
 
 // member만 접근 가능한 api 사용을 위한 기본 인스턴스 생성
@@ -13,17 +21,12 @@ const authAxiosInstance: AxiosInstance = axios.create({
 });
 
 // 요청 인터셉터
-// 요청 보내기 전 수행할 작업을 정의
 authAxiosInstance.interceptors.request.use(
   (config) => {
-    // 토큰 추가 로직
-    // console.log('baseurl', API_BASE_URL);
-
     const token = localStorage.getItem('auth_token');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
-
     return config;
   },
   (error: AxiosError) => {
@@ -31,15 +34,9 @@ authAxiosInstance.interceptors.request.use(
   },
 );
 
-// 응답 인터셉터
-// 응답을 받은 후 수행할 작업을 정의
-// 토큰 갱신 중인지 추적하는 변수
+// 토큰 갱신 관련 변수들
 let isRefreshing: boolean = false;
-
-// 콜백 함수의 타입 정의
 type RefreshCallback = (token: string) => void;
-
-// 토큰 갱신 완료를 기다리는 요청들의 콜백 배열
 let refreshSubscribers: RefreshCallback[] = [];
 
 // 토큰 갱신 후 대기 중인 요청들에게 새 토큰을 전달하는 함수
@@ -81,7 +78,13 @@ authAxiosInstance.interceptors.response.use(
             // 로그아웃 처리
             localStorage.removeItem('auth_token');
             localStorage.removeItem('refresh_token');
-            window.location.href = '/login';
+
+            // 에러 이벤트 발생 - 권한 없음
+            dispatchBusinessError('PERMISSION', {
+              message: '로그인이 필요합니다.',
+              redirectUrl: '/login',
+            });
+
             return Promise.reject(error);
           }
 
@@ -96,7 +99,13 @@ authAxiosInstance.interceptors.response.use(
             // 로그아웃 처리
             localStorage.removeItem('auth_token');
             localStorage.removeItem('refresh_token');
-            window.location.href = '/login';
+
+            // 에러 이벤트 발생 - 권한 없음
+            dispatchBusinessError('PERMISSION', {
+              message: '세션이 만료되었습니다. 다시 로그인해주세요.',
+              redirectUrl: '/login',
+            });
+
             return Promise.reject(error);
           }
 
@@ -122,7 +131,13 @@ authAxiosInstance.interceptors.response.use(
           isRefreshing = false;
           localStorage.removeItem('auth_token');
           localStorage.removeItem('refresh_token');
-          window.location.href = '/login';
+
+          // 에러 이벤트 발생 - 권한 없음
+          dispatchBusinessError('PERMISSION', {
+            message: '인증에 실패했습니다. 다시 로그인해주세요.',
+            redirectUrl: '/login',
+          });
+
           return Promise.reject(refreshError);
         }
       } else {
@@ -138,10 +153,31 @@ authAxiosInstance.interceptors.response.use(
       }
     }
 
-    // 500 에러 확인 
-    if (!error.response || error.response.status >= 500) {
-      // 서버 에러이면 에러 페이지로 이동
-      window.location.href = '/500';
+    // HTTP 에러 처리 (기존 500 에러 처리 대체)
+    if (error.response) {
+      // 서버 응답이 있는 경우 - HTTP 상태 코드 기반 에러 처리
+      const statusCode = error.response.status;
+      const errorDetail: ErrorDetail = {
+        message: '오류가 발생했습니다.',
+        statusCode,
+        url: originalRequest.url,
+        data: error.response.data,
+      };
+
+      // HTTP 상태 코드에 따른 에러 이벤트 발생
+      dispatchHttpError(statusCode, errorDetail);
+    } else if (error.request) {
+      // 요청은 보냈지만 응답을 받지 못한 경우 (네트워크 에러)
+      dispatchSystemError('NETWORK', {
+        message: '서버와 통신할 수 없습니다. 네트워크 연결을 확인해주세요.',
+        url: originalRequest.url,
+      });
+    } else {
+      // 요청 설정 과정에서 에러가 발생한 경우
+      dispatchSystemError('UNKNOWN', {
+        message: error.message || '알 수 없는 오류가 발생했습니다.',
+        error: error.toJSON ? error.toJSON() : error,
+      });
     }
 
     return Promise.reject(error);
@@ -157,8 +193,6 @@ const publicAxiosInstance: AxiosInstance = axios.create({
 publicAxiosInstance.interceptors.request.use(
   (config) => {
     // 토큰 필요 없음
-    // 토큰 추가 로직
-    console.log('baseurl', API_BASE_URL);
     return config;
   },
   (error: AxiosError) => {
@@ -171,11 +205,36 @@ publicAxiosInstance.interceptors.response.use(
     return response.data; // 응답 데이터만 반환
   },
   (error: AxiosError) => {
-    // 500 에러 확인 
-    if (!error.response || error.response.status >= 500) {
-      // 서버 에러이면 에러 페이지로 이동
-      window.location.href = '/500';
+    // originalRequest 접근을 위한 타입 캐스팅
+    const originalRequest = error.config as AxiosRequestConfig;
+
+    // HTTP 에러 처리 (기존 500 에러 처리 대체)
+    if (error.response) {
+      // 서버 응답이 있는 경우 - HTTP 상태 코드 기반 에러 처리
+      const statusCode = error.response.status;
+      const errorDetail: ErrorDetail = {
+        message: '오류가 발생했습니다.',
+        statusCode,
+        url: originalRequest.url,
+        data: error.response.data,
+      };
+
+      // HTTP 상태 코드에 따른 에러 이벤트 발생
+      dispatchHttpError(statusCode, errorDetail);
+    } else if (error.request) {
+      // 요청은 보냈지만 응답을 받지 못한 경우 (네트워크 에러)
+      dispatchSystemError('NETWORK', {
+        message: '서버와 통신할 수 없습니다. 네트워크 연결을 확인해주세요.',
+        url: originalRequest.url,
+      });
+    } else {
+      // 요청 설정 과정에서 에러가 발생한 경우
+      dispatchSystemError('UNKNOWN', {
+        message: error.message || '알 수 없는 오류가 발생했습니다.',
+        error: error.toJSON ? error.toJSON() : error,
+      });
     }
+
     return Promise.reject(error);
   },
 );
