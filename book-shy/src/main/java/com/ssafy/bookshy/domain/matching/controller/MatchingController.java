@@ -29,9 +29,10 @@ public class MatchingController {
     @GetMapping("/candidates")
     public ResponseEntity<MatchingPageResponseDto> getMatchingCandidates(
             @Parameter(hidden = true) @AuthenticationPrincipal Users user,
-            @RequestParam(defaultValue = "1") int page
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "score") String sort
     ) {
-        MatchingPageResponseDto response = matchingService.findPagedCandidates(user.getUserId(), page, 10);
+        MatchingPageResponseDto response = matchingService.findPagedCandidates(user.getUserId(), page, 2, sort);
         return ResponseEntity.ok(response);
     }
 

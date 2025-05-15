@@ -14,7 +14,6 @@ import com.ssafy.bookshy.domain.matching.repository.MatchingRepository;
 import com.ssafy.bookshy.domain.matching.util.MatchingScoreCalculator;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
-import com.ssafy.bookshy.kafka.producer.KafkaProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +31,6 @@ public class MatchingService {
     private final LibraryRepository libraryRepository;
     private final UserRepository userRepository;
     private final MatchingRepository matchingRepository;
-    private final KafkaProducer kafkaProducer;
     private final ChatRoomRepository chatRoomRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -77,6 +74,15 @@ public class MatchingService {
 
                 double score = MatchingScoreCalculator.totalScore(me, other);
 
+                double distKm = MatchingScoreCalculator.calculateDistance(
+                        me.getLatitude(), me.getLongitude(),
+                        other.getLatitude(), other.getLongitude()
+                );
+
+                if (distKm > 20.0) {
+                    continue;
+                }
+
                 MatchingDto dto = MatchingDto.builder()
                         .userId(other.getUserId())
                         .nickname(other.getNickname())
@@ -88,7 +94,8 @@ public class MatchingService {
                         .otherBookId(otherBookIds)
                         .otherBookName(otherBookNames)
                         .matchedAt(LocalDateTime.now())
-                        .score(score)
+                        .score(Math.round(MatchingScoreCalculator.totalScore(me, other) * 10.0) / 10.0)
+                        .distanceKm(Math.round(distKm * 100.0) / 100.0)
                         .build();
 
                 result.add(dto);
@@ -126,10 +133,19 @@ public class MatchingService {
                 .build();
     }
 
-    public MatchingPageResponseDto findPagedCandidates(Long myUserId, int page, int size) {
+    public MatchingPageResponseDto findPagedCandidates(Long myUserId, int page, int size, String sort) {
         List<MatchingDto> all = findMatchingCandidates(myUserId);
-        int total = all.size();
 
+        all = switch (sort.toLowerCase()) {
+            case "distance" -> all.stream()
+                    .sorted(Comparator.comparingDouble(MatchingDto::getDistanceKm))
+                    .toList();
+            default -> all.stream()
+                    .sorted(Comparator.comparingDouble(MatchingDto::getScore).reversed())
+                    .toList();
+        };
+
+        int total = all.size();
         int fromIndex = Math.min((page - 1) * size, total);
         int toIndex = Math.min(page * size, total);
         List<MatchingDto> pageResult = all.subList(fromIndex, toIndex);

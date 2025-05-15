@@ -17,31 +17,35 @@ public class MatchingScoreCalculator {
     }
 
     public static double distanceScore(double km) {
-        if (km <= 3) return 3.0;
-        else if (km <= 10) return 2.0;
-        else if (km <= 30) return 1.0;
+        if (km <= 1) return 6.0;
+        else if (km <= 3) return 5.0;
+        else if (km <= 5) return 4.0;
+        else if (km <= 10) return 3.0;
+        else if (km <= 15) return 2.0;
+        else if (km <= 20) return 1.0;
         return 0.0;
     }
 
     public static double temperatureScore(Float temperature) {
         if (temperature == null) return 0.0;
-        if (temperature >= 30) return (temperature - 30) * 0.1;
+        if (temperature >= 30) {
+            return Math.min((temperature - 30) * 0.1, 4.0);
+        }
         return 0.0;
     }
 
     public static double activityScore(LocalDateTime lastActiveAt) {
         if (lastActiveAt == null) return 0.0;
         LocalDateTime now = LocalDateTime.now();
-        if (lastActiveAt.isAfter(now.minusDays(3))) return 3.0;
-        if (lastActiveAt.isAfter(now.minusDays(7))) return 1.0;
+        if (lastActiveAt.isAfter(now.minusDays(3))) return 4.0;
+        if (lastActiveAt.isAfter(now.minusDays(7))) return 2.0;
         return 0.0;
     }
 
     public static double totalScore(Users me, Users other) {
-        // 거리 점수 계산 (위도/경도 null 체크)
         if (me.getLatitude() == null || me.getLongitude() == null ||
                 other.getLatitude() == null || other.getLongitude() == null) {
-            return 0.0; // 위치 정보 없으면 거리 점수 제외
+            return 0.0;
         }
 
         double distKm = calculateDistance(
@@ -49,8 +53,14 @@ public class MatchingScoreCalculator {
                 other.getLatitude(), other.getLongitude()
         );
 
-        return distanceScore(distKm)
-                + temperatureScore(other.getTemperature())
-                + activityScore(other.getLastActiveAt());
+        double distScore = distanceScore(distKm);
+        double tempScore = temperatureScore(other.getTemperature());
+        double actScore = activityScore(other.getLastActiveAt());
+
+        double rawScore = distScore + tempScore + actScore;
+
+        double percentScore = (rawScore / 14.0) * 100.0;
+
+        return Math.min(percentScore, 100.0);
     }
 }
