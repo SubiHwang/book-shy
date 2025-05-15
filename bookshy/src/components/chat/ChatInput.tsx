@@ -32,7 +32,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
   };
 
   return (
-    <div className="bg-light-bg-secondary pt-2 border-t w-full">
+    <div className="bg-light-bg-secondary pt-2 border-t w-full pb-safe">
       {/* 입력창 */}
       <form onSubmit={handleSubmit} className="flex items-center gap-2 px-4 pb-2">
         <button

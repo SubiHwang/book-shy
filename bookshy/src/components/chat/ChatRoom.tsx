@@ -281,7 +281,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   let lastDateLabel = '';
 
   return (
-    <div className="h-[100svh] max-h-[100svh] flex flex-col overflow-hidden bg-white relative">
+    <div className="h-[100svh] max-h-[100svh] flex flex-col overflow-hidden bg-white relative pb-safe">
       {/* 헤더 */}
       <ChatRoomHeader
         partnerName={partnerName}
