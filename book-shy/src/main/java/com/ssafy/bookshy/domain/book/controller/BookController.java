@@ -6,7 +6,6 @@ import com.ssafy.bookshy.domain.book.entity.Book;
 import com.ssafy.bookshy.domain.book.service.BookService;
 import com.ssafy.bookshy.domain.library.entity.Library;
 import com.ssafy.bookshy.domain.library.repository.LibraryRepository;
-import com.ssafy.bookshy.domain.library.service.LibraryService;
 import com.ssafy.bookshy.domain.ocr.service.OcrBookSearchService;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.external.aladin.AladinClient;
@@ -34,7 +33,6 @@ public class BookController {
     private final AladinClient aladinClient;
     private final OcrBookSearchService ocrSearchService;
     private final LibraryRepository libraryRepository;
-    private final LibraryService libraryService;
 
     @PatchMapping("/{bookId}/status")
     @Operation(summary = "🔄 도서 상태 변경", description = "도서의 상태(AVAILABLE 등)를 변경합니다.")
@@ -78,9 +76,7 @@ public class BookController {
 
         for (BookListResponseDto dto : response.getBooks()) {
             boolean isLiked = bookService.isBookLiked(user.getUserId(), dto.getItemId());
-            boolean inLibrary = libraryService.isBookInLibrary(user.getUserId(), dto.getItemId());
             dto.setIsLiked(isLiked);
-            dto.setInLibrary(inLibrary);
         }
 
         return ResponseEntity.ok(response);
