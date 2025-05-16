@@ -65,6 +65,7 @@ public class AuthService {
                 .email(oAuthUserInfoDto.getEmail())
                 .nickname(oAuthUserInfoDto.getNickname())
                 .profileImageUrl(oAuthUserInfoDto.getProfileImageUrl())
+                .temperature(30.0f)
                 .build();
         return userRepository.save(newUser);
     }

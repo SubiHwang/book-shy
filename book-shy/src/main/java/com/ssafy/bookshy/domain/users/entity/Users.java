@@ -47,7 +47,7 @@ public class Users extends TimeStampEntity implements UserDetails {
     @Column(name = "gender")
     private Gender gender;
 
-    @Column(name = "temperature")
+    @Column(name = "temperature", nullable = false)
     private Float temperature;
 
     @Column(name = "badges")

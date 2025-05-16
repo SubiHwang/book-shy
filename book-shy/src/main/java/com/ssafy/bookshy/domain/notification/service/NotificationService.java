@@ -116,6 +116,19 @@ public class NotificationService {
             messageBody.put("token", targetToken);
             messageBody.put("notification", notification);
 
+            // -------------------------------------------------------
+
+//            JSONObject dataPayload = new JSONObject();
+//            dataPayload.put("title", message.title());
+//            dataPayload.put("body", message.body());
+//            data.forEach(dataPayload::put);
+//
+//            JSONObject messageBody = new JSONObject();
+//            messageBody.put("token", targetToken);
+//            messageBody.put("data", dataPayload);
+
+            // -------------------------------------------------------
+
             JSONObject payload = new JSONObject();
             payload.put("message", messageBody);
 
