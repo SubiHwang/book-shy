@@ -5,15 +5,18 @@ import BookNoteCard from '@/components/mybooknote/booknote/BookNoteCard';
 import AdjacentBookPreview from '@/components/mybooknote/booknote/AdjacentBookPreview';
 import FilterChips from '@/components/common/FilterChips';
 import { PlusCircle, BookOpen, CheckCircle, CircleSlash } from 'lucide-react';
+import { useSwipeable } from 'react-swipeable';
 
 interface BookNoteSwiperPageProps {
   bookNotes: (BookNote & { libraryId: number })[];
 }
 
+type FilterType = 'all' | 'has' | 'none';
+
 const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) => {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'has' | 'none'>('all');
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
   const [stage, setStage] = useState<'cover' | 'quote'>('cover');
 
   const filteredNotes = bookNotes.filter((book) => {
@@ -22,6 +25,13 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
     if (selectedFilter === 'has') return hasReview;
     if (selectedFilter === 'none') return !hasReview;
     return true;
+  });
+
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => goTo(1),
+    onSwipedRight: () => goTo(-1),
+    delta: 50,
+    trackTouch: true,
   });
 
   const currentBook = filteredNotes[currentIndex];
@@ -43,7 +53,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
     }
   };
 
-  const filterOptions = [
+  const filterOptions: { label: string; value: 'all' | 'has' | 'none'; icon: React.ReactNode }[] = [
     { label: '전체 보기', value: 'all', icon: <BookOpen size={16} className="mr-1" /> },
     { label: '기록 O', value: 'has', icon: <CheckCircle size={16} className="mr-1" /> },
     { label: '기록 X', value: 'none', icon: <CircleSlash size={16} className="mr-1" /> },
@@ -54,12 +64,11 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
       <div className="px-4 pt-4 space-y-4">
         <div className="text-sm text-light-text-secondary">총 {filteredNotes.length}권</div>
 
-        {/* ✅ 칩 형식 필터 + 아이콘 + 애니메이션 */}
-        <FilterChips
+        <FilterChips<'all' | 'has' | 'none'>
           options={filterOptions}
           selected={selectedFilter}
           onSelect={(val) => {
-            setSelectedFilter(val as 'all' | 'has' | 'none');
+            setSelectedFilter(val);
             setCurrentIndex(0);
             setStage('cover');
           }}
@@ -79,6 +88,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
 
       {/* 카드 영역 */}
       <div
+        {...swipeHandlers}
         className="relative h-[60vh] flex items-center justify-center overflow-hidden mt-4"
         onClick={handleCardClick}
       >

@@ -28,6 +28,7 @@
     "react-loading-skeleton": "^3.5.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.5.3",
+    "react-swipeable": "^7.0.2",
     "react-toastify": "^11.0.5",
     "sockjs-client": "^1.6.1",
     "tailwindcss-safe-area": "^0.6.0",
