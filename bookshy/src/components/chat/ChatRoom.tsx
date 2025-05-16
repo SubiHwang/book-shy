@@ -275,7 +275,16 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   let lastDateLabel = '';
 
   return (
-    <div className="flex flex-col bg-white" style={{ height: '100svh', overflow: 'hidden' }}>
+    <div
+      className="flex flex-col bg-white"
+      style={{
+        position: 'fixed',
+        inset: 0, // top: 0, left: 0, right: 0, bottom: 0
+        height: '100%',
+        overflow: 'hidden', // body 스크롤 막는 효과
+        zIndex: 0, // 다른 고정 요소와 겹치지 않도록
+      }}
+    >
       {/* 헤더 */}
       <div className="shrink-0 z-10">
         <ChatRoomHeader
