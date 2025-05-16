@@ -1,13 +1,24 @@
-import { Plus } from 'lucide-react';
+// src/components/mylibrary/BookAdd/SearchBookDetailHeader.tsx
+import { Plus, Check } from 'lucide-react';
 import { FC, useState } from 'react';
-import { ExtendedSearchBookDetailPageProps } from '@/types/book';
 import Skeleton from 'react-loading-skeleton';
 import { useImageColors } from '@/hooks/common/useImageColors';
 import { createGradientStyle } from '@/utils/common/gradientStyles';
-import { useQueryClient } from '@tanstack/react-query';
+//import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 
-const SearchBookDetailHeader: FC<ExtendedSearchBookDetailPageProps> = ({
+interface SearchBookDetailHeaderProps {
+  itemId?: number;
+  title: string;
+  author: string;
+  publisher: string;
+  coverImageUrl: string;
+  isLoading: boolean;
+  onAddBook: (itemId: number) => void;
+  inLibrary?: boolean;
+}
+
+const SearchBookDetailHeader: FC<SearchBookDetailHeaderProps> = ({
   itemId,
   title,
   author,
@@ -15,9 +26,10 @@ const SearchBookDetailHeader: FC<ExtendedSearchBookDetailPageProps> = ({
   coverImageUrl,
   isLoading: isLoadingData,
   onAddBook,
+  inLibrary = false,
 }) => {
-  const [isAddLoading, setIsAddLoading] = useState<boolean>(false);
-  const queryClient = useQueryClient();
+  const [isActionLoading, setIsActionLoading] = useState<boolean>(false);
+  //const queryClient = useQueryClient();
 
   // 이미지에서 색상 추출 및 파스텔 색상 자동 생성
   const { pastelColors, isLoading: isLoadingColors } = useImageColors(
@@ -28,14 +40,16 @@ const SearchBookDetailHeader: FC<ExtendedSearchBookDetailPageProps> = ({
   );
 
   // 전체 로딩 상태
-  const isLoading = isLoadingData || isLoadingColors;
+  const isLoading = isLoadingData || isLoadingColors || isActionLoading;
 
   // 배경 그라데이션 스타일 생성 (항상 파스텔 색상 사용)
   const gradientStyle = createGradientStyle(pastelColors, 'bottom right');
 
-  // 북 추가 핸들러
   const handleAddBook = async (e: React.MouseEvent) => {
     e.stopPropagation();
+
+    // 이미 서재에 있으면 아무 동작도 하지 않음
+    if (inLibrary) return;
 
     if (itemId === undefined) {
       console.error('Book ID is missing');
@@ -43,25 +57,16 @@ const SearchBookDetailHeader: FC<ExtendedSearchBookDetailPageProps> = ({
       return;
     }
 
-    setIsAddLoading(true);
+    setIsActionLoading(true);
     try {
-      if (onAddBook) {
-        await onAddBook(itemId);
-
-        // 성공 알림 추가
-        toast.success('책이 성공적으로 등록되었습니다!');
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['myLibraryBooks'] });
+      await onAddBook(itemId);
     } catch (error) {
       console.error('Error adding book:', error);
-
-      // 실패 알림 추가
-      toast.error('책 등록에 실패했습니다. 다시 시도해주세요.');
     } finally {
-      setIsAddLoading(false);
+      setIsActionLoading(false);
     }
   };
+
   return (
     <div>
       {/* 책 정보 섹션 - 파스텔 그라데이션 적용, flex 컨테이너로 변경 */}
@@ -77,6 +82,10 @@ const SearchBookDetailHeader: FC<ExtendedSearchBookDetailPageProps> = ({
                 src={coverImageUrl || '/api/placeholder/200/300'}
                 alt={title || '책 표지'}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/placeholder-book.jpg';
+                }}
               />
             )}
           </div>
@@ -102,13 +111,29 @@ const SearchBookDetailHeader: FC<ExtendedSearchBookDetailPageProps> = ({
               )}
             </div>
             <div className="flex justify-end mt-2">
-              <button
-                className="p-2 rounded-full bg-white bg-opacity-70 hover:bg-opacity-90 shadow-sm"
-                onClick={handleAddBook}
-                disabled={isAddLoading || isLoading}
-              >
-                <Plus className="w-6 h-6 text-primary" strokeWidth={1} />
-              </button>
+              {inLibrary ? (
+                // 서재에 이미 있는 경우: 클릭 불가능한 체크 아이콘만 표시
+                <div
+                  className="p-2 rounded-full bg-white bg-opacity-70 shadow-sm "
+                  title="내 서재에 담긴 책"
+                >
+                  <Check className="w-6 h-6 text-gray-600 " strokeWidth={2} />
+                </div>
+              ) : (
+                // 서재에 없는 경우: 추가 버튼 표시
+                <button
+                  className="p-2 rounded-full bg-white bg-opacity-70 hover:bg-opacity-90 shadow-sm"
+                  onClick={handleAddBook}
+                  disabled={isLoading}
+                  title="서재에 추가"
+                >
+                  {isActionLoading ? (
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                  ) : (
+                    <Plus className="w-6 h-6 text-primary" strokeWidth={1} />
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>
