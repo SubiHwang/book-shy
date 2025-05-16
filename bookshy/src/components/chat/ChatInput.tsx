@@ -27,19 +27,14 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
     const file = e.target.files?.[0];
     if (!file) return;
     console.log('[📷 업로드됨]', file);
-
     // TODO: 이미지 업로드 처리
   };
 
   return (
-    <div className="bg-light-bg-secondary pt-2 border-t w-full pb-safe">
+    <div className="bg-light-bg-secondary pt-2 border-t w-full max-w-full pb-safe overflow-hidden box-border">
       {/* 입력창 */}
-      <form onSubmit={handleSubmit} className="flex items-center gap-2 px-4 pb-2">
-        <button
-          type="button"
-          onClick={onToggleOptions}
-          className="p-2 rounded-full hover:bg-primary hover:text-white transition"
-        >
+      <form onSubmit={handleSubmit} className="w-full flex items-center gap-2 px-4 pb-2 box-border">
+        <button type="button" onClick={onToggleOptions} className="p-2 rounded-full transition">
           {showOptions ? <Minus size={20} /> : <Plus size={20} />}
         </button>
 
@@ -48,13 +43,10 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
           placeholder="메시지 보내기"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="flex-1 px-4 py-2 bg-primary-light text-white placeholder-white rounded-full focus:outline-none"
+          className="w-full max-w-full px-4 py-2 bg-primary-light text-white placeholder-white rounded-full focus:outline-none box-border"
         />
 
-        <button
-          type="submit"
-          className="p-2 rounded-full hover:bg-primary hover:text-white transition"
-        >
+        <button type="submit" className="p-2 rounded-full transition">
           <SendHorizonal size={18} />
         </button>
       </form>
@@ -93,7 +85,11 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
             label="약속"
             onClick={onScheduleClick}
           />
-          <OptionButton icon={<Phone size={28} strokeWidth={1.5} />} label="전화" />
+          <OptionButton
+            icon={<Phone size={28} strokeWidth={1.5} />}
+            label="전화"
+            onClick={() => {}}
+          />
         </div>
       </div>
 
@@ -119,8 +115,11 @@ function OptionButton({
 }) {
   return (
     <button
-      onClick={onClick}
-      className="flex flex-col items-center text-primary hover:opacity-80 transition"
+      onClick={(e) => {
+        (e.currentTarget as HTMLButtonElement).blur();
+        onClick?.();
+      }}
+      className="flex flex-col items-center text-primary hover:opacity-80 transition focus:outline-none active:bg-transparent"
     >
       <div className="w-14 h-14 rounded-full border-2 border-primary flex items-center justify-center mb-2">
         {icon}
