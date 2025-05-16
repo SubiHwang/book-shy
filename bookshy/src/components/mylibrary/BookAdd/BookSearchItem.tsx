@@ -1,3 +1,4 @@
+// src/components/mylibrary/BookAdd/BookSearchItem.tsx
 import { FC } from 'react';
 import { Plus, Check } from 'lucide-react';
 import type { BookSearchItem } from '@/types/mylibrary/bookSearch';
@@ -16,9 +17,23 @@ const BookSearchItem: FC<BookSearchItemProps> = ({ book, onAddBook, onItemClick 
     }
   };
 
+  // 추가 버튼 클릭 핸들러
+  const handleAddClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    // 이미 서재에 있으면 아무 동작도 하지 않음
+    if (book.inLibrary) return;
+
+    // 서재에 추가
+    onAddBook(book.itemId);
+  };
+
   return (
     <div
-      className="card flex items-center justify-between p-4 mb-4 w-full cursor-pointer"
+      // 서재에 추가된 책은 배경색을 회색으로 변경
+      className={`card flex items-center justify-between p-4 mb-4 w-full cursor-pointer ${
+        book.inLibrary ? 'bg-gray-200' : ''
+      }`}
       onClick={handleItemClick}
     >
       {/* Book Image */}
@@ -64,10 +79,7 @@ const BookSearchItem: FC<BookSearchItemProps> = ({ book, onAddBook, onItemClick 
           // 서재에 없으면 추가 버튼 표시
           <button
             className="p-2 rounded-full bg-light-bg-shade hover:bg-gray-200 transition"
-            onClick={(e) => {
-              e.stopPropagation();
-              onAddBook(book.itemId);
-            }}
+            onClick={handleAddClick}
             title="서재에 추가"
           >
             <Plus className="w-6 h-6 text-primary" strokeWidth={1.5} />
