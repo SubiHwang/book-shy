@@ -8,4 +8,5 @@ export interface NeighborBookshelf {
 
 export interface BookshelfRowProps {
   books: (WishBook | null)[];
+  userId: number;
 }

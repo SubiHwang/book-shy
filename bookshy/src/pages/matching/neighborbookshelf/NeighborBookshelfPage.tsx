@@ -66,7 +66,7 @@ const NeighborBookshelfPage = () => {
             </div>
             <div className="bookshelf-container mt-4 pb-4 px-3">
               {bookRows.map((row, index) => (
-                <BookshelfRow key={index} books={row} />
+                <BookshelfRow key={index} books={row} userId={userId} />
               ))}
             </div>
           </>

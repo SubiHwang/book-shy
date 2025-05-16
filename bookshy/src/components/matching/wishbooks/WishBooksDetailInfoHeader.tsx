@@ -6,6 +6,8 @@ import { useImageColors } from '@/hooks/common/useImageColors';
 import { createGradientStyle } from '@/utils/common/gradientStyles';
 import { addWishBook, deleteWishBook } from '@/services/matching/wishbooks';
 import { useQueryClient } from '@tanstack/react-query';
+import { getChatId } from '@/services/matching/matching';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
   itemId,
@@ -16,6 +18,10 @@ const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
   isLiked,
   isLoading: isLoadingData,
 }) => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const whoParams = searchParams.get('who');
+  const userId = Number(whoParams);
   const [isBookInWishList, setIsBookInWishList] = useState<boolean | undefined>(isLiked);
   const [isLikedLoading, setIsLikedLoading] = useState<boolean>(false);
   const queryClient = useQueryClient();
@@ -65,6 +71,16 @@ const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
       console.error('Error toggling wishlist status:', error);
     } finally {
       setIsLikedLoading(false);
+    }
+  };
+
+  const onChatClick = async (userId: number) => {
+    console.log(userId);
+    try {
+      const response = await getChatId(userId);
+      navigate(`/chat/${response.chatRoomId}`);
+    } catch (error) {
+      console.log('채팅 생성 실패', error);
     }
   };
 
@@ -130,7 +146,12 @@ const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
                   />
                 </button>
               ) : (
-                <button className="flex justify-center items-center gap-1 px-3 py-1 rounded-full bg-primary bg-opacity-70 text-white font-extralight hover:bg-opacity-90 shadow-sm">
+                <button
+                  onClick={() => {
+                    onChatClick(userId);
+                  }}
+                  className="flex justify-center items-center gap-1 px-3 py-1 rounded-full bg-primary bg-opacity-70 text-white font-extralight hover:bg-opacity-90 shadow-sm"
+                >
                   <MessageCircle className={`w-4 h-4`} strokeWidth={1} />
                   채팅
                 </button>
