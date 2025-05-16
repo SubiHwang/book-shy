@@ -15,7 +15,7 @@ const WishBookCard: FC<WishBookProps> = ({ wishBook }) => {
 
   const handleCardClick = () => {
     if (wishBook.itemId) {
-      navigate(`/matching/books/${wishBook.itemId}`);
+      navigate(`/matching/books/${wishBook.itemId}?from=wish-book-card`);
     }
   };
 

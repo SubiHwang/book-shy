@@ -26,11 +26,11 @@ export interface MatchingConfirmResponse {
 
 export interface Neighborhood {
   userId: number;
-  name: string;
-  location: string;
-  profileImage: string;
-  shyScore: number;
-  farfrom: number;
+  nickname: string;
+  address: string;
+  profileImageUrl: string;
+  shyScore?: number;
+  distance: number;
 }
 
 export interface NoRecommendationStateProps {
@@ -48,6 +48,7 @@ export interface MatchingCardProps {
 
 export interface NeighborhoodCardProps {
   neighborhood: Neighborhood;
+  isLoading: boolean;
 }
 
 export interface CreateChatRoomReq {
