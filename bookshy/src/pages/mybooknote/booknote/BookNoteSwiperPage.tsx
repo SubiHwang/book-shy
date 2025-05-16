@@ -14,6 +14,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'has' | 'none'>('all');
   const [filterOpen, setFilterOpen] = useState(false);
+  const [stage, setStage] = useState<'cover' | 'quote'>('cover');
 
   const filteredNotes = bookNotes.filter((book) => {
     const hasReview = !!book.reviewId && book.content.trim() !== '';
@@ -27,13 +28,18 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
   if (!currentBook) return <p className="p-4">조건에 맞는 독서 기록이 없습니다.</p>;
 
   const handleCardClick = () => {
-    navigate(`/booknotes/full/${currentBook.bookId}`);
+    if (stage === 'cover') {
+      setStage('quote');
+    } else {
+      navigate(`/booknotes/full/${currentBook.bookId}`);
+    }
   };
 
   const goTo = (offset: number) => {
     const newIdx = currentIndex + offset;
     if (newIdx >= 0 && newIdx < filteredNotes.length) {
       setCurrentIndex(newIdx);
+      setStage('cover'); // 새 카드로 넘길 때 초기 상태로
     }
   };
 
@@ -66,6 +72,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
                       onClick={() => {
                         setSelectedFilter(value as any);
                         setCurrentIndex(0);
+                        setStage('cover');
                         setFilterOpen(false);
                       }}
                     >
@@ -94,6 +101,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
         </div>
       </div>
 
+      {/* 카드 플립 영역 */}
       <div
         className="relative h-[70vh] flex items-center justify-center overflow-hidden"
         onClick={handleCardClick}
@@ -111,6 +119,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
           title={currentBook.title}
           author={currentBook.author}
           quote={currentBook.quoteContent}
+          flipped={stage === 'quote'}
           onMoreClick={() => navigate(`/booknotes/full/${currentBook.bookId}`)}
         />
 
