@@ -3,6 +3,7 @@ package com.ssafy.bookshy.domain.matching.service;
 import com.ssafy.bookshy.domain.book.repository.WishRepository;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
+import com.ssafy.bookshy.domain.chat.service.ChatRoomService;
 import com.ssafy.bookshy.domain.library.entity.Library;
 import com.ssafy.bookshy.domain.library.repository.LibraryRepository;
 import com.ssafy.bookshy.domain.matching.dto.*;
@@ -33,6 +34,7 @@ public class MatchingService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final UserService userService;
     private final WishRepository wishRepository;
+    private final ChatRoomService chatRoomService;
 
     public List<MatchingDto> findMatchingCandidates(Long myUserId) {
         // 🔹 1. 내 정보 가져오기
@@ -112,35 +114,40 @@ public class MatchingService {
         Long receiverId = dto.getReceiverId();
 
         // 🔍 기존 Matching 존재 여부 확인 (양방향 체크 필요)
-        Optional<Matching> existingMatchOpt = matchingRepository
-                .findByUsers(senderId, receiverId);
+        Optional<Matching> existingMatchOpt = matchingRepository.findByUsers(senderId, receiverId);
 
         if (existingMatchOpt.isPresent()) {
             Matching existingMatch = existingMatchOpt.get();
 
             // 🔍 해당 매칭에 대한 채팅방이 이미 있는지 확인
-            Optional<ChatRoom> existingChatRoomOpt = chatRoomRepository
-                    .findByMatching(existingMatch);
+            Optional<ChatRoom> existingChatRoomOpt = chatRoomRepository.findByMatching(existingMatch);
+
+            // 👤 상대방 정보 조회
+            Users partner = userService.getUserById(receiverId);
 
             if (existingChatRoomOpt.isPresent()) {
                 return MatchResponseDto.builder()
                         .matchId(existingMatch.getMatchId())
                         .chatRoomId(existingChatRoomOpt.get().getId())
+                        .nickname(partner.getNickname())
+                        .profileImageUrl(partner.getProfileImageUrl())
+                        .temperature(partner.getTemperature())
                         .build();
             }
 
-            // 채팅방만 없는 경우 → 채팅방 생성
-            ChatRoom chatRoom = chatRoomRepository.save(
-                    ChatRoom.builder()
-                            .matching(existingMatch)
-                            .userAId(existingMatch.getSenderId())
-                            .userBId(existingMatch.getReceiverId())
-                            .build()
+            // 🔧 채팅방만 없는 경우 → 서비스 레이어 메서드로 생성 (notice 메시지 포함)
+            ChatRoom chatRoom = chatRoomService.createChatRoomFromMatch(
+                    existingMatch.getSenderId(),
+                    existingMatch.getReceiverId(),
+                    existingMatch.getMatchId()
             );
 
             return MatchResponseDto.builder()
                     .matchId(existingMatch.getMatchId())
                     .chatRoomId(chatRoom.getId())
+                    .nickname(partner.getNickname())
+                    .profileImageUrl(partner.getProfileImageUrl())
+                    .temperature(partner.getTemperature())
                     .build();
         }
 
@@ -154,20 +161,15 @@ public class MatchingService {
                         .build()
         );
 
-        ChatRoom chatRoom = chatRoomRepository.save(
-                ChatRoom.builder()
-                        .matching(match)
-                        .userAId(match.getSenderId())
-                        .userBId(match.getReceiverId())
-                        .build()
-        );
+        // 💬 채팅방 생성 (부가 기능 포함)
+        ChatRoom chatRoom = chatRoomService.createChatRoomFromMatch(senderId, receiverId, match.getMatchId());
 
+        // 🔔 Kafka 이벤트 발행
         applicationEventPublisher.publishEvent(new MatchCreatedEvent(match));
 
         // 👤 상대방 정보 조회
         Users partner = userService.getUserById(receiverId);
 
-        // ✅ MatchResponseDto 반환
         return MatchResponseDto.builder()
                 .matchId(match.getMatchId())
                 .chatRoomId(chatRoom.getId())
@@ -176,6 +178,7 @@ public class MatchingService {
                 .temperature(partner.getTemperature())
                 .build();
     }
+
 
     public MatchingPageResponseDto findPagedCandidates(Long myUserId, int page, int size, String sort) {
         List<MatchingDto> all = findMatchingCandidates(myUserId);
