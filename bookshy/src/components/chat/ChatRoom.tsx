@@ -162,9 +162,11 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
 
   useEffect(() => {
     if (!isConnected || isNaN(numericRoomId)) return;
+
     const sub = subscribeCalendarTopic(numericRoomId, (calendarDto) => {
       const rawDate =
         calendarDto.exchangeDate || calendarDto.rentalStartDate || calendarDto.rentalEndDate;
+
       if (!rawDate) return;
 
       const formattedDate = new Date(rawDate).toLocaleString('ko-KR', {
@@ -195,6 +197,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
 
   useEffect(() => {
     if (!isConnected || isNaN(numericRoomId)) return;
+
     const sub = subscribeEmojiTopic(
       numericRoomId,
       ({ messageId, emoji, type }: EmojiUpdatePayload) => {
@@ -205,6 +208,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
         );
       },
     );
+
     return () => unsubscribe(sub);
   }, [numericRoomId, subscribeEmojiTopic, unsubscribe, isConnected]);
 
@@ -238,11 +242,14 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
 
   const handleSelectEmoji = async (messageId: string, emoji: string) => {
     setEmojiTargetId(null);
+
     const targetMessage = messages.find((m) => m.id === messageId);
     if (!targetMessage) return;
+
     const currentEmoji = Array.isArray(targetMessage.emoji)
       ? targetMessage.emoji[0]
       : targetMessage.emoji;
+
     if (currentEmoji === emoji) {
       try {
         await deleteEmoji(Number(messageId));
@@ -285,10 +292,16 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
 
   return (
     <div
-      id="chat-room"
       className="flex flex-col bg-white"
-      style={{ position: 'fixed', inset: 0, height: '100%', overflow: 'hidden', zIndex: 0 }}
+      style={{
+        position: 'fixed',
+        inset: 0, // top: 0, left: 0, right: 0, bottom: 0
+        height: '100%',
+        overflow: 'hidden', // body 스크롤 막는 효과
+        zIndex: 0, // 다른 고정 요소와 겹치지 않도록
+      }}
     >
+      {/* 헤더 */}
       <div id="chat-header" className="shrink-0 z-10">
         <ChatRoomHeader
           partnerName={partnerName}
@@ -296,6 +309,8 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
           bookShyScore={bookShyScore}
         />
       </div>
+
+      {/* 메시지 영역 */}
       <div
         ref={messageContainerRef}
         className="overflow-y-auto px-4 sm:px-6 py-3 pb-20 transition-all duration-300 bg-white"
@@ -343,6 +358,8 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
         })}
         <div ref={messagesEndRef} className="h-4" />
       </div>
+
+      {/* ↓ 아래로 버튼 */}
       {showScrollToBottom && (
         <div
           className={`absolute inset-x-0 flex justify-center z-30 transition-all duration-300 ${showOptions ? 'bottom-[35vh]' : 'bottom-[88px]'}`}
@@ -350,6 +367,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
           <button
             className="bg-black/60 hover:bg-black/80 text-white text-lg sm:text-xl px-3 py-1.5 rounded-full shadow-md"
             onClick={() => scrollToBottom(true)}
+            aria-label="맨 아래로 스크롤"
           >
             ↓
           </button>
@@ -364,6 +382,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
             const wasAtBottom = container
               ? container.scrollHeight - container.scrollTop - container.clientHeight < 50
               : false;
+
             setShowOptions((prev) => !prev);
             setTimeout(() => {
               const event = new Event('resize');
@@ -376,6 +395,8 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
           onScheduleClick={() => setShowScheduleModal(true)}
         />
       </div>
+
+      {/* 일정 모달 */}
       {showScheduleModal && (
         <ScheduleModal
           partnerName={partnerName}
