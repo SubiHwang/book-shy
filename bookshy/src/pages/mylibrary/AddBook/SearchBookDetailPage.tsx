@@ -1,67 +1,90 @@
+// src/pages/mylibrary/AddBook/SearchBookDetailPage.tsx
 import Header from '@/components/common/Header';
 import SearchBookDetailHeader from '@/components/mylibrary/BookAdd/SearchBookDetailHeader';
 import SearchBookDetailBody from '@/components/mylibrary/BookAdd/SearchBookDetailBody';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
 import { fetchBookDetailByItemId } from '@/services/book/search';
 import { addBookFromSearch } from '@/services/mylibrary/bookSearchService';
 import { BookDetail } from '@/services/book/search';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
+
+interface LocationState {
+  inLibrary?: boolean;
+  libraryId?: number;
+}
 
 const SearchBookDetailPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams<{ id: string }>();
-  const [bookDetail, setBookDetail] = useState<(BookDetail & { itemId?: number }) | undefined>();
+  const itemId = id ? Number(id) : undefined;
+
+  // 전달받은 상태 가져오기
+  const state = (location.state as LocationState) || {};
+  console.log('SearchBookDetailPage - 전달받은 state:', state);
+
+  const [bookDetail, setBookDetail] = useState<BookDetail | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isAddingBook, setIsAddingBook] = useState<boolean>(false);
+  const [inLibrary, setInLibrary] = useState<boolean>(!!state.inLibrary);
+  const [libraryId, setLibraryId] = useState<number | undefined>(state.libraryId);
+
   const queryClient = useQueryClient();
 
+  // 책 상세 정보만 가져오기
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    const fetchBookDetail = async (bookId: number) => {
+
+    const fetchBookDetail = async () => {
+      if (!itemId || isNaN(itemId)) {
+        console.error('책 ID가 유효하지 않습니다.');
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       try {
-        const response = await fetchBookDetailByItemId(bookId);
-        setBookDetail({
-          ...response,
-          itemId: bookId, // id 파라미터로 전달된 값을 itemId로 설정
-        });
+        const response = await fetchBookDetailByItemId(itemId);
+        setBookDetail(response);
       } catch (error) {
         console.error('책 상세 정보 가져오기 실패:', error);
+        toast.error('책 정보를 불러오는데 실패했습니다.');
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (id && !isNaN(Number(id))) {
-      fetchBookDetail(Number(id));
-    } else {
-      console.error('책 ID가 유효하지 않습니다.');
-      setIsLoading(false);
-    }
-  }, [id]);
+    fetchBookDetail();
+  }, [itemId]);
 
-  // 책 추가 핸들러
+  // 서재에 책 추가
   const handleAddBook = useCallback(
-    async (itemId: number) => {
-      if (isAddingBook) return; // 이미 추가 중이면 중복 요청 방지
+    async (bookItemId: number) => {
+      if (!bookItemId) return;
 
-      setIsAddingBook(true);
+      // 낙관적 업데이트 - API 호출 전 UI 먼저 업데이트
+      setInLibrary(true);
+
       try {
-        await addBookFromSearch(itemId);
+        // 정확한 API 호출
+        const response = await addBookFromSearch(bookItemId);
 
-        // 서재 관련 쿼리 무효화 (데이터 갱신)
+        // API 응답 후 정확한 정보로 상태 업데이트
+        setLibraryId(response.libraryId);
+
+        // 서재 관련 쿼리 무효화
         queryClient.invalidateQueries({ queryKey: ['myLibraryBooks'] });
 
-        // 내 서재로 이동
-        navigate('/mylibrary');
+        toast.success('책이 서재에 추가되었습니다!');
       } catch (error) {
         console.error('책 추가 중 오류:', error);
-      } finally {
-        setIsAddingBook(false);
+        // 에러 발생 시 상태 원복
+        setInLibrary(false);
+        toast.error('책 추가에 실패했습니다. 다시 시도해주세요.');
       }
     },
-    [navigate, isAddingBook, queryClient],
+    [queryClient],
   );
 
   return (
@@ -73,18 +96,21 @@ const SearchBookDetailPage = () => {
         className="bg-light-bg shadow-none"
         onBackClick={() => navigate(-1)}
       />
+
       <div className="bookshelf-container flex flex-col min-h-screen">
         {bookDetail ? (
           <>
             <SearchBookDetailHeader
-              itemId={bookDetail.itemId}
+              itemId={itemId}
               title={bookDetail.title}
               author={bookDetail.author}
               publisher={bookDetail.publisher}
               coverImageUrl={bookDetail.coverImageUrl}
               isLoading={isLoading}
               onAddBook={handleAddBook}
+              inLibrary={inLibrary}
             />
+
             <div className="bg-light-bg flex-1 overflow-y-auto overflow-x-hidden">
               <div className="max-w-screen-md mx-auto">
                 <SearchBookDetailBody
@@ -98,8 +124,12 @@ const SearchBookDetailPage = () => {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <p>책 정보를 찾을 수 없습니다.</p>
+          <div className="flex-1 flex items-center justify-center p-4">
+            {isLoading ? (
+              <p className="text-gray-500">책 정보를 불러오는 중입니다...</p>
+            ) : (
+              <p className="text-gray-500">책 정보를 찾을 수 없습니다.</p>
+            )}
           </div>
         )}
       </div>
