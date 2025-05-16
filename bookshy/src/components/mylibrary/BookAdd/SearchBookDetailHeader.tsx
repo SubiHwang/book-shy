@@ -1,10 +1,9 @@
 // src/components/mylibrary/BookAdd/SearchBookDetailHeader.tsx
 import { Plus, Check } from 'lucide-react';
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import { useImageColors } from '@/hooks/common/useImageColors';
 import { createGradientStyle } from '@/utils/common/gradientStyles';
-//import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 
 interface SearchBookDetailHeaderProps {
@@ -29,7 +28,13 @@ const SearchBookDetailHeader: FC<SearchBookDetailHeaderProps> = ({
   inLibrary = false,
 }) => {
   const [isActionLoading, setIsActionLoading] = useState<boolean>(false);
-  //const queryClient = useQueryClient();
+  const [isInMyLibrary, setIsInMyLibrary] = useState<boolean>(inLibrary);
+
+  // props가 변경되면 내부 상태도 업데이트
+  useEffect(() => {
+    setIsInMyLibrary(inLibrary);
+    console.log(`SearchBookDetailHeader - inLibrary 업데이트: ${inLibrary}`);
+  }, [inLibrary]);
 
   // 이미지에서 색상 추출 및 파스텔 색상 자동 생성
   const { pastelColors, isLoading: isLoadingColors } = useImageColors(
@@ -49,7 +54,7 @@ const SearchBookDetailHeader: FC<SearchBookDetailHeaderProps> = ({
     e.stopPropagation();
 
     // 이미 서재에 있으면 아무 동작도 하지 않음
-    if (inLibrary) return;
+    if (isInMyLibrary) return;
 
     if (itemId === undefined) {
       console.error('Book ID is missing');
@@ -57,11 +62,16 @@ const SearchBookDetailHeader: FC<SearchBookDetailHeaderProps> = ({
       return;
     }
 
+    // 즉시 UI 업데이트 (낙관적 업데이트)
+    setIsInMyLibrary(true);
+
     setIsActionLoading(true);
     try {
       await onAddBook(itemId);
     } catch (error) {
       console.error('Error adding book:', error);
+      // 실패 시 상태 복원
+      setIsInMyLibrary(false);
     } finally {
       setIsActionLoading(false);
     }
@@ -73,8 +83,11 @@ const SearchBookDetailHeader: FC<SearchBookDetailHeaderProps> = ({
       <div className="flex flex-col justify-end p-4 shadow-sm min-h-[25vh]" style={gradientStyle}>
         {/* 내용물을 하단에 배치 */}
         <div className="flex flex-row items-start mt-auto">
-          {/* 책 표지 이미지 */}
-          <div className="w-26 h-36 flex-shrink-0 mr-4 rounded-md overflow-hidden shadow-md bg-white">
+          {/* 책 표지 이미지 - 원래 스타일 복원 */}
+          <div
+            className="w-26 h-36 flex-shrink-0 mr-4 rounded-md overflow-hidden shadow-md bg-white"
+            style={{ aspectRatio: '3/4', maxWidth: '26%' }}
+          >
             {isLoading ? (
               <Skeleton width="100%" height="100%" />
             ) : (
@@ -111,7 +124,7 @@ const SearchBookDetailHeader: FC<SearchBookDetailHeaderProps> = ({
               )}
             </div>
             <div className="flex justify-end mt-2">
-              {inLibrary ? (
+              {isInMyLibrary ? (
                 // 서재에 이미 있는 경우: 클릭 불가능한 체크 아이콘만 표시
                 <div
                   className="p-2 rounded-full bg-white bg-opacity-70 shadow-sm "
