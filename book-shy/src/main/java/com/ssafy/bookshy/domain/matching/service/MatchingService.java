@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.matching.service;
 
+import com.ssafy.bookshy.domain.book.repository.WishRepository;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
 import com.ssafy.bookshy.domain.library.entity.Library;
@@ -11,6 +12,7 @@ import com.ssafy.bookshy.domain.matching.repository.MatchingRepository;
 import com.ssafy.bookshy.domain.matching.util.MatchingScoreCalculator;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
+import com.ssafy.bookshy.domain.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,8 @@ public class MatchingService {
     private final MatchingRepository matchingRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final UserService userService;
+    private final WishRepository wishRepository;
 
     public List<MatchingDto> findMatchingCandidates(Long myUserId) {
         // 🔹 1. 내 정보 가져오기
@@ -208,5 +212,26 @@ public class MatchingService {
                 .limit(10)
                 .map(entry -> new NearbyUserResponseDto(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
+    }
+
+    public NeighborLibraryResponseDto getNeighborLibrary(Long targetUserId, Long viewerUserId) {
+        Users targetUser = userService.getUserById(targetUserId);
+        Users viewer = userService.getUserById(viewerUserId);
+
+        List<Library> publicBooks = libraryRepository.findByUserAndIsPublicTrueOrderByRegisteredAtDesc(targetUser);
+        List<Long> wishedBookIds = wishRepository.findBookIdsByUser(viewer);
+
+        List<NeighborLibraryResponseDto.BookWithLikeDto> books = publicBooks.stream()
+                .map(lib -> {
+                    boolean isLiked = wishedBookIds.contains(lib.getBook().getId());
+                    return NeighborLibraryResponseDto.BookWithLikeDto.from(lib, isLiked);
+                })
+                .toList();
+
+        return NeighborLibraryResponseDto.builder()
+                .userId(targetUser.getUserId())
+                .nickname(targetUser.getNickname())
+                .books(books)
+                .build();
     }
 }

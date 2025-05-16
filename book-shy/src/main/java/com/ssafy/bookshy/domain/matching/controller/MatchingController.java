@@ -2,10 +2,7 @@ package com.ssafy.bookshy.domain.matching.controller;
 
 import com.ssafy.bookshy.domain.library.dto.LibraryResponseDto;
 import com.ssafy.bookshy.domain.library.service.LibraryService;
-import com.ssafy.bookshy.domain.matching.dto.MatchChatRequestDto;
-import com.ssafy.bookshy.domain.matching.dto.MatchResponseDto;
-import com.ssafy.bookshy.domain.matching.dto.MatchingPageResponseDto;
-import com.ssafy.bookshy.domain.matching.dto.NearbyUserResponseDto;
+import com.ssafy.bookshy.domain.matching.dto.*;
 import com.ssafy.bookshy.domain.matching.service.MatchingService;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import io.swagger.v3.oas.annotations.Operation;
@@ -89,10 +86,11 @@ public class MatchingController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/public/{userId}")
-    public ResponseEntity<List<LibraryResponseDto>> getPublicLibraryByUserId(
+    public ResponseEntity<NeighborLibraryResponseDto> getPublicLibraryByUserId(
             @Parameter(description = "공개 서재를 조회할 이웃 주민 ID", example = "1")
-            @PathVariable Long userId
+            @PathVariable Long userId,
+            @AuthenticationPrincipal Users viewer
     ) {
-        return ResponseEntity.ok(libraryService.findPublicLibraryByUser(userId));
+        return ResponseEntity.ok(matchingService.getNeighborLibrary(userId, viewer.getUserId()));
     }
 }
