@@ -36,6 +36,19 @@ public class MatchingService {
     private final WishRepository wishRepository;
     private final ChatRoomService chatRoomService;
 
+    /**
+     * 🔍 [매칭 후보 조회]
+     *
+     * 📌 내가 찜한 책을 보유한 사용자들을 대상으로,
+     *     해당 사용자가 나의 찜 책을 공개서재에 보유하고 있는지,
+     *     그리고 나도 그 사용자의 찜 책을 보유하고 있는지를 확인합니다.
+     *
+     * 📦 조건을 만족할 경우 MatchingDto로 구성된 후보 리스트를 반환합니다.
+     * 거리 제한 20km 이하만 포함됩니다.
+     *
+     * @param myUserId 현재 로그인한 사용자 ID
+     * @return 매칭 후보 리스트
+     */
     public List<MatchingDto> findMatchingCandidates(Long myUserId) {
         // 🔹 1. 내 정보 가져오기
         Users me = userRepository.findById(myUserId)
@@ -109,6 +122,21 @@ public class MatchingService {
                 .toList();
     }
 
+    /**
+     * 🤝 [채팅 매칭 요청]
+     *
+     * 📌 상대방 ID를 기반으로 매칭 요청을 생성하거나,
+     *     기존에 매칭된 기록이 있다면 해당 매칭을 재사용합니다.
+     *
+     * 💬 이후 채팅방이 없을 경우 생성하며,
+     *     채팅방이 새로 만들어질 경우 notice 메시지도 함께 추가됩니다.
+     *
+     * 🔔 최초 매칭일 경우 Kafka 이벤트(`MatchCreatedEvent`)도 발행합니다.
+     *
+     * @param senderId 현재 로그인 사용자 ID
+     * @param dto 매칭 요청 (상대 userId 포함)
+     * @return MatchResponseDto (채팅방 ID, 상대방 닉네임/이미지/온도 포함)
+     */
     @Transactional
     public MatchResponseDto chatMatching(Long senderId, MatchChatRequestDto dto) {
         Long receiverId = dto.getReceiverId();
@@ -179,7 +207,19 @@ public class MatchingService {
                 .build();
     }
 
-
+    /**
+     * 📖 [매칭 후보 페이징 조회]
+     *
+     * 📌 `findMatchingCandidates()` 결과를 페이징 정렬하여 반환합니다.
+     * 정렬 기준은 점수(score) 또는 거리(distance)로 선택 가능하며,
+     * 기본은 점수 내림차순입니다.
+     *
+     * @param myUserId 현재 사용자 ID
+     * @param page 페이지 번호 (1부터 시작)
+     * @param size 페이지 당 결과 수
+     * @param sort 정렬 기준 ("score" 또는 "distance")
+     * @return MatchingPageResponseDto (후보 리스트 + 페이지 메타 정보)
+     */
     public MatchingPageResponseDto findPagedCandidates(Long myUserId, int page, int size, String sort) {
         List<MatchingDto> all = findMatchingCandidates(myUserId);
 
@@ -205,6 +245,17 @@ public class MatchingService {
                 .build();
     }
 
+    /**
+     * 🗺️ [내 주변 유저 조회]
+     *
+     * 📌 20km 이내에 위치한 사용자를 기준으로,
+     *     거리순으로 최대 10명을 반환합니다.
+     *
+     * 📍 사용자의 위도/경도가 등록되어 있어야 필터링 대상이 됩니다.
+     *
+     * @param me 현재 로그인한 사용자
+     * @return 주변 사용자 정보 리스트 (닉네임, 거리 등 포함)
+     */
     public List<NearbyUserResponseDto> findNearbyUsers(Users me) {
         List<Users> others = userRepository.findAllExcept(me.getUserId());
 
@@ -224,6 +275,16 @@ public class MatchingService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 📚 [이웃의 서재 열람]
+     *
+     * 📌 특정 사용자의 공개서재를 조회하며,
+     *     현재 로그인한 사용자가 해당 책을 찜했는지도 함께 표시됩니다.
+     *
+     * @param targetUserId 조회 대상 사용자 ID
+     * @param viewerUserId 열람자 사용자 ID
+     * @return NeighborLibraryResponseDto (책 정보 + 찜 여부 포함)
+     */
     public NeighborLibraryResponseDto getNeighborLibrary(Long targetUserId, Long viewerUserId) {
         Users targetUser = userService.getUserById(targetUserId);
         Users viewer = userService.getUserById(viewerUserId);
