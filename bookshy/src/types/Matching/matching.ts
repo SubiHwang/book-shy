@@ -22,6 +22,9 @@ export interface MatchingRecommendationResponse {
 export interface MatchingConfirmResponse {
   matchId: number;
   chatRoomId: number;
+  nickname: string;
+  profileImageUrl: string;
+  temperature: number;
 }
 
 export interface Neighborhood {
