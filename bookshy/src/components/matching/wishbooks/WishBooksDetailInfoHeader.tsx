@@ -97,7 +97,10 @@ const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
         <div className="flex flex-row items-start mt-auto">
           {/* 책 표지 이미지 */}
 
-          <div className="w-26 h-36 flex-shrink-0 mr-4 rounded-md overflow-hidden shadow-md bg-white">
+          <div
+            className="w-26 h-36 flex-shrink-0 mr-4 rounded-md overflow-hidden shadow-md bg-white"
+            style={{ aspectRatio: '3/4', maxWidth: '26%' }}
+          >
             {isLoading ? (
               <Skeleton width="100%" height="100%" />
             ) : (
