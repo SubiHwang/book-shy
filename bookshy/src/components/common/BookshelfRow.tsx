@@ -24,7 +24,9 @@ const BookshelfRow: FC<BookshelfRowProps> = ({ books }) => {
               {book ? (
                 <div
                   className="w-full aspect-[3/4] bg-white border border-gray-300 shadow-md flex flex-col justify-center items-center rounded overflow-hidden cursor-pointer hover:shadow-lg transition-shadow focus:outline-none"
-                  onClick={() => navigate(`/matching/books/${book.bookId}`)}
+                  onClick={() =>
+                    navigate(`/matching/books/${book.bookId}?from=neighborhood-bookshelf`)
+                  }
                 >
                   {book.coverImageUrl ? (
                     <div className="w-full h-full overflow-hidden bg-white">
