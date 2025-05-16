@@ -275,9 +275,9 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   let lastDateLabel = '';
 
   return (
-    <div className="flex flex-col w-full h-screen min-h-0 bg-white">
+    <div className="min-h-screen flex flex-col bg-white">
       {/* 헤더 */}
-      <div className="shrink-0 z-10">
+      <div className="sticky top-0 z-10 bg-white">
         <ChatRoomHeader
           partnerName={partnerName}
           partnerProfileImage={partnerProfileImage}
@@ -352,7 +352,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
         </div>
       )}
 
-      <div className="shrink-0 z-20 bg-white border-t border-light-border px-4">
+      <div className="shrink-0 z-20 bg-white border-t border-light-border px-4 pb-safe">
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
