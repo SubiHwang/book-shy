@@ -7,6 +7,7 @@ export interface BookSearchItem {
   coverImageUrl: string;
   description: string;
   inLibrary: boolean;
+  libraryId?: number;
 }
 
 export interface BookSearchResponse {
