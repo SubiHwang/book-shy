@@ -48,22 +48,6 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
 
   const queryClient = useQueryClient();
 
-  const [viewportHeight, setViewportHeight] = useState(
-    window.visualViewport?.height || window.innerHeight,
-  );
-
-  useEffect(() => {
-    const handleResize = () => {
-      setViewportHeight(window.visualViewport?.height || window.innerHeight);
-    };
-    window.visualViewport?.addEventListener('resize', handleResize);
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.visualViewport?.removeEventListener('resize', handleResize);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
   const { data: initialMessages = [], isSuccess } = useQuery({
     queryKey: ['chatMessages', numericRoomId],
     queryFn: () => fetchMessages(numericRoomId),
@@ -303,7 +287,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
 
       {/* 메시지 영역 */}
       <div
-        className={`pt-[56px] flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
+        className={`flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
           showOptions ? 'pb-[35vh]' : 'pb-20'
         }`}
       >
@@ -368,7 +352,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
         </div>
       )}
 
-      <div className="shrink-0 z-20 bg-white border-t border-light-border px-4 pb-safe">
+      <div className="shrink-0 z-20 bg-white border-t border-light-border px-4">
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
