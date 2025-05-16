@@ -211,12 +211,6 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
     messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
   };
 
-  const isScrolledToBottom = () => {
-    const container = messagesEndRef.current?.parentElement;
-    if (!container) return true;
-    return container.scrollHeight - container.scrollTop - container.clientHeight < 100;
-  };
-
   const handleSendMessage = (content: string) => {
     if (isNaN(numericRoomId)) return;
     sendMessage(numericRoomId, myUserId, content, 'chat');
@@ -282,15 +276,17 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
 
   return (
     <div className="h-[100svh] max-h-[100svh] flex flex-col overflow-hidden bg-white relative pb-safe">
-      {/* 헤더 */}
       <ChatRoomHeader
         partnerName={partnerName}
         partnerProfileImage={partnerProfileImage}
         bookShyScore={bookShyScore}
       />
 
-      {/* 채팅 메시지 영역 */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3">
+      <div
+        className={`flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
+          showOptions ? 'pb-[25vh]' : 'pb-[80px]'
+        }`}
+      >
         {messages.map((msg, idx) => {
           const dateLabel = formatDateLabel(msg.sentAt);
           const showDate = dateLabel !== lastDateLabel;
@@ -335,7 +331,6 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
         <div ref={messagesEndRef} className="h-4" />
       </div>
 
-      {/* ↓ 버튼: 입력창 바로 위에 반응형 위치 */}
       <div className="relative shrink-0">
         {showScrollToBottom && (
           <div className="absolute inset-x-0 -top-12 sm:-top-14 flex justify-center z-30">
@@ -349,14 +344,16 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
           </div>
         )}
 
-        {/* 입력창 */}
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
           onToggleOptions={() => {
-            const wasAtBottom = isScrolledToBottom();
-            setShowOptions((prev) => !prev);
+            const container = messagesEndRef.current?.parentElement;
+            const wasAtBottom = container
+              ? container.scrollHeight - container.scrollTop - container.clientHeight < 50
+              : false;
 
+            setShowOptions((prev) => !prev);
             setTimeout(() => {
               if (wasAtBottom) scrollToBottom(true);
             }, 0);
@@ -365,13 +362,12 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
         />
       </div>
 
-      {/* 일정 등록 모달 */}
       {showScheduleModal && (
         <ScheduleModal
           partnerName={partnerName}
           partnerProfileImage={partnerProfileImage}
           roomId={numericRoomId}
-          requestId={Number(0)}
+          requestId={0}
           onClose={() => setShowScheduleModal(false)}
           onConfirm={registerScheduleAndNotify}
         />
