@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Search } from 'lucide-react';
 import BookSearchItem from '@/components/mylibrary/BookAdd/BookSearchItem';
 import { searchBooksByKeyword, addBookFromSearch } from '@/services/mylibrary/bookSearchService';
-// 삭제 기능 관련 import 제거
 import type { BookSearchItem as BookItemType } from '@/types/mylibrary/bookSearch';
 import Loading from '@/components/common/Loading';
 import { toast } from 'react-toastify';
@@ -99,6 +98,19 @@ const AddBySearchPage: FC = () => {
 
       console.log('책 등록 성공:', registeredBook);
 
+      // 상태 업데이트 - 추가된 책의 inLibrary와 libraryId 업데이트
+      setBooks((prev) =>
+        prev.map((book) =>
+          book.itemId === itemId
+            ? {
+                ...book,
+                inLibrary: true,
+                libraryId: registeredBook.libraryId,
+              }
+            : book,
+        ),
+      );
+
       // 성공 알림
       toast.success('책이 성공적으로 등록되었습니다!');
     } catch (error) {
@@ -109,8 +121,21 @@ const AddBySearchPage: FC = () => {
     }
   };
 
+  // 책 상세 페이지로 이동 핸들러
   const handleBookItemClick = (itemId: number) => {
-    navigate(`/bookshelf/add/searchdetail/${itemId}`);
+    const book = books.find((book) => book.itemId === itemId);
+
+    if (book) {
+      // 클릭한 책의 정보(inLibrary 포함)를 state로 전달
+      navigate(`/bookshelf/add/searchdetail/${itemId}`, {
+        state: {
+          inLibrary: book.inLibrary,
+          libraryId: book.libraryId,
+        },
+      });
+    } else {
+      navigate(`/bookshelf/add/searchdetail/${itemId}`);
+    }
   };
 
   // 직접 등록 페이지로 이동
@@ -119,7 +144,7 @@ const AddBySearchPage: FC = () => {
   };
 
   const handleGoBack = (): void => {
-    navigate('/bookshelf');
+    navigate(-1);
   };
 
   return (
@@ -151,7 +176,7 @@ const AddBySearchPage: FC = () => {
         </div>
       </div>
 
-      {/* 나머지 내용은 기존과 동일 */}
+      {/* 검색 결과 */}
       <div>
         {/* 검색 결과 헤더 */}
         {hasSearched && !error && !isSearching && (
@@ -221,7 +246,7 @@ const AddBySearchPage: FC = () => {
           )}
         </div>
 
-        {/* 로딩 오버레이 - isRemoving 제거 */}
+        {/* 로딩 오버레이 */}
         {isAdding && (
           <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg text-center">
