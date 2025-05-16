@@ -86,8 +86,10 @@ const BookTripPage: React.FC = () => {
             <button
               key={filter}
               onClick={() => setSelectedFilter(filter)}
-              className={`px-4 py-2 text-sm rounded-full whitespace-nowrap ${
-                selectedFilter === filter ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-700'
+              className={`px-4 py-1.5 text-sm rounded-full border transition ${
+                selectedFilter === filter
+                  ? 'bg-[#FF4040] text-white border-[#FF4040]'
+                  : 'bg-white text-[#FF4040] border-[#FF8080]'
               }`}
             >
               {filter}
