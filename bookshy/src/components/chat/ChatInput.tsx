@@ -31,7 +31,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
   };
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 bg-light-bg-secondary border-t pb-safe">
+    <div className="sticky bottom-0 inset-x-0 z-50 bg-light-bg-secondary border-t pb-safe">
       {/* 입력창 */}
       <form
         onSubmit={handleSubmit}
