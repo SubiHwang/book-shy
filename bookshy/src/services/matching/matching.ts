@@ -1,5 +1,9 @@
 import { authAxiosInstance } from '../axiosInstance';
-import { MatchingRecommendationResponse, MatchingConfirmResponse } from '@/types/Matching';
+import {
+  MatchingRecommendationResponse,
+  MatchingConfirmResponse,
+  Neighborhood,
+} from '@/types/Matching';
 export const getMatchingList = async (page: number) => {
   try {
     const response = await authAxiosInstance.get<string, MatchingRecommendationResponse>(
@@ -22,6 +26,17 @@ export const getChatId = async (receiverId: number) => {
     return response;
   } catch (error) {
     console.log('매칭 확정 요청 api 조회 중 에러 발생', error);
+    throw error;
+  }
+};
+
+export const getNeighborhoodList = async () => {
+  try {
+    const response = await authAxiosInstance.get<[], Neighborhood[]>('/matching/neighbors');
+    console.log('이웃들의 목록', response);
+    return response;
+  } catch (error) {
+    console.log('이웃들의 목록 불러오기 에러', error);
     throw error;
   }
 };
