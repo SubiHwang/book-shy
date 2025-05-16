@@ -1,7 +1,15 @@
 // utils/gradientStyles.ts
 
 // 그라데이션 방향 타입 정의
-type GradientDirection = 'top' | 'right' | 'bottom' | 'left' | 'top right' | 'top left' | 'bottom right' | 'bottom left';
+type GradientDirection =
+  | 'top'
+  | 'right'
+  | 'bottom'
+  | 'left'
+  | 'top right'
+  | 'top left'
+  | 'bottom right'
+  | 'bottom left';
 
 // 색상 배열 타입 정의
 type ColorArray = [string, string];
@@ -24,10 +32,10 @@ interface GradientStyles {
  */
 export const createGradientStyle = (
   colors: ColorArray,
-  direction: GradientDirection = 'right'
+  direction: GradientDirection = 'right',
 ): GradientStyle => {
   return {
-    background: `linear-gradient(to ${direction}, ${colors[0]}, ${colors[1]})`
+    background: `linear-gradient(to ${direction}, ${colors[0]}, ${colors[1]})`,
   };
 };
 
@@ -36,14 +44,14 @@ export const createGradientStyle = (
  */
 export const defaultGradients: GradientStyles = {
   warmYellow: {
-    background: 'linear-gradient(to right, #FCF6D4, #F4E8B8)'
+    background: 'linear-gradient(to right, #FCF6D4, #F4E8B8)',
   },
   coolBlue: {
-    background: 'linear-gradient(to right, #E3F2FD, #BBDEFB)'
+    background: 'linear-gradient(to right, #E3F2FD, #BBDEFB)',
   },
   softPink: {
-    background: 'linear-gradient(to right, #FCE4EC, #F8BBD0)'
-  }
+    background: 'linear-gradient(to right, #FCE4EC, #F8BBD0)',
+  },
 };
 
 // 추가 편의 함수: 색상 코드에서 밝게/어둡게 변형
@@ -76,9 +84,9 @@ export const adjustColorBrightness = (hex: string, percent: number): string => {
  * @returns 그라데이션 스타일 객체
  */
 export const createMonochromaticGradient = (
-  baseColor: string, 
+  baseColor: string,
   brightnessOffset: number = 10,
-  direction: GradientDirection = 'right'
+  direction: GradientDirection = 'right',
 ): GradientStyle => {
   const secondColor = adjustColorBrightness(baseColor, brightnessOffset);
   return createGradientStyle([baseColor, secondColor], direction);
@@ -88,5 +96,5 @@ export default {
   createGradientStyle,
   defaultGradients,
   adjustColorBrightness,
-  createMonochromaticGradient
+  createMonochromaticGradient,
 };
