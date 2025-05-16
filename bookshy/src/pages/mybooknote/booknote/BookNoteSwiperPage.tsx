@@ -12,7 +12,6 @@ interface BookNoteSwiperPageProps {
 const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) => {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [stage, setStage] = useState<'quote' | 'review'>('quote');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'has' | 'none'>('all');
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -27,21 +26,14 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
   const currentBook = filteredNotes[currentIndex];
   if (!currentBook) return <p className="p-4">조건에 맞는 독서 기록이 없습니다.</p>;
 
-  const hasReview = !!currentBook.reviewId && currentBook.content.trim() !== '';
-
   const handleCardClick = () => {
-    if (stage === 'quote') {
-      setStage('review');
-    } else {
-      navigate(`/booknotes/full/${currentBook.bookId}`);
-    }
+    navigate(`/booknotes/full/${currentBook.bookId}`);
   };
 
   const goTo = (offset: number) => {
     const newIdx = currentIndex + offset;
     if (newIdx >= 0 && newIdx < filteredNotes.length) {
       setCurrentIndex(newIdx);
-      setStage('quote');
     }
   };
 
@@ -74,7 +66,6 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
                       onClick={() => {
                         setSelectedFilter(value as any);
                         setCurrentIndex(0);
-                        setStage('quote');
                         setFilterOpen(false);
                       }}
                     >
@@ -120,8 +111,6 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
           title={currentBook.title}
           author={currentBook.author}
           quote={currentBook.quoteContent}
-          review={currentBook.content}
-          stage={hasReview ? stage : 'quote'}
           onMoreClick={() => navigate(`/booknotes/full/${currentBook.bookId}`)}
         />
 

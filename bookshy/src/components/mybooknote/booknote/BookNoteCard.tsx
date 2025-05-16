@@ -3,9 +3,7 @@ interface BookNoteCardProps {
   title: string;
   author?: string;
   quote?: string;
-  review?: string;
-  stage: 'quote' | 'review';
-  onMoreClick: () => void;
+  onMoreClick?: () => void; // ❗ 선택적 prop로 변경
 }
 
 const BookNoteCard: React.FC<BookNoteCardProps> = ({
@@ -13,8 +11,6 @@ const BookNoteCard: React.FC<BookNoteCardProps> = ({
   title,
   author,
   quote,
-  review,
-  stage,
   onMoreClick,
 }) => {
   return (
@@ -26,35 +22,24 @@ const BookNoteCard: React.FC<BookNoteCardProps> = ({
       />
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm z-10" />
 
-      {/* 인용구 화면 */}
-      <div
-        className={`absolute inset-0 z-20 flex flex-col justify-center items-center px-6 text-white text-center transition-opacity duration-300 ${
-          stage === 'quote' ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-      >
+      {/* ✅ 인용구 화면만 표시 */}
+      <div className="absolute inset-0 z-20 flex flex-col justify-center items-center px-6 text-white text-center">
         <p className="text-xs mb-1">{author}</p>
         <h2 className="font-semibold text-sm mb-2">{title} 중에서</h2>
         <p className="text-sm leading-tight">{quote || '등록된 인용구가 없습니다.'}</p>
-      </div>
 
-      {/* 독후감 화면 */}
-      <div
-        className={`absolute inset-0 z-20 flex flex-col justify-center items-center px-6 text-white text-center transition-opacity duration-300 ${
-          stage === 'review' ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        <p className="text-xs mb-1">{author}</p>
-        <h2 className="font-semibold text-sm mb-2">{title}을(를) 읽고</h2>
-        <p className="text-sm leading-tight">{review || '작성된 독후감이 없습니다.'}</p>
-        <p
-          className="text-right text-xs text-white/80 mt-4 w-full"
-          onClick={(e) => {
-            e.stopPropagation();
-            onMoreClick();
-          }}
-        >
-          더 보기 →
-        </p>
+        {/* ❓ 더 보기 버튼이 필요하다면 조건부 렌더링 */}
+        {onMoreClick && (
+          <p
+            className="text-right text-xs text-white/80 mt-4 w-full"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMoreClick();
+            }}
+          >
+            더 보기 →
+          </p>
+        )}
       </div>
     </div>
   );
