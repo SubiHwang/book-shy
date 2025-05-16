@@ -26,7 +26,7 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
           state: {
             partnerName: matching.nickname,
             partnerProfileImage: matching.profileImageUrl,
-            bookShyScore: matching.score,
+            bookShyScore: matching.temperature,
           },
         });
       } else {
