@@ -20,6 +20,6 @@ public class NearbyUserResponseDto {
         this.profileImageUrl = user.getProfileImageUrl();
         this.temperature = user.getTemperature();
         this.address = user.getAddress();
-        this.distance =  Math.round(distance * 100.0) / 100.0;
+        this.distance =  Math.round(distance * 10.0) / 10.0;
     }
 }
