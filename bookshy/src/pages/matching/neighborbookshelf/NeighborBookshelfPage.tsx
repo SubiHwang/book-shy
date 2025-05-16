@@ -46,7 +46,7 @@ const NeighborBookshelfPage = () => {
   return (
     <div>
       <Header title="이웃의 서재" onBackClick={() => navigate(-1)} />
-      <div className="bookshelf bg-white rounded-t-lg shadow-md mt-10 mx-3 h-screen">
+      <div className="bookshelf bg-white rounded-t-lg shadow-md mt-10 mx-3 min-h-screen pb-28">
         {isLoading ? (
           <Loading loadingText="서재 불러오는 중..." />
         ) : (
