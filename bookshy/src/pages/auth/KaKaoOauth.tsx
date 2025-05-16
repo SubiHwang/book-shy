@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import SplashScreen from '@/components/splash/SplashScreen';
 import bookAnimation from '@/assets/lottie/bookshy-splash.json';
+import { fetchUserProfile } from '@/services/mypage/profile'; // ✅ 유저 정보 fetch 함수 import
 
 const KaKaoOauth: FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -13,11 +14,27 @@ const KaKaoOauth: FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 로그인 상태 확인 및 스플래시 화면이 끝났을 때
+    const checkLocationStatus = async () => {
+      try {
+        const profile = await fetchUserProfile();
+
+        const needsLocationSetting =
+          !profile.address || profile.latitude === null || profile.longitude === null;
+
+        if (needsLocationSetting) {
+          navigate('/setting-location');
+        } else {
+          navigate('/');
+        }
+      } catch (err) {
+        console.error('프로필 정보 불러오기 실패:', err);
+        navigate('/');
+      }
+    };
+
     if (!isLoading && isLoggedIn) {
-      navigate('/setting-location');
+      checkLocationStatus(); // ✅ 조건 확인 후 이동
     } else if (!isLoading && !isLoggedIn) {
-      // 로그인하지 않은 상태에서 스플래시 화면이 끝났을 때
       navigate('/login');
     }
   }, [isLoading, isLoggedIn, navigate]);
@@ -35,7 +52,7 @@ const KaKaoOauth: FC = () => {
       if (!isInitialized) return;
 
       try {
-        login({
+        await login({
           token: code,
           fcmToken: firebaseToken || '',
         });
@@ -48,7 +65,6 @@ const KaKaoOauth: FC = () => {
     loginWithToken();
   }, [location, navigate, login, firebaseToken, isInitialized]);
 
-  // 스플래시 화면 종료 처리
   const handleSplashFinished = (): void => {
     setIsLoading(false);
   };
