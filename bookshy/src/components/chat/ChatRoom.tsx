@@ -277,7 +277,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* 헤더 */}
-      <div className="shrink-0 z-10">
+      <div className="sticky top-0 z-10 bg-white">
         <ChatRoomHeader
           partnerName={partnerName}
           partnerProfileImage={partnerProfileImage}
