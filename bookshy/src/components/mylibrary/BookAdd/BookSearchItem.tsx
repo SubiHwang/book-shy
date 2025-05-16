@@ -1,12 +1,11 @@
-// src/components/mylibrary/BookAdd/BookSearchItem.tsx
 import { FC } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Check } from 'lucide-react';
 import type { BookSearchItem } from '@/types/mylibrary/bookSearch';
 
 interface BookSearchItemProps {
   book: BookSearchItem;
   onAddBook: (itemId: number) => void;
-  onItemClick?: (itemId: number) => void; // 아이템 클릭 핸들러 추가
+  onItemClick?: (itemId: number) => void;
 }
 
 const BookSearchItem: FC<BookSearchItemProps> = ({ book, onAddBook, onItemClick }) => {
@@ -20,7 +19,7 @@ const BookSearchItem: FC<BookSearchItemProps> = ({ book, onAddBook, onItemClick 
   return (
     <div
       className="card flex items-center justify-between p-4 mb-4 w-full cursor-pointer"
-      onClick={handleItemClick} // 카드 클릭 이벤트
+      onClick={handleItemClick}
     >
       {/* Book Image */}
       <div className="flex-shrink-0 w-24 h-32 mr-4">
@@ -30,7 +29,7 @@ const BookSearchItem: FC<BookSearchItemProps> = ({ book, onAddBook, onItemClick 
           className="w-full h-full object-cover rounded-md shadow-sm"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
-            target.src = '/placeholder-book.jpg'; // 이미지 로드 실패 시 대체 이미지
+            target.src = '/placeholder-book.jpg';
           }}
         />
       </div>
@@ -52,17 +51,28 @@ const BookSearchItem: FC<BookSearchItemProps> = ({ book, onAddBook, onItemClick 
         )}
       </div>
 
-      {/* Add (+) Button */}
       <div className="flex-shrink-0 ml-4">
-        <button
-          className="p-2 rounded-full bg-light-bg-shade hover:bg-gray-200"
-          onClick={(e) => {
-            e.stopPropagation(); // 버튼 클릭이 카드 클릭 이벤트를 방해하지 않도록
-            onAddBook(book.itemId);
-          }}
-        >
-          <Plus className="w-6 h-6 text-primary" strokeWidth={1} />
-        </button>
+        {book.inLibrary ? (
+          // 이미 서재에 있으면 체크 아이콘만 표시 (클릭 불가)
+          <div
+            className="p-2 rounded-full bg-gray-200 bg-opacity-70 shadow-sm"
+            title="내 서재에 담긴 책"
+          >
+            <Check className="w-6 h-6 text-gray-600" strokeWidth={2} />
+          </div>
+        ) : (
+          // 서재에 없으면 추가 버튼 표시
+          <button
+            className="p-2 rounded-full bg-light-bg-shade hover:bg-gray-200 transition"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddBook(book.itemId);
+            }}
+            title="서재에 추가"
+          >
+            <Plus className="w-6 h-6 text-primary" strokeWidth={1.5} />
+          </button>
+        )}
       </div>
     </div>
   );
