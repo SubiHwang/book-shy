@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.kafka.consumer;
 
 import com.ssafy.bookshy.domain.chat.dto.ChatMessageResponseDto;
+import com.ssafy.bookshy.domain.chat.dto.ChatRoomDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomUserIds;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.service.ChatMessageService;
@@ -154,8 +155,10 @@ public class KafkaEventConsumer {
                     : userIds.getUserAId();
 
             // 👥 각 사용자에게 채팅 목록 갱신 WebSocket 전송
-            messagingTemplate.convertAndSend("/topic/chat/user/" + senderId, saved);
-            messagingTemplate.convertAndSend("/topic/chat/user/" + receiverId, saved);
+            ChatRoomDto chatRoomDto = chatRoomService.getChatRoomDtoByKafkaEvent(dto);
+
+            messagingTemplate.convertAndSend("/topic/chat/user/" + senderId, chatRoomDto);
+            messagingTemplate.convertAndSend("/topic/chat/user/" + receiverId, chatRoomDto);
 
             log.info("✅ [KafkaConsumer] 채팅 보낸이 Id: '{}', 받는이 Id: '{}'", senderId, receiverId);
 
