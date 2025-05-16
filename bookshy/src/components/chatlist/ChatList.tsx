@@ -5,60 +5,60 @@ import { useWebSocket } from '@/contexts/WebSocketProvider';
 import { useEffect } from 'react';
 import { getUserIdFromToken } from '@/utils/jwt';
 import { ChatMessage } from '@/types/chat/chat';
+import { useLocation } from 'react-router-dom';
 
 function ChatList() {
   const queryClient = useQueryClient();
   const { subscribeUser, unsubscribe } = useWebSocket();
+  const location = useLocation();
   const myUserId = getUserIdFromToken();
   if (!myUserId) return;
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['chatList'],
     queryFn: () => fetchChatList(),
   });
 
   useEffect(() => {
-    const subscription = subscribeUser(myUserId, (frame) => {
-      try {
-        const msg: ChatMessage = frame;
-        console.log('📨 WebSocket 수신:', msg);
+    refetch();
+  }, [location.pathname, refetch]);
 
-        queryClient.setQueryData(['chatList'], (prev: any) => {
-          if (!Array.isArray(prev)) return prev;
+  useEffect(() => {
+    const subscription = subscribeUser(myUserId, (msg: ChatMessage) => {
+      console.log('📨 WebSocket 수신:', msg);
+      queryClient.setQueryData(['chatList'], (prev: any) => {
+        if (!Array.isArray(prev)) return prev;
 
-          const exists = prev.some((room: any) => room.id === msg.chatRoomId);
+        const exists = prev.some((room: any) => room.id === msg.chatRoomId);
 
-          if (!exists) {
-            return [
-              ...prev,
-              {
-                id: msg.chatRoomId,
-                partnerName: msg.senderNickname || '상대방',
-                partnerProfileImage: '',
+        if (!exists) {
+          return [
+            ...prev,
+            {
+              id: msg.chatRoomId,
+              partnerName: msg.senderNickname || '상대방',
+              partnerProfileImage: '',
+              lastMessage: msg.content,
+              lastMessageTime: msg.sentAt,
+              unreadCount: 1,
+            },
+          ];
+        }
+
+        return prev.map((room: any) =>
+          room.id === msg.chatRoomId
+            ? {
+                ...room,
                 lastMessage: msg.content,
                 lastMessageTime: msg.sentAt,
-                unreadCount: 1,
-              },
-            ];
-          }
-
-          return prev.map((room: any) =>
-            room.id === msg.chatRoomId
-              ? {
-                  ...room,
-                  lastMessage: msg.content,
-                  lastMessageTime: msg.sentAt,
-                  unreadCount:
-                    window.location.pathname !== `/chat/${msg.chatRoomId}`
-                      ? (room.unreadCount || 0) + 1
-                      : room.unreadCount,
-                }
-              : room,
-          );
-        });
-      } catch (e) {
-        console.error('❌ WebSocket 메시지 처리 실패:', e);
-      }
+                unreadCount:
+                  window.location.pathname !== `/chat/${msg.chatRoomId}`
+                    ? (room.unreadCount || 0) + 1
+                    : room.unreadCount,
+              }
+            : room,
+        );
+      });
     });
 
     return () => unsubscribe(subscription);
