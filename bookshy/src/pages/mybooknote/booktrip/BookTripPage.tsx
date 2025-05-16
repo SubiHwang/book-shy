@@ -11,16 +11,29 @@ import type {
   BookTripBookItem,
   BookTripListItem,
 } from '@/types/mybooknote/booktrip/booktrip';
+
 import BookTripIntroCard from '@/components/mybooknote/booktrip/BookTripIntroCard';
 import BookTripBookList from '@/components/mybooknote/booktrip/BookTripBookList';
 import SearchBar from '@/components/common/SearchBar';
+import FilterChips from '@/components/common/FilterChips';
+
+// 📌 필터 타입 선언
+type FilterType = '전체 보기' | '여정이 있는 책' | '여정이 없는 책';
 
 const BookTripPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState<string>('전체 보기');
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>('전체 보기');
 
-  const filterList = useMemo(() => ['전체 보기', '여정이 있는 책', '여정이 없는 책'], []);
+  const filterOptions = useMemo(
+    () =>
+      [
+        { label: '전체 보기', value: '전체 보기' },
+        { label: '여정이 있는 책', value: '여정이 있는 책' },
+        { label: '여정이 없는 책', value: '여정이 없는 책' },
+      ] as { label: FilterType; value: FilterType }[],
+    [],
+  );
 
   const { data: libraryBooks = [], isLoading: isLoadingLibrary } = useQuery<LibraryBookWithTrip[]>({
     queryKey: ['libraryBooksWithTrip'],
@@ -63,7 +76,7 @@ const BookTripPage: React.FC = () => {
 
   const handleSearchKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      // 향후 추가 작업 가능 (예: 스크롤 이동 등)
+      // 향후 스크롤 등 추가 동작 가능
     }
   };
 
@@ -80,22 +93,14 @@ const BookTripPage: React.FC = () => {
           placeholder="책 여정 검색 (책 제목)"
         />
 
-        {/* 🏷️ 필터 버튼들 */}
-        <div className="flex gap-2 overflow-x-auto">
-          {filterList.map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setSelectedFilter(filter)}
-              className={`px-4 py-2 text-sm rounded-full whitespace-nowrap ${
-                selectedFilter === filter ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-700'
-              }`}
-            >
-              {filter}
-            </button>
-          ))}
-        </div>
+        {/* 🏷️ 칩 필터 */}
+        <FilterChips<FilterType>
+          options={filterOptions}
+          selected={selectedFilter}
+          onSelect={(val) => setSelectedFilter(val)}
+        />
 
-        {/* 📚 책 리스트 렌더링 */}
+        {/* 📚 리스트 */}
         {isLoading ? (
           <p className="text-center text-gray-500">불러오는 중...</p>
         ) : filteredBooks.length === 0 ? (

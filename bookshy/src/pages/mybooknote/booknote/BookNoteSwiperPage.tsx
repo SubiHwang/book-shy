@@ -3,18 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import BookNoteCard from '@/components/mybooknote/booknote/BookNoteCard';
 import AdjacentBookPreview from '@/components/mybooknote/booknote/AdjacentBookPreview';
-import { ChevronDown, PlusCircle } from 'lucide-react';
+import FilterChips from '@/components/common/FilterChips';
+import { PlusCircle, BookOpen, CheckCircle, CircleSlash } from 'lucide-react';
+import { useSwipeable } from 'react-swipeable';
 
 interface BookNoteSwiperPageProps {
   bookNotes: (BookNote & { libraryId: number })[];
 }
 
+type FilterType = 'all' | 'has' | 'none';
+
 const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) => {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [stage, setStage] = useState<'quote' | 'review'>('quote');
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'has' | 'none'>('all');
-  const [filterOpen, setFilterOpen] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
+  const [stage, setStage] = useState<'cover' | 'quote'>('cover');
 
   const filteredNotes = bookNotes.filter((book) => {
     const hasReview = !!book.reviewId && book.content.trim() !== '';
@@ -24,74 +27,56 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
     return true;
   });
 
+  const total = filteredNotes.length;
   const currentBook = filteredNotes[currentIndex];
+  const prevIndex = (currentIndex - 1 + total) % total;
+  const nextIndex = (currentIndex + 1) % total;
+
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => goTo(1),
+    onSwipedRight: () => goTo(-1),
+    delta: 50,
+    trackTouch: true,
+  });
+
   if (!currentBook) return <p className="p-4">조건에 맞는 독서 기록이 없습니다.</p>;
 
-  const hasReview = !!currentBook.reviewId && currentBook.content.trim() !== '';
-
   const handleCardClick = () => {
-    if (stage === 'quote') {
-      setStage('review');
+    if (stage === 'cover') {
+      setStage('quote');
     } else {
       navigate(`/booknotes/full/${currentBook.bookId}`);
     }
   };
 
   const goTo = (offset: number) => {
-    const newIdx = currentIndex + offset;
-    if (newIdx >= 0 && newIdx < filteredNotes.length) {
-      setCurrentIndex(newIdx);
-      setStage('quote');
-    }
+    const newIdx = (currentIndex + offset + total) % total;
+    setCurrentIndex(newIdx);
+    setStage('cover');
   };
+
+  const filterOptions: { label: string; value: FilterType; icon: React.ReactNode }[] = [
+    { label: '전체 보기', value: 'all', icon: <BookOpen size={16} className="mr-1" /> },
+    { label: '기록 O', value: 'has', icon: <CheckCircle size={16} className="mr-1" /> },
+    { label: '기록 X', value: 'none', icon: <CircleSlash size={16} className="mr-1" /> },
+  ];
 
   return (
     <div className="min-h-screen bg-light-bg pb-28">
-      <div className="px-4 pt-4">
-        <div className="mb-2 flex justify-between items-center">
-          <div className="font-light text-light-text-secondary">총 {filteredNotes.length}권</div>
-          <div className="relative">
-            <button
-              className="flex items-center border rounded px-3 py-1 text-sm"
-              onClick={() => setFilterOpen(!filterOpen)}
-            >
-              <span>
-                {selectedFilter === 'all'
-                  ? '전체 보기'
-                  : selectedFilter === 'has'
-                    ? '기록이 있는 책'
-                    : '기록이 없는 책'}
-              </span>
-              <ChevronDown size={16} className="ml-1" />
-            </button>
-            {filterOpen && (
-              <div className="absolute right-0 mt-1 bg-white border rounded shadow-lg z-10 w-32">
-                <ul className="py-1">
-                  {['all', 'has', 'none'].map((value) => (
-                    <li
-                      key={value}
-                      className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm font-light"
-                      onClick={() => {
-                        setSelectedFilter(value as any);
-                        setCurrentIndex(0);
-                        setStage('quote');
-                        setFilterOpen(false);
-                      }}
-                    >
-                      {value === 'all'
-                        ? '전체 보기'
-                        : value === 'has'
-                          ? '기록이 있는 책'
-                          : '기록이 없는 책'}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
+      <div className="px-4 pt-4 space-y-4">
+        <div className="text-sm text-light-text-secondary">총 {filteredNotes.length}권</div>
 
-        <div className="bg-[#FFF3F3] border border-[#FF8080] rounded-md px-5 py-3 mb-4">
+        <FilterChips<FilterType>
+          options={filterOptions}
+          selected={selectedFilter}
+          onSelect={(val) => {
+            setSelectedFilter(val);
+            setCurrentIndex(0);
+            setStage('cover');
+          }}
+        />
+
+        <div className="bg-[#FFF3F3] border border-[#FF8080] rounded-md px-5 py-3">
           <div className="flex items-center gap-1 mb-1">
             <span className="text-[#FF4040]">📢</span>
             <h1 className="text-[#FF4040] font-medium text-sm">내 독서 기록 보기 시스템</h1>
@@ -103,37 +88,48 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
         </div>
       </div>
 
+      {/* 카드 영역 */}
       <div
-        className="relative h-[70vh] flex items-center justify-center overflow-hidden"
+        {...swipeHandlers}
+        className="relative h-[60vh] flex items-center justify-center overflow-hidden mt-4"
         onClick={handleCardClick}
       >
-        {filteredNotes[currentIndex - 1] && (
-          <AdjacentBookPreview
-            book={filteredNotes[currentIndex - 1]}
-            direction="left"
-            onClick={() => goTo(-1)}
-          />
+        {/* 왼쪽 카드 */}
+        {total > 1 && (
+          <div className="absolute left-0 z-10 opacity-90 scale-90">
+            <AdjacentBookPreview
+              book={filteredNotes[prevIndex]}
+              direction="left"
+              onClick={() => goTo(-1)}
+            />
+          </div>
         )}
 
-        <BookNoteCard
-          coverUrl={currentBook.coverUrl}
-          title={currentBook.title}
-          author={currentBook.author}
-          quote={currentBook.quoteContent}
-          review={currentBook.content}
-          stage={hasReview ? stage : 'quote'}
-          onMoreClick={() => navigate(`/booknotes/full/${currentBook.bookId}`)}
-        />
-
-        {filteredNotes[currentIndex + 1] && (
-          <AdjacentBookPreview
-            book={filteredNotes[currentIndex + 1]}
-            direction="right"
-            onClick={() => goTo(1)}
+        {/* 현재 카드 */}
+        <div className="z-20">
+          <BookNoteCard
+            coverUrl={currentBook.coverUrl}
+            title={currentBook.title}
+            author={currentBook.author}
+            quote={currentBook.quoteContent}
+            flipped={stage === 'quote'}
+            onMoreClick={() => navigate(`/booknotes/full/${currentBook.bookId}`)}
           />
+        </div>
+
+        {/* 오른쪽 카드 */}
+        {total > 1 && (
+          <div className="absolute right-0 z-10 opacity-90 scale-90">
+            <AdjacentBookPreview
+              book={filteredNotes[nextIndex]}
+              direction="right"
+              onClick={() => goTo(1)}
+            />
+          </div>
         )}
       </div>
 
+      {/* 등록 버튼 */}
       <div className="fixed bottom-24 right-6 z-50">
         <button
           onClick={() => navigate('/booknotes/select')}

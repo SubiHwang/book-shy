@@ -53,3 +53,24 @@ body,
 .badge {
   @apply flex justify-center items-center px-2 py-0.5 rounded-full font-light text-xs text-center;
 }
+
+/* Flip 효과를 위한 유틸리티 클래스 */
+.perspective {
+  perspective: 1000px;
+}
+
+.transform-style {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.rotate-y-0 {
+  transform: rotateY(0deg);
+}
