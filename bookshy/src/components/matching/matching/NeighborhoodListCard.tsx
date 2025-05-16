@@ -2,8 +2,10 @@ import { NeighborhoodCardProps } from '@/types/Matching';
 import { ChevronRight } from 'lucide-react';
 import { FC } from 'react';
 import Skeleton from 'react-loading-skeleton';
+import { useNavigate } from 'react-router-dom';
 
 const NeighborhoodListCard: FC<NeighborhoodCardProps> = ({ neighborhood, isLoading }) => {
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col card my-2 w-full">
       {/* 항상 가로 배치로 유지 */}
@@ -70,7 +72,9 @@ const NeighborhoodListCard: FC<NeighborhoodCardProps> = ({ neighborhood, isLoadi
         ) : (
           <button
             className="badge border border-primary-accent rounded-full flex items-center py-2 px-4 ml-auto"
-            onClick={() => {}}
+            onClick={() => {
+              navigate(`/matching/neigbors-bookshelf/${neighborhood.userId}`);
+            }}
           >
             <span className="flex items-center text-sm sm:text-base font-extralight text-primary-accent whitespace-nowrap">
               서재 보기
