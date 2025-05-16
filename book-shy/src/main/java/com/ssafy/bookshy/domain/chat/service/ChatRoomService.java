@@ -2,6 +2,7 @@ package com.ssafy.bookshy.domain.chat.service;
 
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomUserIds;
+import com.ssafy.bookshy.domain.chat.entity.ChatMessage;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatMessageRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
@@ -10,11 +11,10 @@ import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.service.UserService;
 import com.ssafy.bookshy.kafka.dto.ChatMessageKafkaDto;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -101,7 +101,27 @@ public class ChatRoomService {
                 .userBId(userBId)
                 .matching(Matching.builder().matchId(matchId).build())
                 .build();
-        return chatRoomRepository.save(chatRoom);
+        chatRoom = chatRoomRepository.save(chatRoom);
+
+        // 📝 3. 안내 메시지 생성
+        LocalDateTime now = LocalDateTime.now();
+        String systemMessage = "채팅방이 생성되었습니다.";
+
+        ChatMessage noticeMessage = ChatMessage.builder()
+                .chatRoom(chatRoom)
+                .senderId(userAId) // 시스템 메시지지만 최초 생성자 기준
+                .content(systemMessage)
+                .type("notice")
+                .timestamp(now)
+                .build();
+
+        // 💾 메시지 저장
+        chatMessageRepository.save(noticeMessage);
+
+        // 💬 마지막 메시지 정보 업데이트
+        chatRoom.updateLastMessage(systemMessage, now);
+
+        return chatRoom;
     }
 
 
