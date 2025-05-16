@@ -92,36 +92,6 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   }, [messages]);
 
   useEffect(() => {
-    const lockBody = () => {
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${window.scrollY}px`;
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
-    };
-
-    const unlockBody = () => {
-      const scrollY = document.body.style.top;
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.width = '';
-      document.body.style.overflow = '';
-      window.scrollTo(0, parseInt(scrollY || '0') * -1);
-    };
-
-    window.addEventListener('focusin', lockBody);
-    window.addEventListener('focusout', unlockBody);
-
-    return () => {
-      window.removeEventListener('focusin', lockBody);
-      window.removeEventListener('focusout', unlockBody);
-    };
-  }, []);
-
-  useEffect(() => {
     if (!isNaN(numericRoomId)) {
       markMessagesAsRead(numericRoomId).catch((err) => console.error('❌ 읽음 처리 실패:', err));
       queryClient.setQueryData(['chatList'], (prev: any) => {
