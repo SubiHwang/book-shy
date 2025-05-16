@@ -31,7 +31,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
   };
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 bg-light-bg-secondary border-t pb-safe">
+    <div className="w-full bg-light-bg-secondary border-t border-light-border">
       {/* 입력창 */}
       <form
         onSubmit={handleSubmit}
@@ -51,7 +51,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
           placeholder="메시지 보내기"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="w-full max-w-full px-4 py-2 bg-primary-light text-white placeholder-white rounded-full focus:outline-none box-border"
+          className="flex-1 px-4 py-2 bg-primary-light text-white placeholder-white rounded-full focus:outline-none"
         />
 
         <div
