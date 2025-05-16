@@ -1,7 +1,8 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { HeaderProps } from '@/types/common';
-import { ArrowLeft, Bell } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import NotificationButton from './NotificationButton';
 
 const Header: FC<HeaderProps> = ({
   title,
@@ -14,6 +15,7 @@ const Header: FC<HeaderProps> = ({
   className = 'bg-light-bg shadow-md',
 }) => {
   const location = useLocation();
+  const [hasNotifications, setHasNotifications] = useState<boolean>(false);
 
   // 숨길 경로 목록
   const hiddenPaths = ['/bookshelf/add/title', '/bookshelf/add/isbn'];
@@ -43,11 +45,7 @@ const Header: FC<HeaderProps> = ({
       </div>
 
       <div className="flex items-center space-x-2">
-        {showNotification && (
-          <button className="p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors relative">
-            <Bell size={24} />
-          </button>
-        )}
+        {showNotification && <NotificationButton />}
 
         {extraButton && extraButtonIcon && (
           <button
