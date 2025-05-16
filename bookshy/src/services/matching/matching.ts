@@ -1,3 +1,4 @@
+import { NeighborBookshelf } from '@/types/book';
 import { authAxiosInstance } from '../axiosInstance';
 import {
   MatchingRecommendationResponse,
@@ -37,6 +38,19 @@ export const getNeighborhoodList = async () => {
     return response;
   } catch (error) {
     console.log('이웃들의 목록 불러오기 에러', error);
+    throw error;
+  }
+};
+
+export const getNeighborhoodBookShelf = async (userId: number) => {
+  try {
+    const response = await authAxiosInstance.get<string, NeighborBookshelf>(
+      `/matching/public/${userId}`,
+    );
+    console.log('이웃의 서재', response);
+    return response;
+  } catch (error) {
+    console.log('이웃의 서재 불러오기 에러', error);
     throw error;
   }
 };
