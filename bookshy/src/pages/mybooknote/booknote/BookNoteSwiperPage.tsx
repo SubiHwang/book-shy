@@ -27,6 +27,11 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
     return true;
   });
 
+  const total = filteredNotes.length;
+  const currentBook = filteredNotes[currentIndex];
+  const prevIndex = (currentIndex - 1 + total) % total;
+  const nextIndex = (currentIndex + 1) % total;
+
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => goTo(1),
     onSwipedRight: () => goTo(-1),
@@ -34,7 +39,6 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
     trackTouch: true,
   });
 
-  const currentBook = filteredNotes[currentIndex];
   if (!currentBook) return <p className="p-4">조건에 맞는 독서 기록이 없습니다.</p>;
 
   const handleCardClick = () => {
@@ -46,14 +50,12 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
   };
 
   const goTo = (offset: number) => {
-    const newIdx = currentIndex + offset;
-    if (newIdx >= 0 && newIdx < filteredNotes.length) {
-      setCurrentIndex(newIdx);
-      setStage('cover');
-    }
+    const newIdx = (currentIndex + offset + total) % total;
+    setCurrentIndex(newIdx);
+    setStage('cover');
   };
 
-  const filterOptions: { label: string; value: 'all' | 'has' | 'none'; icon: React.ReactNode }[] = [
+  const filterOptions: { label: string; value: FilterType; icon: React.ReactNode }[] = [
     { label: '전체 보기', value: 'all', icon: <BookOpen size={16} className="mr-1" /> },
     { label: '기록 O', value: 'has', icon: <CheckCircle size={16} className="mr-1" /> },
     { label: '기록 X', value: 'none', icon: <CircleSlash size={16} className="mr-1" /> },
@@ -64,7 +66,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
       <div className="px-4 pt-4 space-y-4">
         <div className="text-sm text-light-text-secondary">총 {filteredNotes.length}권</div>
 
-        <FilterChips<'all' | 'has' | 'none'>
+        <FilterChips<FilterType>
           options={filterOptions}
           selected={selectedFilter}
           onSelect={(val) => {
@@ -93,10 +95,10 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
         onClick={handleCardClick}
       >
         {/* 왼쪽 카드 */}
-        {filteredNotes[currentIndex - 1] && (
+        {total > 1 && (
           <div className="absolute left-0 z-10 opacity-90 scale-90">
             <AdjacentBookPreview
-              book={filteredNotes[currentIndex - 1]}
+              book={filteredNotes[prevIndex]}
               direction="left"
               onClick={() => goTo(-1)}
             />
@@ -116,10 +118,10 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
         </div>
 
         {/* 오른쪽 카드 */}
-        {filteredNotes[currentIndex + 1] && (
+        {total > 1 && (
           <div className="absolute right-0 z-10 opacity-90 scale-90">
             <AdjacentBookPreview
-              book={filteredNotes[currentIndex + 1]}
+              book={filteredNotes[nextIndex]}
               direction="right"
               onClick={() => goTo(1)}
             />
