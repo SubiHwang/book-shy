@@ -76,7 +76,7 @@ function ChatMessageItem({
         <div
           className={`max-w-[85%] sm:max-w-[70%] px-4 py-2 rounded-2xl text-sm sm:text-base whitespace-pre-wrap break-words ${
             isMyMessage ? 'bg-primary-light text-white' : 'bg-light-bg-secondary text-gray-900'
-          }`}
+          } select-none`}
         >
           {message.content}
         </div>
