@@ -23,7 +23,6 @@ import BookNotesTab from '@/pages/mylibrary/tabs/BookNotesTab';
 import ISBNScanResultPage from '@/pages/mylibrary/AddBook/ISBNScanResultPage';
 import SearchBookDetailPage from '@/pages/mylibrary/AddBook/SearchBookDetailPage';
 import MyBookNotesPage from '@/pages/mybooknote/booknote/MyBookNotesPage';
-import BookNoteDetailPage from '@/pages/mybooknote/booknote/BookNoteDetailPage';
 import BookNoteFullPage from '@/pages/mybooknote/booknote/BookNoteFullPage';
 import BookNoteEditPage from '@/pages/mybooknote/booknote/BookNoteEditPage';
 import BookNoteCreatePage from '@/pages/mybooknote/booknote/BookNoteCreatePage';
@@ -136,7 +135,6 @@ const AppLayout: FC = () => {
                     <Route path="/booknotes/trip" element={<BookTripPage />} />
                   </Route>
 
-                  <Route path="/booknotes/detail/:bookId" element={<BookNoteDetailPage />} />
                   <Route path="/booknotes/full/:bookId" element={<BookNoteFullPage />} />
                   <Route path="/booknotes/edit/:bookId" element={<BookNoteEditPage />} />
                   <Route path="/booknotes/create" element={<BookNoteCreatePage />} />
