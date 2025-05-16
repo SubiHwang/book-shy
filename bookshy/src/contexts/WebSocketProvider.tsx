@@ -53,7 +53,6 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ c
         console.log('✅ WebSocket connected');
         setIsConnected(true);
         subscriptions.current.forEach(({ topic, callback }) => {
-          const sub = client.subscribe(topic, callback);
           subscriptions.current.set(topic, { topic, callback });
           console.log(`🔄 Re-subscribed to ${topic}`);
         });
