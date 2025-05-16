@@ -64,10 +64,6 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
     };
   }, []);
 
-  const headerHeight = 56;
-  const inputHeight = showOptions ? viewportHeight * 0.35 : 72;
-  const messageAreaHeight = viewportHeight - headerHeight - inputHeight;
-
   const { data: initialMessages = [], isSuccess } = useQuery({
     queryKey: ['chatMessages', numericRoomId],
     queryFn: () => fetchMessages(numericRoomId),
