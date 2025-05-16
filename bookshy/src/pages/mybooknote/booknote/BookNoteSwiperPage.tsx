@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import BookNoteCard from '@/components/mybooknote/booknote/BookNoteCard';
 import AdjacentBookPreview from '@/components/mybooknote/booknote/AdjacentBookPreview';
-import { PlusCircle } from 'lucide-react';
+import FilterChips from '@/components/common/FilterChips';
+import { PlusCircle, BookOpen, CheckCircle, CircleSlash } from 'lucide-react';
 
 interface BookNoteSwiperPageProps {
   bookNotes: (BookNote & { libraryId: number })[];
@@ -42,36 +43,27 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
     }
   };
 
+  const filterOptions = [
+    { label: '전체 보기', value: 'all', icon: <BookOpen size={16} className="mr-1" /> },
+    { label: '기록 O', value: 'has', icon: <CheckCircle size={16} className="mr-1" /> },
+    { label: '기록 X', value: 'none', icon: <CircleSlash size={16} className="mr-1" /> },
+  ];
+
   return (
     <div className="min-h-screen bg-light-bg pb-28">
       <div className="px-4 pt-4 space-y-4">
         <div className="text-sm text-light-text-secondary">총 {filteredNotes.length}권</div>
 
-        {/* ✅ 칩 형식 필터 버튼 */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-none">
-          {[
-            { label: '전체 보기', value: 'all' },
-            { label: '기록이 있는 책', value: 'has' },
-            { label: '기록이 없는 책', value: 'none' },
-          ].map((filter) => (
-            <button
-              key={filter.value}
-              onClick={() => {
-                setSelectedFilter(filter.value as typeof selectedFilter);
-                setCurrentIndex(0);
-                setStage('cover');
-              }}
-              className={`px-4 py-1.5 rounded-full border text-sm whitespace-nowrap transition
-                ${
-                  selectedFilter === filter.value
-                    ? 'bg-primary text-white border-primary'
-                    : 'bg-white text-gray-600 border-gray-300'
-                }`}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
+        {/* ✅ 칩 형식 필터 + 아이콘 + 애니메이션 */}
+        <FilterChips
+          options={filterOptions}
+          selected={selectedFilter}
+          onSelect={(val) => {
+            setSelectedFilter(val as 'all' | 'has' | 'none');
+            setCurrentIndex(0);
+            setStage('cover');
+          }}
+        />
 
         <div className="bg-[#FFF3F3] border border-[#FF8080] rounded-md px-5 py-3">
           <div className="flex items-center gap-1 mb-1">
