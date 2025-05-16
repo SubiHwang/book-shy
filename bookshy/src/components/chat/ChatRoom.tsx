@@ -211,12 +211,6 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
     messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
   };
 
-  const isScrolledToBottom = () => {
-    const container = messagesEndRef.current?.parentElement;
-    if (!container) return true;
-    return container.scrollHeight - container.scrollTop - container.clientHeight < 100;
-  };
-
   const handleSendMessage = (content: string) => {
     if (isNaN(numericRoomId)) return;
     sendMessage(numericRoomId, myUserId, content, 'chat');
@@ -281,16 +275,31 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   let lastDateLabel = '';
 
   return (
-    <div className="h-[100svh] max-h-[100svh] flex flex-col overflow-hidden bg-white relative pb-safe">
+    <div
+      className="flex flex-col bg-white"
+      style={{
+        position: 'fixed',
+        inset: 0, // top: 0, left: 0, right: 0, bottom: 0
+        height: '100%',
+        overflow: 'hidden', // body 스크롤 막는 효과
+        zIndex: 0, // 다른 고정 요소와 겹치지 않도록
+      }}
+    >
       {/* 헤더 */}
-      <ChatRoomHeader
-        partnerName={partnerName}
-        partnerProfileImage={partnerProfileImage}
-        bookShyScore={bookShyScore}
-      />
+      <div className="shrink-0 z-10">
+        <ChatRoomHeader
+          partnerName={partnerName}
+          partnerProfileImage={partnerProfileImage}
+          bookShyScore={bookShyScore}
+        />
+      </div>
 
-      {/* 채팅 메시지 영역 */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3">
+      {/* 메시지 영역 */}
+      <div
+        className={`flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
+          showOptions ? 'pb-[25vh]' : 'pb-20'
+        }`}
+      >
         {messages.map((msg, idx) => {
           const dateLabel = formatDateLabel(msg.sentAt);
           const showDate = dateLabel !== lastDateLabel;
@@ -335,28 +344,30 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
         <div ref={messagesEndRef} className="h-4" />
       </div>
 
-      {/* ↓ 버튼: 입력창 바로 위에 반응형 위치 */}
-      <div className="relative shrink-0">
-        {showScrollToBottom && (
-          <div className="absolute inset-x-0 -top-12 sm:-top-14 flex justify-center z-30">
-            <button
-              className="bg-black/60 hover:bg-black/80 text-white text-lg sm:text-xl px-3 py-1.5 rounded-full shadow-md transition"
-              onClick={() => scrollToBottom(true)}
-              aria-label="맨 아래로 스크롤"
-            >
-              ↓
-            </button>
-          </div>
-        )}
+      {/* ↓ 아래로 버튼 */}
+      {showScrollToBottom && (
+        <div className="absolute bottom-[88px] inset-x-0 flex justify-center z-30">
+          <button
+            className="bg-black/60 hover:bg-black/80 text-white text-lg sm:text-xl px-3 py-1.5 rounded-full shadow-md transition"
+            onClick={() => scrollToBottom(true)}
+            aria-label="맨 아래로 스크롤"
+          >
+            ↓
+          </button>
+        </div>
+      )}
 
-        {/* 입력창 */}
+      <div className="shrink-0 z-20 bg-white border-t border-light-border px-4">
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
           onToggleOptions={() => {
-            const wasAtBottom = isScrolledToBottom();
-            setShowOptions((prev) => !prev);
+            const container = messagesEndRef.current?.parentElement;
+            const wasAtBottom = container
+              ? container.scrollHeight - container.scrollTop - container.clientHeight < 50
+              : false;
 
+            setShowOptions((prev) => !prev);
             setTimeout(() => {
               if (wasAtBottom) scrollToBottom(true);
             }, 0);
@@ -365,13 +376,13 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
         />
       </div>
 
-      {/* 일정 등록 모달 */}
+      {/* 일정 모달 */}
       {showScheduleModal && (
         <ScheduleModal
           partnerName={partnerName}
           partnerProfileImage={partnerProfileImage}
           roomId={numericRoomId}
-          requestId={Number(0)}
+          requestId={0}
           onClose={() => setShowScheduleModal(false)}
           onConfirm={registerScheduleAndNotify}
         />

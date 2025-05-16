@@ -30,62 +30,74 @@ interface WebSocketContextValue {
   sendMessage: (roomId: number, senderId: number, content: string, type: string) => void;
   isConnected: boolean;
 }
+
 const WebSocketContext = createContext<WebSocketContextValue | null>(null);
 
 export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ children }) => {
   const clientRef = useRef<CompatClient | null>(null);
-  const subscriptions = useRef<Map<string, ReturnType<CompatClient['subscribe']>>>(new Map());
+  const subscriptions = useRef<Map<string, { topic: string; callback: (frame: IMessage) => void }>>(
+    new Map(),
+  );
   const [isConnected, setIsConnected] = useState(false);
 
-  useEffect(() => {
+  const connect = useCallback(() => {
     const socket = new SockJS(SOCKET_URL);
     const client = Stomp.over(socket);
+    client.heartbeatIncoming = 10000;
+    client.heartbeatOutgoing = 10000;
     client.debug = () => {};
-    client.connect({}, () => {
-      console.log('✅ WebSocket connected');
-      setIsConnected(true);
-    });
-    clientRef.current = client;
 
+    client.connect(
+      {},
+      () => {
+        console.log('✅ WebSocket connected');
+        setIsConnected(true);
+        subscriptions.current.forEach(({ topic, callback }) => {
+          subscriptions.current.set(topic, { topic, callback });
+          console.log(`🔄 Re-subscribed to ${topic}`);
+        });
+      },
+      (error: any) => {
+        console.error('❌ WebSocket connect error:', error);
+        setTimeout(connect, 5000);
+      },
+    );
+
+    client.onWebSocketClose = () => {
+      console.warn('⚠️ WebSocket closed, attempting reconnect...');
+      setIsConnected(false);
+      setTimeout(connect, 5000);
+    };
+
+    clientRef.current = client;
+  }, []);
+
+  useEffect(() => {
+    connect();
     return () => {
-      client.disconnect(() => {
-        console.log('🔌 WebSocket disconnected');
-      });
-      subscriptions.current.forEach((sub, topic) => {
-        sub.unsubscribe();
-        console.log(`❌ Cleaned up subscription to ${topic}`);
-      });
+      clientRef.current?.disconnect(() => console.log('🔌 WebSocket disconnected'));
       subscriptions.current.clear();
     };
-  }, []);
+  }, [connect]);
 
-  const subscribeRoom = useCallback((roomId: number, onMessage: (message: IMessage) => void) => {
-    const topic = `/topic/chat/${roomId}`;
+  const subscribe = useCallback((topic: string, callback: (frame: IMessage) => void) => {
     const client = clientRef.current;
-
     if (!client?.connected) {
-      console.warn('🛑 WebSocket not connected yet. Delaying subscription.');
+      console.warn(`🛑 WebSocket not connected yet. Delaying subscription to ${topic}`);
       return null;
     }
-
     if (subscriptions.current.has(topic)) {
       console.log(`🟡 Already subscribed to ${topic}`);
       return {
         unsubscribe: () => {
-          subscriptions.current.get(topic)?.unsubscribe();
+          client.unsubscribe(topic);
           subscriptions.current.delete(topic);
-          console.log(`❌ Unsubscribed from ${topic}`);
         },
       };
     }
-
-    const sub = client.subscribe(topic, (frame) => {
-      onMessage(frame);
-    });
-
-    subscriptions.current.set(topic, sub);
+    const sub = client.subscribe(topic, callback);
+    subscriptions.current.set(topic, { topic, callback });
     console.log(`✅ Subscribed to ${topic}`);
-
     return {
       unsubscribe: () => {
         sub.unsubscribe();
@@ -95,144 +107,44 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ c
     };
   }, []);
 
-  const unsubscribe = useCallback((sub: { unsubscribe: () => void } | null) => {
-    if (sub) sub.unsubscribe();
-  }, []);
-
-  const subscribeUser = useCallback((userId: number, onMessage: (message: ChatMessage) => void) => {
-    const topic = `/topic/chat/user/${userId}`;
-    const client = clientRef.current;
-
-    if (!client?.connected) {
-      console.warn('🛑 WebSocket not connected yet. Delaying user subscription.');
-      return null;
-    }
-
-    if (subscriptions.current.has(topic)) {
-      console.log(`🟡 Already subscribed to ${topic}`);
-      return {
-        unsubscribe: () => {
-          subscriptions.current.get(topic)?.unsubscribe();
-          subscriptions.current.delete(topic);
-          console.log(`❌ Unsubscribed from ${topic}`);
-        },
-      };
-    }
-
-    console.log(`📡 Subscribing to user topic: ${topic}`);
-
-    const sub = client.subscribe(topic, (frame) => {
-      console.log('📩 [WebSocket 수신]', frame.body);
-      try {
-        if (!frame.body || frame.body === 'undefined' || frame.body === 'null') {
-          throw new Error('❗ WebSocket frame.body is empty or invalid');
-        }
-
-        const msg = JSON.parse(frame.body);
-        console.log('✅ JSON.parse 성공:', msg);
-        onMessage(msg);
-      } catch (e) {
-        console.error('❌ User message parsing failed', e);
-      }
-    });
-
-    subscriptions.current.set(topic, sub);
-    console.log(`✅ Subscribed to ${topic}`);
-
-    return {
-      unsubscribe: () => {
-        sub.unsubscribe();
-        subscriptions.current.delete(topic);
-        console.log(`❌ Unsubscribed from ${topic}`);
-      },
-    };
-  }, []);
-
-  const sendMessage = useCallback(
-    (roomId: number, senderId: number, content: string, type = 'chat') => {
-      if (!clientRef.current?.connected) return;
-
-      const payload = {
-        chatRoomId: roomId,
-        senderId,
-        content,
-        type,
-      };
-
-      clientRef.current.send('/app/chat.send', {}, JSON.stringify(payload));
+  const subscribeRoom = useCallback(
+    (roomId: number, onMessage: (msg: IMessage) => void) => {
+      return subscribe(`/topic/chat/${roomId}`, onMessage);
     },
-    [],
+    [subscribe],
+  );
+
+  const subscribeUser = useCallback(
+    (userId: number, onMessage: (message: ChatMessage) => void) => {
+      return subscribe(`/topic/chat/user/${userId}`, (frame) => {
+        try {
+          const msg = JSON.parse(frame.body);
+          onMessage(msg);
+        } catch (e) {
+          console.error('❌ User message parsing failed', e);
+        }
+      });
+    },
+    [subscribe],
   );
 
   const subscribeReadTopic = useCallback(
     (roomId: number, onRead: (payload: ReadPayload) => void) => {
-      const topic = `/topic/read/${roomId}`;
-      const client = clientRef.current;
-
-      if (!client?.connected) {
-        console.warn('🛑 WebSocket not connected yet. Delaying read subscription.');
-        return null;
-      }
-
-      if (subscriptions.current.has(topic)) {
-        console.log(`🟡 Already subscribed to ${topic}`);
-        return {
-          unsubscribe: () => {
-            subscriptions.current.get(topic)?.unsubscribe();
-            subscriptions.current.delete(topic);
-            console.log(`❌ Unsubscribed from ${topic}`);
-          },
-        };
-      }
-
-      console.log(`📡 Subscribing to read topic: ${topic}`);
-
-      const sub = client.subscribe(topic, (frame) => {
+      return subscribe(`/topic/read/${roomId}`, (frame) => {
         try {
-          const payload = JSON.parse(frame.body) as ReadPayload;
-          onRead(payload); // ✅ 타입에 맞게 직접 전달
+          const payload = JSON.parse(frame.body);
+          onRead(payload);
         } catch (e) {
           console.error('❌ 읽음 메시지 파싱 실패', e);
         }
       });
-
-      subscriptions.current.set(topic, sub);
-      console.log(`✅ Subscribed to ${topic}`);
-
-      return {
-        unsubscribe: () => {
-          sub.unsubscribe();
-          subscriptions.current.delete(topic);
-          console.log(`❌ Unsubscribed from ${topic}`);
-        },
-      };
     },
-    [],
+    [subscribe],
   );
 
   const subscribeCalendarTopic = useCallback(
     (roomId: number, onCalendar: (payload: any) => void) => {
-      const topic = `/topic/calendar/${roomId}`;
-      const client = clientRef.current;
-
-      if (!client?.connected) {
-        console.warn('🛑 WebSocket not connected yet. Delaying calendar subscription.');
-        return null;
-      }
-
-      if (subscriptions.current.has(topic)) {
-        console.log(`🟡 Already subscribed to ${topic}`);
-        return {
-          unsubscribe: () => {
-            subscriptions.current.get(topic)?.unsubscribe();
-            subscriptions.current.delete(topic);
-            console.log(`❌ Unsubscribed from ${topic}`);
-          },
-        };
-      }
-
-      console.log(`📡 Subscribing to calendar topic: ${topic}`);
-      const sub = client.subscribe(topic, (frame) => {
+      return subscribe(`/topic/calendar/${roomId}`, (frame) => {
         try {
           const payload = JSON.parse(frame.body);
           onCalendar(payload);
@@ -240,62 +152,33 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ c
           console.error('❌ Calendar message parsing failed', e);
         }
       });
-
-      subscriptions.current.set(topic, sub);
-      console.log(`✅ Subscribed to ${topic}`);
-
-      return {
-        unsubscribe: () => {
-          sub.unsubscribe();
-          subscriptions.current.delete(topic);
-          console.log(`❌ Unsubscribed from ${topic}`);
-        },
-      };
     },
-    [],
+    [subscribe],
   );
 
   const subscribeEmojiTopic = useCallback(
     (roomId: number, onEmojiUpdate: (payload: EmojiUpdatePayload) => void) => {
-      const topic = `/topic/chat/emoji/${roomId}`;
-      const client = clientRef.current;
-
-      if (!client?.connected) {
-        console.warn('🛑 WebSocket not connected yet. Delaying emoji subscription.');
-        return null;
-      }
-
-      if (subscriptions.current.has(topic)) {
-        console.log(`🟡 Already subscribed to ${topic}`);
-        return {
-          unsubscribe: () => {
-            subscriptions.current.get(topic)?.unsubscribe();
-            subscriptions.current.delete(topic);
-            console.log(`❌ Unsubscribed from ${topic}`);
-          },
-        };
-      }
-
-      console.log(`📡 Subscribing to emoji topic: ${topic}`);
-      const sub = client.subscribe(topic, (frame) => {
+      return subscribe(`/topic/chat/emoji/${roomId}`, (frame) => {
         try {
-          const payload = JSON.parse(frame.body) as EmojiUpdatePayload;
+          const payload = JSON.parse(frame.body);
           onEmojiUpdate(payload);
         } catch (e) {
           console.error('❌ Emoji message parsing failed', e);
         }
       });
+    },
+    [subscribe],
+  );
 
-      subscriptions.current.set(topic, sub);
-      console.log(`✅ Subscribed to ${topic}`);
+  const unsubscribe = useCallback((sub: { unsubscribe: () => void } | null) => {
+    if (sub) sub.unsubscribe();
+  }, []);
 
-      return {
-        unsubscribe: () => {
-          sub.unsubscribe();
-          subscriptions.current.delete(topic);
-          console.log(`❌ Unsubscribed from ${topic}`);
-        },
-      };
+  const sendMessage = useCallback(
+    (roomId: number, senderId: number, content: string, type = 'chat') => {
+      if (!clientRef.current?.connected) return;
+      const payload = { chatRoomId: roomId, senderId, content, type };
+      clientRef.current.send('/app/chat.send', {}, JSON.stringify(payload));
     },
     [],
   );

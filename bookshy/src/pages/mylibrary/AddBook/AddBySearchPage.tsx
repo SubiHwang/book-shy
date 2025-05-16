@@ -1,12 +1,12 @@
-// src/pages/mylibrary/AddBook/AddBySearchPage.tsx
-import { useState, FC, KeyboardEvent, useEffect } from 'react';
+import { useState, FC, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Search } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import BookSearchItem from '@/components/mylibrary/BookAdd/BookSearchItem';
 import { searchBooksByKeyword, addBookFromSearch } from '@/services/mylibrary/bookSearchService';
 import type { BookSearchItem as BookItemType } from '@/types/mylibrary/bookSearch';
 import Loading from '@/components/common/Loading';
 import { toast } from 'react-toastify';
+import SearchBar from '@/components/common/SearchBar';
 
 const AddBySearchPage: FC = () => {
   const navigate = useNavigate();
@@ -62,9 +62,9 @@ const AddBySearchPage: FC = () => {
     }
   };
 
-  // 검색어 변경 핸들러
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setSearchQuery(e.target.value);
+  // 검색어 변경 핸들러 - 수정됨
+  const handleSearchChange = (value: string): void => {
+    setSearchQuery(value);
   };
 
   // 검색 실행 함수 - URL 업데이트 추가
@@ -157,23 +157,12 @@ const AddBySearchPage: FC = () => {
           </button>
         </div>
         <p className="text-xl font-light text-white text-center mb-3">등록할 책을 검색하세요.</p>
-        {/* 검색바 */}
-        <div className="relative flex items-center w-full px-4 mb-5">
-          <input
-            type="text"
-            placeholder="등록할 책 검색(책 제목, 저자, 출판사)"
-            value={searchQuery}
-            onChange={handleSearchChange}
-            onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && executeSearch()}
-            className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-200"
-          />
-          <button
-            className="absolute right-7 top-1/2 transform -translate-y-1/2 text-gray-400"
-            onClick={executeSearch}
-          >
-            <Search size={20} />
-          </button>
-        </div>
+        <SearchBar
+          value={searchQuery}
+          onChange={handleSearchChange}
+          onSearch={executeSearch}
+          placeholder="등록할 책을 선택하세요(책 제목, 저자, 출판사)"
+        />
       </div>
 
       {/* 검색 결과 */}

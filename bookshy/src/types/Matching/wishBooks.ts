@@ -5,6 +5,7 @@ export interface SearchBarProps {
   onSearch: (e: KeyboardEvent<HTMLInputElement>) => void;
   value: string;
   onChange: (value: string) => void;
+  placeholder: string;
 }
 
 export interface SearchResultListProps {
@@ -26,5 +27,5 @@ export interface PopularSearchTermType {
 }
 
 export interface PopularSearchTermResponse {
-  trendingKeywords: PopularSearchTermType[]
+  trendingKeywords: PopularSearchTermType[];
 }
