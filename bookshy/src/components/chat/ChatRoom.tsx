@@ -275,7 +275,19 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   let lastDateLabel = '';
 
   return (
-    <div className="flex flex-col bg-white" style={{ height: '100svh', overflow: 'hidden' }}>
+    <div
+      className="flex flex-col bg-white"
+      style={{
+        position: 'fixed',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '100dvh',
+        overflow: 'hidden',
+        zIndex: 0,
+      }}
+    >
       {/* 헤더 */}
       <div className="shrink-0 z-10">
         <ChatRoomHeader
@@ -288,7 +300,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
       {/* 메시지 영역 */}
       <div
         className={`flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
-          showOptions ? 'pb-[25vh]' : 'pb-20'
+          showOptions ? 'pb-[35vh]' : 'pb-20'
         }`}
       >
         {messages.map((msg, idx) => {
@@ -337,9 +349,13 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
 
       {/* ↓ 아래로 버튼 */}
       {showScrollToBottom && (
-        <div className="absolute bottom-[88px] inset-x-0 flex justify-center z-30">
+        <div
+          className={`absolute inset-x-0 flex justify-center z-30 transition-all duration-300
+      ${showOptions ? 'bottom-[32vh]' : 'bottom-[88px]'}
+    `}
+        >
           <button
-            className="bg-black/60 hover:bg-black/80 text-white text-lg sm:text-xl px-3 py-1.5 rounded-full shadow-md transition"
+            className="bg-black/60 hover:bg-black/80 text-white text-lg sm:text-xl px-3 py-1.5 rounded-full shadow-md"
             onClick={() => scrollToBottom(true)}
             aria-label="맨 아래로 스크롤"
           >
@@ -359,9 +375,15 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
               : false;
 
             setShowOptions((prev) => !prev);
-            setTimeout(() => {
-              if (wasAtBottom) scrollToBottom(true);
-            }, 0);
+
+            // 확장된 후 DOM이 완전히 반영된 다음 스크롤 (조금 delay)
+            if (wasAtBottom) {
+              setTimeout(() => {
+                requestAnimationFrame(() => {
+                  scrollToBottom(true); // smooth 스크롤
+                });
+              }, 250); // 약간 더 넉넉한 시간
+            }
           }}
           onScheduleClick={() => setShowScheduleModal(true)}
         />
