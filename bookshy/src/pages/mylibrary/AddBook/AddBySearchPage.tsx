@@ -150,7 +150,7 @@ const AddBySearchPage: FC = () => {
   return (
     <div className="min-h-screen bg-light-bg overflow-auto">
       {/* 헤더 */}
-      <div className="bg-primary-light px-4 py-3 sticky top-0 z-10">
+      <div className="bg-primary-light px-4 py-3 pb-4 sticky top-0 z-10">
         <div>
           <button onClick={handleGoBack} className="mr-4 p-1 text-white" aria-label="Go back">
             <ArrowLeft size={24} />
