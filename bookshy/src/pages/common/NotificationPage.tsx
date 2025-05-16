@@ -4,7 +4,7 @@ import { NotificationData } from '@/components/common/NotificationInitializer';
 
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
-  const [hasNotifications, setHasNotifications] = useState(false);
+  const [_hasNotifications, setHasNotifications] = useState(false);
 
   // 컴포넌트 마운트 시 로컬 스토리지에서 알림 불러오기
   useEffect(() => {
