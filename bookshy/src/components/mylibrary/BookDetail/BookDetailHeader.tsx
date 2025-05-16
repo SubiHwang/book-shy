@@ -40,8 +40,11 @@ const BookDetailHeader: React.FC<BookDetailHeaderProps> = ({
       <div className="flex flex-col justify-end p-4 shadow-sm min-h-[25vh]" style={gradientStyle}>
         {/* 내용물을 하단에 배치 */}
         <div className="flex flex-row items-start mt-auto">
-          {/* 책 표지 이미지 */}
-          <div className="w-26 h-36 flex-shrink-0 mr-4 rounded-md overflow-hidden shadow-md bg-white">
+          {/* 책 표지 이미지 - 비율 고정 추가 */}
+          <div
+            className="w-26 h-36 flex-shrink-0 mr-4 rounded-md overflow-hidden shadow-md bg-white"
+            style={{ aspectRatio: '3/4', maxWidth: '26%' }}
+          >
             {isLoading ? (
               <Skeleton width="100%" height="100%" />
             ) : (
@@ -81,16 +84,16 @@ const BookDetailHeader: React.FC<BookDetailHeaderProps> = ({
             </div>
 
             {!isLoading && (
-              <div className="flex space-x-2 mt-3">
+              <div className="flex flex-wrap space-x-2 mt-3">
                 <button
-                  className="py-1.5 px-4 rounded-full bg-white bg-opacity-70 hover:bg-opacity-90 shadow-sm text-gray-700 text-sm font-medium transition-colors"
+                  className="py-1.5 px-3 rounded-full bg-white bg-opacity-70 hover:bg-opacity-90 shadow-sm text-gray-700 text-sm font-medium transition-colors whitespace-nowrap"
                   onClick={onTogglePublicStatus}
                 >
-                  {bookDetail.isPublic ? '공개 서재에서 숨기기' : '공개 서재에 추가'}
+                  {bookDetail.isPublic ? '숨기기' : '공개하기'}
                 </button>
 
                 <button
-                  className="py-1.5 px-4 rounded-full bg-white bg-opacity-70 hover:bg-opacity-90 shadow-sm text-gray-700 text-sm font-medium transition-colors"
+                  className="py-1.5 px-3 rounded-full bg-white bg-opacity-70 hover:bg-opacity-90 shadow-sm text-gray-700 text-sm font-medium transition-colors whitespace-nowrap"
                   onClick={onDelete}
                 >
                   삭제하기
