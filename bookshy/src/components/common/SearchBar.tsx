@@ -26,6 +26,7 @@ const SearchBar: FC<AutocompleteSearchBarProps> = ({
   // 참조 객체들
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const pendingSuggestionRef = useRef<string | null>(null);
 
   // useBookSuggestions 훅 사용
   const { data: fetchedSuggestions = [], isLoading } = useBookSuggestions(value);
@@ -34,6 +35,28 @@ const SearchBar: FC<AutocompleteSearchBarProps> = ({
   const allSuggestions = [...suggestions, ...(fetchedSuggestions || [])]
     .filter((suggestion, index, self) => self.indexOf(suggestion) === index)
     .slice(0, maxSuggestions);
+
+  // value prop이 변경될 때 검사하여, 제안 선택 후 검색 실행
+  useEffect(() => {
+    // 보류 중인 제안이 있고, 그 값이 현재 value와 일치하면 검색 실행
+    if (pendingSuggestionRef.current && pendingSuggestionRef.current === value) {
+      // 제안 선택 후 검색 실행
+      setTimeout(() => {
+        // 키보드 이벤트 생성 (React의 합성 이벤트 시스템 사용)
+        const fakeEvent = {
+          key: 'Enter',
+          preventDefault: () => {},
+          stopPropagation: () => {}
+        } as unknown as KeyboardEvent<HTMLInputElement>;
+        
+        // 검색 실행
+        onSearch(fakeEvent);
+        
+        // 처리 완료 후 보류 중인 제안 초기화
+        pendingSuggestionRef.current = null;
+      }, 50);
+    }
+  }, [value, onSearch]);
 
   // 외부 클릭 감지하여 제안 목록 닫기
   useEffect(() => {
@@ -102,19 +125,32 @@ const SearchBar: FC<AutocompleteSearchBarProps> = ({
   };
 
   /**
-   * 제안 선택 함수
+   * 제안 선택 함수 - 완전히 새로운 접근법
+   * value prop의 변경을 감지하여 검색 실행
    */
   const selectSuggestion = (suggestion: string) => {
+    // 보류 중인 제안 설정
+    pendingSuggestionRef.current = suggestion;
+    
+    // 부모 컴포넌트의 상태 업데이트
     onChange(suggestion);
+    
+    // UI 상태 정리
     setShowSuggestions(false);
-    inputRef.current?.focus();
+    
+    // 나머지는 useEffect에서 value 변경 감지 후 처리
   };
 
   /**
    * 검색 버튼 클릭 핸들러
    */
   const handleSearchClick = () => {
-    onSearch({ key: 'Enter' } as KeyboardEvent<HTMLInputElement>);
+    const e = {
+      key: 'Enter',
+      preventDefault: () => {}
+    } as unknown as KeyboardEvent<HTMLInputElement>;
+    
+    onSearch(e);
     setShowSuggestions(false);
   };
 
