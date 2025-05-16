@@ -32,10 +32,6 @@ interface EmojiUpdatePayload {
   updatedBy: number;
 }
 
-const HEADER_H = 56; // 헤더 높이(px)
-const INPUT_H = 64; // 기본 입력창 높이(px)
-const OPTIONS_H = '35vh'; // 옵션 영역 높이
-
 function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   const { roomId } = useParams();
   const numericRoomId = Number(roomId);
@@ -51,14 +47,6 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    const original = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = original;
-    };
-  }, []);
 
   const { data: initialMessages = [], isSuccess } = useQuery({
     queryKey: ['chatMessages', numericRoomId],
