@@ -1,4 +1,4 @@
-import { Heart } from 'lucide-react';
+import { Heart, MessageCircle } from 'lucide-react';
 import { FC, useState } from 'react';
 import { BookDetailPageProps } from '@/types/book';
 import Skeleton from 'react-loading-skeleton';
@@ -73,8 +73,14 @@ const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
       {/* 책 정보 섹션 - 파스텔 그라데이션 적용, flex 컨테이너로 변경 */}
       <div className="flex flex-col justify-end p-4 shadow-sm min-h-[25vh]" style={gradientStyle}>
         {/* 내용물을 하단에 배치 */}
+        {!itemId && (
+          <p className="text-sm mb-1 truncate text-light-text-muted">
+            * 사용자가 직접 등록한 책입니다
+          </p>
+        )}
         <div className="flex flex-row items-start mt-auto">
           {/* 책 표지 이미지 */}
+
           <div className="w-26 h-36 flex-shrink-0 mr-4 rounded-md overflow-hidden shadow-md bg-white">
             {isLoading ? (
               <Skeleton width="100%" height="100%" />
@@ -104,19 +110,31 @@ const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
                   </h2>
                   <p className="text-sm mb-1 truncate">작가: {author || '정보 없음'}</p>
                   <p className="text-sm mb-1 truncate">출판사: {publisher || '정보 없음'}</p>
+                  {!itemId && (
+                    <p className="text-sm mb-1 truncate text-light-text-muted">
+                      채팅으로 문의하세요.
+                    </p>
+                  )}
                 </>
               )}
             </div>
             <div className="flex justify-end mt-2">
-              <button
-                className="p-2 rounded-full bg-white bg-opacity-70 hover:bg-opacity-90 shadow-sm"
-                onClick={handleToggleLike}
-              >
-                <Heart
-                  className={`w-6 h-6 text-primary ${!isLikedLoading && isBookInWishList ? 'fill-primary' : ''}`}
-                  strokeWidth={1}
-                />
-              </button>
+              {itemId ? (
+                <button
+                  className="p-2 rounded-full bg-white bg-opacity-70 hover:bg-opacity-90 shadow-sm"
+                  onClick={handleToggleLike}
+                >
+                  <Heart
+                    className={`w-6 h-6 text-primary ${!isLikedLoading && isBookInWishList ? 'fill-primary' : ''}`}
+                    strokeWidth={1}
+                  />
+                </button>
+              ) : (
+                <button className="flex justify-center items-center gap-1 px-3 py-1 rounded-full bg-primary bg-opacity-70 text-white font-extralight hover:bg-opacity-90 shadow-sm">
+                  <MessageCircle className={`w-4 h-4`} strokeWidth={1} />
+                  채팅
+                </button>
+              )}
             </div>
           </div>
         </div>
