@@ -1,11 +1,12 @@
-import { Book } from './book';
+import { WishBook } from './book';
 
 export interface NeighborBookshelf {
   userId: number;
-  userNickName: string;
-  books: Book[];
+  nickname: string;
+  books: WishBook[];
 }
 
 export interface BookshelfRowProps {
-  books: (Book | null)[];
+  books: (WishBook | null)[];
+  userId: number;
 }

@@ -1,14 +1,18 @@
 import Header from '@/components/common/Header';
 import WishBooksDetailInfoHeader from '@/components/matching/wishbooks/WishBooksDetailInfoHeader';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getWishBookDetail } from '@/services/matching/wishbooks';
 import { WishBook } from '@/types/book';
 import WishBooksDetailInfoBody from '@/components/matching/wishbooks/WishBooksDetailInfoBody';
 import Loading from '@/components/common/Loading';
+import { fetchBookDetailByBookId } from '@/services/book/search';
 
 const WishBooksDetailPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const from = queryParams.get('from');
   const { id } = useParams<{ id: string }>();
   const [bookDetail, setBookDetail] = useState<WishBook | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -22,9 +26,15 @@ const WishBooksDetailPage = () => {
       setError(null);
 
       try {
-        const response = await getWishBookDetail(bookId);
-        console.log('책 상세 정보:', response);
-        setBookDetail(response);
+        if (from === 'neighborhood-bookshelf') {
+          const response = await fetchBookDetailByBookId(bookId);
+          console.log('책 상세 정보:', response);
+          setBookDetail(response);
+        } else if (from === 'wish-book-card') {
+          const response = await getWishBookDetail(bookId);
+          console.log('책 상세 정보:', response);
+          setBookDetail(response);
+        }
       } catch (error) {
         console.error('책 상세 정보 가져오기 실패:', error);
         setError('책 정보를 가져오는 중 오류가 발생했습니다.');

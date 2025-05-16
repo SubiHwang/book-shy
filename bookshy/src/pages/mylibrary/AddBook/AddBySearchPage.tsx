@@ -144,7 +144,7 @@ const AddBySearchPage: FC = () => {
   };
 
   const handleGoBack = (): void => {
-    navigate(-1);
+    navigate('/bookshelf');
   };
 
   return (

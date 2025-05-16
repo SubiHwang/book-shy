@@ -20,22 +20,31 @@ interface ImageColorsResult {
  * @returns 파스텔톤 색상 코드
  */
 export const pastelizeColor = (
-  hexColor: string, 
-  brightness: number = 0.7, 
-  minBrightness: number = 220
+  hexColor: string,
+  brightness: number = 0.7,
+  minBrightness: number = 220,
 ): string => {
   // RGB 값 추출
   const r = parseInt(hexColor.slice(1, 3), 16);
   const g = parseInt(hexColor.slice(3, 5), 16);
   const b = parseInt(hexColor.slice(5, 7), 16);
-  
+
   // 색상을 파스텔톤으로 변환 (더 밝고 덜 채도 높게)
-  const pastelR = Math.min(255, Math.max(minBrightness, Math.round(r * (1 - brightness) + 255 * brightness)));
-  const pastelG = Math.min(255, Math.max(minBrightness, Math.round(g * (1 - brightness) + 255 * brightness)));
-  const pastelB = Math.min(255, Math.max(minBrightness, Math.round(b * (1 - brightness) + 255 * brightness)));
-  
+  const pastelR = Math.min(
+    255,
+    Math.max(minBrightness, Math.round(r * (1 - brightness) + 255 * brightness)),
+  );
+  const pastelG = Math.min(
+    255,
+    Math.max(minBrightness, Math.round(g * (1 - brightness) + 255 * brightness)),
+  );
+  const pastelB = Math.min(
+    255,
+    Math.max(minBrightness, Math.round(b * (1 - brightness) + 255 * brightness)),
+  );
+
   // 16진수 문자열로 변환
-  return `#${(pastelR).toString(16).padStart(2, '0')}${(pastelG).toString(16).padStart(2, '0')}${(pastelB).toString(16).padStart(2, '0')}`;
+  return `#${pastelR.toString(16).padStart(2, '0')}${pastelG.toString(16).padStart(2, '0')}${pastelB.toString(16).padStart(2, '0')}`;
 };
 
 /**
@@ -47,10 +56,10 @@ export const pastelizeColor = (
  * @returns 추출된 색상, 파스텔 색상, 로딩 상태, 오류 정보를 포함하는 객체
  */
 export const useImageColors = (
-  imageUrl: string | null | undefined, 
+  imageUrl: string | null | undefined,
   fallbackColors: ColorArray = ['#FCF6D4', '#F4E8B8'],
   pastelBrightness: number = 0.7,
-  minBrightness: number = 220
+  minBrightness: number = 220,
 ): ImageColorsResult => {
   const [colors, setColors] = useState<ColorArray>(fallbackColors);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -60,7 +69,7 @@ export const useImageColors = (
   const pastelColors = useMemo<ColorArray>(() => {
     return [
       pastelizeColor(colors[0], pastelBrightness, minBrightness),
-      pastelizeColor(colors[1], pastelBrightness, minBrightness)
+      pastelizeColor(colors[1], pastelBrightness, minBrightness),
     ];
   }, [colors, pastelBrightness, minBrightness]);
 
@@ -73,25 +82,33 @@ export const useImageColors = (
 
     const extractColors = (): void => {
       const img = new Image();
-      img.crossOrigin = "Anonymous";
-      
+      img.crossOrigin = 'Anonymous';
+
       img.onload = (): void => {
         try {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d', { willReadFrequently: true });
-          
+
           if (!ctx) {
             throw new Error('Canvas 2D context not supported');
           }
-          
+
           canvas.width = img.width;
           canvas.height = img.height;
           ctx.drawImage(img, 0, 0);
-          
+
           // 이미지의 다른 부분에서 색상 샘플링
-          const topColor = getColorFromPixel(ctx, Math.floor(img.width/2), Math.floor(img.height/4));
-          const bottomColor = getColorFromPixel(ctx, Math.floor(img.width/2), Math.floor(img.height*3/4));
-          
+          const topColor = getColorFromPixel(
+            ctx,
+            Math.floor(img.width / 2),
+            Math.floor(img.height / 4),
+          );
+          const bottomColor = getColorFromPixel(
+            ctx,
+            Math.floor(img.width / 2),
+            Math.floor((img.height * 3) / 4),
+          );
+
           setColors([topColor, bottomColor]);
           setIsLoading(false);
         } catch (err) {
@@ -101,14 +118,14 @@ export const useImageColors = (
           setIsLoading(false);
         }
       };
-      
+
       img.onerror = (event: Event | string): void => {
         const errorMessage = typeof event === 'string' ? event : 'Failed to load image';
         setError(new Error(errorMessage));
         setColors(fallbackColors);
         setIsLoading(false);
       };
-      
+
       img.src = imageUrl;
     };
 
@@ -121,7 +138,7 @@ export const useImageColors = (
         const r = pixelData[0];
         const g = pixelData[1];
         const b = pixelData[2];
-        
+
         return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
       } catch (err) {
         console.error('Error extracting pixel color:', err);

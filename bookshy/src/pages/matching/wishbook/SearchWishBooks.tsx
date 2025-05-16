@@ -33,10 +33,13 @@ const SearchWishBooks = () => {
           읽고 싶은 책을 검색 해보세요.
         </p>
         <SearchBar
-          onSearch={handleSearch}
           value={searchTerm}
+          onSearch={handleSearch}
           onChange={setSearchTerm}
           placeholder="읽고 싶은 책 검색(책 제목, 저자, 출판사)"
+          suggestions={[]}
+          maxSuggestions={8}
+          minQueryLength={2}
         />
       </div>
       <div className="bg-primary-light">

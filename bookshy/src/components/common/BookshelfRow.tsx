@@ -1,7 +1,10 @@
 import { FC } from 'react';
 import { BookshelfRowProps } from '@/types/book';
+import { useNavigate } from 'react-router-dom';
 
-const BookshelfRow: FC<BookshelfRowProps> = ({ books }) => {
+const BookshelfRow: FC<BookshelfRowProps> = ({ books, userId }) => {
+  const navigate = useNavigate();
+
   // 각 책장 열에 표시할 최대 책 수
   const maxBooksPerRow = 3;
 
@@ -21,12 +24,16 @@ const BookshelfRow: FC<BookshelfRowProps> = ({ books }) => {
               {book ? (
                 <div
                   className="w-full aspect-[3/4] bg-white border border-gray-300 shadow-md flex flex-col justify-center items-center rounded overflow-hidden cursor-pointer hover:shadow-lg transition-shadow focus:outline-none"
-                  onClick={() => console.log(`책 선택: ${book.title}`)}
+                  onClick={() =>
+                    navigate(
+                      `/matching/books/${book.bookId}?from=neighborhood-bookshelf&who=${userId}`,
+                    )
+                  }
                 >
-                  {book.bookImgUrl ? (
+                  {book.coverImageUrl ? (
                     <div className="w-full h-full overflow-hidden bg-white">
                       <img
-                        src={book.bookImgUrl}
+                        src={book.coverImageUrl}
                         alt={book.title}
                         className="w-full h-full object-cover"
                         loading="lazy"
