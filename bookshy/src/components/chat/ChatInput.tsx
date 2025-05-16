@@ -31,12 +31,20 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
   };
 
   return (
-    <div className="bg-light-bg-secondary pt-2 border-t w-full max-w-full pb-safe overflow-hidden box-border">
+    <div className="fixed bottom-0 inset-x-0 z-50 bg-light-bg-secondary border-t pb-safe">
       {/* 입력창 */}
-      <form onSubmit={handleSubmit} className="w-full flex items-center gap-2 px-4 pb-2 box-border">
-        <button type="button" onClick={onToggleOptions} className="p-2 rounded-full transition">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full flex items-center gap-2 px-4 pt-2 pb-2 box-border"
+      >
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={onToggleOptions}
+          className="p-2 rounded-full transition shrink-0 select-none touch-manipulation"
+        >
           {showOptions ? <Minus size={20} /> : <Plus size={20} />}
-        </button>
+        </div>
 
         <input
           type="text"
@@ -46,9 +54,19 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
           className="w-full max-w-full px-4 py-2 bg-primary-light text-white placeholder-white rounded-full focus:outline-none box-border"
         />
 
-        <button type="submit" className="p-2 rounded-full transition">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            if (content.trim()) {
+              onSend(content);
+              setContent('');
+            }
+          }}
+          className="p-2 rounded-full transition shrink-0 select-none touch-manipulation"
+        >
           <SendHorizonal size={18} />
-        </button>
+        </div>
       </form>
 
       {/* 확장 기능 옵션 */}
@@ -114,18 +132,17 @@ function OptionButton({
   onClick?: () => void;
 }) {
   return (
-    <button
-      onClick={(e) => {
-        (e.currentTarget as HTMLButtonElement).blur();
-        onClick?.();
-      }}
-      className="flex flex-col items-center text-primary hover:opacity-80 transition focus:outline-none active:bg-transparent"
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      className="flex flex-col items-center text-primary hover:opacity-80 transition select-none touch-manipulation"
     >
       <div className="w-14 h-14 rounded-full border-2 border-primary flex items-center justify-center mb-2">
         {icon}
       </div>
       <span className="text-sm font-medium">{label}</span>
-    </button>
+    </div>
   );
 }
 
