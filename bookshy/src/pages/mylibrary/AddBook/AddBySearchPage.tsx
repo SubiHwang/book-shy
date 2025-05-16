@@ -1,23 +1,36 @@
 // src/pages/mylibrary/AddBook/AddBySearchPage.tsx
-import { useState, FC, KeyboardEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, FC, KeyboardEvent, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Search } from 'lucide-react';
 import BookSearchItem from '@/components/mylibrary/BookAdd/BookSearchItem';
 import { searchBooksByKeyword, addBookFromSearch } from '@/services/mylibrary/bookSearchService';
+// 삭제 기능 관련 import 제거
 import type { BookSearchItem as BookItemType } from '@/types/mylibrary/bookSearch';
 import Loading from '@/components/common/Loading';
 import { toast } from 'react-toastify';
 
 const AddBySearchPage: FC = () => {
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // URL에서 searchQuery 파라미터 가져오기
+  const urlSearchParams = new URLSearchParams(location.search);
+  const queryParam = urlSearchParams.get('q') || '';
+
+  const [searchQuery, setSearchQuery] = useState<string>(queryParam);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [books, setBooks] = useState<BookItemType[]>([]);
   const [totalResults, setTotalResults] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState<boolean>(false);
-  const [hasSearched, setHasSearched] = useState<boolean>(false);
+  const [hasSearched, setHasSearched] = useState<boolean>(!!queryParam); // URL에 쿼리가 있으면 검색된 상태로 시작
 
-  const navigate = useNavigate();
+  // URL에 검색어가 있을 경우, 페이지 로드 시 자동으로 검색 실행
+  useEffect(() => {
+    if (queryParam) {
+      searchBooks(queryParam);
+    }
+  }, [queryParam]);
 
   // 책 검색 함수
   const searchBooks = async (query: string) => {
@@ -55,9 +68,13 @@ const AddBySearchPage: FC = () => {
     setSearchQuery(e.target.value);
   };
 
-  // 직접 검색 실행 함수
+  // 검색 실행 함수 - URL 업데이트 추가
   const executeSearch = () => {
     if (searchQuery.trim()) {
+      // 검색어를 URL에 반영
+      navigate(`/bookshelf/add/search?q=${encodeURIComponent(searchQuery.trim())}`, {
+        replace: true,
+      });
       searchBooks(searchQuery.trim());
     }
   };
@@ -82,7 +99,7 @@ const AddBySearchPage: FC = () => {
 
       console.log('책 등록 성공:', registeredBook);
 
-      // 성공 알림 및 서재 페이지로 이동
+      // 성공 알림
       toast.success('책이 성공적으로 등록되었습니다!');
     } catch (error) {
       console.error('책 추가 중 오류 발생:', error);
@@ -92,9 +109,7 @@ const AddBySearchPage: FC = () => {
     }
   };
 
-  // 책 아이템 클릭 핸들러 - 상세 페이지로 이동
   const handleBookItemClick = (itemId: number) => {
-    // 책 상세 페이지로 이동
     navigate(`/bookshelf/add/searchdetail/${itemId}`);
   };
 
@@ -104,12 +119,12 @@ const AddBySearchPage: FC = () => {
   };
 
   const handleGoBack = (): void => {
-    navigate(-1);
+    navigate('/bookshelf');
   };
 
   return (
     <div className="min-h-screen bg-light-bg overflow-auto">
-      {/* 헤더 - SearchWishBooks 스타일 적용 */}
+      {/* 헤더 */}
       <div className="bg-primary-light px-4 py-3 sticky top-0 z-10">
         <div>
           <button onClick={handleGoBack} className="mr-4 p-1 text-white" aria-label="Go back">
@@ -117,7 +132,7 @@ const AddBySearchPage: FC = () => {
           </button>
         </div>
         <p className="text-xl font-light text-white text-center mb-3">등록할 책을 검색하세요.</p>
-        {/* 직접 구현한 검색바 */}
+        {/* 검색바 */}
         <div className="relative flex items-center w-full px-4 mb-5">
           <input
             type="text"
@@ -136,9 +151,9 @@ const AddBySearchPage: FC = () => {
         </div>
       </div>
 
-      {/* 메인 콘텐츠 영역 */}
+      {/* 나머지 내용은 기존과 동일 */}
       <div>
-        {/* 검색 결과 헤더 - 검색 완료되고 오류가 없을 때 항상 표시 (결과 수와 관계없이) */}
+        {/* 검색 결과 헤더 */}
         {hasSearched && !error && !isSearching && (
           <div className="flex flex-col text-light-text px-8 py-4">
             <div className="flex gap-2 justify-between items-center mb-1">
@@ -163,15 +178,13 @@ const AddBySearchPage: FC = () => {
           </div>
         )}
 
-        {/* 로딩, 검색 결과 없음, 초기 상태, 책 목록 중 하나만 표시 */}
+        {/* 로딩, 검색 결과 없음, 초기 상태, 책 목록 표시 */}
         <div className="px-4">
           {isSearching ? (
-            // 로딩 상태 - 카드 영역에서만 표시
             <div className="flex justify-center items-center py-10">
               <Loading loadingText={'도서 검색 중...'} />
             </div>
           ) : hasSearched && books.length === 0 && !error ? (
-            // 검색 결과 없음
             <div className="flex flex-col items-center mt-16 justify-center min-h-[40vh]">
               <p className="text-light-text-secondary text-center text-lg mb-2">
                 찾는 책이 없으신가요?
@@ -185,7 +198,6 @@ const AddBySearchPage: FC = () => {
               </button>
             </div>
           ) : !hasSearched ? (
-            // 초기 상태 (아직 검색하지 않음)
             <div className="flex flex-col items-center justify-center mt-32 min-h-[50vh]">
               <p className="text-light-text-secondary text-center text-lg mb-2">
                 책 제목, 저자 또는 출판사를 검색해보세요
@@ -202,14 +214,14 @@ const AddBySearchPage: FC = () => {
                   key={book.itemId}
                   book={book}
                   onAddBook={handleAddBook}
-                  onItemClick={handleBookItemClick} // 추가: 아이템 클릭 핸들러 전달
+                  onItemClick={handleBookItemClick}
                 />
               ))}
             </div>
           )}
         </div>
 
-        {/* 로딩 중일 때 보여줄 오버레이 */}
+        {/* 로딩 오버레이 - isRemoving 제거 */}
         {isAdding && (
           <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg text-center">
