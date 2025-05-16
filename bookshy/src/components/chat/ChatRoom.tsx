@@ -42,30 +42,40 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showOptions, setShowOptions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messageContainerRef = useRef<HTMLDivElement | null>(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
   const queryClient = useQueryClient();
 
+  const updateHeight = () => {
+    const header = document.getElementById('chat-header');
+    const input = document.getElementById('chat-input');
+    const visualHeight = window.visualViewport?.height || 0;
+    const innerHeight = window.innerHeight;
+    const hasKeyboard = Math.abs(innerHeight - visualHeight) > 100;
+    const height = hasKeyboard ? visualHeight : innerHeight;
+
+    if (header && input && messageContainerRef.current) {
+      const usedHeight = header.offsetHeight + input.offsetHeight;
+      const available = height - usedHeight;
+      messageContainerRef.current.style.height = `${available}px`;
+    }
+  };
+
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
-    const onResize = () => {
-      const vh = window.visualViewport?.height || window.innerHeight;
-      const chatRoom = document.getElementById('chat-room');
-      if (chatRoom) chatRoom.style.height = `${vh}px`;
-    };
-
-    window.visualViewport?.addEventListener('resize', onResize);
-    window.visualViewport?.addEventListener('scroll', onResize);
-    onResize();
+    window.visualViewport?.addEventListener('resize', updateHeight);
+    window.visualViewport?.addEventListener('scroll', updateHeight);
+    updateHeight();
 
     return () => {
       document.body.style.overflow = originalOverflow;
-      window.visualViewport?.removeEventListener('resize', onResize);
-      window.visualViewport?.removeEventListener('scroll', onResize);
+      window.visualViewport?.removeEventListener('resize', updateHeight);
+      window.visualViewport?.removeEventListener('scroll', updateHeight);
     };
   }, []);
 
@@ -113,18 +123,6 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   }, [messages]);
 
   useEffect(() => {
-    if (!isNaN(numericRoomId)) {
-      markMessagesAsRead(numericRoomId).catch((err) => console.error('❌ 읽음 처리 실패:', err));
-      queryClient.setQueryData(['chatList'], (prev: any) => {
-        if (!Array.isArray(prev)) return prev;
-        return prev.map((room: any) =>
-          room.id === numericRoomId ? { ...room, unreadCount: 0 } : room,
-        );
-      });
-    }
-  }, [numericRoomId, queryClient]);
-
-  useEffect(() => {
     if (!isSuccess) return;
     setMessages(initialMessages);
   }, [initialMessages, isSuccess]);
@@ -141,29 +139,26 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
     [userId],
   );
 
-  const onMessage = useCallback(
-    (newMessage: ChatMessage) => {
-      setMessages((prev) =>
-        prev.some((m) => m.id === newMessage.id) ? prev : [...prev, newMessage],
-      );
-      if (newMessage.senderId !== myUserId) {
-        markMessagesAsRead(numericRoomId).catch((err) => console.error('❌ 읽음 실패:', err));
-      }
-      queryClient.setQueryData(['chatList'], (prev: any) =>
-        Array.isArray(prev)
-          ? prev.map((room: any) =>
-              room.id === newMessage.chatRoomId
-                ? { ...room, lastMessage: newMessage.content, lastMessageTime: newMessage.sentAt }
-                : room,
-            )
-          : prev,
-      );
-    },
-    [myUserId, numericRoomId, queryClient],
-  );
+  const onMessage = useCallback((newMessage: ChatMessage) => {
+    setMessages((prev) =>
+      prev.some((m) => m.id === newMessage.id) ? prev : [...prev, newMessage],
+    );
+  }, []);
 
   const { sendMessage } = useStomp(numericRoomId, onMessage, onRead);
   const { subscribeCalendarTopic, subscribeEmojiTopic, unsubscribe, isConnected } = useWebSocket();
+
+  useEffect(() => {
+    if (!isNaN(numericRoomId)) {
+      markMessagesAsRead(numericRoomId).catch((err) => console.error('❌ 읽음 처리 실패:', err));
+      queryClient.setQueryData(['chatList'], (prev: any) => {
+        if (!Array.isArray(prev)) return prev;
+        return prev.map((room: any) =>
+          room.id === numericRoomId ? { ...room, unreadCount: 0 } : room,
+        );
+      });
+    }
+  }, [numericRoomId, queryClient]);
 
   useEffect(() => {
     if (!isConnected || isNaN(numericRoomId)) return;
@@ -294,7 +289,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
       className="flex flex-col bg-white"
       style={{ position: 'fixed', inset: 0, height: '100%', overflow: 'hidden', zIndex: 0 }}
     >
-      <div className="shrink-0 z-10">
+      <div id="chat-header" className="shrink-0 z-10">
         <ChatRoomHeader
           partnerName={partnerName}
           partnerProfileImage={partnerProfileImage}
@@ -302,7 +297,8 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
         />
       </div>
       <div
-        className={`flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${showOptions ? 'pb-[35vh]' : 'pb-20'}`}
+        ref={messageContainerRef}
+        className="overflow-y-auto px-4 sm:px-6 py-3 pb-20 transition-all duration-300 bg-white"
       >
         {messages.map((msg, idx) => {
           const dateLabel = formatDateLabel(msg.sentAt);
@@ -349,7 +345,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
       </div>
       {showScrollToBottom && (
         <div
-          className={`absolute inset-x-0 flex justify-center z-30 transition-all duration-300 ${showOptions ? 'bottom-[32vh]' : 'bottom-[88px]'}`}
+          className={`absolute inset-x-0 flex justify-center z-30 transition-all duration-300 ${showOptions ? 'bottom-[35vh]' : 'bottom-[88px]'}`}
         >
           <button
             className="bg-black/60 hover:bg-black/80 text-white text-lg sm:text-xl px-3 py-1.5 rounded-full shadow-md"
@@ -359,7 +355,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
           </button>
         </div>
       )}
-      <div className="shrink-0 z-20 bg-white border-t border-light-border px-4">
+      <div id="chat-input" className="shrink-0 z-20 bg-white border-t border-light-border px-4">
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
@@ -369,13 +365,13 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
               ? container.scrollHeight - container.scrollTop - container.clientHeight < 50
               : false;
             setShowOptions((prev) => !prev);
-            if (wasAtBottom) {
-              setTimeout(() => {
-                requestAnimationFrame(() => {
-                  scrollToBottom(true);
-                });
-              }, 250);
-            }
+            setTimeout(() => {
+              const event = new Event('resize');
+              window.visualViewport?.dispatchEvent(event);
+              if (wasAtBottom) {
+                requestAnimationFrame(() => scrollToBottom(true));
+              }
+            }, 300);
           }}
           onScheduleClick={() => setShowScheduleModal(true)}
         />
