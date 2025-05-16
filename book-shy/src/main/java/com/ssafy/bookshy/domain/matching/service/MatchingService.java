@@ -164,9 +164,16 @@ public class MatchingService {
 
         applicationEventPublisher.publishEvent(new MatchCreatedEvent(match));
 
+        // 👤 상대방 정보 조회
+        Users partner = userService.getUserById(receiverId);
+
+        // ✅ MatchResponseDto 반환
         return MatchResponseDto.builder()
                 .matchId(match.getMatchId())
                 .chatRoomId(chatRoom.getId())
+                .nickname(partner.getNickname())
+                .profileImageUrl(partner.getProfileImageUrl())
+                .temperature(partner.getTemperature())
                 .build();
     }
 
