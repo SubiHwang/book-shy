@@ -275,18 +275,20 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   let lastDateLabel = '';
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-white relative z-0">
+    <div className="min-h-screen flex flex-col bg-white">
       {/* 헤더 */}
-      <ChatRoomHeader
-        partnerName={partnerName}
-        partnerProfileImage={partnerProfileImage}
-        bookShyScore={bookShyScore}
-      />
+      <div className="shrink-0 z-10">
+        <ChatRoomHeader
+          partnerName={partnerName}
+          partnerProfileImage={partnerProfileImage}
+          bookShyScore={bookShyScore}
+        />
+      </div>
 
       {/* 메시지 영역 */}
       <div
         className={`flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
-          showOptions ? 'pb-[25vh]' : 'pb-[80px]'
+          showOptions ? 'pb-[25vh]' : 'pb-20'
         }`}
       >
         {messages.map((msg, idx) => {
@@ -335,7 +337,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
 
       {/* ↓ 아래로 버튼 */}
       {showScrollToBottom && (
-        <div className="fixed bottom-[80px] inset-x-0 flex justify-center z-30">
+        <div className="absolute bottom-[88px] inset-x-0 flex justify-center z-30">
           <button
             className="bg-black/60 hover:bg-black/80 text-white text-lg sm:text-xl px-3 py-1.5 rounded-full shadow-md transition"
             onClick={() => scrollToBottom(true)}
@@ -346,8 +348,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
         </div>
       )}
 
-      {/* ChatInput - fixed */}
-      <div className="fixed bottom-0 inset-x-0 bg-white z-20">
+      <div className="shrink-0 z-20 bg-white border-t border-light-border px-4">
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
