@@ -78,7 +78,13 @@ const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
     console.log(userId);
     try {
       const response = await getChatId(userId);
-      navigate(`/chat/${response.chatRoomId}`);
+      navigate(`/chat/${response.chatRoomId}`, {
+          state: {
+            partnerName: response.nickname,
+            partnerProfileImage: response.profileImageUrl,
+            bookShyScore: response.temperature,
+          },
+        });
     } catch (error) {
       console.log('채팅 생성 실패', error);
     }
