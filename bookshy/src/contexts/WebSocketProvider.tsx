@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 import SockJS from 'sockjs-client';
 import { CompatClient, IMessage, Stomp } from '@stomp/stompjs';
-import { ChatMessage, EmojiUpdatePayload, ReadPayload } from '@/types/chat/chat';
+import { ChatRoomSummary, EmojiUpdatePayload, ReadPayload } from '@/types/chat/chat';
 
 const SOCKET_URL = 'https://k12d204.p.ssafy.io/ws-chat';
 
@@ -12,7 +12,7 @@ interface WebSocketContextValue {
   ) => { unsubscribe: () => void } | null;
   subscribeUser: (
     userId: number,
-    onMessage: (msg: ChatMessage) => void,
+    onMessage: (msg: ChatRoomSummary) => void,
   ) => { unsubscribe: () => void } | null;
   subscribeReadTopic: (
     roomId: number,
@@ -115,7 +115,7 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren<object>> = ({ c
   );
 
   const subscribeUser = useCallback(
-    (userId: number, onMessage: (message: ChatMessage) => void) => {
+    (userId: number, onMessage: (message: ChatRoomSummary) => void) => {
       return subscribe(`/topic/chat/user/${userId}`, (frame) => {
         try {
           const msg = JSON.parse(frame.body);
