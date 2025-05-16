@@ -28,7 +28,7 @@ const SearchBookDetailPage = () => {
   const [bookDetail, setBookDetail] = useState<BookDetail | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [inLibrary, setInLibrary] = useState<boolean>(!!state.inLibrary);
-  const [libraryId, setLibraryId] = useState<number | undefined>(state.libraryId);
+  const [_libraryId, setLibraryId] = useState<number | undefined>(state.libraryId);
 
   const queryClient = useQueryClient();
 
