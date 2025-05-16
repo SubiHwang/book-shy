@@ -43,14 +43,14 @@ const SearchResultBookList: FC = () => {
   return (
     <div>
       <div className="flex flex-col text-light-text px-8 py-4">
-        <div className="flex gap-2 justify-between items-center mb-1">
-          <p className="text-lg font-medium">
-            <span className="font-semibold text-primary-dark">
-              {searchParams.get('searchTerm')}{' '}
+        <div className="flex items-center mb-1">
+          <p className="text-lg font-medium flex items-center flex-1 min-w-0">
+            <span className="font-semibold text-primary-dark truncate max-w-[70%] inline-block">
+              {searchParams.get('searchTerm')}
             </span>
-            의 검색 결과
+            <span className="ml-1 whitespace-nowrap">의 검색 결과</span>
           </p>
-          <p className="font-light">검색 결과 수 : {total}</p>
+          <p className="font-light whitespace-nowrap ml-2">총 {total} 권</p>
         </div>
       </div>
       <div className="flex flex-col px-4">
