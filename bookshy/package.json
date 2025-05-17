@@ -33,6 +33,7 @@
     "sockjs-client": "^1.6.1",
     "tailwindcss-safe-area": "^0.6.0",
     "tesseract.js": "^6.0.1",
+    "three": "^0.176.0",
     "workbox-window": "^7.3.0"
   },
   "devDependencies": {
@@ -42,6 +43,7 @@
     "@types/node": "^22.15.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
+    "@types/three": "^0.176.0",
     "@types/trusted-types": "^2.0.7",
     "@typescript-eslint/eslint-plugin": "^8.31.1",
     "@typescript-eslint/parser": "^8.31.1",
