@@ -50,6 +50,7 @@ const QuoteGalaxyPage = () => {
     const quoteNodes: Text[] = [];
 
     const quoteColors = [0xaa88ff, 0x88ccff, 0xff66cc, 0xffff66, 0xdddddd];
+    const spriteMap = new THREE.TextureLoader().load('/images/star-glow.png');
 
     quotes.forEach((quote) => {
       const textMesh = new Text();
@@ -73,6 +74,19 @@ const QuoteGalaxyPage = () => {
 
       textMesh.sync(() => {
         scene.add(textMesh);
+
+        // 🌟 Sprite 발광 효과
+        const spriteMaterial = new THREE.SpriteMaterial({
+          map: spriteMap,
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.3,
+          depthWrite: false,
+        });
+        const sprite = new THREE.Sprite(spriteMaterial);
+        sprite.scale.set(50, 20, 1);
+        sprite.position.copy(textMesh.position);
+        scene.add(sprite);
       });
 
       quoteNodes.push(textMesh);

@@ -130,7 +130,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
       </div>
 
       {/* 인용구 버튼 */}
-      <div className="fixed bottom-24 left-6 z-[999]">
+      <div className="fixed bottom-24 left-6 z-[50]">
         <button
           onClick={() => navigate('/booknotes/quote-galaxy')}
           className="w-14 h-14 rounded-full bg-cyan-500/20 backdrop-blur-md shadow-xl shadow-cyan-400/40 
