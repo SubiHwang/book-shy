@@ -28,7 +28,7 @@ const FilterChips = <T extends string | number>({
                   ? 'bg-primary text-white border-primary shadow-sm'
                   : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
               }
-              hover:-translate-y-0.5
+              
             `}
           >
             {opt.icon}
