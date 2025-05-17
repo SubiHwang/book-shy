@@ -84,7 +84,8 @@ const QuoteGalaxyPage = () => {
           depthWrite: false,
         });
         const sprite = new THREE.Sprite(spriteMaterial);
-        sprite.scale.set(50, 20, 1);
+        const size = textMesh.fontSize * 6;
+        sprite.scale.set(size, size, 1);
         sprite.position.copy(textMesh.position);
         scene.add(sprite);
       });
@@ -138,13 +139,28 @@ const QuoteGalaxyPage = () => {
         const clicked = intersects[0].object as Text;
         setSelectedQuote(clicked.userData.fullQuote || '');
 
+        const clickedPos = clicked.position.clone();
+
         gsap.to(camera.position, {
           duration: 1.5,
-          x: clicked.position.x + 10,
-          y: clicked.position.y + 10,
-          z: clicked.position.z + 20,
+          x: clickedPos.x + 10,
+          y: clickedPos.y + 10,
+          z: clickedPos.z + 20,
           ease: 'power2.inOut',
-          onUpdate: () => camera.lookAt(clicked.position),
+          onUpdate: () => {
+            controls.update(); // 중요!
+          },
+        });
+
+        gsap.to(controls.target, {
+          duration: 1.5,
+          x: clickedPos.x,
+          y: clickedPos.y,
+          z: clickedPos.z,
+          ease: 'power2.inOut',
+          onUpdate: () => {
+            controls.update(); // 반영
+          },
         });
       }
     });
