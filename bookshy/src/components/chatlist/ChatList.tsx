@@ -4,7 +4,7 @@ import { fetchChatList } from '@/services/chat/chat';
 import { useWebSocket } from '@/contexts/WebSocketProvider';
 import { useEffect } from 'react';
 import { getUserIdFromToken } from '@/utils/jwt';
-import { ChatMessage } from '@/types/chat/chat';
+import { ChatRoomSummary } from '@/types/chat/chat';
 import { useLocation } from 'react-router-dom';
 
 function ChatList() {
@@ -24,35 +24,35 @@ function ChatList() {
   }, [location.pathname, refetch]);
 
   useEffect(() => {
-    const subscription = subscribeUser(myUserId, (msg: ChatMessage) => {
+    const subscription = subscribeUser(myUserId, (msg: ChatRoomSummary) => {
       console.log('📨 WebSocket 수신:', msg);
       queryClient.setQueryData(['chatList'], (prev: any) => {
         if (!Array.isArray(prev)) return prev;
 
-        const exists = prev.some((room: any) => room.id === msg.chatRoomId);
+        const exists = prev.some((room: any) => room.id === msg.id);
 
         if (!exists) {
           return [
             ...prev,
             {
-              id: msg.chatRoomId,
-              partnerName: msg.senderNickname || '상대방',
+              id: msg.id,
+              partnerName: msg.partnerName || '상대방',
               partnerProfileImage: '',
-              lastMessage: msg.content,
-              lastMessageTime: msg.sentAt,
+              lastMessage: msg.lastMessage,
+              lastMessageTime: msg.lastMessageTime,
               unreadCount: 1,
             },
           ];
         }
 
         return prev.map((room: any) =>
-          room.id === msg.chatRoomId
+          room.id === msg.id
             ? {
                 ...room,
-                lastMessage: msg.content,
-                lastMessageTime: msg.sentAt,
+                lastMessage: msg.lastMessage,
+                lastMessageTime: msg.lastMessageTime,
                 unreadCount:
-                  window.location.pathname !== `/chat/${msg.chatRoomId}`
+                  window.location.pathname !== `/chat/${msg.id}`
                     ? (room.unreadCount || 0) + 1
                     : room.unreadCount,
               }

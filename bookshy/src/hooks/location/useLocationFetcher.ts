@@ -10,6 +10,12 @@ export const useLocationFetcher = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // 행정구역 접미사 제거 함수
+  const simplifyRegionName = (name: string): string => {
+    // 특별시, 광역시, 특별자치시, 도, 특별자치도 등 제거
+    return name.replace(/(특별시|광역시|특별자치시|특별자치도|자치도|시|도)$/, '');
+  };
+
   const fetchCurrentLocation = () => {
     setLoading(true);
     setError(null);
@@ -38,10 +44,22 @@ export const useLocationFetcher = () => {
             },
           );
           const data = await response.json();
-          const kakaoAddress = data.documents?.[0]?.address?.address_name;
+          const addressInfo = data.documents?.[0]?.address;
 
-          if (kakaoAddress) {
-            setAddress(kakaoAddress);
+          if (addressInfo) {
+            // 행정구역 접미사 제거하고 주소 구성
+            const simplifiedRegion1 = simplifyRegionName(addressInfo.region_1depth_name); // 시/도 (예: '서울특별시' -> '서울')
+            const region2 = addressInfo.region_2depth_name; // 시/군/구 (그대로 사용)
+            const region3 = addressInfo.region_3depth_name; // 동/읍/면 (그대로 사용)
+            
+            // 시/도 + 시/군/구 + 동/읍/면 형식으로 주소 가공
+            const shortAddress = [
+              simplifiedRegion1,
+              region2,
+              region3
+            ].filter(Boolean).join(' ');
+            
+            setAddress(shortAddress);
           } else {
             setError('주소를 찾을 수 없습니다.');
           }

@@ -43,6 +43,8 @@ import LocationSetting from '@/pages/auth/LocationSetting';
 import BookNotePage from '@/pages/mybooknote/booknote/BookNotePage';
 import ErrorState from '../common/error/ErrorState';
 import ErrorHandler from '../common/error/ErrorHandler';
+import NotificationPage from '@/pages/common/NotificationPage';
+import { CustomToastContainer } from '../common/CustomToastContainer';
 const AppLayout: FC = () => {
   const navigate = useNavigate();
   const { isLoading } = useAuth();
@@ -60,6 +62,7 @@ const AppLayout: FC = () => {
   return (
     <div className="app-container">
       <ErrorHandler />
+      <CustomToastContainer />
       <div className="content">
         <Routes>
           {/* 공개 라우트 - 로그인하지 않아도 접근 가능 */}
@@ -80,6 +83,7 @@ const AppLayout: FC = () => {
             element={
               <PrivateRoute>
                 <Routes>
+                  <Route path="/notifications" element={<NotificationPage />} />
                   <Route path="/setting-location" element={<LocationSetting />} />
                   {/* 기본 경로 리다이렉션 */}
                   <Route path="/" element={<Navigate to="/bookshelf" replace />} />

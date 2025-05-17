@@ -26,7 +26,7 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
           state: {
             partnerName: matching.nickname,
             partnerProfileImage: matching.profileImageUrl,
-            bookShyScore: matching.score,
+            bookShyScore: matching.temperature,
           },
         });
       } else {
@@ -86,7 +86,7 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
             내가 읽고 싶은 책 :{' '}
           </span>
           <div className="flex flex-wrap">
-            {matching.myBookName.map((myWishBook, index) => (
+            {matching.otherBookName.map((myWishBook, index) => (
               <div
                 key={index}
                 className="badge bg-light-status-success/20 mx-0.5 sm:mx-1 mb-1 whitespace-nowrap"
@@ -105,7 +105,7 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
             상대가 읽고 싶은 책:{' '}
           </span>
           <div className="flex flex-wrap">
-            {matching.otherBookName.map((yourWishBook, index) => (
+            {matching.myBookName.map((yourWishBook, index) => (
               <div
                 key={index}
                 className="badge bg-light-status-info/20 mx-0.5 sm:mx-1 mb-1 whitespace-nowrap"

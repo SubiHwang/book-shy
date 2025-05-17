@@ -1,7 +1,8 @@
 import { FC } from 'react';
 import { HeaderProps } from '@/types/common';
-import { ArrowLeft, Bell } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import NotificationButton from './NotificationButton';
 
 const Header: FC<HeaderProps> = ({
   title,
@@ -43,11 +44,7 @@ const Header: FC<HeaderProps> = ({
       </div>
 
       <div className="flex items-center space-x-2">
-        {showNotification && (
-          <button className="p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors relative">
-            <Bell size={24} />
-          </button>
-        )}
+        {showNotification && <NotificationButton />}
 
         {extraButton && extraButtonIcon && (
           <button

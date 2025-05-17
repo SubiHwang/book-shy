@@ -1,4 +1,8 @@
-import { PopularSearchTermResponse, WishBooksResponse } from '@/types/Matching/wishBooks';
+import {
+  BookSearchSuggestionResponse,
+  PopularSearchTermResponse,
+  WishBooksResponse,
+} from '@/types/Matching/wishBooks';
 import { WishBook } from '@/types/book';
 import { authAxiosInstance } from '../axiosInstance';
 
@@ -82,5 +86,24 @@ export const getPopularSearchTerms = async (): Promise<PopularSearchTermResponse
   } catch (error) {
     console.error('실시간 인기 검색어 호출 오류 발생:', error);
     throw error;
+  }
+};
+
+export const getBookSuggestions = async (query: string): Promise<string[]> => {
+  if (!query || query.length < 2) {
+    return []; // 빈 검색어나 짧은 검색어는 빈 배열 반환
+  }
+
+  try {
+    const response = await authAxiosInstance.get<string, BookSearchSuggestionResponse>(
+      `/auto?q=${query}`,
+    );
+    console.log(response);
+    // 응답에서 키워드 추출하여 문자열 배열로 변환
+    return response.items.map((item) => item.keyword);
+  } catch (error) {
+    console.error('자동완성 API 오류:', error);
+    // 오류 발생 시 빈 배열 반환
+    return [];
   }
 };

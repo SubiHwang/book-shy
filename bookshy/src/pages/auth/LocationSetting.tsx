@@ -2,6 +2,7 @@ import Header from '@/components/common/Header';
 import { FC, useEffect, useState } from 'react';
 import { MapPin, Locate, Search } from 'lucide-react';
 import { useLocationFetcher } from '@/hooks/location/useLocationFetcher';
+import useSearchAddress from '@/hooks/location/useSearchAddress'; // 주소 검색 훅 임포트
 import { useNavigate } from 'react-router-dom';
 import { updateUserAddress } from '@/services/mypage/profile';
 import type { AddressUpdateRequest } from '@/types/User/user';
@@ -12,6 +13,42 @@ const LocationSetting: FC = () => {
 
   const [isGpsEnabled, setIsGpsEnabled] = useState<boolean>(true);
   const navigate = useNavigate();
+
+  // 선택한 주소 정보를 저장할 상태 (useLocationFetcher와 별개)
+  const [selectedAddress, setSelectedAddress] = useState<string>('');
+  const [selectedLatitude, setSelectedLatitude] = useState<number | null>(null);
+  const [selectedLongitude, setSelectedLongitude] = useState<number | null>(null);
+
+  // 사용할 주소와 좌표 (GPS 또는 검색 결과)
+  const finalAddress = selectedAddress || address;
+  const finalLatitude = selectedLatitude !== null ? selectedLatitude : latitude;
+  const finalLongitude = selectedLongitude !== null ? selectedLongitude : longitude;
+
+  // 주소 검색 훅 사용 - 위도/경도 정보를 포함한 결과 처리
+  const { openAddressSearch, isLoading: isAddressSearchLoading, error: addressSearchError } = useSearchAddress((data) => {
+    // 주소 검색 결과 처리
+    if (data && data.address) {
+      // 상태 업데이트 - 이제 실제 좌표 정보 사용
+      setSelectedAddress(data.address);
+      
+      if (data.latitude !== undefined && data.longitude !== undefined) {
+        setSelectedLatitude(data.latitude);
+        setSelectedLongitude(data.longitude);
+      } else {
+        console.warn('주소 검색 결과에 좌표 정보가 없습니다.');
+        setSelectedLatitude(null);
+        setSelectedLongitude(null);
+      }
+    }
+  });
+
+  // 현재 위치 다시 가져오기 - 선택한 주소 초기화
+  const handleGetCurrentLocation = () => {
+    setSelectedAddress('');
+    setSelectedLatitude(null);
+    setSelectedLongitude(null);
+    fetchCurrentLocation();
+  };
 
   // GPS 사용 가능 여부 확인
   useEffect(() => {
@@ -43,15 +80,15 @@ const LocationSetting: FC = () => {
 
   const handleAddressSelect = async () => {
     try {
-      if (!address || latitude === null || longitude === null) {
+      if (!finalAddress || finalLatitude === null || finalLongitude === null) {
         alert('위치 정보를 먼저 가져와주세요.');
         return;
       }
 
       const payload: AddressUpdateRequest = {
-        address,
-        latitude,
-        longitude,
+        address: finalAddress,
+        latitude: finalLatitude,
+        longitude: finalLongitude,
       };
 
       await updateUserAddress(payload);
@@ -62,9 +99,14 @@ const LocationSetting: FC = () => {
     }
   };
 
+  // 주소 검색 버튼 핸들러
   const handleSearchAddress = () => {
-    alert('주소 검색 기능은 구현되지 않았습니다.');
+    openAddressSearch();
   };
+
+  // 모든 로딩 상태와 오류 메시지 통합
+  const isLoading = loading || isAddressSearchLoading;
+  const finalError = error || addressSearchError;
 
   useEffect(() => {
     if (!import.meta.env.VITE_KAKAO_REST_API_KEY) {
@@ -97,18 +139,23 @@ const LocationSetting: FC = () => {
             <input
               type="text"
               readOnly
-              value={address}
+              value={finalAddress}
               placeholder="위치를 가져오려면 아래 버튼을 클릭하세요"
               className="w-full py-2 px-3 border border-gray-300 rounded-lg bg-gray-50 text-light-text-secondary focus:outline-none"
             />
+            {isLoading && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
           </div>
 
-          {error ? (
+          {finalError && !finalAddress ? (
             <div className="mb-4">
-              <p className="text-light-status-error text-sm mb-3">{error}</p>
+              <p className="text-light-status-error text-sm mb-3">{finalError}</p>
               <button
-                onClick={fetchCurrentLocation}
-                disabled={!isGpsEnabled || loading}
+                onClick={handleGetCurrentLocation}
+                disabled={!isGpsEnabled || isLoading}
                 className={`w-full py-2.5 rounded-md flex items-center justify-center transition text-sm
                   ${
                     isGpsEnabled
@@ -120,29 +167,39 @@ const LocationSetting: FC = () => {
                 현재 위치 가져오기
               </button>
             </div>
-          ) : address ? (
+          ) : finalAddress ? (
             <div>
               <button
                 onClick={handleAddressSelect}
-                disabled={latitude === null || longitude === null}
+                disabled={finalLatitude === null || finalLongitude === null || isLoading}
                 className="w-full py-2.5 bg-primary text-white rounded-md mb-2 transition hover:bg-primary/90 text-sm"
               >
                 이 주소로 설정하기
               </button>
-              <button
-                onClick={fetchCurrentLocation}
-                disabled={!isGpsEnabled || loading}
-                className="w-full py-2.5 bg-gray-100 text-primary rounded-md flex items-center justify-center transition hover:bg-gray-200 text-sm"
-              >
-                <Locate className="mr-1" size={16} />
-                현재 위치 다시 가져오기
-              </button>
+              <div className="flex flex-col space-y-2">
+                <button
+                  onClick={handleGetCurrentLocation}
+                  disabled={!isGpsEnabled || isLoading}
+                  className="w-full py-2.5 bg-gray-100 text-primary rounded-md flex items-center justify-center transition hover:bg-gray-200 text-sm"
+                >
+                  <Locate className="mr-1" size={16} />
+                  현재 위치 다시 가져오기
+                </button>
+                <button
+                  onClick={handleSearchAddress}
+                  disabled={isLoading}
+                  className="w-full py-2.5 bg-gray-100 text-light-text rounded-md flex items-center justify-center transition hover:bg-gray-200 text-sm"
+                >
+                  <Search className="mr-1" size={16} />
+                  주소 검색하기
+                </button>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col space-y-2">
               <button
-                onClick={fetchCurrentLocation}
-                disabled={!isGpsEnabled || loading}
+                onClick={handleGetCurrentLocation}
+                disabled={!isGpsEnabled || isLoading}
                 className="w-full py-2.5 bg-primary text-white rounded-md flex items-center justify-center transition hover:bg-primary/90 text-sm"
               >
                 <Locate className="mr-1" size={16} />
@@ -150,7 +207,7 @@ const LocationSetting: FC = () => {
               </button>
               <button
                 onClick={handleSearchAddress}
-                disabled={loading}
+                disabled={isLoading}
                 className="w-full py-2.5 bg-gray-100 text-light-text rounded-md flex items-center justify-center transition hover:bg-gray-200 text-sm"
               >
                 <Search className="mr-1" size={16} />
