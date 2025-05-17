@@ -39,7 +39,7 @@ const EditProfilePage = () => {
   const { openAddressSearch, isLoading: isAddressSearchLoading } = useSearchAddress((data) => {
     if (data && data.address) {
       setAddress(data.address);
-      
+
       if (data.latitude !== undefined && data.longitude !== undefined) {
         setLatitude(data.latitude);
         setLongitude(data.longitude);
@@ -69,8 +69,10 @@ const EditProfilePage = () => {
 
   const { mutate: saveProfile, isPending } = useMutation({
     mutationFn: updateUserProfile,
-    onSuccess: () => {
-      notify.success("프로필 저장에 성공했습니다.")
+    onSuccess: (res) => {
+      if (res.accessToken) localStorage.setItem('auth_token', res.accessToken);
+      if (res.refreshToken) localStorage.setItem('refresh_token', res.refreshToken);
+      notify.success('프로필 저장에 성공했습니다.');
       navigate('/mypage');
     },
     onError: () => {
@@ -160,11 +162,9 @@ const EditProfilePage = () => {
               </div>
             )}
           </div>
-          
-          {locationError && (
-            <p className="text-light-status-error text-sm mb-2">{locationError}</p>
-          )}
-          
+
+          {locationError && <p className="text-light-status-error text-sm mb-2">{locationError}</p>}
+
           <div className="flex space-x-2">
             <button
               onClick={handleGetCurrentLocation}
