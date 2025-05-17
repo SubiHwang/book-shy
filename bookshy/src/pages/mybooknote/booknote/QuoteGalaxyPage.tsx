@@ -46,17 +46,14 @@ const QuoteGalaxyPage = () => {
     const mouse = new THREE.Vector2();
     const quoteNodes: Text[] = [];
 
-    const getColorByBookId = (bookId: number) => {
-      const colors = [0xff5555, 0x55ff55, 0x5555ff, 0xffff55, 0xff55ff];
-      return colors[bookId % colors.length];
-    };
+    const quoteColors = [0xaa88ff, 0x88ccff, 0xff66cc, 0xffff66, 0xdddddd];
 
     quotes.forEach((quote) => {
       const textMesh = new Text();
       textMesh.text = quote.content.slice(0, 12) + '...';
       textMesh.font = '/fonts/NotoSansKR-Regular.ttf';
       textMesh.fontSize = 2;
-      textMesh.color = getColorByBookId(quote.bookId);
+      textMesh.color = quoteColors[Math.floor(Math.random() * quoteColors.length)];
       textMesh.anchorX = 'center';
       textMesh.anchorY = 'middle';
       textMesh.position.set(
@@ -82,7 +79,7 @@ const QuoteGalaxyPage = () => {
       const p1 = quoteNodes[i].position.clone();
       const p2 = quoteNodes[i + 1].position.clone();
       const geometry = new THREE.BufferGeometry().setFromPoints([p1, p2]);
-      const material = new THREE.LineBasicMaterial({ color: 0x8888ff });
+      const material = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
       const line = new THREE.Line(geometry, material);
       scene.add(line);
     }
