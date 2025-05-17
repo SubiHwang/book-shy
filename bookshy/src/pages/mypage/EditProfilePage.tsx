@@ -9,6 +9,7 @@ import GenderSelector from '@/components/mypage/profile/GenderSelector';
 import { useLocationFetcher } from '@/hooks/location/useLocationFetcher';
 import useSearchAddress from '@/hooks/location/useSearchAddress';
 import { Locate, Search } from 'lucide-react';
+import { notify } from '@/components/common/CustomToastContainer';
 
 const EditProfilePage = () => {
   const navigate = useNavigate();
@@ -69,11 +70,11 @@ const EditProfilePage = () => {
   const { mutate: saveProfile, isPending } = useMutation({
     mutationFn: updateUserProfile,
     onSuccess: () => {
-      alert('프로필이 저장되었습니다.');
+      notify.success("프로필 저장에 성공했습니다.")
       navigate('/mypage');
     },
     onError: () => {
-      alert('프로필 저장에 실패했습니다.');
+      notify.error('프로필 저장에 실패했습니다.');
     },
   });
 
