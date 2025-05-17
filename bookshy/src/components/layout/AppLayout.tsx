@@ -45,6 +45,7 @@ import ErrorState from '../common/error/ErrorState';
 import ErrorHandler from '../common/error/ErrorHandler';
 import NotificationPage from '@/pages/common/NotificationPage';
 import QuoteGalaxyPage from '@/pages/mybooknote/booknote/QuoteGalaxyPage';
+import BookTripMapPage from '@/pages/mybooknote/booktrip/BookTripMapPage';
 import { CustomToastContainer } from '../common/CustomToastContainer';
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -151,6 +152,7 @@ const AppLayout: FC = () => {
                     path="/booknotes/trip/:bookId"
                     element={<BookTripDetailPage key={location.key} />}
                   />
+                  <Route path="/booknotes/trip-map" element={<BookTripMapPage />} />
 
                   {/* ✅ 마이페이지 라우팅 (공통 레이아웃) */}
                   <Route path="/mypage" element={<MyPage />}>
