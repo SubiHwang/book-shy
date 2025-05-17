@@ -55,6 +55,11 @@ public class FcmMessageTemplate {
             case BOOK_RECOMMEND -> {
                 title = String.format("\uD83D\uDCDA %s님, 이런 책은 어떤가요?", data.get("userName"));
                 body = String.format("『%s』을(를) 추천해 드립니다. 지금 확인해 보세요!", data.get("bookTitle"));
+
+                String itemId = data.get("itemId");
+                if (itemId != null && !itemId.isBlank()) {
+                    url = "/bookshelf/add/searchdetail/" + itemId;
+                }
             }
         }
 

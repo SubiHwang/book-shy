@@ -85,10 +85,11 @@ public class NotificationService {
         ));
     }
 
-    public void sendBookRecommendation(Long receiverId, String userName, String bookTitle) {
+    public void sendBookRecommendation(Long receiverId, String userName, String bookTitle, Long itemId) {
         sendFcm(receiverId, FcmNotificationType.BOOK_RECOMMEND, Map.of(
                 "userName", userName,
-                "bookTitle", bookTitle
+                "bookTitle", bookTitle,
+                "itemId", String.valueOf(itemId)
         ));
     }
 
