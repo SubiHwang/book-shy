@@ -1,4 +1,4 @@
-import { useState, useMemo, KeyboardEvent } from 'react';
+import { useState, KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 
@@ -16,7 +16,7 @@ import BookTripIntroCard from '@/components/mybooknote/booktrip/BookTripIntroCar
 import BookTripBookList from '@/components/mybooknote/booktrip/BookTripBookList';
 import SearchBar from '@/components/common/SearchBar';
 import FilterChips from '@/components/common/FilterChips';
-import { MapPin } from 'lucide-react';
+import { MapPin, BookOpen, CheckCircle, CircleSlash } from 'lucide-react';
 
 // 📌 필터 타입 선언
 type FilterType = '전체 보기' | '여정이 있는 책' | '여정이 없는 책';
@@ -26,15 +26,11 @@ const BookTripPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('전체 보기');
 
-  const filterOptions = useMemo(
-    () =>
-      [
-        { label: '전체 보기', value: '전체 보기' },
-        { label: '여정이 있는 책', value: '여정이 있는 책' },
-        { label: '여정이 없는 책', value: '여정이 없는 책' },
-      ] as { label: FilterType; value: FilterType }[],
-    [],
-  );
+  const filterOptions: { label: string; value: FilterType; icon: React.ReactNode }[] = [
+    { label: '전체 보기', value: '전체 보기', icon: <BookOpen size={16} className="mr-1" /> },
+    { label: '여정 O', value: '여정이 있는 책', icon: <CheckCircle size={16} className="mr-1" /> },
+    { label: '여정 X', value: '여정이 없는 책', icon: <CircleSlash size={16} className="mr-1" /> },
+  ];
 
   const { data: libraryBooks = [], isLoading: isLoadingLibrary } = useQuery<LibraryBookWithTrip[]>({
     queryKey: ['libraryBooksWithTrip'],
