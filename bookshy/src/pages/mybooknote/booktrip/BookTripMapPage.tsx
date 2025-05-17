@@ -1,16 +1,22 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { Text } from 'troika-three-text';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLibraryBooksWithTrip } from '@/services/mybooknote/booktrip/booktrip';
 import type { LibraryBookWithTrip } from '@/types/mybooknote/booktrip/booktrip';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import type { OrbitControlsExtended } from '@/utils/OrbitControlsExtended';
+
+interface OrbitControlsExtended extends OrbitControls {
+  autoRotate: boolean;
+  autoRotateSpeed: number;
+}
 
 const BookTripMapPage = () => {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
+  const [hoveredTitle, setHoveredTitle] = useState<string | null>(null);
 
   const { data: books = [] } = useQuery<LibraryBookWithTrip[]>({
     queryKey: ['libraryBooksWithTrip'],
@@ -21,13 +27,15 @@ const BookTripMapPage = () => {
     if (!mountRef.current || books.length === 0) return;
 
     const scene = new THREE.Scene();
+    scene.background = new THREE.TextureLoader().load('/images/mountain.png');
     const camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
       0.1,
       1000,
     );
-    camera.position.set(0, 20, 80);
+    const isMobile = window.innerWidth < 768;
+    camera.position.set(0, 20, isMobile ? 50 : 80);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -41,8 +49,8 @@ const BookTripMapPage = () => {
 
     const loader = new THREE.TextureLoader();
     const coverMeshes: THREE.Mesh[] = [];
+    const titleTexts: Text[] = [];
 
-    // 📚 Spiral layout parameters
     const radius = 30;
     const heightStep = 6;
     const angleStep = (2 * Math.PI) / books.length;
@@ -60,9 +68,26 @@ const BookTripMapPage = () => {
 
       coverMesh.position.set(x, y, z);
       coverMesh.lookAt(new THREE.Vector3(0, y, 0));
-      coverMesh.userData.bookId = book.bookId;
+      coverMesh.userData = {
+        bookId: book.bookId,
+        title: book.title,
+      };
+
       scene.add(coverMesh);
       coverMeshes.push(coverMesh);
+
+      // 제목 표시
+      const title = new Text();
+      title.text = book.title.slice(0, 10);
+      title.font = '/fonts/NotoSansKR-Regular.ttf';
+      title.fontSize = 1.2;
+      title.anchorX = 'center';
+      title.anchorY = 'top';
+      title.color = 0xffffff;
+      title.position.set(x, y - 7, z);
+      title.lookAt(new THREE.Vector3(0, y - 7, 0));
+      title.sync(() => scene.add(title));
+      titleTexts.push(title);
 
       if (i > 0) {
         const prev = coverMeshes[i - 1];
@@ -75,6 +100,18 @@ const BookTripMapPage = () => {
         scene.add(line);
       }
     });
+
+    // 깃발 추가
+    const last = coverMeshes[coverMeshes.length - 1];
+    const flag = new Text();
+    flag.text = '🏁';
+    flag.font = '/fonts/NotoSansKR-Regular.ttf';
+    flag.fontSize = 4;
+    flag.anchorX = 'center';
+    flag.anchorY = 'bottom';
+    flag.position.set(last.position.x, last.position.y + 10, last.position.z);
+    flag.lookAt(new THREE.Vector3(0, last.position.y + 10, 0));
+    flag.sync(() => scene.add(flag));
 
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
@@ -93,7 +130,23 @@ const BookTripMapPage = () => {
       }
     };
 
+    const handleMove = (event: MouseEvent) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(coverMeshes);
+
+      if (intersects.length > 0) {
+        setHoveredTitle(intersects[0].object.userData.title);
+      } else {
+        setHoveredTitle(null);
+      }
+    };
+
     renderer.domElement.addEventListener('pointerdown', handleClick);
+    renderer.domElement.addEventListener('pointermove', handleMove);
 
     const animate = () => {
       requestAnimationFrame(animate);
@@ -112,6 +165,7 @@ const BookTripMapPage = () => {
     return () => {
       window.removeEventListener('resize', handleResize);
       renderer.domElement.removeEventListener('pointerdown', handleClick);
+      renderer.domElement.removeEventListener('pointermove', handleMove);
       if (mountRef.current) {
         mountRef.current.removeChild(renderer.domElement);
       }
@@ -127,6 +181,11 @@ const BookTripMapPage = () => {
         <h1 className="text-lg font-semibold">📚 책의 여정 맵</h1>
       </div>
       <div ref={mountRef} className="fixed inset-0 z-0" />
+      {hoveredTitle && (
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 bg-white text-black px-3 py-2 rounded shadow max-w-xs text-sm whitespace-pre-wrap">
+          <p>{hoveredTitle}</p>
+        </div>
+      )}
     </>
   );
 };
