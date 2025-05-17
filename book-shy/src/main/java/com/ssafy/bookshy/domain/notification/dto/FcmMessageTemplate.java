@@ -7,6 +7,7 @@ public class FcmMessageTemplate {
     public static FcmMessage build(FcmNotificationType type, Map<String, String> data) {
         String title = "";
         String body = "";
+        String url = "";
 
         switch (type) {
             case TRANSACTION_DATE -> {
@@ -31,8 +32,13 @@ public class FcmMessageTemplate {
             }
 
             case CHAT_RECEIVE -> {
-                title = String.format("\uD83D\uDCAC %s님에게서 새 메시지가 왔어요", data.get("senderName"));
-                body = String.format("%s: %s", data.get("senderName"), data.get("preview"));
+                title = String.format("\uD83D\uDCAC %s님에게서 새 메시지가 왔어요", data.get("senderNickName"));
+                body = String.format("%s: %s", data.get("senderNickName"), data.get("content"));
+
+                String chatRoomId = data.get("chatRoomId");
+                if (chatRoomId != null && !chatRoomId.isBlank()) {
+                    url = "/chat/" + chatRoomId;
+                }
             }
 
             case MATCH_COMPLETE -> {
@@ -46,8 +52,8 @@ public class FcmMessageTemplate {
             }
         }
 
-        return new FcmMessage(title, body);
+        return new FcmMessage(title, body, data.getOrDefault("url", ""));
     }
 
-    public record FcmMessage(String title, String body) {}
+    public record FcmMessage(String title, String body, String url) {}
 }

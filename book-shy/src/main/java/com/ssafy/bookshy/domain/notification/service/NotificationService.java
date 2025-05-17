@@ -1,7 +1,7 @@
 package com.ssafy.bookshy.domain.notification.service;
 
 import com.google.auth.oauth2.GoogleCredentials;
-import com.ssafy.bookshy.domain.notification.dto.ChatNotificationRequestDto;
+import com.ssafy.bookshy.domain.notification.dto.ChatNotificationFcmDto;
 import com.ssafy.bookshy.domain.notification.dto.FcmMessageTemplate;
 import com.ssafy.bookshy.domain.notification.dto.FcmNotificationType;
 import com.ssafy.bookshy.domain.users.entity.Users;
@@ -39,14 +39,16 @@ public class NotificationService {
                 "partnerName", "제니",
                 "userName", "잭슨",
                 "bookTitle", "백설공주에게 죽음을",
-                "subtype", "now"
+                "subtype", "now",
+                "url", "/chat/123"
         ));
     }
 
-    public void sendChatNotification(ChatNotificationRequestDto request) {
-        sendFcm(request.getReceiverId(), FcmNotificationType.CHAT_RECEIVE, Map.of(
-                "senderName", request.getSenderNickName(),
-                "preview", request.getContent()
+    public void sendChatNotification(ChatNotificationFcmDto dto) {
+        sendFcm(dto.receiverId(), FcmNotificationType.CHAT_RECEIVE, Map.of(
+                "senderNickName", dto.senderNickName(),
+                "content", dto.content(),
+                "chatRoomId", String.valueOf(dto.chatRoomId())
         ));
     }
 
@@ -108,26 +110,25 @@ public class NotificationService {
             // 2. 메시지 구성
             FcmMessageTemplate.FcmMessage message = FcmMessageTemplate.build(type, data);
 
-            JSONObject notification = new JSONObject();
-            notification.put("title", message.title());
-            notification.put("body", message.body());
+            // --------------------------------------------------------------------------
+            JSONObject dataPayload = new JSONObject();
+            dataPayload.put("title", message.title());
+            dataPayload.put("body", message.body());
+            dataPayload.put("url", message.url());
+            data.forEach(dataPayload::put);
 
             JSONObject messageBody = new JSONObject();
             messageBody.put("token", targetToken);
-            messageBody.put("notification", notification);
+            messageBody.put("data", dataPayload);
+            // --------------------------------------------------------------------------
 
-            // -------------------------------------------------------
-
-//            JSONObject dataPayload = new JSONObject();
-//            dataPayload.put("title", message.title());
-//            dataPayload.put("body", message.body());
-//            data.forEach(dataPayload::put);
+//            JSONObject notification = new JSONObject();
+//            notification.put("title", message.title());
+//            notification.put("body", message.body());
 //
 //            JSONObject messageBody = new JSONObject();
 //            messageBody.put("token", targetToken);
-//            messageBody.put("data", dataPayload);
-
-            // -------------------------------------------------------
+//            messageBody.put("notification", notification);
 
             JSONObject payload = new JSONObject();
             payload.put("message", messageBody);
