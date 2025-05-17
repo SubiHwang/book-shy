@@ -34,6 +34,7 @@
     "tailwindcss-safe-area": "^0.6.0",
     "tesseract.js": "^6.0.1",
     "three": "^0.176.0",
+    "troika-three-text": "^0.52.4",
     "workbox-window": "^7.3.0"
   },
   "devDependencies": {
