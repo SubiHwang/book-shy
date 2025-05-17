@@ -16,6 +16,7 @@ import BookTripIntroCard from '@/components/mybooknote/booktrip/BookTripIntroCar
 import BookTripBookList from '@/components/mybooknote/booktrip/BookTripBookList';
 import SearchBar from '@/components/common/SearchBar';
 import FilterChips from '@/components/common/FilterChips';
+import { MapPin } from 'lucide-react';
 
 // 📌 필터 타입 선언
 type FilterType = '전체 보기' | '여정이 있는 책' | '여정이 없는 책';
@@ -99,6 +100,18 @@ const BookTripPage: React.FC = () => {
           selected={selectedFilter}
           onSelect={(val) => setSelectedFilter(val)}
         />
+
+        {/* 📚 책의여정 지도 */}
+        <div className="fixed bottom-24 left-6 z-50">
+          <button
+            onClick={() => navigate('/booknotes/trip-map')}
+            className="w-14 h-14 rounded-full bg-cyan-500/20 backdrop-blur-md shadow-xl shadow-cyan-400/40 
+               border border-cyan-400 hover:ring-2 hover:ring-cyan-300 hover:ring-offset-2 
+               flex justify-center items-center transition duration-300"
+          >
+            <MapPin size={28} strokeWidth={2} color="white" />
+          </button>
+        </div>
 
         {/* 📚 리스트 */}
         {isLoading ? (
