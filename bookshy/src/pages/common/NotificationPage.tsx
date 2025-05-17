@@ -25,9 +25,6 @@ const NotificationPage = () => {
     };
 
     loadNotifications();
-
-    // 알림 페이지를 열면 모든 알림을 읽음으로 표시
-    markAllAsRead();
   }, []);
 
   // 새 알림 이벤트 리스너
@@ -55,20 +52,6 @@ const NotificationPage = () => {
     };
   }, []);
 
-  // 모든 알림을 읽음으로 표시
-  const markAllAsRead = () => {
-    const updatedNotifications = notifications.map((notification) => ({
-      ...notification,
-      read: true,
-    }));
-
-    setNotifications(updatedNotifications);
-    setHasNotifications(false);
-
-    // 업데이트된 알림을 로컬 스토리지에 저장
-    localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
-  };
-
   // 특정 알림 삭제
   const deleteNotification = (id: string) => {
     const updatedNotifications = notifications.filter((notification) => notification.id !== id);
@@ -89,9 +72,9 @@ const NotificationPage = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-gray-50">
+    <div className="w-full h-full flex flex-col bg-light-bg">
       {/* 헤더 */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-light-bg shadow-sm">
         <div className="flex items-center justify-between p-4">
           <div className="w-8"></div> {/* 왼쪽 여백을 위한 빈 div */}
           <h1 className="text-lg font-medium text-center flex-1">알림</h1>
@@ -103,7 +86,7 @@ const NotificationPage = () => {
 
       {/* 전체 삭제 버튼 - 헤더 아래에 배치 */}
       {notifications.length > 0 && (
-        <div className="bg-white p-3 text-right border-b border-gray-100">
+        <div className="bg-light-bg p-3 text-right border-b border-gray-100">
           <button 
             onClick={deleteAllNotifications}
             className="text-sm text-gray-500 hover:text-gray-700"
@@ -120,7 +103,7 @@ const NotificationPage = () => {
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`p-4 bg-white relative ${
+                className={`p-4 bg-light-bg-card relative ${
                   !notification.read ? 'border-l-4 border-blue-500' : ''
                 }`}
               >
