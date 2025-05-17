@@ -103,8 +103,8 @@ const NotificationPage = () => {
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`p-4 bg-light-bg-card relative ${
-                  !notification.read ? 'border-l-4 border-blue-500' : ''
+                className={`p-4 relative ${
+                  !notification.read ? 'border-l-4 border-primary  bg-primary-light/10' : ' bg-light-bg-card'
                 }`}
               >
                 <div className="flex justify-between items-start">
