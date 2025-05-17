@@ -64,21 +64,24 @@ public class NotificationService {
         sendFcm(receiverId, FcmNotificationType.TRANSACTION_DATE, Map.of(
                 "subtype", "now",
                 "targetName", partnerName,
-                "date", date
+                "date", date,
+                "url", "/mypage"
         ));
     }
 
     public void sendTransactionDayBeforeNotification(Long receiverId, String partnerName) {
         sendFcm(receiverId, FcmNotificationType.TRANSACTION_DATE, Map.of(
                 "subtype", "day_before",
-                "targetName", partnerName
+                "targetName", partnerName,
+                "url", "/mypage"
         ));
     }
 
     public void sendTransactionTodayNotification(Long receiverId, String partnerName) {
         sendFcm(receiverId, FcmNotificationType.TRANSACTION_DATE, Map.of(
                 "subtype", "today",
-                "targetName", partnerName
+                "targetName", partnerName,
+                "url", "/mypage"
         ));
     }
 

@@ -17,18 +17,19 @@ public class FcmMessageTemplate {
 
                 switch (subtype) {
                     case "now" -> {
-                        title = "거래 날짜가 등록되었어요";
-                        body = String.format("%s님과의 거래 날짜가 %s로 확정되었습니다. 잊지 마세요!", targetName, date);
+                        title = "교환 날짜가 등록되었어요";
+                        body = String.format("%s님과의 교환 날짜가 %s로 확정되었습니다. 잊지 마세요!", targetName, date);
                     }
                     case "day_before" -> {
-                        title = "내일은 거래 약속이 있어요";
-                        body = String.format("내일 %s님과의 거래가 예정되어 있습니다. 준비 되셨나요?", targetName);
+                        title = "내일은 교환 약속이 있어요";
+                        body = String.format("내일 %s님과의 교환이 예정되어 있습니다. 준비 되셨나요?", targetName);
                     }
                     case "today" -> {
-                        title = "오늘 거래 약속이 있어요";
-                        body = String.format("오늘 %s님과의 거래가 예정되어 있습니다. 잊지 않으셨죠?", targetName);
+                        title = "오늘 교환 약속이 있어요";
+                        body = String.format("오늘 %s님과의 교환이 예정되어 있습니다. 잊지 않으셨죠?", targetName);
                     }
                 }
+                url = data.getOrDefault("url", "/mypage");
             }
 
             case CHAT_RECEIVE -> {

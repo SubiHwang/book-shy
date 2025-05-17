@@ -138,9 +138,7 @@ public class ExchangeService {
         request.setStatus(ExchangeRequest.RequestStatus.COMPLETED);
 
         // 4. 필요한 후처리: 예) 알림, 포인트 적립 등
-        // ...
     }
-
 
     /**
      * ⚠️ 중복 거래 요청 방지

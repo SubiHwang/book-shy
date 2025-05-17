@@ -19,6 +19,8 @@ public class BookListResponseDto {
     private String category;
     private String coverImageUrl;
     private String description;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean isLiked;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -35,7 +37,7 @@ public class BookListResponseDto {
                 .build();
     }
 
-    public static BookListResponseDto from(Book book, Boolean isLiked) {
+    public static BookListResponseDto from(Book book, Boolean isLiked, Boolean inLibrary) {
         return BookListResponseDto.builder()
                 .itemId(book.getItemId())
                 .title(book.getTitle())
@@ -45,7 +47,7 @@ public class BookListResponseDto {
                 .coverImageUrl(book.getCoverImageUrl())
                 .description(book.getDescription())
                 .isLiked(isLiked)
-                .inLibrary(null)
+                .inLibrary(inLibrary)
                 .build();
     }
 }
