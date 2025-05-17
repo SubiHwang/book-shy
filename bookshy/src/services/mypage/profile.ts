@@ -13,8 +13,9 @@ export const updateUserProfile = async (payload: {
   address: string;
   latitude: number | null;
   longitude: number | null;
-}) => {
-  return authAxiosInstance.put('/user/profile', payload);
+}): Promise<{ accessToken?: string; refreshToken?: string }> => {
+  const res = await authAxiosInstance.put('/user/profile', payload);
+  return res.data;
 };
 
 // 이미지 업로드
