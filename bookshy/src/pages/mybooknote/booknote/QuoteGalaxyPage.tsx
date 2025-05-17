@@ -6,8 +6,11 @@ import { fetchBookQuoteList } from '@/services/mybooknote/booknote/bookquote';
 import type { BookQuote } from '@/types/mybooknote/booknote/bookquote';
 import { Text } from 'troika-three-text';
 import gsap from 'gsap';
+import { ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const QuoteGalaxyPage = () => {
+  const navigate = useNavigate();
   const mountRef = useRef<HTMLDivElement | null>(null);
   const [selectedQuote, setSelectedQuote] = useState<string | null>(null);
   const [hoveredQuote, setHoveredQuote] = useState<string | null>(null);
@@ -152,6 +155,14 @@ const QuoteGalaxyPage = () => {
 
   return (
     <>
+      {/* 헤더 */}
+      <div className="fixed top-0 left-0 w-full z-[1000] bg-black/60 backdrop-blur-sm text-white px-4 py-3 flex items-center gap-2 shadow-md">
+        <button onClick={() => navigate(-1)} className="p-1 hover:text-cyan-300 transition">
+          <ArrowLeft size={24} />
+        </button>
+        <h1 className="text-lg font-semibold">📘 인용구 별자리</h1>
+      </div>
+
       <div ref={mountRef} className="fixed inset-0 z-40" />
 
       {selectedQuote && (
