@@ -3,9 +3,8 @@ package com.ssafy.bookshy.domain.notification.dto;
 import lombok.Builder;
 
 @Builder
-public record ChatNotificationFcmDto(
+public record MatchCompleteFcmDto(
     Long receiverId,
-    String senderNickName,
-    String content,
+    String partnerName,
     Long chatRoomId
 ) {}

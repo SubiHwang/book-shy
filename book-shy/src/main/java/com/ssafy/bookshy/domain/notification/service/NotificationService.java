@@ -4,6 +4,7 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.ssafy.bookshy.domain.notification.dto.ChatNotificationFcmDto;
 import com.ssafy.bookshy.domain.notification.dto.FcmMessageTemplate;
 import com.ssafy.bookshy.domain.notification.dto.FcmNotificationType;
+import com.ssafy.bookshy.domain.notification.dto.MatchCompleteFcmDto;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,13 @@ public class NotificationService {
         ));
     }
 
+    public void sendMatchCompleteNotification(MatchCompleteFcmDto dto) {
+        sendFcm(dto.receiverId(), FcmNotificationType.MATCH_COMPLETE, Map.of(
+                "partnerName", dto.partnerName(),
+                "chatRoomId", String.valueOf(dto.chatRoomId())
+        ));
+    }
+
     public void sendTransactionNowNotification(Long receiverId, String partnerName, String date) {
         sendFcm(receiverId, FcmNotificationType.TRANSACTION_DATE, Map.of(
                 "subtype", "now",
@@ -71,12 +79,6 @@ public class NotificationService {
         sendFcm(receiverId, FcmNotificationType.TRANSACTION_DATE, Map.of(
                 "subtype", "today",
                 "targetName", partnerName
-        ));
-    }
-
-    public void sendMatchCompleteNotification(Long receiverId, String partnerName) {
-        sendFcm(receiverId, FcmNotificationType.MATCH_COMPLETE, Map.of(
-                "partnerName", partnerName
         ));
     }
 
@@ -110,7 +112,6 @@ public class NotificationService {
             // 2. 메시지 구성
             FcmMessageTemplate.FcmMessage message = FcmMessageTemplate.build(type, data);
 
-            // --------------------------------------------------------------------------
             JSONObject dataPayload = new JSONObject();
             dataPayload.put("title", message.title());
             dataPayload.put("body", message.body());
@@ -120,15 +121,6 @@ public class NotificationService {
             JSONObject messageBody = new JSONObject();
             messageBody.put("token", targetToken);
             messageBody.put("data", dataPayload);
-            // --------------------------------------------------------------------------
-
-//            JSONObject notification = new JSONObject();
-//            notification.put("title", message.title());
-//            notification.put("body", message.body());
-//
-//            JSONObject messageBody = new JSONObject();
-//            messageBody.put("token", targetToken);
-//            messageBody.put("notification", notification);
 
             JSONObject payload = new JSONObject();
             payload.put("message", messageBody);
