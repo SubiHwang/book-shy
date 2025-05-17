@@ -75,7 +75,7 @@ const NotificationButton = () => {
     >
       <Bell size={24} />
       {hasNotifications && (
-        <span className="absolute -top-1 -right-1 bg-red-500 rounded-full w-3 h-3"></span>
+        <span className="absolute top-1 right-2 bg-red-500 rounded-full w-2 h-2"></span>
       )}
     </button>
   );

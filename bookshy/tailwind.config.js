@@ -66,6 +66,20 @@ export default {
           yellow: '#FFFDE7', // 카드 배경 (옐로우)
         },
       },
+      keyframes: {
+        smoothEnter: {
+          '0%': { transform: 'translateY(-100%)', opacity: 0 },
+          '100%': { transform: 'translateY(0)', opacity: 1 },
+        },
+        smoothExit: {
+          '0%': { transform: 'translateY(0)', opacity: 1 },
+          '100%': { transform: 'translateY(-100%)', opacity: 0 },
+        },
+      },
+      animation: {
+        smoothEnter: 'smoothEnter 0.4s cubic-bezier(0.21, 1.02, 0.73, 1) forwards',
+        smoothExit: 'smoothExit 0.4s cubic-bezier(0.06, 0.71, 0.55, 1) forwards',
+      },
     },
   },
   plugins: [safeArea],

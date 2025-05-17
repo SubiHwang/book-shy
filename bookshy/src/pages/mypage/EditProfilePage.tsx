@@ -6,8 +6,10 @@ import { useNavigate } from 'react-router-dom';
 import type { UserProfile } from '@/types/User/user';
 import ProfileImage from '@/components/mypage/profile/ProfileImage';
 import GenderSelector from '@/components/mypage/profile/GenderSelector';
-import AddressInput from '@/components/mypage/profile/AddressInput';
 import { useLocationFetcher } from '@/hooks/location/useLocationFetcher';
+import useSearchAddress from '@/hooks/location/useSearchAddress';
+import { Locate, Search } from 'lucide-react';
+import { notify } from '@/components/common/CustomToastContainer';
 
 const EditProfilePage = () => {
   const navigate = useNavigate();
@@ -33,6 +35,21 @@ const EditProfilePage = () => {
     error: locationError,
   } = useLocationFetcher();
 
+  // 주소 검색 훅 사용
+  const { openAddressSearch, isLoading: isAddressSearchLoading } = useSearchAddress((data) => {
+    if (data && data.address) {
+      setAddress(data.address);
+      
+      if (data.latitude !== undefined && data.longitude !== undefined) {
+        setLatitude(data.latitude);
+        setLongitude(data.longitude);
+      }
+    }
+  });
+
+  // 통합 로딩 상태
+  const isLocationLoading = isLocating || isAddressSearchLoading;
+
   useEffect(() => {
     if (profile) {
       setNickname(profile.nickname || '');
@@ -53,11 +70,11 @@ const EditProfilePage = () => {
   const { mutate: saveProfile, isPending } = useMutation({
     mutationFn: updateUserProfile,
     onSuccess: () => {
-      alert('프로필이 저장되었습니다.');
+      notify.success("프로필 저장에 성공했습니다.")
       navigate('/mypage');
     },
     onError: () => {
-      alert('프로필 저장에 실패했습니다.');
+      notify.error('프로필 저장에 실패했습니다.');
     },
   });
 
@@ -94,6 +111,14 @@ const EditProfilePage = () => {
     navigate('/login');
   };
 
+  const handleSearchAddress = () => {
+    openAddressSearch();
+  };
+
+  const handleGetCurrentLocation = async () => {
+    await fetchCurrentLocation();
+  };
+
   if (isLoading) {
     return <p className="p-4">프로필을 불러오는 중입니다...</p>;
   }
@@ -119,30 +144,58 @@ const EditProfilePage = () => {
 
         <GenderSelector gender={gender} onChange={setGender} />
 
-        <AddressInput
-          address={address}
-          onChange={setAddress}
-          onFetchLocation={async () => {
-            await fetchCurrentLocation();
-            setAddress(fetchedAddress);
-            setLatitude(currentLat);
-            setLongitude(currentLng);
-          }}
-          loading={isLocating}
-          error={locationError}
-        />
+        <div className="mb-4">
+          <label className="block mb-1 font-medium">주소</label>
+          <div className="relative mb-2">
+            <input
+              type="text"
+              value={address}
+              readOnly
+              placeholder="주소를 검색하거나 현재 위치를 가져오세요"
+              className="w-full py-2 px-3 border border-gray-300 rounded-lg bg-gray-50 text-light-text-secondary focus:outline-none"
+            />
+            {isLocationLoading && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
+          </div>
+          
+          {locationError && (
+            <p className="text-light-status-error text-sm mb-2">{locationError}</p>
+          )}
+          
+          <div className="flex space-x-2">
+            <button
+              onClick={handleGetCurrentLocation}
+              disabled={isLocationLoading}
+              className="flex-1 py-2 bg-gray-100 text-primary rounded-md flex items-center justify-center transition hover:bg-gray-200 text-sm"
+            >
+              <Locate className="mr-1" size={16} />
+              현재 위치
+            </button>
+            <button
+              onClick={handleSearchAddress}
+              disabled={isLocationLoading}
+              className="flex-1 py-2 bg-gray-100 text-light-text rounded-md flex items-center justify-center transition hover:bg-gray-200 text-sm"
+            >
+              <Search className="mr-1" size={16} />
+              주소 검색
+            </button>
+          </div>
+        </div>
 
         <button
           onClick={handleSave}
-          className="w-full mt-6 bg-pink-500 text-white py-3 rounded text-lg font-semibold"
-          disabled={isPending}
+          className="w-full mt-6 bg-primary text-white py-3 rounded-md text-lg font-semibold transition hover:bg-primary/90"
+          disabled={isPending || isLocationLoading}
         >
           {isPending ? '저장 중...' : '저장'}
         </button>
 
         <button
           onClick={handleLogout}
-          className="w-full mt-3 border border-pink-300 text-pink-500 py-3 rounded text-lg"
+          className="w-full mt-3 border border-primary/30 text-primary py-3 rounded-md text-lg transition hover:bg-gray-50"
         >
           로그아웃
         </button>
