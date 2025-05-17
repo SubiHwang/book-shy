@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { Camera } from 'lucide-react';
 
 interface Props {
   src: string;
@@ -27,9 +28,9 @@ const ProfileImage: React.FC<Props> = ({ src, onImageChange }) => {
         />
         <button
           onClick={handleButtonClick}
-          className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow"
+          className="absolute bottom-0 right-0 bg-white text-primary rounded-full p-1 shadow"
         >
-          📸
+          <Camera strokeWidth={2}/>
         </button>
         <input
           type="file"
