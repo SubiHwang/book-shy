@@ -130,12 +130,14 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
       </div>
 
       {/* 인용구 버튼 */}
-      <div className="fixed bottom-24 left-6 z-50">
+      <div className="fixed bottom-24 left-6 z-[999]">
         <button
           onClick={() => navigate('/booknotes/quote-galaxy')}
-          className="w-14 h-14 rounded-xl bg-secondary text-white flex justify-center items-center shadow-lg"
+          className="w-14 h-14 rounded-full bg-cyan-500/20 backdrop-blur-md shadow-xl shadow-cyan-400/40 
+               border border-cyan-400 hover:ring-2 hover:ring-cyan-300 hover:ring-offset-2 
+               flex justify-center items-center transition duration-300"
         >
-          <BookOpen size={28} strokeWidth={1} />
+          <BookOpen size={28} strokeWidth={2} color="white" />
         </button>
       </div>
 
