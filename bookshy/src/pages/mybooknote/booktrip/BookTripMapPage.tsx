@@ -36,7 +36,6 @@ const BookTripMapPage = () => {
       1000,
     );
     const isMobile = window.innerWidth < 768;
-    camera.position.set(0, 20, isMobile ? 50 : 80);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -47,6 +46,13 @@ const BookTripMapPage = () => {
     controls.autoRotateSpeed = 0.8;
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
+
+    // ✅ 카메라 위치 (높이 낮춤)
+    camera.position.set(0, 5, isMobile ? 50 : 80);
+
+    // ✅ OrbitControls가 바라볼 중심 좌표 설정
+    controls.target.set(0, 10, 0); // 여정이 시작되는 대략적인 높이
+    controls.update();
 
     const loader = new THREE.TextureLoader();
     const coverMeshes: THREE.Mesh[] = [];
@@ -105,7 +111,7 @@ const BookTripMapPage = () => {
           prev.position.clone(),
           coverMesh.position.clone(),
         ]);
-        const material = new THREE.LineBasicMaterial({ color: 0x888888 });
+        const material = new THREE.LineBasicMaterial({ color: 0xd4f4fa });
         const line = new THREE.Line(geometry, material);
         scene.add(line);
       }
