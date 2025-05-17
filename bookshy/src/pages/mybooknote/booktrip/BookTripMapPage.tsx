@@ -7,6 +7,7 @@ import { fetchLibraryBooksWithTrip } from '@/services/mybooknote/booktrip/booktr
 import type { LibraryBookWithTrip } from '@/types/mybooknote/booktrip/booktrip';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import gsap from 'gsap';
 
 interface OrbitControlsExtended extends OrbitControls {
   autoRotate: boolean;
@@ -71,12 +72,21 @@ const BookTripMapPage = () => {
       coverMesh.userData = {
         bookId: book.bookId,
         title: book.title,
+        index: i,
       };
 
       scene.add(coverMesh);
       coverMeshes.push(coverMesh);
 
-      // 제목 표시
+      gsap.from(coverMesh.scale, {
+        x: 0.1,
+        y: 0.1,
+        z: 0.1,
+        duration: 0.8,
+        delay: i * 0.1,
+        ease: 'back.out(1.7)',
+      });
+
       const title = new Text();
       title.text = book.title.slice(0, 10);
       title.font = '/fonts/NotoSansKR-Regular.ttf';
@@ -125,8 +135,26 @@ const BookTripMapPage = () => {
       const intersects = raycaster.intersectObjects(coverMeshes);
 
       if (intersects.length > 0) {
-        const bookId = intersects[0].object.userData.bookId;
-        navigate(`/booknotes/trip/${bookId}`);
+        const clicked = intersects[0].object as THREE.Mesh;
+        const clickedPos = clicked.position.clone();
+        gsap.to(camera.position, {
+          duration: 1.5,
+          x: clickedPos.x + 10,
+          y: clickedPos.y + 10,
+          z: clickedPos.z + 20,
+          ease: 'power2.inOut',
+          onUpdate: () => controls.update(),
+        });
+        gsap.to(controls.target, {
+          duration: 1.5,
+          x: clickedPos.x,
+          y: clickedPos.y,
+          z: clickedPos.z,
+          ease: 'power2.inOut',
+          onUpdate: () => controls.update(),
+        });
+        const bookId = clicked.userData.bookId;
+        setTimeout(() => navigate(`/booknotes/trip/${bookId}`), 1600);
       }
     };
 
@@ -148,8 +176,18 @@ const BookTripMapPage = () => {
     renderer.domElement.addEventListener('pointerdown', handleClick);
     renderer.domElement.addEventListener('pointermove', handleMove);
 
+    const clock = new THREE.Clock();
+
     const animate = () => {
       requestAnimationFrame(animate);
+      const time = clock.getElapsedTime();
+
+      coverMeshes.forEach((mesh, i) => {
+        mesh.position.y += Math.sin(time + i) * 0.005;
+      });
+
+      flag.rotation.z = Math.sin(time * 3) * 0.05;
+
       controls.update();
       renderer.render(scene, camera);
     };
