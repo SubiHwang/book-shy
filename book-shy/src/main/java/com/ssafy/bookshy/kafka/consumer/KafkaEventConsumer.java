@@ -7,6 +7,7 @@ import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.service.ChatMessageService;
 import com.ssafy.bookshy.domain.chat.service.ChatRoomService;
 import com.ssafy.bookshy.domain.notification.dto.ChatNotificationFcmDto;
+import com.ssafy.bookshy.domain.notification.dto.MatchCompleteFcmDto;
 import com.ssafy.bookshy.domain.notification.service.NotificationService;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
@@ -98,7 +99,13 @@ public class KafkaEventConsumer {
                     .map(Users::getNickname)
                     .orElse("상대방");
 
-            notificationService.sendMatchCompleteNotification(event.getUserBId(), senderName);
+            notificationService.sendMatchCompleteNotification(
+                    MatchCompleteFcmDto.builder()
+                            .receiverId(event.getUserBId())
+                            .partnerName(senderName)
+                            .chatRoomId(chatRoom.getId())
+                            .build()
+            );
 
             ack.acknowledge();
         } catch (Exception e) {

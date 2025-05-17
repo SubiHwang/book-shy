@@ -44,6 +44,11 @@ public class FcmMessageTemplate {
             case MATCH_COMPLETE -> {
                 title = "\uD83E\uDD1D 새로운 매칭이 성사되었어요";
                 body = String.format("%s님과 매칭이 완료되었습니다. 지금 대화를 시작해 보세요!", data.get("partnerName"));
+
+                String chatRoomId = data.get("chatRoomId");
+                if (chatRoomId != null && !chatRoomId.isBlank()) {
+                    url = "/chat/" + chatRoomId;
+                }
             }
 
             case BOOK_RECOMMEND -> {
