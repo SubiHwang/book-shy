@@ -5,7 +5,7 @@ import ChatInput from './ChatInput.tsx';
 import ChatRoomHeader from './ChatRoomHeader.tsx';
 import ScheduleModal from './ScheduleModal.tsx';
 import SystemMessage from './SystemMessage.tsx';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   deleteEmoji,
@@ -47,6 +47,7 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: initialMessages = [], isSuccess } = useQuery({
     queryKey: ['chatMessages', numericRoomId],
@@ -341,6 +342,31 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
             </div>
           );
         })}
+
+        {/* 📌 교환 완료 유도 메시지 */}
+        <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm">
+          <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
+          <p className="text-xs mt-1 text-light-text-muted">
+            거래가 완료되었다면 리뷰를 남겨주세요.
+          </p>
+          <button
+            onClick={() =>
+              navigate(`/chat/${numericRoomId}/review`, {
+                state: {
+                  chatSummary: {
+                    partnerName,
+                    partnerProfileImage,
+                    bookShyScore,
+                  },
+                },
+              })
+            }
+            className="mt-3 inline-block bg-primary text-white text-xs font-medium px-4 py-2 rounded-full"
+          >
+            거래 완료
+          </button>
+        </div>
+
         <div ref={messagesEndRef} className="h-4" />
       </div>
 
