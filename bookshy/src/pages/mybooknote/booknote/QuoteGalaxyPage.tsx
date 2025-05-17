@@ -5,10 +5,12 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchBookQuoteList } from '@/services/mybooknote/booknote/bookquote';
 import type { BookQuote } from '@/types/mybooknote/booknote/bookquote';
 import { Text } from 'troika-three-text';
+import gsap from 'gsap';
 
 const QuoteGalaxyPage = () => {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const [selectedQuote, setSelectedQuote] = useState<string | null>(null);
+  const [hoveredQuote, setHoveredQuote] = useState<string | null>(null);
 
   const { data: quotes = [] } = useQuery<BookQuote[]>({
     queryKey: ['quote-list'],
@@ -19,7 +21,8 @@ const QuoteGalaxyPage = () => {
     if (!mountRef.current || quotes.length === 0) return;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000);
+    const background = new THREE.TextureLoader().load('/images/space.jpg');
+    scene.background = background;
 
     const camera = new THREE.PerspectiveCamera(
       75,
@@ -61,9 +64,13 @@ const QuoteGalaxyPage = () => {
         Math.random() * 50 - 25,
         Math.random() * 10 - 5,
       );
+      textMesh.rotation.set(
+        (Math.random() - 0.5) * 0.4,
+        (Math.random() - 0.5) * 0.4,
+        (Math.random() - 0.5) * 0.4,
+      );
       textMesh.userData.fullQuote = quote.content;
 
-      // geometry 생성 완료 후 씬에 추가
       textMesh.sync(() => {
         scene.add(textMesh);
       });
@@ -71,7 +78,6 @@ const QuoteGalaxyPage = () => {
       quoteNodes.push(textMesh);
     });
 
-    // quote 간 선 연결
     for (let i = 0; i < quoteNodes.length - 1; i++) {
       const p1 = quoteNodes[i].position.clone();
       const p2 = quoteNodes[i + 1].position.clone();
@@ -84,7 +90,17 @@ const QuoteGalaxyPage = () => {
     const animate = () => {
       requestAnimationFrame(animate);
       controls.update();
-      scene.rotation.y += 0.0005;
+
+      quoteNodes.forEach((mesh, i) => {
+        const flicker = 0.85 + 0.15 * Math.sin(Date.now() * 0.002 + i);
+        const base = new THREE.Color(mesh.color as any);
+        (mesh.material as THREE.MeshBasicMaterial).color.setRGB(
+          base.r * flicker,
+          base.g * flicker,
+          base.b * flicker,
+        );
+      });
+
       renderer.render(scene, camera);
     };
     animate();
@@ -107,7 +123,26 @@ const QuoteGalaxyPage = () => {
       if (intersects.length > 0) {
         const clicked = intersects[0].object as Text;
         setSelectedQuote(clicked.userData.fullQuote || '');
+
+        gsap.to(camera.position, {
+          duration: 1.5,
+          x: clicked.position.x + 10,
+          y: clicked.position.y + 10,
+          z: clicked.position.z + 20,
+          ease: 'power2.inOut',
+          onUpdate: () => camera.lookAt(clicked.position),
+        });
       }
+    });
+
+    renderer.domElement.addEventListener('pointermove', (event) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(quoteNodes, true);
+      setHoveredQuote(intersects.length > 0 ? intersects[0].object.userData.fullQuote : null);
     });
 
     return () => {
@@ -123,11 +158,30 @@ const QuoteGalaxyPage = () => {
       <div ref={mountRef} className="fixed inset-0 z-40" />
 
       {selectedQuote && (
-        <div className="absolute top-12 left-1/2 -translate-x-1/2 z-50 bg-white text-black p-4 rounded shadow max-w-xs text-sm whitespace-pre-wrap">
-          <p>{selectedQuote}</p>
-          <button onClick={() => setSelectedQuote(null)} className="mt-2 text-blue-500">
-            닫기
-          </button>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => setSelectedQuote(null)}
+        >
+          <div
+            className="bg-[#1e1e1e] text-white max-w-md w-full mx-4 p-6 rounded-lg shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-lg font-semibold leading-relaxed whitespace-pre-wrap">
+              {selectedQuote}
+            </p>
+            <button
+              onClick={() => setSelectedQuote(null)}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 float-right"
+            >
+              닫기
+            </button>
+          </div>
+        </div>
+      )}
+
+      {hoveredQuote && !selectedQuote && (
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 bg-white text-black px-3 py-2 rounded shadow max-w-xs text-sm whitespace-pre-wrap">
+          <p>{hoveredQuote}</p>
         </div>
       )}
     </>
