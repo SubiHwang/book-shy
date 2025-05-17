@@ -6,14 +6,13 @@ import com.ssafy.bookshy.domain.chat.dto.ChatRoomUserIds;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.service.ChatMessageService;
 import com.ssafy.bookshy.domain.chat.service.ChatRoomService;
-import com.ssafy.bookshy.domain.notification.dto.ChatNotificationRequestDto;
+import com.ssafy.bookshy.domain.notification.dto.ChatNotificationFcmDto;
 import com.ssafy.bookshy.domain.notification.service.NotificationService;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import com.ssafy.bookshy.kafka.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -173,10 +172,11 @@ public class KafkaEventConsumer {
                     preview = preview.substring(0, 47) + "...";
                 }
 
-                notificationService.sendChatNotification(ChatNotificationRequestDto.builder()
+                notificationService.sendChatNotification(ChatNotificationFcmDto.builder()
                         .receiverId(receiverId)
                         .senderNickName(senderName)
                         .content(preview)
+                        .chatRoomId(dto.getChatRoomId())
                         .build()
                 );
             }
