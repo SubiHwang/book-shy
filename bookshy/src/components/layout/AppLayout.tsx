@@ -44,6 +44,7 @@ import BookNotePage from '@/pages/mybooknote/booknote/BookNotePage';
 import ErrorState from '../common/error/ErrorState';
 import ErrorHandler from '../common/error/ErrorHandler';
 import NotificationPage from '@/pages/common/NotificationPage';
+import QuoteGalaxyPage from '@/pages/mybooknote/booknote/QuoteGalaxyPage';
 import { CustomToastContainer } from '../common/CustomToastContainer';
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -143,6 +144,7 @@ const AppLayout: FC = () => {
                   <Route path="/booknotes/edit/:bookId" element={<BookNoteEditPage />} />
                   <Route path="/booknotes/create" element={<BookNoteCreatePage />} />
                   <Route path="/booknotes/select" element={<BookNoteSelectPage />} />
+                  <Route path="/booknotes/quote-galaxy" element={<QuoteGalaxyPage />} />
 
                   {/* 책의 여정 페이지 */}
                   <Route
