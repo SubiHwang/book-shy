@@ -52,7 +52,7 @@ public class FcmMessageTemplate {
             }
         }
 
-        return new FcmMessage(title, body, data.getOrDefault("url", ""));
+        return new FcmMessage(title, body, url);
     }
 
     public record FcmMessage(String title, String body, String url) {}
