@@ -6,7 +6,7 @@ import { useImageColors } from '@/hooks/common/useImageColors';
 import { createGradientStyle } from '@/utils/common/gradientStyles';
 import { addWishBook, deleteWishBook } from '@/services/matching/wishbooks';
 import { useQueryClient } from '@tanstack/react-query';
-import { getChatId } from '@/services/matching/matching';
+import { createSimpleChatRoom } from '@/services/matching/matching';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
@@ -77,14 +77,14 @@ const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
   const onChatClick = async (userId: number) => {
     console.log(userId);
     try {
-      const response = await getChatId(userId);
+      const response = await createSimpleChatRoom(userId);
       navigate(`/chat/${response.chatRoomId}`, {
-          state: {
-            partnerName: response.nickname,
-            partnerProfileImage: response.profileImageUrl,
-            bookShyScore: response.temperature,
-          },
-        });
+        state: {
+          partnerName: response.nickname,
+          partnerProfileImage: response.profileImageUrl,
+          bookShyScore: response.temperature,
+        },
+      });
     } catch (error) {
       console.log('채팅 생성 실패', error);
     }

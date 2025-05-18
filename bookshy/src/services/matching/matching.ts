@@ -37,6 +37,21 @@ export const getChatId = async (
   return response;
 };
 
+// 단일 책에서 채팅 요청 시 사용
+export const createSimpleChatRoom = async (
+  receiverId: number,
+): Promise<MatchingConfirmResponse> => {
+  try {
+    const response = await authAxiosInstance.post<string, MatchingConfirmResponse>(
+      `/matching/chat/simple?receiverId=${receiverId}`,
+    );
+    return response;
+  } catch (error) {
+    console.error('❌ 단순 채팅방 생성 실패:', error);
+    throw error;
+  }
+};
+
 export const getNeighborhoodList = async () => {
   try {
     const response = await authAxiosInstance.get<[], Neighborhood[]>('/matching/neighbors');
