@@ -10,6 +10,7 @@ import { useLocationFetcher } from '@/hooks/location/useLocationFetcher';
 import useSearchAddress from '@/hooks/location/useSearchAddress';
 import { Locate, Search } from 'lucide-react';
 import { notify } from '@/components/common/CustomToastContainer';
+import { authAxiosInstance } from '@/services/axiosInstance';
 
 const EditProfilePage = () => {
   const navigate = useNavigate();
@@ -72,8 +73,14 @@ const EditProfilePage = () => {
   const { mutate: saveProfile, isPending } = useMutation({
     mutationFn: updateUserProfile,
     onSuccess: (res) => {
-      if (res.accessToken) localStorage.setItem('auth_token', res.accessToken);
-      if (res.refreshToken) localStorage.setItem('refresh_token', res.refreshToken);
+      if (res.accessToken) {
+        localStorage.setItem('auth_token', res.accessToken);
+        // ✅ axios 인스턴스에도 즉시 반영
+        authAxiosInstance.defaults.headers.common['Authorization'] = `Bearer ${res.accessToken}`;
+      }
+      if (res.refreshToken) {
+        localStorage.setItem('refresh_token', res.refreshToken);
+      }
 
       // ✅ 캐시 무효화
       queryClient.invalidateQueries({ queryKey: ['profile'] });

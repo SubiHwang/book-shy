@@ -53,9 +53,11 @@ const addRefreshSubscriber = (callback: RefreshCallback): void => {
 // 응답 인터셉터
 authAxiosInstance.interceptors.response.use(
   (response: AxiosResponse) => {
-    console.log(response.data)
+    console.log(response.data);
     // ✅ 성공 상태인지 확인 (200~299)
-    if (response.data.status < 200 || response.data.status >= 300) {
+    // 성공적인 HTTP 응답(2xx)일 때, data.status가 없으면 그대로 통과시키고,
+    // data.status가 있다면 그것도 검사
+    if ('status' in response.data && (response.data.status < 200 || response.data.status >= 300)) {
       const error = response.data.error;
       const statusCode = response.data.status;
       const errorDetail: ErrorDetail = {
