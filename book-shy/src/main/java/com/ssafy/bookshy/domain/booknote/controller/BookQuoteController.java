@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.booknote.controller;
 
+import com.ssafy.bookshy.common.response.CommonResponse;
 import com.ssafy.bookshy.domain.booknote.dto.BookQuoteRequest;
 import com.ssafy.bookshy.domain.booknote.dto.BookQuoteResponseDto;
 import com.ssafy.bookshy.domain.booknote.entity.BookQuote;
@@ -12,7 +13,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,8 +29,8 @@ public class BookQuoteController {
     @Operation(
             summary = "💡 인용구 등록",
             description = """
-                🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 인상 깊었던 문장을 인용구로 등록합니다.
-            """,
+                        🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 인상 깊었던 문장을 인용구로 등록합니다.
+                    """,
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "도서 ID와 인용구 내용 포함",
                     required = true,
@@ -54,12 +54,12 @@ public class BookQuoteController {
             }
     )
     @PostMapping
-    public ResponseEntity<BookQuote> create(
+    public CommonResponse<BookQuote> create(
             @RequestBody BookQuoteRequest request,
             @AuthenticationPrincipal Users user
     ) {
         request.setUserId(user.getUserId());
-        return ResponseEntity.ok(bookQuoteService.create(request));
+        return CommonResponse.success(bookQuoteService.create(request));
     }
 
     @Operation(
@@ -85,39 +85,39 @@ public class BookQuoteController {
             )
     )
     @PutMapping("/{quoteId}")
-    public ResponseEntity<BookQuote> update(
+    public CommonResponse<BookQuote> update(
             @PathVariable Long quoteId,
             @RequestBody BookQuoteRequest request,
             @AuthenticationPrincipal Users user
     ) {
         request.setUserId(user.getUserId());
-        return ResponseEntity.ok(bookQuoteService.update(quoteId, request));
+        return CommonResponse.success(bookQuoteService.update(quoteId, request));
     }
 
     @GetMapping
     @Operation(
             summary = "📙 나의 인용구 조회",
             description = """
-                🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 나의 인용구 목록을 조회합니다.<br>
-            """,
+                        🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 나의 인용구 목록을 조회합니다.<br>
+                    """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "✅ 조회 성공"),
                     @ApiResponse(responseCode = "404", description = "❗ 도서가 존재하지 않음"),
                     @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
             }
     )
-    public ResponseEntity<List<BookQuoteResponseDto>> getMyQuotes(
+    public CommonResponse<List<BookQuoteResponseDto>> getMyQuotes(
             @AuthenticationPrincipal Users user
     ) {
-        return ResponseEntity.ok(bookQuoteService.findQuoteResponsesByUserId(user.getUserId()));
+        return CommonResponse.success(bookQuoteService.findQuoteResponsesByUserId(user.getUserId()));
     }
 
     @GetMapping("/by-book")
     @Operation(
             summary = "📙 특정 도서에 대한 나의 인용구 조회",
             description = """
-            🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 특정 도서의 인용구 목록을 조회합니다.
-        """,
+                        🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 특정 도서의 인용구 목록을 조회합니다.
+                    """,
             parameters = {
                     @Parameter(name = "bookId", description = "📕 도서 ID", required = true, example = "101")
             },
@@ -127,12 +127,12 @@ public class BookQuoteController {
                     @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
             }
     )
-    public ResponseEntity<BookQuoteResponseDto> getMyQuotesByBook(
+    public CommonResponse<BookQuoteResponseDto> getMyQuotesByBook(
             @RequestParam Long bookId,
             @AuthenticationPrincipal Users user
     ) {
         BookQuoteResponseDto response = bookQuoteService.findOneQuoteResponseByUserIdAndBookId(user.getUserId(), bookId);
-        return ResponseEntity.ok(response); // response == null 이면, JSON null 응답
+        return CommonResponse.success(response); // response == null 이면, JSON null 응답
     }
 
 }

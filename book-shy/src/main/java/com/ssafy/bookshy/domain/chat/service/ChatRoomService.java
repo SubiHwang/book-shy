@@ -4,8 +4,10 @@ import com.ssafy.bookshy.domain.chat.dto.ChatRoomDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomUserIds;
 import com.ssafy.bookshy.domain.chat.entity.ChatMessage;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
+import com.ssafy.bookshy.domain.chat.entity.ChatRoomBook;
 import com.ssafy.bookshy.domain.chat.repository.ChatMessageRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
+import com.ssafy.bookshy.domain.matching.dto.MatchChatRequestDto;
 import com.ssafy.bookshy.domain.matching.entity.Matching;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.service.UserService;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -80,49 +83,118 @@ public class ChatRoomService {
     /**
      * 🧩 두 사용자의 매칭 기반으로 채팅방을 생성합니다.
      *
-     * - 이미 존재하는 채팅방이 있다면 해당 채팅방 반환
-     * - 없다면 새로 생성하여 저장 후 반환
+     * - 이미 존재하는 채팅방이 있다면 해당 채팅방을 반환합니다.
+     * - 존재하지 않으면 새로운 채팅방을 생성하고,
+     *   참여자 각각의 도서 정보를 함께 저장합니다.
+     * - 생성 시 시스템 안내 메시지를 notice 타입으로 함께 추가하고,
+     *   마지막 메시지 정보를 초기화합니다.
      *
-     * @param userAId 사용자 A
-     * @param userBId 사용자 B
-     * @return 생성되거나 기존의 채팅방
+     * @param matchId 매칭 ID
+     * @param dto 채팅방 정보
+
+     * @return 생성되거나 기존의 ChatRoom 객체
      */
     @Transactional
-    public ChatRoom createChatRoomFromMatch(Long userAId, Long userBId, Long matchId) {
-        // 🔄 1. 이미 존재하는 채팅방이 있는지 확인
-        Optional<ChatRoom> existing = chatRoomRepository.findByParticipants(userAId, userBId);
+    public ChatRoom createChatRoomFromMatch(Long matchId, MatchChatRequestDto dto) {
+        Long senderId = dto.getSenderId();
+        Long receiverId = dto.getReceiverId();
+
+        // 🔍 1. 기존 채팅방 존재 여부 확인
+        Optional<ChatRoom> existing = chatRoomRepository.findByParticipants(senderId, receiverId);
         if (existing.isPresent()) {
             return existing.get();
         }
 
-        // 🆕 2. 새로운 채팅방 생성 및 저장
+        // 📚 2. 책 정보 매핑
+        List<ChatRoomBook> books = new ArrayList<>();
+
+        for (int i = 0; i < dto.getMyBookId().size(); i++) {
+            books.add(ChatRoomBook.builder()
+                    .bookId(dto.getMyBookId().get(i))
+                    .bookName(dto.getMyBookName().get(i))
+                    .userId(senderId)
+                    .build());
+        }
+
+        for (int i = 0; i < dto.getOtherBookId().size(); i++) {
+            books.add(ChatRoomBook.builder()
+                    .bookId(dto.getOtherBookId().get(i))
+                    .bookName(dto.getOtherBookName().get(i))
+                    .userId(receiverId)
+                    .build());
+        }
+
+        // 🆕 3. 채팅방 생성 및 저장
         ChatRoom chatRoom = ChatRoom.builder()
-                .userAId(userAId)
-                .userBId(userBId)
+                .userAId(senderId)
+                .userBId(receiverId)
                 .matching(Matching.builder().matchId(matchId).build())
+                .books(books)
                 .build();
         chatRoom = chatRoomRepository.save(chatRoom);
 
-        // 📝 3. 안내 메시지 생성
+        // 📝 4. 안내 메시지 저장
         LocalDateTime now = LocalDateTime.now();
         String systemMessage = "채팅방이 생성되었습니다.";
 
         ChatMessage noticeMessage = ChatMessage.builder()
                 .chatRoom(chatRoom)
-                .senderId(userAId) // 시스템 메시지지만 최초 생성자 기준
+                .senderId(senderId)
                 .content(systemMessage)
                 .type("notice")
                 .timestamp(now)
                 .build();
 
-        // 💾 메시지 저장
         chatMessageRepository.save(noticeMessage);
-
-        // 💬 마지막 메시지 정보 업데이트
         chatRoom.updateLastMessage(systemMessage, now);
 
         return chatRoom;
     }
+
+    /**
+     * 💬 [단순 채팅방 생성]
+     *
+     * 📌 두 사용자 간 책 정보 없이 단순히 채팅을 시작하고자 할 때 사용됩니다.
+     *
+     * ✅ 기능 요약:
+     * - sender와 receiver 간 채팅방이 존재하지 않는다는 전제 하에 호출됩니다.
+     * - 새로운 ChatRoom을 생성하고, 시스템 메시지("채팅방이 생성되었습니다.")를 자동 추가합니다.
+     * - Matching 없이도 채팅방 생성이 가능합니다 (즉, Matching 엔티티와 무관).
+     *
+     * @param senderId 채팅을 시작하는 사용자 ID
+     * @param receiverId 채팅을 받을 사용자 ID
+     * @return 생성된 ChatRoom 엔티티
+     */
+    @Transactional
+    public ChatRoom createChatRoomFromSimple(Long senderId, Long receiverId) {
+        // 🆕 1. 채팅방 생성
+        ChatRoom chatRoom = ChatRoom.builder()
+                .userAId(senderId)
+                .userBId(receiverId)
+                .build();
+
+        chatRoom = chatRoomRepository.save(chatRoom);
+
+        // 📝 2. 시스템 메시지 저장
+        LocalDateTime now = LocalDateTime.now();
+        String systemMessage = "채팅방이 생성되었습니다.";
+
+        ChatMessage noticeMessage = ChatMessage.builder()
+                .chatRoom(chatRoom)
+                .senderId(senderId) // 최초 요청자 기준
+                .content(systemMessage)
+                .type("notice")
+                .timestamp(now)
+                .build();
+
+        chatMessageRepository.save(noticeMessage);
+
+        // 💬 3. 채팅방에 마지막 메시지 정보 업데이트
+        chatRoom.updateLastMessage(systemMessage, now);
+
+        return chatRoom;
+    }
+
 
 
     public Optional<ChatRoom> findByMatchId(Long matchId) {

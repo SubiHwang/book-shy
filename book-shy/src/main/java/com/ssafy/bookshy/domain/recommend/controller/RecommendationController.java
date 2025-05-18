@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.recommend.controller;
 
+import com.ssafy.bookshy.common.response.CommonResponse;
 import com.ssafy.bookshy.domain.book.dto.BookListTotalResponseDto;
 import com.ssafy.bookshy.domain.recommend.dto.BookRecommendationResponseDto;
 import com.ssafy.bookshy.domain.recommend.service.BookRecommendationService;
@@ -13,8 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,24 +67,20 @@ public class RecommendationController {
             )
     })
     @GetMapping
-    public ResponseEntity<BookListTotalResponseDto> getRecommendations(
+    public CommonResponse<BookListTotalResponseDto> getRecommendations(
             @Parameter(description = "인증된 사용자 정보", required = true)
             @AuthenticationPrincipal Users users) {
 
-        try {
-            // 사용자 ID를 가져와서 로그 기록
-            Long userId = users.getUserId();
-            log.info("사용자 {} 맞춤 추천 요청", userId);
 
-            // 서비스에서 모든 추천 책 정보를 한 번에 가져옴
-            BookListTotalResponseDto recommendations = bookRecommendationService.getAllRecommendations(userId);
+        // 사용자 ID를 가져와서 로그 기록
+        Long userId = users.getUserId();
+        log.info("사용자 {} 맞춤 추천 요청", userId);
 
-            // 추천 결과를 클라이언트에 반환
-            return ResponseEntity.ok(recommendations);
-        } catch (Exception e) {
-            // 기타 예외 처리
-            log.error("책 추천 중 오류 발생: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        // 서비스에서 모든 추천 책 정보를 한 번에 가져옴
+        BookListTotalResponseDto recommendations = bookRecommendationService.getAllRecommendations(userId);
+
+        // 추천 결과를 클라이언트에 반환
+        return CommonResponse.success(recommendations);
+
     }
 }

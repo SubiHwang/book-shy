@@ -10,14 +10,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ErrorResponse {
-    private String code; //ENUM의 NAME을 사용
-    private String detail;
+    private String message;
+    private int status;
 
-    // 간단한 에러 생성
-    public static ErrorResponse of(String code, String detail) {
+    public static ErrorResponse of(String message, int status) {
         return ErrorResponse.builder()
-                .code(code)
-                .detail(detail)
+                .message(message)
+                .status(status)
                 .build();
     }
 

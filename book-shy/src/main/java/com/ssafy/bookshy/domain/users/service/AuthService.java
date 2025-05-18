@@ -18,26 +18,6 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
 
-//    /**
-//     * 회원가입
-//     *
-//     * @param signUpDto
-//     * @return
-//     */
-//    public JwtTokenDto signUp(SignUpDto signUpDto) {
-//        Users user = Users.builder()
-//                .nickname(signUpDto.getNickname())
-//                .address(signUpDto.getAddress())
-//                .gender(signUpDto.getGender())
-//                .age(signUpDto.getAge())
-//                .build();
-//
-//        Users savedUser = userService.create(user);
-//        JwtTokenDto jwtTokenDto = generateJwtTokenDto(savedUser);
-//
-//        return jwtTokenDto;
-//    }
-
 
     /**
      * 로그인

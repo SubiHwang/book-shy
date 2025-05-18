@@ -1,5 +1,7 @@
 package com.ssafy.bookshy.domain.matching.controller;
 
+import com.ssafy.bookshy.common.response.CommonResponse;
+import com.ssafy.bookshy.domain.library.service.LibraryService;
 import com.ssafy.bookshy.domain.matching.dto.*;
 import com.ssafy.bookshy.domain.matching.service.MatchingService;
 import com.ssafy.bookshy.domain.users.entity.Users;
@@ -23,17 +25,18 @@ import java.util.List;
 public class MatchingController {
 
     private final MatchingService matchingService;
+    private final LibraryService libraryService;
 
     @Operation(summary = "📋 매칭 후보 조회", description = "도서 조건이 맞는 상대방 중, 점수 높은 순으로 목록을 반환합니다.")
     @ApiResponse(responseCode = "200", description = "매칭 후보 조회 성공")
     @GetMapping("/candidates")
-    public ResponseEntity<MatchingPageResponseDto> getMatchingCandidates(
+    public CommonResponse<MatchingPageResponseDto> getMatchingCandidates(
             @Parameter(hidden = true) @AuthenticationPrincipal Users user,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "score") String sort
     ) {
         MatchingPageResponseDto response = matchingService.findPagedCandidates(user.getUserId(), page, 2, sort);
-        return ResponseEntity.ok(response);
+        return CommonResponse.success(response);
     }
 
     @Operation(
@@ -45,16 +48,40 @@ public class MatchingController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
     })
     @PostMapping("/chat")
-    public ResponseEntity<MatchResponseDto> chatMatching(
+    public CommonResponse<MatchResponseDto> chatMatching(
             @Parameter(hidden = true) @AuthenticationPrincipal Users user,
-            @RequestParam @Parameter(description = "상대 사용자 ID", example = "1") Long receiverId) {
+            @RequestParam @Parameter(description = "상대 사용자 ID", example = "1") Long receiverId,
+            @RequestBody MatchChatRequestDto requestDto) {
 
-        MatchChatRequestDto requestDto = new MatchChatRequestDto();
         requestDto.setReceiverId(receiverId);
-
         MatchResponseDto response = matchingService.chatMatching(user.getUserId(), requestDto);
+        return CommonResponse.success(response);
+    }
+
+    @Operation(
+            summary = "💬 단순 채팅방 생성",
+            description = """
+        로그인한 사용자가 상대방과 **단순 채팅방**을 생성합니다.  
+        책 정보를 포함하지 않고 자유롭게 대화를 시작하고 싶은 경우에 사용합니다.  
+        이미 채팅방이 존재하면 해당 채팅방을 반환하며,  
+        존재하지 않으면 새 채팅방을 만들고 `"채팅방이 생성되었습니다."`라는 시스템 메시지가 자동 등록됩니다.
+        """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "채팅방 생성 또는 재사용 성공"),
+            @ApiResponse(responseCode = "400", description = "요청이 잘못된 경우"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @PostMapping("/chat/simple")
+    public ResponseEntity<SimpleChatResponseDto> createSimpleChatRoom(
+            @Parameter(hidden = true) @AuthenticationPrincipal Users user,
+            @RequestParam @Parameter(description = "채팅을 시작할 상대 사용자 ID", example = "42") Long receiverId
+    ) {
+        SimpleChatResponseDto response = matchingService.createSimpleChatRoom(user.getUserId(), receiverId);
         return ResponseEntity.ok(response);
     }
+
 
     @Operation(
             summary = "📍 주변 이웃 목록 조회",
@@ -66,11 +93,11 @@ public class MatchingController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/neighbors")
-    public ResponseEntity<List<NearbyUserResponseDto>> getNearbyUsers(
+    public CommonResponse<List<NearbyUserResponseDto>> getNearbyUsers(
             @Parameter(hidden = true) @AuthenticationPrincipal Users user
     ) {
         List<NearbyUserResponseDto> neighbors = matchingService.findNearbyUsers(user);
-        return ResponseEntity.ok(neighbors);
+        return CommonResponse.success(neighbors);
     }
 
     @Operation(
@@ -83,11 +110,11 @@ public class MatchingController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/public/{userId}")
-    public ResponseEntity<NeighborLibraryResponseDto> getPublicLibraryByUserId(
+    public CommonResponse<NeighborLibraryResponseDto> getPublicLibraryByUserId(
             @Parameter(description = "공개 서재를 조회할 이웃 주민 ID", example = "1")
             @PathVariable Long userId,
             @AuthenticationPrincipal Users viewer
     ) {
-        return ResponseEntity.ok(matchingService.getNeighborLibrary(userId, viewer.getUserId()));
+        return CommonResponse.success(matchingService.getNeighborLibrary(userId, viewer.getUserId()));
     }
 }

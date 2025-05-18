@@ -3,7 +3,7 @@ package com.ssafy.bookshy.domain.users.service;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.ssafy.bookshy.common.exception.GlobalErrorCode;
-import com.ssafy.bookshy.common.exception.GlobalException;
+import com.ssafy.bookshy.common.response.BusinessException;
 import com.ssafy.bookshy.domain.users.config.KakaoConfig;
 import com.ssafy.bookshy.domain.users.dto.OAuthUserInfoDto;
 import lombok.RequiredArgsConstructor;
@@ -88,13 +88,11 @@ public class KakaoService {
 
         } catch (MalformedURLException e) {
             log.error("잘못된 URL 형식: {}", e.getMessage(), e);
-            throw new GlobalException(GlobalErrorCode.UNDEFINED_URL);
+            throw new BusinessException(GlobalErrorCode.UNDEFINED_URL);
         } catch (ProtocolException e) {
-            log.error("잘못된 프로토콜: {}", e.getMessage(), e);
-            throw new GlobalException(GlobalErrorCode.UNDEFINED_PROTOCOL);
+            throw new RuntimeException(e);
         } catch (IOException e) {
-            log.error("I/O 오류 발생: {}", e.getMessage(), e);
-            throw new GlobalException(GlobalErrorCode.INTERNAL_SERVER_ERROR);
+            throw new RuntimeException(e);
         }
     }
 
@@ -179,10 +177,10 @@ public class KakaoService {
             return accessToken;
         } catch (MalformedURLException e) {
             log.error("잘못된 URL 형식: {}", e.getMessage(), e);
-            throw new GlobalException(GlobalErrorCode.UNDEFINED_URL);
+            throw new BusinessException(GlobalErrorCode.UNDEFINED_URL);
         } catch (IOException e) {
             log.error("토큰 발급 중 I/O 오류: {}", e.getMessage(), e);
-            throw new GlobalException(GlobalErrorCode.INTERNAL_SERVER_ERROR);
+            throw new RuntimeException(e);
         }
     }
 

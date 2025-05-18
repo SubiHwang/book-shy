@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.trending.controller;
 
+import com.ssafy.bookshy.common.response.CommonResponse;
 import com.ssafy.bookshy.domain.trending.dto.TrendingListResponseDto;
 import com.ssafy.bookshy.domain.trending.service.TrendingSearchService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,8 +37,8 @@ public class TrendingSearchContoller {
             )
     })
     @GetMapping
-    public ResponseEntity<TrendingListResponseDto> getTrendingSearchList() {
+    public CommonResponse<TrendingListResponseDto> getTrendingSearchList() {
         TrendingListResponseDto trendingListResponseDto = trendingSearchService.getTrendingSearchList();
-        return ResponseEntity.ok(trendingListResponseDto);
+        return CommonResponse.success(trendingListResponseDto);
     }
 }

@@ -1,6 +1,6 @@
 package com.ssafy.bookshy.domain.autocomplete.service;
 
-import com.ssafy.bookshy.common.exception.GlobalException;
+import com.ssafy.bookshy.common.response.BusinessException;
 import com.ssafy.bookshy.domain.autocomplete.dto.AutoCompleteItem;
 import com.ssafy.bookshy.domain.autocomplete.dto.AutoCompleteResponseDto;
 import com.ssafy.bookshy.domain.autocomplete.exception.AutoCompletionErrorCode;
@@ -47,7 +47,7 @@ public class AutoCompleteService {
 
             if (bookListTotalResponseDto == null || bookListTotalResponseDto.getBooks() == null) {
                 log.warn("알라딘 API 응답이 null - query: {}", query);
-                throw new GlobalException(AutoCompletionErrorCode.NO_RESULTS_FOUND);
+                throw new BusinessException(AutoCompletionErrorCode.NO_RESULTS_FOUND);
             }
 
             log.info("알라딘 API 응답 받음 - 책 개수: {}", bookListTotalResponseDto.getTotal());
@@ -75,16 +75,16 @@ public class AutoCompleteService {
                     .items(limitedItems)
                     .build();
 
-        } catch (GlobalException e) {
+        } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
             log.error("💥 알라딘 API 호출 중 오류 발생 - query: {}", query, e);
 
             if (e.getMessage() != null && e.getMessage().contains("timeout")) {
-                throw new GlobalException(AutoCompletionErrorCode.SEARCH_TIMEOUT);
+                throw new BusinessException(AutoCompletionErrorCode.SEARCH_TIMEOUT);
             }
 
-            throw new GlobalException(AutoCompletionErrorCode.AUTOCOMPLETE_SERVICE_UNAVAILABLE);
+            throw new BusinessException(AutoCompletionErrorCode.AUTOCOMPLETE_SERVICE_UNAVAILABLE);
         }
     }
 
@@ -94,24 +94,24 @@ public class AutoCompleteService {
     private void validateQuery(String query) {
         if (query == null || query.trim().isEmpty()) {
             log.debug("📍 쿼리가 null이거나 비어있음");
-            throw new GlobalException(AutoCompletionErrorCode.QUERY_TOO_SHORT);
+            throw new BusinessException(AutoCompletionErrorCode.QUERY_TOO_SHORT);
         }
 
         String trimmedQuery = query.trim();
 
         if (trimmedQuery.length() < MIN_QUERY_LENGTH) {
             log.debug("📍 쿼리가 너무 짧음: {}", trimmedQuery);
-            throw new GlobalException(AutoCompletionErrorCode.QUERY_TOO_SHORT);
+            throw new BusinessException(AutoCompletionErrorCode.QUERY_TOO_SHORT);
         }
 
         if (trimmedQuery.length() > MAX_QUERY_LENGTH) {
             log.debug("📍 쿼리가 너무 김: {}", trimmedQuery.length());
-            throw new GlobalException(AutoCompletionErrorCode.QUERY_TOO_LONG);
+            throw new BusinessException(AutoCompletionErrorCode.QUERY_TOO_LONG);
         }
 
         if (trimmedQuery.matches(".*" + INVALID_CHAR_PATTERN + ".*")) {
             log.debug("📍 허용되지 않는 문자 포함: {}", trimmedQuery);
-            throw new GlobalException(AutoCompletionErrorCode.INVALID_CHARACTERS);
+            throw new BusinessException(AutoCompletionErrorCode.INVALID_CHARACTERS);
         }
     }
 
@@ -166,7 +166,7 @@ public class AutoCompleteService {
 
         } catch (Exception e) {
             log.error("데이터 변환 중 오류 발생", e);
-            throw new GlobalException(AutoCompletionErrorCode.DATABASE_ERROR);
+            throw new BusinessException(AutoCompletionErrorCode.DATABASE_ERROR);
         }
     }
 

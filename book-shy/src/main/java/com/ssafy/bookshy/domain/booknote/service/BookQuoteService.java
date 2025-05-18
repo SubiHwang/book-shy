@@ -50,12 +50,15 @@ public class BookQuoteService {
         return bookQuoteRepository.findAll().stream()
                 .filter(q -> q.getUserId().equals(userId))
                 .map(q -> {
-                    Book book = bookRepository.findById(q.getBookId())
-                            .orElseThrow(() -> new IllegalArgumentException("도서 정보를 찾을 수 없습니다."));
+                    Long bookId = q.getBookId();
+                    Book book = bookRepository.findById(bookId)
+                            .orElseThrow(() ->
+                                    new IllegalArgumentException("❌ 도서 정보를 찾을 수 없습니다. [quoteId=" + q.getQuoteId() + ", bookId=" + bookId + "]"));
                     return BookQuoteResponseDto.from(q, book);
                 })
                 .toList();
     }
+
 
 
     /**

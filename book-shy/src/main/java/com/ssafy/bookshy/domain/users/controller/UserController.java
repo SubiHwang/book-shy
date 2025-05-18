@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.users.controller;
 
+import com.ssafy.bookshy.common.response.CommonResponse;
 import com.ssafy.bookshy.domain.users.dto.UserAddressUpdateRequestDto;
 import com.ssafy.bookshy.domain.users.dto.UserProfileResponseDto;
 import com.ssafy.bookshy.domain.users.dto.UserProfileUpdateRequestDto;
@@ -16,7 +17,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,8 +46,8 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류 또는 데이터 조회 실패 ❌")
     })
     @GetMapping("/profile")
-    public ResponseEntity<UserProfileResponseDto> getProfile(@AuthenticationPrincipal Users user) {
-        return ResponseEntity.ok(userService.getUserProfile(user.getUserId()));
+    public CommonResponse<UserProfileResponseDto> getProfile(@AuthenticationPrincipal Users user) {
+        return CommonResponse.success(userService.getUserProfile(user.getUserId()));
     }
 
     @Operation(
@@ -64,7 +64,7 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류 또는 DB 저장 실패 ❌")
     })
     @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(
+    public CommonResponse<?> updateProfile(
             @AuthenticationPrincipal Users user,
 
             @RequestBody(
@@ -89,14 +89,7 @@ public class UserController {
             UserProfileUpdateRequestDto requestDto
     ) {
         log.info("latitude: {}, longitude: {}", requestDto.getLatitude(), requestDto.getLongitude());
-
-        userService.updateUserProfile(user.getUserId(), requestDto);
-        return ResponseEntity.ok().body(
-                Map.of(
-                        "status", "SUCCESS",
-                        "message", "프로필이 성공적으로 수정되었습니다."
-                )
-        );
+        return CommonResponse.success(userService.updateUserProfile(user.getUserId(), requestDto));
     }
 
     @Operation(
@@ -113,7 +106,7 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류 또는 이미지 저장 실패 ❌")
     })
     @PutMapping(value = "/profile/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Map<String, Object>> updateProfileImage(
+    public CommonResponse<Map<String, Object>> updateProfileImage(
             @AuthenticationPrincipal Users user,
             @RequestPart("imageFile") MultipartFile imageFile
     ) {
@@ -122,7 +115,7 @@ public class UserController {
         response.put("imageUrl", imageUrl);
         response.put("status", "SUCCESS");
         response.put("message", "프로필 이미지가 업로드되었습니다.");
-        return ResponseEntity.ok(response);
+        return CommonResponse.success(response);
     }
 
     @Operation(
@@ -140,7 +133,7 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류 또는 DB 저장 실패 ❌")
     })
     @PutMapping("/profile/address")
-    public ResponseEntity<Map<String, Object>> updateAddressOnly(
+    public CommonResponse updateAddressOnly(
             @AuthenticationPrincipal Users user,
             @RequestBody(
                     description = "📦 주소 및 위치 정보",
@@ -159,9 +152,6 @@ public class UserController {
             @org.springframework.web.bind.annotation.RequestBody UserAddressUpdateRequestDto requestDto
     ) {
         userService.updateUserAddress(user.getUserId(), requestDto.getAddress(), requestDto.getLatitude(), requestDto.getLongitude());
-        return ResponseEntity.ok(Map.of(
-                "status", "SUCCESS",
-                "message", "주소가 성공적으로 수정되었습니다."
-        ));
+        return CommonResponse.success();
     }
 }
