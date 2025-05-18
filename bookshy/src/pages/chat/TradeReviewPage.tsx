@@ -128,10 +128,25 @@ const TradeReviewPage = () => {
       return;
     }
 
+    // 📌 매칭 당시 + 추가 선택 도서 중 선택된 것만 추출
+    const allBooks = [...defaultBooks, ...myLibraryBooks];
+    const selectedReviewedBooks: ReviewedBook[] = allBooks
+      .filter((book) => selectedBooks.includes(book.title))
+      .map((book) => ({
+        title: book.title,
+        bookId: book.bookId,
+        libraryId: book.libraryId,
+        aladinItemId: book.aladinItemId,
+        fromMatching: defaultBooks.some((b) => b.title === book.title),
+      }));
+
     const payload: TradeReviewRequest = {
       requestId: calendar.requestId,
+      reviewerId: 1, // TODO: 사용자 정보에서 가져오기
+      revieweeId: 2, // TODO: 상대방 ID 추출
+      rating: (ratings.condition + ratings.punctuality + ratings.manner) / 3,
       ratings,
-      selectedBookTitles: selectedBooks,
+      books: selectedReviewedBooks,
     };
 
     try {
