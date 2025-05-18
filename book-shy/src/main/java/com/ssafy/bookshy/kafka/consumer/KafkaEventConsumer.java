@@ -82,6 +82,12 @@ public class KafkaEventConsumer {
             MatchSuccessDto event = record.value();
             log.info("🤝 Match Success Event received: {}", event);
 
+            // 💬 채팅방 조회 (있다고 가정함 - 이미 생성된 상태)
+            Long matchId = event.getMatchId();
+            Long chatRoomId = chatRoomService.findByMatchId(matchId)
+                    .map(ChatRoom::getId)
+                    .orElseThrow(() -> new IllegalStateException("❌ 해당 matchId에 대한 채팅방이 존재하지 않습니다. matchId = " + matchId));
+
             // 🔔 매칭 완료 알림 전송
             String senderName = userRepository.findById(event.getUserAId())
                     .map(Users::getNickname)
@@ -91,7 +97,7 @@ public class KafkaEventConsumer {
                     MatchCompleteFcmDto.builder()
                             .receiverId(event.getUserBId())
                             .partnerName(senderName)
-                            .chatRoomId(chatRoom.getId())
+                            .chatRoomId(chatRoomId)
                             .build()
             );
 
@@ -100,6 +106,7 @@ public class KafkaEventConsumer {
             log.error("❌ Error processing match.success event: {}", record.value(), e);
         }
     }
+
 
     /**
      * 📦 교환 완료 이벤트 수신 처리
