@@ -66,7 +66,7 @@ function ChatList() {
 
   if (isLoading) {
     return (
-      <div className="h-[100svh] flex items-center justify-center bg-light-bg px-4">
+      <div className="flex items-center justify-center bg-light-bg px-4">
         <span className="text-sm text-light-text-muted">불러오는 중...</span>
       </div>
     );
@@ -74,14 +74,14 @@ function ChatList() {
 
   if (isError || !data) {
     return (
-      <div className="h-[100svh] flex items-center justify-center bg-light-bg px-4">
+      <div className="flex items-center justify-center bg-light-bg px-4">
         <span className="text-sm text-light-status-error">채팅 목록을 불러올 수 없습니다.</span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-[100dvh] bg-light-bg px-4 py-4 flex flex-col gap-3">
+    <div className="bg-light-bg px-4 py-4 flex flex-col gap-3">
       {data.length === 0 ? (
         <div className="flex-grow flex items-center justify-center text-sm text-light-text-muted">
           진행 중인 채팅이 없습니다.
