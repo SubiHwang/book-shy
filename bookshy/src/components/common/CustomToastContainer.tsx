@@ -24,7 +24,7 @@ const CustomToastContainer: React.FC = () => {
   const containerProps = {
     position: 'top-center' as const,
     transition: smoothSlide,
-    autoClose: 10000,
+    autoClose: 1000,
     hideProgressBar: true,
     newestOnTop: true,
     closeOnClick: true,
@@ -45,7 +45,7 @@ const CustomToastContainer: React.FC = () => {
     <ToastContainer
       {...containerProps}
       toastClassName={
-        () => 'bg-[#1E1E1E] text-white border-0 shadow-lg mb-2 overflow-hidden rounded-lg' // 더 둥근 모서리
+        () => 'flex bg-[#6c6864] text-white border-0 shadow-lg w-full p-3 mb-2 overflow-hidden rounded-lg' // 더 둥근 모서리
       }
     />
   );
