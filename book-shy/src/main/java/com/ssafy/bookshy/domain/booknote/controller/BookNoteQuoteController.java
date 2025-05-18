@@ -13,8 +13,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,13 +55,13 @@ public class BookNoteQuoteController {
                     @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
             }
     )
-    public ResponseEntity<BookNoteQuoteResponse> createNoteAndQuote(
+    public CommonResponse<BookNoteQuoteResponse> createNoteAndQuote(
             @RequestBody BookNoteQuoteRequest request,
             @AuthenticationPrincipal Users user
     ) {
         request.setUserId(user.getUserId()); // ✅ 인증된 사용자 ID 설정
         BookNoteQuoteResponse response = bookNoteQuoteService.registerNoteAndQuote(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return CommonResponse.success(response);
     }
 
     @PutMapping
