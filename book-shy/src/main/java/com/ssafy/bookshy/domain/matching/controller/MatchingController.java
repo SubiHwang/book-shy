@@ -35,7 +35,7 @@ public class MatchingController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "score") String sort
     ) {
-        MatchingPageResponseDto response = matchingService.findPagedCandidates(user.getUserId(), page, 2, sort);
+        MatchingPageResponseDto response = matchingService.findPagedCandidates(user.getUserId(), page, 8, sort);
         return CommonResponse.success(response);
     }
 

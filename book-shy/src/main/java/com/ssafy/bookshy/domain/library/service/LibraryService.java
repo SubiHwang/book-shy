@@ -345,8 +345,4 @@ public class LibraryService {
                 .map(lib -> LibraryWithTripResponseDto.from(lib, tripBookIds.contains(lib.getBook().getId())))
                 .toList();
     }
-
-    public boolean isBookInLibrary(Long userId, Long itemId) {
-        return libraryRepository.existsByUserUserIdAndBookItemId(userId, itemId);
-    }
 }

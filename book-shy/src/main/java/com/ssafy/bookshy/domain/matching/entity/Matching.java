@@ -19,7 +19,6 @@ public class Matching {
     private Long matchId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = true)
     @Builder.Default
     private Status status = Status.ACCEPTED;
 
@@ -33,6 +32,6 @@ public class Matching {
     private Long receiverId;
 
     public enum Status {
-        ACCEPTED // 수락됨
+        ACCEPTED
     }
 }
