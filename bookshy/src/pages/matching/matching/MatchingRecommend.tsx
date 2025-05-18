@@ -11,6 +11,7 @@ import { RefreshCw } from 'lucide-react';
 import MatchingHeader from '@/components/matching/matching/MatchingHeader';
 import MatchingEndMessage from '@/components/matching/matching/MatchingEndMessage';
 import ScrollToTopButton from '@/components/matching/matching/ScrollToTopButton';
+import SortingChips from '@/components/matching/matching/SortingChips';
 
 const MatchingRecommend: FC = () => {
   // 페이지네이션 관련 상태
@@ -19,12 +20,14 @@ const MatchingRecommend: FC = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  // 정렬 옵션 상태 추가
+  const [sortOption, setSortOption] = useState<string>('score');
 
   // 첫 페이지 데이터 가져오기
   const { data, isLoading, refetch } = useQuery<MatchingRecommendationResponse>({
-    queryKey: ['matching-list', currentPage],
+    queryKey: ['matching-list', currentPage, sortOption],
     queryFn: async () => {
-      return await getMatchingList(currentPage);
+      return await getMatchingList(currentPage, sortOption);
     },
     enabled: true, // 컴포넌트 마운트 시 자동으로 쿼리 실행
   });
@@ -77,6 +80,15 @@ const MatchingRecommend: FC = () => {
     await refetch();
   };
 
+  // 정렬 변경 핸들러
+  const handleSortChange = (newSortOption: string) => {
+    if (sortOption !== newSortOption) {
+      setSortOption(newSortOption);
+      setCurrentPage(1); // 정렬 변경 시 첫 페이지로 리셋
+      setMatchings([]); // 기존 데이터 초기화
+    }
+  };
+
   // 매칭이 충분한지 확인하는 상수 (3개 이하면 적다고 판단)
   const MIN_SUFFICIENT_MATCHES = 3;
   const hasSufficientMatches = totalItems > MIN_SUFFICIENT_MATCHES;
@@ -103,6 +115,9 @@ const MatchingRecommend: FC = () => {
             </button>
           )}
         </div>
+
+        {/* 정렬 칩 컴포넌트 추가 */}
+        <SortingChips onSortChange={handleSortChange} defaultSort={sortOption} />
       </div>
 
       {isLoading && currentPage === 1 ? (
