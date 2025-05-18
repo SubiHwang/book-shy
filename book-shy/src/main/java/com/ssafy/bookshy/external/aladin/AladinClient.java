@@ -68,6 +68,8 @@ public class AladinClient {
 
             throw new AladinException(AladinErrorCode.ITEM_NOT_FOUND);
 
+        } catch (AladinException ae) {
+            throw ae;
         } catch (Exception e) {
             throw new AladinException(AladinErrorCode.API_CALL_FAILED);
         }
@@ -81,12 +83,18 @@ public class AladinClient {
                 return BookResponseDto.fromAladin(itemArray.get(0));
             }
             throw new AladinException(AladinErrorCode.ITEM_NOT_FOUND);
+        } catch (AladinException ae) {
+            throw ae;
         } catch (Exception e) {
             throw new AladinException(AladinErrorCode.API_CALL_FAILED);
         }
     }
 
     public List<BookResponseDto> searchByKeyword(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            throw new AladinException(AladinErrorCode.INVALID_QUERY);
+        }
+
         try {
             String url = String.format(
                     "%s/ItemSearch.aspx?ttbkey=%s&Query=%s&QueryType=Title&MaxResults=50&Sort=Accuracy&output=js",
@@ -108,12 +116,18 @@ public class AladinClient {
 
             return list;
 
+        } catch (AladinException ae) {
+            throw ae;
         } catch (Exception e) {
             throw new AladinException(AladinErrorCode.API_CALL_FAILED);
         }
     }
 
     public BookListTotalResponseDto searchListPreview(String query, int start) {
+        if (query == null || query.trim().isEmpty()) {
+            throw new AladinException(AladinErrorCode.INVALID_QUERY);
+        }
+
         try {
             String url = String.format(
                     "%s/ItemSearch.aspx?ttbkey=%s&Query=%s&QueryType=Keyword&SearchTarget=Book&MaxResults=50&Start=%d&OptResult=bookinfo&Sort=Accuracy&output=js",
@@ -155,12 +169,18 @@ public class AladinClient {
                     .books(result)
                     .build();
 
+        } catch (AladinException ae) {
+            throw ae;
         } catch (Exception e) {
             throw new AladinException(AladinErrorCode.API_CALL_FAILED);
         }
     }
 
     public List<BookListResponseDto> searchListAuthor(String query, int start) {
+        if (query == null || query.trim().isEmpty()) {
+            throw new AladinException(AladinErrorCode.INVALID_QUERY);
+        }
+
         try {
             String url = String.format(
                     "%s/ItemSearch.aspx?ttbkey=%s&Query=%s&QueryType=Keyword&SearchTarget=Book&MaxResults=50&Start=%d&OptResult=bookinfo&Sort=Accuracy&output=js",
@@ -196,6 +216,8 @@ public class AladinClient {
 
             return result;
 
+        } catch (AladinException ae) {
+            throw ae;
         } catch (Exception e) {
             throw new AladinException(AladinErrorCode.API_CALL_FAILED);
         }
@@ -232,6 +254,8 @@ public class AladinClient {
 
             return recommendedBooks;
 
+        } catch (AladinException ae) {
+            throw ae;
         } catch (Exception e) {
             throw new AladinException(AladinErrorCode.API_CALL_FAILED);
         }
@@ -260,6 +284,8 @@ public class AladinClient {
 
             return recommendedBooks;
 
+        } catch (AladinException ae) {
+            throw ae;
         } catch (Exception e) {
             throw new AladinException(AladinErrorCode.API_CALL_FAILED);
         }
