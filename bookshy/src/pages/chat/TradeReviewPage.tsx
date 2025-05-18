@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { fetchUserPublicLibrary } from '@/services/mylibrary/libraryApi';
-import type { ChatRoomSummary } from '@/types/chat/chat';
 import type { Library } from '@/types/mylibrary/library';
 
 import StarRating from '@/components/chat/tradereview/StarRating';
@@ -12,9 +11,14 @@ const TradeReviewPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as {
-    chatSummary?: ChatRoomSummary & {
-      myBookId: number[];
-      myBookName: string[];
+    chatSummary?: {
+      partnerName: string;
+      partnerProfileImage: string;
+      bookShyScore?: number;
+      myBookId?: number[];
+      myBookName?: string[];
+      otherBookId?: number[];
+      otherBookName?: string[];
     };
   };
 
@@ -35,21 +39,6 @@ const TradeReviewPage = () => {
     };
   }, [activeBook]);
 
-  const toggleBook = (title: string) => {
-    setSelectedBooks((prev) =>
-      prev.includes(title) ? prev.filter((b) => b !== title) : [...prev, title],
-    );
-  };
-
-  const handleSubmit = () => {
-    if (Object.values(ratings).some((v) => v === 0)) {
-      alert('모든 항목을 평가해주세요.');
-      return;
-    }
-    console.log('📝 제출 데이터:', { ratings, selectedBooks });
-    navigate(-1);
-  };
-
   if (!state?.chatSummary) {
     return (
       <div className="min-h-screen flex items-center justify-center text-center text-gray-500 px-4">
@@ -67,19 +56,39 @@ const TradeReviewPage = () => {
     );
   }
 
-  const { partnerName, partnerProfileImage, myBookId, myBookName } = state.chatSummary;
+  const { partnerName, partnerProfileImage, myBookId = [], myBookName = [] } = state.chatSummary;
 
-  // ✅ 매칭 당시 책들을 Library 형태로 변환
-  const defaultBooks: Library[] = myBookId.map((id, idx) => ({
-    libraryId: -id,
-    bookId: id,
-    aladinItemId: -id,
-    public: false,
-    title: myBookName[idx],
-    author: '',
-    isbn13: '',
-    coverImageUrl: '', // or placeholder
-  }));
+  const toggleBook = (title: string) => {
+    setSelectedBooks((prev) =>
+      prev.includes(title) ? prev.filter((b) => b !== title) : [...prev, title],
+    );
+  };
+
+  const handleSubmit = () => {
+    if (Object.values(ratings).some((v) => v === 0)) {
+      alert('모든 항목을 평가해주세요.');
+      return;
+    }
+    console.log('📝 제출 데이터:', {
+      ratings,
+      selectedBookTitles: selectedBooks,
+    });
+    navigate(-1);
+  };
+
+  const defaultBooks: Library[] =
+    myBookId.length === myBookName.length
+      ? myBookId.map((id, idx) => ({
+          libraryId: -id,
+          bookId: id,
+          aladinItemId: -id,
+          public: false,
+          title: myBookName[idx],
+          author: '',
+          isbn13: '',
+          coverImageUrl: '', // 개선 여지
+        }))
+      : [];
 
   return (
     <div className="min-h-screen bg-light-bg pb-8 relative">
@@ -110,7 +119,7 @@ const TradeReviewPage = () => {
           setShowMyLibrary={setShowMyLibrary}
           myLibraryBooks={myLibraryBooks}
           onViewDetail={setActiveBook}
-          defaultBooks={defaultBooks} // ✅ 매칭 당시 책 목록 전달
+          defaultBooks={defaultBooks}
         />
 
         {/* 별점 영역 */}
