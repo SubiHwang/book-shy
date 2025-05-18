@@ -21,7 +21,7 @@ const ScheduleModal: FC<Props> = ({
   requestId,
 }) => {
   const today = new Date();
-  const [tab, setTab] = useState<'대여' | '교환'>('대여');
+  const [tab, setTab] = useState<'대여' | '교환'>('교환');
   const [startDate, setStartDate] = useState<string | null>(null);
   const [endDate, setEndDate] = useState<string | null>(null);
   const [showTimePickerFor, setShowTimePickerFor] = useState<'대여' | '반납' | null>(null);
@@ -154,16 +154,16 @@ const ScheduleModal: FC<Props> = ({
 
         {/* 탭 */}
         <div className="flex mb-3 border-b border-light-bg-shade">
-          {['책 대여 하기', '책 교환 하기'].map((label, idx) => (
+          {['책 교환 하기', '책 대여 하기'].map((label, idx) => (
             <button
               key={label}
               onClick={() => {
-                setTab(idx === 0 ? '대여' : '교환');
+                setTab(idx === 0 ? '교환' : '대여');
                 setStartDate(null);
                 setEndDate(null);
               }}
               className={`flex-1 py-2 text-sm font-medium ${
-                tab === (idx === 0 ? '대여' : '교환')
+                tab === (idx === 0 ? '교환' : '대여')
                   ? 'text-primary border-b-2 border-primary'
                   : 'text-light-text-muted'
               }`}

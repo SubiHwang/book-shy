@@ -10,6 +10,7 @@ interface Props {
   onSelectEmoji?: (emoji: string | null) => void;
   showEmojiSelector?: boolean;
   selectedEmoji?: string;
+  onCloseEmoji?: () => void;
 }
 
 function ChatMessageItem({
@@ -20,6 +21,7 @@ function ChatMessageItem({
   onSelectEmoji,
   showEmojiSelector,
   selectedEmoji,
+  onCloseEmoji,
 }: Props) {
   const touchTimer = useRef<NodeJS.Timeout | null>(null);
   const selectorRef = useRef<HTMLDivElement | null>(null);
@@ -29,7 +31,7 @@ function ChatMessageItem({
 
     const handleClickOutside = (e: MouseEvent) => {
       if (selectorRef.current && !selectorRef.current.contains(e.target as Node)) {
-        onSelectEmoji?.(null);
+        onCloseEmoji?.();
       }
     };
 
