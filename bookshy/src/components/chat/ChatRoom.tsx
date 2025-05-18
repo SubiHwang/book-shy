@@ -349,6 +349,7 @@ function ChatRoom({
                   onRightClick={() => handleLongPressOrRightClick(msg.id)}
                   onSelectEmoji={(emoji) => handleSelectEmoji(msg.id, emoji ?? '')}
                   selectedEmoji={Array.isArray(msg.emoji) ? msg.emoji[0] : msg.emoji}
+                  onCloseEmoji={() => setEmojiTargetId(null)}
                 />
               )}
             </div>
