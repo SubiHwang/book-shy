@@ -3,7 +3,14 @@ import type { UserProfile, AddressUpdateRequest } from '@/types/User/user';
 
 // 프로필 조회
 export const fetchUserProfile = async (): Promise<UserProfile> => {
-  return authAxiosInstance.get('/user/profile');
+  try {
+    const res = await authAxiosInstance.get<string, UserProfile>('/user/profile');
+    console.log(res)
+    return res;
+  } catch (error) {
+    console.log(error)
+    return Promise.reject(error);
+  }
 };
 
 // 프로필 수정
