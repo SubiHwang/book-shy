@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.users.exception;
 
+import com.ssafy.bookshy.common.response.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -17,10 +18,4 @@ public enum UserErrorCode implements ErrorCode {
 
     private final int status;
     private final String message;
-
-    @Override
-    public String code() {
-        return name();
-    }
-
 }

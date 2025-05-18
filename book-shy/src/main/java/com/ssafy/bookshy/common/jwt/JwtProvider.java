@@ -4,6 +4,7 @@ import com.ssafy.bookshy.common.exception.JwtErrorCode;
 import com.ssafy.bookshy.common.exception.JwtException;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.exception.UserErrorCode;
+import com.ssafy.bookshy.domain.users.exception.UserException;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import com.ssafy.bookshy.domain.users.service.UserService;
 import io.jsonwebtoken.Claims;
@@ -116,7 +117,7 @@ public class JwtProvider {
     public Authentication getAuthentication(String token) {
         UserDetails userDetails = userService.loadUserByNickname(this.getNickname(token));
         if (userDetails == null) {
-            throw new UserExcpetion(UserErrorCode.INVALID_USER_ID);
+            throw new UserException(UserErrorCode.INVALID_USER_ID);
         }
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }

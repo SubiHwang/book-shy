@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
      * 비즈니스 예외 처리
      */
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
+    public ResponseEntity<CommonResponse<Void>> handleBusinessException(BusinessException e) {
         ErrorCode errorCode = e.getErrorCode();
         log.error("비즈니스 예외 발생: {}, {}", errorCode.getStatus(), e.getMessage());
 
@@ -26,14 +26,14 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(errorCode.getStatus())
-                .body(ApiResponse.fail(errorResponse));
+                .body(CommonResponse.fail(errorResponse));
     }
 
     /**
      * 잘못된 JSON 요청 처리
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    protected ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+    protected ResponseEntity<CommonResponse<Void>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         log.error("잘못된 JSON 요청: {}", e.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.of(
@@ -42,14 +42,14 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.fail(errorResponse));
+                .body(CommonResponse.fail(errorResponse));
     }
 
     /**
      * 내부 서버 오류 처리
      */
     @ExceptionHandler(Exception.class)
-    protected ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
+    protected ResponseEntity<CommonResponse<Void>> handleException(Exception e) {
         log.error("내부 서버 오류 발생", e);
 
         ErrorResponse errorResponse = ErrorResponse.of(
@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.fail(errorResponse));
+                .body(CommonResponse.fail(errorResponse));
     }
 
 }

@@ -57,7 +57,6 @@ public class LibraryService {
      * @param isbn13   도서의 ISBN13
      * @param isPublic 공개 여부 (null일 경우 false로 처리)
      * @return 등록된 도서의 LibraryResponseDto
-     * @throws GlobalException 도서를 찾을 수 없거나 이미 등록된 경우 예외 발생
      */
     @Transactional
     public LibraryResponseDto registerByIsbn(Long userId, String isbn13, Boolean isPublic) {
@@ -66,9 +65,9 @@ public class LibraryService {
         Book book = bookRepository.findByUserAndIsbn(user, isbn13).orElseGet(() -> {
             BookResponseDto response = aladinClient.searchByIsbn13(isbn13);
 
-            if (response.getTitle() == null) {
-                throw new GlobalException(GlobalErrorCode.RESOURCE_NOT_FOUND);
-            }
+//            if (response.getTitle() == null) {
+//                throw new GlobalException(GlobalErrorCode.RESOURCE_NOT_FOUND);
+//            }
 
             Book newBook = Book.builder()
                     .itemId(response.getItemId())
@@ -90,9 +89,9 @@ public class LibraryService {
             return bookRepository.save(newBook);
         });
 
-        if (libraryRepository.existsByUserAndBook(user, book)) {
-            throw new GlobalException(GlobalErrorCode.INVALID_INPUT_VALUE);
-        }
+//        if (libraryRepository.existsByUserAndBook(user, book)) {
+//            throw new GlobalException(GlobalErrorCode.INVALID_INPUT_VALUE);
+//        }
 
         wishRepository.deleteByUserAndBook(user, book);
 
@@ -114,9 +113,9 @@ public class LibraryService {
      */
     @Transactional
     public void removeFromLibrary(Long libraryId) {
-        if (!libraryRepository.existsById(libraryId)) {
-            throw new GlobalException(GlobalErrorCode.RESOURCE_NOT_FOUND);
-        }
+//        if (!libraryRepository.existsById(libraryId)) {
+//            throw new GlobalException(GlobalErrorCode.RESOURCE_NOT_FOUND);
+//        }
         libraryRepository.deleteById(libraryId);
     }
 
@@ -130,7 +129,7 @@ public class LibraryService {
     @Transactional
     public void setPublic(Long libraryId, boolean isPublic) {
         Library library = libraryRepository.findById(libraryId)
-                .orElseThrow(() -> new GlobalException(GlobalErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new RuntimeException());
         library.setPublic(isPublic);
     }
 

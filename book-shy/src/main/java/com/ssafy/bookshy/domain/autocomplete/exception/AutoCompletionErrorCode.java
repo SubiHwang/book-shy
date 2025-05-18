@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.autocomplete.exception;
 
+import com.ssafy.bookshy.common.response.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -35,10 +36,5 @@ public enum AutoCompletionErrorCode implements ErrorCode {
 
     private final int status;
     private final String message;
-
-    @Override
-    public String code() {
-        return name();
-    }
 
 }

@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.users.controller;
 
+import com.ssafy.bookshy.common.response.CommonResponse;
 import com.ssafy.bookshy.domain.users.config.KakaoConfig;
 import com.ssafy.bookshy.domain.users.dto.JwtTokenDto;
 import com.ssafy.bookshy.domain.users.dto.OAuthTokenDto;
@@ -18,8 +19,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,27 +35,6 @@ public class AuthController {
     private final AuthService authService;
     private final AuthTokenService authTokenService;
     private final KakaoConfig kakaoConfig;
-
-//    @PostMapping("/sign-up")
-//    @Operation(
-//            summary = "회원가입 메서드",
-//            description = "사용자가 회원가입을 하기 위한 메서드입니다.",
-//            tags = {"Auth"}
-//    )
-//    @ApiResponses({
-//            @ApiResponse(
-//                    responseCode = "200",
-//                    description = "회원가입 성공",
-//                    content = @Content(schema = @Schema(implementation = JwtTokenDto.class))
-//            ),
-//            @ApiResponse(responseCode = "400", description = "비밀번호 형식 부적합(영문, 숫자, 특수문자를 포함한 8자리 이상)"),
-//            @ApiResponse(responseCode = "400", description = "닉네임 글자 수 부적합(12자리 이하)"),
-//            @ApiResponse(responseCode = "409", description = "이미 존재하는 아이디")
-//    })
-//    public ResponseEntity<JwtTokenDto> signUp(@RequestBody SignUpDto signUpDto) {
-//        JwtTokenDto jwtTokenDto = authService.signUp(signUpDto);
-//        return ResponseEntity.ok(jwtTokenDto);
-//    }
 
     @PostMapping("/refresh")
     @Operation(
@@ -80,7 +58,7 @@ public class AuthController {
                     content = @Content
             )
     })
-    public ResponseEntity<JwtTokenDto> reissueAccessToken(@Parameter(description = "FCM 토큰 및 리프레시 토큰 정보", required = true)
+    public CommonResponse<JwtTokenDto> reissueAccessToken(@Parameter(description = "FCM 토큰 및 리프레시 토큰 정보", required = true)
                                                           @RequestBody RefreshDto refreshDto) {
 
         log.info("🔵 토큰 재발행 요청 시작");
@@ -117,7 +95,7 @@ public class AuthController {
             log.info("✅ 토큰 저장 완료");
 
             log.info("✅ 토큰 재발행 요청 완료");
-            return ResponseEntity.ok(jwtTokenDto);
+            return CommonResponse.success(jwtTokenDto);
 
         } catch (Exception e) {
             log.error("❌ 토큰 재발행 중 에러 발생", e);
@@ -147,7 +125,7 @@ public class AuthController {
                     content = @Content
             )
     })
-    public ResponseEntity<JwtTokenDto> kakaoSignIn(
+    public CommonResponse<JwtTokenDto> kakaoSignIn(
             @Parameter(description = "카카오 OAuth 토큰 정보", required = true)
             @RequestBody OAuthTokenDto oAuthTokenDto,
             HttpServletRequest request) {
@@ -164,7 +142,7 @@ public class AuthController {
         String redirectUri = determineRedirectUri(frontendUrl);
 
         JwtTokenDto jwtTokenDto = authService.signIn(oAuthTokenDto, redirectUri);
-        return ResponseEntity.ok(jwtTokenDto);
+        return CommonResponse.success(jwtTokenDto);
     }
 
     private String determineRedirectUri(String frontendUrl) {
@@ -192,18 +170,16 @@ public class AuthController {
                     content = @Content
             )
     })
-    public ResponseEntity<?> signOut(
+    public CommonResponse<?> signOut(
             @Parameter(description = "JWT 토큰이 포함된 요청", required = true)
             Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
-            // UserDetails(Users)를 principal에서 가져옴
-            Users user = (Users) authentication.getPrincipal();
+        // UserDetails(Users)를 principal에서 가져옴
+        Users user = (Users) authentication.getPrincipal();
 
-            Long userId = user.getUserId(); // Users 엔티티에 getId 또는 getUserId 메서드가 있어야 함
+        Long userId = user.getUserId(); // Users 엔티티에 getId 또는 getUserId 메서드가 있어야 함
 
-            authService.signOut(userId);
-            return ResponseEntity.ok("로그아웃 되었습니다.");
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        authService.signOut(userId);
+        return CommonResponse.success();
+
     }
 }
