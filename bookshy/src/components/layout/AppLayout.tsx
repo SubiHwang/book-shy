@@ -46,6 +46,7 @@ import ErrorHandler from '../common/error/ErrorHandler';
 import NotificationPage from '@/pages/common/NotificationPage';
 import QuoteGalaxyPage from '@/pages/mybooknote/booknote/QuoteGalaxyPage';
 import BookTripMapPage from '@/pages/mybooknote/booktrip/BookTripMapPage';
+import TradeCompletedPage from '@/pages/chat/TradeCompletedPage';
 import { CustomToastContainer } from '../common/CustomToastContainer';
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -134,6 +135,7 @@ const AppLayout: FC = () => {
                   <Route path="/chat" element={<ChatListPage />} />
                   <Route path="/chat/:roomId" element={<ChatRoomPage />} />
                   <Route path="/chat/:roomId/review" element={<TradeReviewPage />} />
+                  <Route path="/exchange/completed" element={<TradeCompletedPage />} />
 
                   {/* 독서기록 페이지 - 탭이 있는 부분은 중첩 라우팅 적용용 */}
                   <Route path="/booknotes" element={<BookNotePage />}>

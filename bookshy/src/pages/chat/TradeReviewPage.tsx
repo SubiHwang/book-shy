@@ -127,52 +127,47 @@ const TradeReviewPage = () => {
       return;
     }
 
-    // 📦 선택된 책 정보 구성
+    // 책 정보 구성
     const allBooks = [...defaultBooks, ...myLibraryBooks];
-
     const selectedReviewedBooks = allBooks
       .filter((book) => selectedBooks.includes(book.title))
-      .map((book) => {
-        if (
-          book.bookId === undefined ||
-          book.libraryId === undefined ||
-          book.aladinItemId === undefined
-        ) {
-          throw new Error('선택된 도서 정보에 누락된 값이 있습니다.');
-        }
+      .map((book) => ({
+        title: book.title,
+        bookId: book.bookId,
+        libraryId: book.libraryId,
+        aladinItemId: book.aladinItemId,
+        fromMatching: defaultBooks.some((b) => b.title === book.title),
+      }));
 
-        return {
-          title: book.title,
-          bookId: book.bookId,
-          libraryId: book.libraryId,
-          aladinItemId: book.aladinItemId,
-          fromMatching: defaultBooks.some((b) => b.title === book.title),
-        };
-      });
-
-    // 👥 참여자 ID 불러오기
+    // 참여자 ID 가져오기
     let userIds: number[] = [];
     try {
-      const { userAId, userBId } = await fetchChatRoomUserIds(roomId!); // roomId는 이미 존재 검증 완료
+      const { userAId, userBId } = await fetchChatRoomUserIds(roomId!);
       userIds = [userAId, userBId];
     } catch (e) {
       alert('참여자 정보를 불러오지 못했습니다.');
       return;
     }
 
-    // 📤 서버에 전송할 리뷰 payload 구성
     const payload = {
       requestId: calendar.requestId,
       userIds,
-      rating: Number(((ratings.condition + ratings.punctuality + ratings.manner) / 3).toFixed(1)),
+      rating: (ratings.condition + ratings.punctuality + ratings.manner) / 3,
       ratings,
       books: selectedReviewedBooks,
     };
 
     try {
-      await submitTradeReview(payload);
+      const { isTradeCompleted } = await submitTradeReview(payload);
       alert('리뷰가 성공적으로 제출되었습니다!');
-      navigate(-1);
+
+      // ✅ 거래가 최종 완료된 경우 → 완료 페이지로 이동
+      if (isTradeCompleted) {
+        navigate('/exchange/completed');
+      } else {
+        // 상대방 리뷰 대기 중
+        navigate(-1);
+      }
     } catch (e) {
       console.error(e);
       alert('리뷰 제출에 실패했습니다.');
