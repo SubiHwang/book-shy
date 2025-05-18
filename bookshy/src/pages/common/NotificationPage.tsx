@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { NotificationData } from '@/components/common/NotificationInitializer';
+import { useNavigate } from 'react-router-dom';
 
 const NotificationPage = () => {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [_hasNotifications, setHasNotifications] = useState(false);
 
@@ -67,8 +69,7 @@ const NotificationPage = () => {
 
   // 뒤로 가기
   const goBack = () => {
-    // 브라우저 히스토리 사용
-    window.history.back();
+    navigate(-1);
   };
 
   return (
@@ -87,7 +88,7 @@ const NotificationPage = () => {
       {/* 전체 삭제 버튼 - 헤더 아래에 배치 */}
       {notifications.length > 0 && (
         <div className="bg-light-bg p-3 text-right border-b border-gray-100">
-          <button 
+          <button
             onClick={deleteAllNotifications}
             className="text-sm text-gray-500 hover:text-gray-700"
           >
@@ -104,11 +105,13 @@ const NotificationPage = () => {
               <div
                 key={notification.id}
                 className={`p-4 relative ${
-                  !notification.read ? 'border-l-4 border-primary  bg-primary-light/10' : ' bg-light-bg-card'
+                  !notification.read
+                    ? 'border-l-4 border-primary  bg-primary-light/10'
+                    : ' bg-light-bg-card'
                 }`}
               >
                 <div className="flex justify-between items-start">
-                  <div className="flex-1">
+                  <div className="flex-1" onClick={()=>{navigate(notification.url)}}>
                     <h3 className="font-medium text-gray-900">{notification.title}</h3>
                     <p className="text-gray-600 text-sm mt-1">{notification.body}</p>
                     <p className="text-gray-400 text-xs mt-2">
