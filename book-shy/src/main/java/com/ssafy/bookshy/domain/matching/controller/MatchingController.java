@@ -74,12 +74,12 @@ public class MatchingController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @PostMapping("/chat/simple")
-    public ResponseEntity<SimpleChatResponseDto> createSimpleChatRoom(
+    public CommonResponse<SimpleChatResponseDto> createSimpleChatRoom(
             @Parameter(hidden = true) @AuthenticationPrincipal Users user,
             @RequestParam @Parameter(description = "채팅을 시작할 상대 사용자 ID", example = "42") Long receiverId
     ) {
         SimpleChatResponseDto response = matchingService.createSimpleChatRoom(user.getUserId(), receiverId);
-        return ResponseEntity.ok(response);
+        return CommonResponse.success(response);
     }
 
 
