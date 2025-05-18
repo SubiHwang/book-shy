@@ -53,10 +53,11 @@ const addRefreshSubscriber = (callback: RefreshCallback): void => {
 // 응답 인터셉터
 authAxiosInstance.interceptors.response.use(
   (response: AxiosResponse) => {
+    console.log(response.data)
     // ✅ 성공 상태인지 확인 (200~299)
-    if (response.status < 200 || response.status >= 300) {
+    if (response.data.status < 200 || response.data.status >= 300) {
       const error = response.data.error;
-      const statusCode = error.status;
+      const statusCode = response.data.status;
       const errorDetail: ErrorDetail = {
         message: error.message || '오류가 발생 했습니다.',
         statusCode,
@@ -169,8 +170,29 @@ authAxiosInstance.interceptors.response.use(
     if (error.response) {
       // 서버 응답이 있는 경우 - HTTP 상태 코드 기반 에러 처리
       const statusCode = error.response.status;
+
+      let errorMessage = '오류가 발생했습니다.';
+      // error가 AxiosError 타입인지 확인
+      if (axios.isAxiosError(error)) {
+        // 응답 데이터 접근
+        const responseData = error.response?.data;
+        if (responseData && typeof responseData === 'object') {
+          // error 객체 접근
+          if (
+            'error' in responseData &&
+            typeof responseData.error === 'object' &&
+            responseData.error !== null
+          ) {
+            // message 속성 접근
+            if ('message' in responseData.error && typeof responseData.error.message === 'string') {
+              errorMessage = responseData.error.message;
+            }
+          }
+        }
+      }
+
       const errorDetail: ErrorDetail = {
-        message: '오류가 발생했습니다.',
+        message: errorMessage,
         statusCode,
         url: originalRequest.url,
         data: error.response.data,
@@ -214,9 +236,10 @@ publicAxiosInstance.interceptors.request.use(
 
 publicAxiosInstance.interceptors.response.use(
   (response: AxiosResponse) => {
-    if (response.status !== 200) {
+    // ✅ 성공 상태인지 확인 (200~299)
+    if (response.data.status < 200 || response.data.status >= 300) {
       const error = response.data.error;
-      const statusCode = error.status;
+      const statusCode = response.data.status;
       const errorDetail: ErrorDetail = {
         message: error.message || '오류가 발생 했습니다.',
         statusCode,
@@ -225,7 +248,6 @@ publicAxiosInstance.interceptors.response.use(
       dispatchBusinessError(statusCode, errorDetail);
       return Promise.reject(error);
     }
-    console.log(response.data.data)
     return response.data.data;
   },
   (error: AxiosError) => {
@@ -236,8 +258,29 @@ publicAxiosInstance.interceptors.response.use(
     if (error.response) {
       // 서버 응답이 있는 경우 - HTTP 상태 코드 기반 에러 처리
       const statusCode = error.response.status;
+
+      let errorMessage = '오류가 발생했습니다.';
+      // error가 AxiosError 타입인지 확인
+      if (axios.isAxiosError(error)) {
+        // 응답 데이터 접근
+        const responseData = error.response?.data;
+        if (responseData && typeof responseData === 'object') {
+          // error 객체 접근
+          if (
+            'error' in responseData &&
+            typeof responseData.error === 'object' &&
+            responseData.error !== null
+          ) {
+            // message 속성 접근
+            if ('message' in responseData.error && typeof responseData.error.message === 'string') {
+              errorMessage = responseData.error.message;
+            }
+          }
+        }
+      }
+
       const errorDetail: ErrorDetail = {
-        message: '오류가 발생했습니다.',
+        message: errorMessage,
         statusCode,
         url: originalRequest.url,
         data: error.response.data,
