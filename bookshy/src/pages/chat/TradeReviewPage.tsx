@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { fetchUserPublicLibrary } from '@/services/mylibrary/libraryApi';
+import { fetchBookDetailByBookId } from '@/services/book/search';
 import type { Library } from '@/types/mylibrary/library';
 
 import StarRating from '@/components/chat/tradereview/StarRating';
@@ -22,17 +23,64 @@ const TradeReviewPage = () => {
     };
   };
 
-  console.log(state.chatSummary);
-
   const [ratings, setRatings] = useState({ condition: 0, punctuality: 0, manner: 0 });
   const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
   const [myLibraryBooks, setMyLibraryBooks] = useState<Library[]>([]);
+  const [defaultBooks, setDefaultBooks] = useState<Library[]>([]);
   const [showMyLibrary, setShowMyLibrary] = useState(false);
   const [activeBook, setActiveBook] = useState<Library | null>(null);
 
+  const {
+    partnerName,
+    partnerProfileImage,
+    myBookId = [],
+    myBookName = [],
+  } = state?.chatSummary || {};
+
   useEffect(() => {
+    // 공개 서재 불러오기
     fetchUserPublicLibrary().then(setMyLibraryBooks).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    // 매칭 당시 bookId로 책 상세 정보 조회
+    const fetchBooks = async () => {
+      const books: Library[] = await Promise.all(
+        myBookId.map(async (id, idx) => {
+          try {
+            const detail = await fetchBookDetailByBookId(id);
+            return {
+              libraryId: -id,
+              bookId: id,
+              aladinItemId: detail.itemId ?? -1,
+              title: detail.title ?? myBookName[idx],
+              author: detail.author ?? '',
+              publisher: detail.publisher ?? '',
+              isbn13: detail.isbn13 ?? '',
+              coverImageUrl: detail.coverImageUrl ?? '',
+              public: false,
+            };
+          } catch (e) {
+            console.warn('책 정보 조회 실패:', id, e);
+            return {
+              libraryId: -id,
+              bookId: id,
+              aladinItemId: -1,
+              title: myBookName[idx] ?? '제목 없음',
+              author: '',
+              publisher: '',
+              isbn13: '',
+              coverImageUrl: '',
+              public: false,
+            };
+          }
+        }),
+      );
+      setDefaultBooks(books);
+    };
+
+    fetchBooks();
+  }, [myBookId, myBookName]);
 
   useEffect(() => {
     document.body.style.overflow = activeBook ? 'hidden' : 'auto';
@@ -40,25 +88,6 @@ const TradeReviewPage = () => {
       document.body.style.overflow = 'auto';
     };
   }, [activeBook]);
-
-  if (!state?.chatSummary) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-center text-gray-500 px-4">
-        <div>
-          <p className="text-lg font-semibold mb-2">잘못된 접근입니다.</p>
-          <p className="text-sm mb-4">리뷰 정보를 불러올 수 없습니다.</p>
-          <button
-            onClick={() => navigate(-1)}
-            className="bg-primary text-white px-4 py-2 rounded-lg text-sm"
-          >
-            돌아가기
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const { partnerName, partnerProfileImage, myBookId = [], myBookName = [] } = state.chatSummary;
 
   const toggleBook = (title: string) => {
     setSelectedBooks((prev) =>
@@ -78,19 +107,22 @@ const TradeReviewPage = () => {
     navigate(-1);
   };
 
-  const defaultBooks: Library[] =
-    myBookId.length === myBookName.length
-      ? myBookId.map((id, idx) => ({
-          libraryId: -id,
-          bookId: id,
-          aladinItemId: -id,
-          public: false,
-          title: myBookName[idx],
-          author: '',
-          isbn13: '',
-          coverImageUrl: '', // 개선 여지
-        }))
-      : [];
+  if (!state?.chatSummary) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-center text-gray-500 px-4">
+        <div>
+          <p className="text-lg font-semibold mb-2">잘못된 접근입니다.</p>
+          <p className="text-sm mb-4">리뷰 정보를 불러올 수 없습니다.</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-primary text-white px-4 py-2 rounded-lg text-sm"
+          >
+            돌아가기
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-light-bg pb-8 relative">
