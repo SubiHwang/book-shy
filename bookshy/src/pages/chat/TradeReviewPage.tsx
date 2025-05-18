@@ -11,7 +11,12 @@ import BookModal from '@/components/chat/tradereview/BookModal';
 const TradeReviewPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const state = location.state as { chatSummary?: ChatRoomSummary };
+  const state = location.state as {
+    chatSummary?: ChatRoomSummary & {
+      myBookId: number[];
+      myBookName: string[];
+    };
+  };
 
   const [ratings, setRatings] = useState({ condition: 0, punctuality: 0, manner: 0 });
   const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
@@ -62,7 +67,19 @@ const TradeReviewPage = () => {
     );
   }
 
-  const { partnerName, partnerProfileImage } = state.chatSummary;
+  const { partnerName, partnerProfileImage, myBookId, myBookName } = state.chatSummary;
+
+  // ✅ 매칭 당시 책들을 Library 형태로 변환
+  const defaultBooks: Library[] = myBookId.map((id, idx) => ({
+    libraryId: -id,
+    bookId: id,
+    aladinItemId: -id,
+    public: false,
+    title: myBookName[idx],
+    author: '',
+    isbn13: '',
+    coverImageUrl: '', // or placeholder
+  }));
 
   return (
     <div className="min-h-screen bg-light-bg pb-8 relative">
@@ -93,6 +110,7 @@ const TradeReviewPage = () => {
           setShowMyLibrary={setShowMyLibrary}
           myLibraryBooks={myLibraryBooks}
           onViewDetail={setActiveBook}
+          defaultBooks={defaultBooks} // ✅ 매칭 당시 책 목록 전달
         />
 
         {/* 별점 영역 */}

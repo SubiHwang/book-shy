@@ -8,6 +8,7 @@ interface Props {
   setShowMyLibrary: (v: boolean) => void;
   myLibraryBooks: Library[];
   onViewDetail: (book: Library) => void;
+  defaultBooks: Library[]; // ✅ 추가된 props
 }
 
 const BookSelector = ({
@@ -17,37 +18,15 @@ const BookSelector = ({
   setShowMyLibrary,
   myLibraryBooks,
   onViewDetail,
+  defaultBooks,
 }: Props) => {
-  const defaultBooks: Library[] = [
-    {
-      libraryId: -1,
-      bookId: -1,
-      aladinItemId: -1,
-      public: false,
-      title: '장발장',
-      author: '빅토르 위고',
-      isbn13: '9788956605950',
-      coverImageUrl: 'https://image.aladin.co.kr/product/11455/87/coversum/k922531000_1.jpg',
-    },
-    {
-      libraryId: -2,
-      bookId: -2,
-      aladinItemId: -2,
-      public: false,
-      title: '이기적 유전자',
-      author: '리처드 도킨스',
-      isbn13: '9788926799794',
-      coverImageUrl: 'https://image.aladin.co.kr/product/6609/25/coversum/8926799794_1.jpg',
-    },
-  ];
-
   return (
     <div className="bg-[#FFFEEC] mt-6 rounded-lg p-4">
       <p className="text-primary font-semibold mb-2">내 책을 선택해주세요</p>
       <p className="text-xs text-light-text-muted mb-4">교환에 사용한 책을 선택해주세요.</p>
 
-      {/* 기본 2권 */}
-      <div className="flex gap-4 justify-center mb-4">
+      {/* 매칭 당시 도서들 */}
+      <div className="flex gap-4 justify-center mb-4 flex-wrap">
         {defaultBooks.map((book) => (
           <BookChip
             key={book.title}

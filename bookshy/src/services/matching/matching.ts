@@ -18,17 +18,23 @@ export const getMatchingList = async (page: number) => {
   }
 };
 
-export const getChatId = async (receiverId: number) => {
-  try {
-    const response = await authAxiosInstance.post<string, MatchingConfirmResponse>(
-      `/matching/chat?receiverId=${receiverId}`,
-    );
-    console.log('매칭 확정 요청 api 호출 응답', response);
-    return response;
-  } catch (error) {
-    console.log('매칭 확정 요청 api 조회 중 에러 발생', error);
-    throw error;
-  }
+export const getChatId = async (
+  receiverId: number,
+  myBookId: number[],
+  myBookName: string[],
+  otherBookId: number[],
+  otherBookName: string[],
+): Promise<MatchingConfirmResponse> => {
+  const response = await authAxiosInstance.post<string, MatchingConfirmResponse>(
+    `/matching/chat?receiverId=${receiverId}`,
+    {
+      myBookId,
+      myBookName,
+      otherBookId,
+      otherBookName,
+    },
+  );
+  return response;
 };
 
 export const getNeighborhoodList = async () => {
