@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { fetchUserPublicLibrary } from '@/services/mylibrary/libraryApi';
 import { fetchBookDetailByBookId } from '@/services/book/search';
+import { fetchScheduleByRoomId } from '@/services/chat/chat';
+import { submitTradeReview } from '@/services/chat/trade';
+
 import type { Library } from '@/types/mylibrary/library';
+import type { ChatCalendarEventDto } from '@/types/chat/chat';
+import type { TradeReviewRequest } from '@/types/chat/trade';
 
 import StarRating from '@/components/chat/tradereview/StarRating';
 import BookSelector from '@/components/chat/tradereview/BookSelector';
@@ -13,6 +18,7 @@ const TradeReviewPage = () => {
   const location = useLocation();
   const state = location.state as {
     chatSummary?: {
+      roomId: number;
       partnerName: string;
       partnerProfileImage: string;
       bookShyScore?: number;
@@ -23,6 +29,7 @@ const TradeReviewPage = () => {
     };
   };
 
+  const [calendar, setCalendar] = useState<ChatCalendarEventDto | null>(null);
   const [ratings, setRatings] = useState({ condition: 0, punctuality: 0, manner: 0 });
   const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
   const [myLibraryBooks, setMyLibraryBooks] = useState<Library[]>([]);
@@ -31,6 +38,7 @@ const TradeReviewPage = () => {
   const [activeBook, setActiveBook] = useState<Library | null>(null);
 
   const {
+    roomId,
     partnerName,
     partnerProfileImage,
     myBookId = [],
@@ -38,12 +46,27 @@ const TradeReviewPage = () => {
   } = state?.chatSummary || {};
 
   useEffect(() => {
+    if (!roomId) {
+      alert('유효하지 않은 접근입니다.');
+      navigate(-1);
+      return;
+    }
+
     // 공개 서재 불러오기
     fetchUserPublicLibrary().then(setMyLibraryBooks).catch(console.error);
-  }, []);
+
+    // 캘린더 일정 불러오기
+    fetchScheduleByRoomId(roomId)
+      .then(setCalendar)
+      .catch((err) => {
+        console.error(err);
+        alert('거래 일정을 불러올 수 없습니다.');
+        navigate(-1);
+      });
+  }, [roomId]);
 
   useEffect(() => {
-    // 매칭 당시 bookId로 책 상세 정보 조회
+    // 매칭 당시 책 정보를 불러오기
     const fetchBooks = async () => {
       const books: Library[] = await Promise.all(
         myBookId.map(async (id, idx) => {
@@ -61,7 +84,6 @@ const TradeReviewPage = () => {
               public: false,
             };
           } catch (e) {
-            console.warn('책 정보 조회 실패:', id, e);
             return {
               libraryId: -id,
               bookId: id,
@@ -95,16 +117,31 @@ const TradeReviewPage = () => {
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!calendar) {
+      alert('일정 정보가 없습니다.');
+      return;
+    }
+
     if (Object.values(ratings).some((v) => v === 0)) {
       alert('모든 항목을 평가해주세요.');
       return;
     }
-    console.log('📝 제출 데이터:', {
+
+    const payload: TradeReviewRequest = {
+      requestId: calendar.requestId,
       ratings,
       selectedBookTitles: selectedBooks,
-    });
-    navigate(-1);
+    };
+
+    try {
+      await submitTradeReview(payload);
+      alert('리뷰가 성공적으로 제출되었습니다!');
+      navigate(-1);
+    } catch (e) {
+      console.error(e);
+      alert('리뷰 제출에 실패했습니다.');
+    }
   };
 
   if (!state?.chatSummary) {
@@ -144,7 +181,7 @@ const TradeReviewPage = () => {
         </div>
       </div>
 
-      {/* 책 선택 영역 */}
+      {/* 책 선택 + 별점 영역 */}
       <div className="px-4">
         <BookSelector
           selectedBooks={selectedBooks}
@@ -156,7 +193,6 @@ const TradeReviewPage = () => {
           defaultBooks={defaultBooks}
         />
 
-        {/* 별점 영역 */}
         <div className="mt-6 px-1">
           <StarRating
             label="책 상태는 좋은가요?"
