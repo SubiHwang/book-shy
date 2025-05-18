@@ -34,7 +34,6 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
       }
     } catch (error) {
       console.log('채팅방 진입 실패', error);
-      toast.error('채팅방에 진입할 수 없습니다. 다시 시도 해주세요.');
     }
   };
 
