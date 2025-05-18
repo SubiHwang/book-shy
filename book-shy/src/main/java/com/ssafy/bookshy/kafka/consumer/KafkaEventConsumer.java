@@ -1,17 +1,19 @@
 package com.ssafy.bookshy.kafka.consumer;
 
 import com.ssafy.bookshy.domain.chat.dto.ChatMessageResponseDto;
+import com.ssafy.bookshy.domain.chat.dto.ChatRoomDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomUserIds;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.service.ChatMessageService;
 import com.ssafy.bookshy.domain.chat.service.ChatRoomService;
+import com.ssafy.bookshy.domain.notification.dto.ChatNotificationFcmDto;
+import com.ssafy.bookshy.domain.notification.dto.MatchCompleteFcmDto;
 import com.ssafy.bookshy.domain.notification.service.NotificationService;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import com.ssafy.bookshy.kafka.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -97,7 +99,13 @@ public class KafkaEventConsumer {
                     .map(Users::getNickname)
                     .orElse("상대방");
 
-            notificationService.sendMatchCompleteNotification(event.getUserBId(), senderName);
+            notificationService.sendMatchCompleteNotification(
+                    MatchCompleteFcmDto.builder()
+                            .receiverId(event.getUserBId())
+                            .partnerName(senderName)
+                            .chatRoomId(chatRoom.getId())
+                            .build()
+            );
 
             ack.acknowledge();
         } catch (Exception e) {
@@ -152,11 +160,33 @@ public class KafkaEventConsumer {
                     ? userIds.getUserBId()
                     : userIds.getUserAId();
 
-// 👥 각 사용자에게 채팅 목록 갱신 WebSocket 전송
-            messagingTemplate.convertAndSend("/topic/chat/user/" + senderId, saved);
-            messagingTemplate.convertAndSend("/topic/chat/user/" + receiverId, saved);
+            // 👥 각 사용자에게 채팅 목록 갱신 WebSocket 전송
+            ChatRoomDto chatRoomDto = chatRoomService.getChatRoomDtoByKafkaEvent(dto);
+
+            messagingTemplate.convertAndSend("/topic/chat/user/" + senderId, chatRoomDto);
+            messagingTemplate.convertAndSend("/topic/chat/user/" + receiverId, chatRoomDto);
 
             log.info("✅ [KafkaConsumer] 채팅 보낸이 Id: '{}', 받는이 Id: '{}'", senderId, receiverId);
+
+            // FCM 알림 전송 (본인 제외 + 미리보기 길이 제한)
+            if (!senderId.equals(receiverId)) {
+                String senderName = userRepository.findById(senderId)
+                        .map(Users::getNickname)
+                        .orElse("알 수 없음");
+
+                String preview = dto.getContent();
+                if (preview.length() > 50) {
+                    preview = preview.substring(0, 47) + "...";
+                }
+
+                notificationService.sendChatNotification(ChatNotificationFcmDto.builder()
+                        .receiverId(receiverId)
+                        .senderNickName(senderName)
+                        .content(preview)
+                        .chatRoomId(dto.getChatRoomId())
+                        .build()
+                );
+            }
 
             ack.acknowledge(); // ✅ 커밋
             log.info("✅ [KafkaConsumer] Offset committed for topic '{}'", record.topic());

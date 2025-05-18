@@ -77,6 +77,7 @@ public class BookResponseDto {
 
     public static BookResponseDto from(Book book, boolean isPublic) {
         return BookResponseDto.builder()
+                .itemId(book.getItemId())
                 .title(book.getTitle())
                 .author(book.getAuthor())
                 .publisher(book.getPublisher())

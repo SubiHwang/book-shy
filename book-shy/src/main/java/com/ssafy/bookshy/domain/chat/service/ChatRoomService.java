@@ -2,18 +2,19 @@ package com.ssafy.bookshy.domain.chat.service;
 
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomUserIds;
+import com.ssafy.bookshy.domain.chat.entity.ChatMessage;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatMessageRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
 import com.ssafy.bookshy.domain.matching.entity.Matching;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.service.UserService;
+import com.ssafy.bookshy.kafka.dto.ChatMessageKafkaDto;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -100,7 +101,27 @@ public class ChatRoomService {
                 .userBId(userBId)
                 .matching(Matching.builder().matchId(matchId).build())
                 .build();
-        return chatRoomRepository.save(chatRoom);
+        chatRoom = chatRoomRepository.save(chatRoom);
+
+        // 📝 3. 안내 메시지 생성
+        LocalDateTime now = LocalDateTime.now();
+        String systemMessage = "채팅방이 생성되었습니다.";
+
+        ChatMessage noticeMessage = ChatMessage.builder()
+                .chatRoom(chatRoom)
+                .senderId(userAId) // 시스템 메시지지만 최초 생성자 기준
+                .content(systemMessage)
+                .type("notice")
+                .timestamp(now)
+                .build();
+
+        // 💾 메시지 저장
+        chatMessageRepository.save(noticeMessage);
+
+        // 💬 마지막 메시지 정보 업데이트
+        chatRoom.updateLastMessage(systemMessage, now);
+
+        return chatRoom;
     }
 
 
@@ -121,6 +142,51 @@ public class ChatRoomService {
     public ChatRoomUserIds getUserIdsByChatRoomId(Long chatRoomId) {
         return chatRoomRepository.findUserIdsByChatRoomId(chatRoomId)
                 .orElseThrow(() -> new IllegalArgumentException("❌ 채팅방이 존재하지 않습니다. ID=" + chatRoomId));
+    }
+
+    /**
+     * 📦 Kafka 이벤트 기반으로 채팅방 정보를 조회하여 ChatRoomDto로 변환합니다.
+     *
+     * 💬 사용 목적:
+     * - KafkaConsumer에서 채팅 목록 WebSocket 갱신을 위해 사용
+     *
+     * 🧩 처리 과정:
+     * 1. 채팅방 ID로 ChatRoom 엔티티 조회
+     * 2. senderId를 기준으로 상대방 ID 결정
+     * 3. 상대방의 프로필 정보 조회
+     * 4. 안 읽은 메시지 수 계산
+     * 5. ChatRoomDto 생성
+     *
+     * @param dto Kafka에서 전달받은 채팅 메시지 DTO
+     * @return ChatRoomDto (채팅방 요약 정보)
+     */
+    public ChatRoomDto getChatRoomDtoByKafkaEvent(ChatMessageKafkaDto dto) {
+        Long chatRoomId = dto.getChatRoomId();
+        Long senderId = dto.getSenderId();
+
+        // 1. 채팅방 조회
+        ChatRoom room = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new IllegalArgumentException("❌ 채팅방이 존재하지 않습니다. ID=" + chatRoomId));
+
+        // 2. 상대방 ID 결정
+        Long partnerId = room.getUserAId().equals(senderId) ? room.getUserBId() : room.getUserAId();
+
+        // 3. 상대방 사용자 정보 조회
+        Users partner = userService.getUserById(partnerId);
+
+        // 4. 안 읽은 메시지 수 계산
+        int unreadCount = chatMessageRepository.countUnreadMessages(chatRoomId, senderId);
+
+        // 5. ChatRoomDto 생성 및 반환
+        return ChatRoomDto.from(
+                room,
+                senderId, // 내 userId
+                partnerId,
+                partner.getNickname(),
+                partner.getProfileImageUrl(),
+                partner.getTemperature(), // bookshyScore
+                unreadCount
+        );
     }
 
 }

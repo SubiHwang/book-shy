@@ -12,4 +12,9 @@ import lombok.NoArgsConstructor;
 public class MatchResponseDto {
     private Long matchId;
     private Long chatRoomId;
+
+    // 상대방 정보
+    private String nickname;
+    private String profileImageUrl;
+    private Float temperature;
 }

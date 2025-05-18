@@ -28,9 +28,6 @@ public class Users extends TimeStampEntity implements UserDetails {
     @Column(name = "user_id")
     private Long userId;
 
-//    @Column(name = "kakao_id", nullable = false)
-//    private Long kakaoId;
-
     @Column(name = "email")
     private String email;
 
@@ -50,7 +47,7 @@ public class Users extends TimeStampEntity implements UserDetails {
     @Column(name = "gender")
     private Gender gender;
 
-    @Column(name = "temperature")
+    @Column(name = "temperature", nullable = false)
     private Float temperature;
 
     @Column(name = "badges")
@@ -70,7 +67,6 @@ public class Users extends TimeStampEntity implements UserDetails {
 
     @Column(name = "last_active_at")
     private LocalDateTime lastActiveAt;
-
 
     public void updateTokens(String refreshToken, String fcmToken) {
         this.refreshToken = refreshToken;

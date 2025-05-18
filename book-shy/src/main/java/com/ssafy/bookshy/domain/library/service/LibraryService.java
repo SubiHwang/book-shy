@@ -346,4 +346,7 @@ public class LibraryService {
                 .toList();
     }
 
+    public boolean isBookInLibrary(Long userId, Long itemId) {
+        return libraryRepository.existsByUserUserIdAndBookItemId(userId, itemId);
+    }
 }

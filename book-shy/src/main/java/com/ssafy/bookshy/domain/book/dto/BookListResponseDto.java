@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.book.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.ssafy.bookshy.domain.book.entity.Book;
 import lombok.Builder;
@@ -18,7 +19,12 @@ public class BookListResponseDto {
     private String category;
     private String coverImageUrl;
     private String description;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean isLiked;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean inLibrary;
 
     public static BookListResponseDto from(JsonNode node) {
         return BookListResponseDto.builder()
@@ -31,7 +37,7 @@ public class BookListResponseDto {
                 .build();
     }
 
-    public static BookListResponseDto from(Book book, Boolean isLiked) {
+    public static BookListResponseDto from(Book book, Boolean isLiked, Boolean inLibrary) {
         return BookListResponseDto.builder()
                 .itemId(book.getItemId())
                 .title(book.getTitle())
@@ -41,7 +47,7 @@ public class BookListResponseDto {
                 .coverImageUrl(book.getCoverImageUrl())
                 .description(book.getDescription())
                 .isLiked(isLiked)
+                .inLibrary(inLibrary)
                 .build();
     }
-
 }

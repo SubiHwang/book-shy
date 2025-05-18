@@ -8,6 +8,7 @@ import com.ssafy.bookshy.domain.book.entity.Book;
 import com.ssafy.bookshy.domain.book.entity.Wish;
 import com.ssafy.bookshy.domain.book.repository.BookRepository;
 import com.ssafy.bookshy.domain.book.repository.WishRepository;
+import com.ssafy.bookshy.domain.library.repository.LibraryRepository;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.service.UserService;
 import com.ssafy.bookshy.external.aladin.AladinClient;
@@ -28,6 +29,7 @@ public class BookService {
     private final UserService userService;
     private final AladinClient aladinClient;
     private final WishRepository wishRepository;
+    private final LibraryRepository libraryRepository;
 
     // 공개 여부 변경
     @Transactional
@@ -91,12 +93,18 @@ public class BookService {
     }
 
     public BookListTotalResponseDto getWishList(Long userId) {
-
         Users user = userService.getUserById(userId);
         List<Wish> wishList = wishRepository.findAllByUser(user);
 
         List<BookListResponseDto> books = wishList.stream()
-                .map(w -> BookListResponseDto.from(w.getBook(), true))
+                .map(wish -> {
+                    Book book = wish.getBook();
+
+                    boolean isLiked = wishRepository.existsByUserAndBook(user, book);
+                    boolean inLibrary = libraryRepository.existsByUserAndBook(user, book);
+
+                    return BookListResponseDto.from(book, isLiked, inLibrary);
+                })
                 .toList();
 
         return BookListTotalResponseDto.builder()
@@ -136,20 +144,14 @@ public class BookService {
                 .orElse(false);
     }
 
-    /**
-     * 📕 bookId를 기반으로 사용자의 서재에 있는 도서 상세 정보를 조회합니다.
-     *
-     * @param bookId 조회할 도서 ID
-     * @param userId 현재 로그인한 사용자 ID
-     * @return BookResponseDto 도서 상세 정보
-     * @throws RuntimeException 도서가 존재하지 않거나 접근 권한이 없을 경우
-     */
     public BookResponseDto getBookDetailById(Long bookId, Long userId) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new RuntimeException("해당 도서를 찾을 수 없습니다."));
 
-
-        return BookResponseDto.from(book, true); // isPublic은 true로 고정 (또는 필요 시 추출)
+        return BookResponseDto.from(book, true);
     }
 
+    public boolean isInLibrary(Long userId, Long itemId) {
+        return libraryRepository.existsByUserUserIdAndBookItemId(userId, itemId);
+    }
 }

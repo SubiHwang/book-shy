@@ -76,7 +76,10 @@ public class BookController {
 
         for (BookListResponseDto dto : response.getBooks()) {
             boolean isLiked = bookService.isBookLiked(user.getUserId(), dto.getItemId());
+            boolean inLibrary = bookService.isInLibrary(user.getUserId(), dto.getItemId());
+
             dto.setIsLiked(isLiked);
+            dto.setInLibrary(inLibrary);
         }
 
         return ResponseEntity.ok(response);
