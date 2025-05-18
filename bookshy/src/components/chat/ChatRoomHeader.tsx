@@ -16,7 +16,7 @@ const ChatRoomHeader: FC<ChatRoomHeaderProps> = ({
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-50 bg-white px-4 py-3 min-h-[64px] flex items-center justify-between border-b border-[#E5E5E5]">
+    <header className="sticky top-0 w-full px-4 py-3 flex items-center justify-between border-b border-[#E5E5E5]">
       {/* 왼쪽: 뒤로가기 + 프로필 */}
       <div className="flex items-center gap-3">
         <button
