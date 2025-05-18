@@ -249,7 +249,6 @@ export const FirebaseProvider: FC<{ children: React.ReactNode }> = ({ children }
           notification.onclick = () => {
             // 앱 내 특정 페이지로 이동 등의 작업
             const url = payload.data?.url || '/';
-            window.focus();
             window.location.href = url;
             notification.close();
           };

@@ -9,7 +9,7 @@ export interface NotificationData {
   title: string;
   body: string;
   timestamp: string;
-  data?: any;
+  url: string;
   read: boolean;
 }
 
@@ -57,9 +57,9 @@ const NotificationInitializer: FC = () => {
           // 알림 데이터 생성
           const notificationData: NotificationData = {
             id: Date.now().toString(),
-            title: payload.notification?.title || '새 알림',
-            body: payload.notification?.body || '',
-            data: payload.data,
+            title: payload.data?.title || '새 알림',
+            body: payload.data?.body || '',
+            url: payload.data?.url || '/',
             timestamp: new Date().toISOString(),
             read: false
           };
