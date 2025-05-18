@@ -18,7 +18,7 @@ const MatchingEndMessage: FC<MatchingEndMessageProps> = ({ matchingCount, onScro
       </p>
       <button
         onClick={onScrollToTop}
-        className="mt-4 bg-primary-light text-primary-dark px-6 py-2 rounded-full hover:bg-primary-light/80 transition-colors flex items-center"
+        className="mt-4 bg-primary text-white px-6 py-2 rounded-full flex items-center"
       >
         <ArrowUp className="mr-2" size={16} />맨 위로 이동하기
       </button>

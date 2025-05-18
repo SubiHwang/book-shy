@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, useRef } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { MatchingRecommendation, MatchingRecommendationResponse } from '@/types/Matching';
 import NoRecommendationState from '@/components/matching/matching/NoRecommendationState';
 import MatchingList from '@/components/matching/matching/MatchingList';
@@ -11,66 +11,92 @@ import { RefreshCw } from 'lucide-react';
 import MatchingHeader from '@/components/matching/matching/MatchingHeader';
 import MatchingEndMessage from '@/components/matching/matching/MatchingEndMessage';
 import ScrollToTopButton from '@/components/matching/matching/ScrollToTopButton';
-import LoadingIndicator from '@/components/matching/matching/LoadingIndicator';
+import SortingChips from '@/components/matching/matching/SortingChips';
 
 const MatchingRecommend: FC = () => {
-  const ITEMS_PER_PAGE = 10;
-  const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
+  // 페이지네이션 관련 상태
+  const [currentPage, setCurrentPage] = useState(1);
+  const [matchings, setMatchings] = useState<MatchingRecommendation[]>([]);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  // 정렬 옵션 상태 추가
+  const [sortOption, setSortOption] = useState<string>('score');
 
-  // useQuery로 데이터 가져오기
+  // 첫 페이지 데이터 가져오기
   const { data, isLoading, refetch } = useQuery<MatchingRecommendationResponse>({
-    queryKey: ['matching-list'],
+    queryKey: ['matching-list', currentPage, sortOption],
     queryFn: async () => {
-      return await getMatchingList(1);
+      return await getMatchingList(currentPage, sortOption);
     },
+    enabled: true, // 컴포넌트 마운트 시 자동으로 쿼리 실행
   });
-  const matchingList: MatchingRecommendation[] = data?.candidates || [];
 
-  const visibleMatchings = matchingList.slice(0, visibleItems);
-  const hasMoreItems = visibleItems < matchingList.length;
+  // 데이터 로드 시 상태 업데이트
+  useEffect(() => {
+    if (data) {
+      if (currentPage === 1) {
+        // 첫 페이지일 경우 데이터 초기화
+        setMatchings(data.candidates);
+      } else {
+        // 추가 페이지일 경우 데이터 누적
+        setMatchings((prev) => [...prev, ...data.candidates]);
+      }
 
+      // 총 아이템 수와 총 페이지 수 업데이트
+      setTotalItems(data.results);
+      setTotalPages(data.totalPages);
+    }
+  }, [data, currentPage]);
+
+  // 다음 페이지 로드 가능 여부 확인
+  const hasNextPage = currentPage < totalPages;
+
+  // 위로 스크롤 함수
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // 바닥 감지를 위한 Intersection Observer 설정
-  useEffect(() => {
-    if (!bottomRef.current || isLoading) return;
+  // 더보기 버튼 클릭 핸들러
+  const handleLoadMore = async () => {
+    if (!hasNextPage || isLoadingMore) return;
 
-    const currentRef = bottomRef.current;
+    setIsLoadingMore(true);
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry.isIntersecting && hasMoreItems && !isLoadingMore) {
-          setIsLoadingMore(true);
+    try {
+      // 다음 페이지로 이동
+      setCurrentPage((prev) => prev + 1);
+    } catch (error) {
+      console.error('Failed to load more matchings', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
-          setTimeout(() => {
-            setVisibleItems((prev) => Math.min(prev + ITEMS_PER_PAGE, matchingList.length));
-            setIsLoadingMore(false);
-          }, 500);
-        }
-      },
-      { threshold: 0.5 },
-    );
+  // 새로고침 핸들러
+  const handleRefresh = async () => {
+    setCurrentPage(1);
+    setMatchings([]);
+    await refetch();
+  };
 
-    observer.observe(currentRef);
-
-    return () => {
-      observer.unobserve(currentRef);
-    };
-  }, [bottomRef, hasMoreItems, isLoading, isLoadingMore, matchingList.length]);
+  // 정렬 변경 핸들러
+  const handleSortChange = (newSortOption: string) => {
+    if (sortOption !== newSortOption) {
+      setSortOption(newSortOption);
+      setCurrentPage(1); // 정렬 변경 시 첫 페이지로 리셋
+      setMatchings([]); // 기존 데이터 초기화
+    }
+  };
 
   // 매칭이 충분한지 확인하는 상수 (3개 이하면 적다고 판단)
   const MIN_SUFFICIENT_MATCHES = 3;
-  const hasSufficientMatches = matchingList.length > MIN_SUFFICIENT_MATCHES;
-  const hasFewMatches = matchingList.length > 0 && matchingList.length <= MIN_SUFFICIENT_MATCHES;
+  const hasSufficientMatches = totalItems > MIN_SUFFICIENT_MATCHES;
+  const hasFewMatches = totalItems > 0 && totalItems <= MIN_SUFFICIENT_MATCHES;
 
   return (
-    <div className="flex flex-col bg-light-bg">
-      <MatchingHeader matchingCount={matchingList.length} />
+    <div className="flex flex-col bg-light-bg mb-24">
+      <MatchingHeader matchingCount={totalItems} />
 
       <div className="flex flex-col px-5 sm:px-8 md:px-10 pt-3 sm:pt-4">
         <div className="flex justify-between items-center">
@@ -80,8 +106,8 @@ const MatchingRecommend: FC = () => {
 
           {!isLoading && (
             <button
-              onClick={() => refetch()}
-              disabled={isLoading}
+              onClick={handleRefresh}
+              disabled={isLoading || isLoadingMore}
               className="text-primary hover:text-primary-dark transition-colors"
               aria-label="추천 도서 새로고침"
             >
@@ -89,44 +115,51 @@ const MatchingRecommend: FC = () => {
             </button>
           )}
         </div>
+
+        {/* 정렬 칩 컴포넌트 추가 */}
+        <SortingChips onSortChange={handleSortChange} defaultSort={sortOption} />
       </div>
 
-      {isLoading ? (
+      {isLoading && currentPage === 1 ? (
         <Loading loadingText="매칭 추천을 불러오는 중..." />
       ) : hasSufficientMatches ? (
         <>
           {/* 매칭 목록 표시 */}
-          <MatchingList matchings={visibleMatchings} />
+          <MatchingList matchings={matchings} />
 
-          {/* 바닥 감지 영역 및 로딩 표시기 */}
+          {/* 더보기 버튼 영역 */}
           <div className="py-4 px-5 sm:px-8 md:px-10">
-            <div ref={bottomRef} className="flex justify-center items-center py-4 min-h-[60px]">
-              {isLoadingMore ? (
-                <LoadingIndicator loadingText="더 많은 매칭을 불러오는 중..." />
-              ) : hasMoreItems ? (
-                <p className="text-light-text-secondary text-sm text-center">
-                  스크롤하여 더 많은 매칭을 확인하세요
-                </p>
+            <div className="flex justify-center items-center py-4 min-h-[60px]">
+              {hasNextPage ? (
+                <button
+                  onClick={handleLoadMore}
+                  disabled={isLoadingMore}
+                  className="px-6 py-2 bg-primary text-white rounded-full disabled:opacity-70"
+                >
+                  {isLoadingMore ? (
+                    <span className="flex items-center gap-2">
+                      <RefreshCw size={16} className="animate-spin" />
+                      불러오는 중...
+                    </span>
+                  ) : (
+                    '더 보기'
+                  )}
+                </button>
               ) : (
-                <MatchingEndMessage
-                  matchingCount={matchingList.length}
-                  onScrollToTop={scrollToTop}
-                />
+                <MatchingEndMessage matchingCount={totalItems} onScrollToTop={scrollToTop} />
               )}
             </div>
 
             {/* 추가 여백으로 스크롤 끝 표시 */}
-            {!hasMoreItems && <div className="h-16"></div>}
+            {!hasNextPage && <div className="h-16"></div>}
           </div>
 
-          {/* 위로 스크롤 버튼 */}
-          {visibleItems > ITEMS_PER_PAGE && hasMoreItems && (
-            <ScrollToTopButton onClick={scrollToTop} />
-          )}
+          {/* 위로 스크롤 버튼 - 첫 페이지 이상일 때만 표시 */}
+          {currentPage > 1 && <ScrollToTopButton onClick={scrollToTop} />}
         </>
       ) : hasFewMatches ? (
         <>
-          <MatchingList matchings={matchingList} />
+          <MatchingList matchings={matchings} />
           <div className="px-5 sm:px-8 md:px-10 py-3 sm:py-4">
             <h2 className="text-primary-dark font-medium text-base mb-2">
               주변 이웃들의 서재도 둘러보세요
@@ -140,7 +173,7 @@ const MatchingRecommend: FC = () => {
           </div>
         </>
       ) : (
-        <NoRecommendationState onRetry={refetch} />
+        <NoRecommendationState onRetry={handleRefresh} />
       )}
     </div>
   );

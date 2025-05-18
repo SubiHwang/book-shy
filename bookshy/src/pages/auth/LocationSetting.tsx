@@ -151,7 +151,7 @@ const LocationSetting: FC = () => {
           </div>
 
           {finalError && !finalAddress ? (
-            <div className="mb-4">
+            <div className="mb-4 flex flex-col space-y-2">
               <p className="text-light-status-error text-sm mb-3">{finalError}</p>
               <button
                 onClick={handleGetCurrentLocation}
@@ -165,6 +165,14 @@ const LocationSetting: FC = () => {
               >
                 <Locate className="mr-1" size={16} />
                 현재 위치 가져오기
+              </button>
+              <button
+                onClick={handleSearchAddress}
+                disabled={isLoading}
+                className="w-full py-2.5 bg-gray-100 text-light-text rounded-md flex items-center justify-center transition hover:bg-gray-200 text-sm"
+              >
+                <Search className="mr-1" size={16} />
+                주소 검색하기
               </button>
             </div>
           ) : finalAddress ? (

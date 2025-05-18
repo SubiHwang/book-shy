@@ -10,6 +10,7 @@ export interface MatchingRecommendation {
   otherBookName: string[];
   matchedAt: string;
   score: number;
+  distanceKm: number;
 }
 
 export interface MatchingRecommendationResponse {

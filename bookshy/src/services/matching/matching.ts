@@ -5,10 +5,10 @@ import {
   MatchingConfirmResponse,
   Neighborhood,
 } from '@/types/Matching';
-export const getMatchingList = async (page: number) => {
+export const getMatchingList = async (page: number, sort: string = 'score') => {
   try {
     const response = await authAxiosInstance.get<string, MatchingRecommendationResponse>(
-      `/matching/candidates?page=${page}`,
+      `/matching/candidates?page=${page}&sort=${sort}`,
     );
     console.log('매칭 목록 api 조회', response);
     return response;

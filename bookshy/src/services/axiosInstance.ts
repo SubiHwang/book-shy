@@ -65,7 +65,7 @@ authAxiosInstance.interceptors.response.use(
       dispatchBusinessError(statusCode, errorDetail);
       return Promise.reject(error);
     }
-    return response.data;
+    return response.data.data;
   },
   async (error: AxiosError) => {
     // originalRequest에 _retry 속성을 추가하기 위한 타입 정의
@@ -225,7 +225,8 @@ publicAxiosInstance.interceptors.response.use(
       dispatchBusinessError(statusCode, errorDetail);
       return Promise.reject(error);
     }
-    return response.data;
+    console.log(response.data.data)
+    return response.data.data;
   },
   (error: AxiosError) => {
     // originalRequest 접근을 위한 타입 캐스팅
