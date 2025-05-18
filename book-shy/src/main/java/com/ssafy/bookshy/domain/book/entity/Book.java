@@ -63,4 +63,8 @@ public class Book {
         EXCHANGING,    // 교환 중
         EXCHANGED      // 교환 완료
     }
+
+    public void transferTo(Users newUser) {
+        this.user = newUser;
+    }
 }

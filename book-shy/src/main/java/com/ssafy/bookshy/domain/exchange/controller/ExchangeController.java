@@ -4,11 +4,12 @@ import com.ssafy.bookshy.common.response.CommonResponse;
 import com.ssafy.bookshy.domain.exchange.dto.ExchangeHistoryGroupDto;
 import com.ssafy.bookshy.domain.exchange.dto.ExchangePromiseDto;
 import com.ssafy.bookshy.domain.exchange.dto.ExchangeRequestDto;
-import com.ssafy.bookshy.domain.exchange.dto.ReviewRequestDto;
+import com.ssafy.bookshy.domain.exchange.dto.ReviewSubmitRequest;
 import com.ssafy.bookshy.domain.exchange.service.ExchangeHistoryService;
 import com.ssafy.bookshy.domain.exchange.service.ExchangePromiseService;
 import com.ssafy.bookshy.domain.exchange.service.ExchangeService;
 import com.ssafy.bookshy.domain.users.entity.Users;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -53,18 +54,6 @@ public class ExchangeController {
         return CommonResponse.success();
     }
 
-    @Operation(summary = "🌟 매너 평가 작성", description = "거래 후 상대방에 대한 매너 평가를 등록합니다.",
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "✅ 평가 완료"),
-                    @ApiResponse(responseCode = "400", description = "🚫 잘못된 요청"),
-                    @ApiResponse(responseCode = "409", description = "⚠️ 이미 작성된 리뷰")
-            })
-    @PostMapping("/reviews")
-    public CommonResponse submitReview(@RequestBody ReviewRequestDto reviewDto) {
-        exchangeService.submitReview(reviewDto);
-        return CommonResponse.success();
-    }
-
     @Operation(
             summary = "📅 나의 교환 약속 조회",
             description = """
@@ -105,15 +94,27 @@ public class ExchangeController {
         return CommonResponse.success(exchangeHistoryService.getCompletedExchanges(user));
     }
 
-
-    @Operation(summary = "✅ 거래 완료 처리", description = "사용자가 교환 완료 버튼을 눌러 거래를 완료 처리합니다.")
-    @PostMapping("/complete/{requestId}")
-    public CommonResponse completeExchange(
-            @PathVariable Long requestId,
-            @RequestHeader("X-User-Id") Long userId
+    @Operation(
+            summary = "📝 매너 평가 + 거래 완료 제출",
+            description = """
+                📌 교환/대여가 완료된 후 <b>상대방에 대한 평가</b>를 제출합니다.<br>
+                - 총점과 세부 항목(책 상태, 약속 시간, 매너)을 입력합니다.<br>
+                - 내가 넘긴 책 목록도 함께 제출합니다.<br>
+                - 양쪽 사용자가 모두 리뷰를 작성한 경우 거래 상태가 <code>COMPLETED</code>로 변경되며, 교환된 책들은 서로의 서재로 이동합니다.
+                """,
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "🎉 리뷰 제출 및 거래 완료 처리 성공"),
+                    @ApiResponse(responseCode = "400", description = "🚫 잘못된 요청 데이터", content = @Content),
+                    @ApiResponse(responseCode = "409", description = "⚠️ 이미 리뷰를 제출함", content = @Content),
+                    @ApiResponse(responseCode = "500", description = "💥 서버 오류", content = @Content)
+            }
+    )
+    @PostMapping("/reviews")
+    public CommonResponse submitTradeReview(
+            @AuthenticationPrincipal Users user,
+            @RequestBody ReviewSubmitRequest request
     ) {
-        exchangeService.completeExchange(requestId, userId);
-        return CommonResponse.success();
+        exchangeService.submitReview(user.getUserId(), request);
+        return CommonResponse.success("리뷰가 성공적으로 제출되었습니다.");
     }
-
 }

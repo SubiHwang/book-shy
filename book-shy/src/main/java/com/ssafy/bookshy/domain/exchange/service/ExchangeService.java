@@ -1,21 +1,27 @@
 package com.ssafy.bookshy.domain.exchange.service;
 
+import com.ssafy.bookshy.domain.book.entity.Book;
 import com.ssafy.bookshy.domain.chat.entity.ChatCalendar;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatCalendarRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
 import com.ssafy.bookshy.domain.exchange.dto.ExchangeRequestDto;
-import com.ssafy.bookshy.domain.exchange.dto.ReviewRequestDto;
+import com.ssafy.bookshy.domain.exchange.dto.ReviewSubmitRequest;
 import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequest;
 import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequestReview;
 import com.ssafy.bookshy.domain.exchange.repository.ExchangeRequestRepository;
 import com.ssafy.bookshy.domain.exchange.repository.ExchangeRequestReviewRepository;
+import com.ssafy.bookshy.domain.library.entity.Library;
+import com.ssafy.bookshy.domain.library.repository.LibraryRepository;
+import com.ssafy.bookshy.domain.users.entity.Users;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +31,7 @@ public class ExchangeService {
     private final ExchangeRequestReviewRepository reviewRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatCalendarRepository chatCalendarRepository;
+    private final LibraryRepository libraryRepository;
 
     /**
      * 📩 도서 교환 요청 처리 메서드
@@ -96,49 +103,6 @@ public class ExchangeService {
         chatCalendarRepository.save(calendar);
     }
 
-    /**
-     * 🌟 거래 완료 후 매너 평가 등록
-     * - 같은 거래에 대한 리뷰가 이미 존재하면 예외 발생
-     * - 리뷰 테이블에 저장
-     */
-    @Transactional
-    public void submitReview(ReviewRequestDto dto) {
-        boolean exists = reviewRepository.existsByRequestIdAndReviewerId(dto.getRequestId(), dto.getReviewerId());
-        if (exists) throw new IllegalStateException("이미 이 요청에 대한 리뷰를 작성하셨습니다.");
-
-        ExchangeRequestReview review = ExchangeRequestReview.builder()
-                .requestId(dto.getRequestId())
-                .reviewerId(dto.getReviewerId())
-                .revieweeId(dto.getRevieweeId())
-                .rating(dto.getRating())
-                .build();
-
-        reviewRepository.save(review);
-    }
-
-    /**
-     * 🌟 거래 완료 처리
-     */
-    @Transactional
-    public void completeExchange(Long requestId, Long userId) {
-        ExchangeRequest request = exchangeRequestRepository.findById(requestId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 요청이 존재하지 않습니다."));
-
-        // 1. 사용자가 해당 거래의 당사자인지 확인
-        if (!request.getRequesterId().equals(userId) && !request.getResponderId().equals(userId)) {
-            throw new SecurityException("해당 거래에 참여한 사용자만 완료할 수 있습니다.");
-        }
-
-        // 2. 이미 완료된 거래인지 체크
-        if (request.getStatus() == ExchangeRequest.RequestStatus.COMPLETED) {
-            throw new IllegalStateException("이미 완료된 거래입니다.");
-        }
-
-        // 3. 상태를 COMPLETED로 변경
-        request.setStatus(ExchangeRequest.RequestStatus.COMPLETED);
-
-        // 4. 필요한 후처리: 예) 알림, 포인트 적립 등
-    }
 
     /**
      * ⚠️ 중복 거래 요청 방지
@@ -158,4 +122,59 @@ public class ExchangeService {
     private LocalDateTime parseDate(String dateString) {
         return LocalDateTime.parse(dateString, DateTimeFormatter.ISO_DATE_TIME);
     }
+
+    /**
+     * 💬 매너 평가 제출 및 거래 완료 처리
+     *
+     * 1️⃣ 리뷰 정보 저장 (reviewerId → revieweeId 평점)
+     * 2️⃣ 해당 거래 요청의 리뷰 수가 2개인지 확인 (양쪽 모두 작성 여부)
+     * 3️⃣ 모두 완료 시 거래 상태 COMPLETED 로 변경
+     * 4️⃣ 내가 제출한 책들을 상대방에게 소유권 이전 (Library + Book 모두 이전)
+     */
+    @Transactional
+    public void submitReview(Long reviewerId, ReviewSubmitRequest request) {
+        // 🧍‍♂️ 1. 상대방 ID 식별 (토큰 기준 reviewerId 제외)
+        Long revieweeId = request.getUserIds().stream()
+                .filter(id -> !id.equals(reviewerId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("상대방 ID를 찾을 수 없습니다."));
+
+        // 📝 리뷰 정보 저장
+        ExchangeRequestReview review = ExchangeRequestReview.builder()
+                .requestId(request.getRequestId())
+                .reviewerId(reviewerId)
+                .revieweeId(revieweeId)
+                .rating(request.getRating())
+                .condition(request.getRatings().getCondition())
+                .punctuality(request.getRatings().getPunctuality())
+                .manner(request.getRatings().getManner())
+                .build();
+        reviewRepository.save(review);
+
+        // ✅ 2. 리뷰가 2개 모두 작성되었는지 확인
+        List<ExchangeRequestReview> reviews = reviewRepository.findByRequestId(request.getRequestId());
+        if (reviews.size() < 2) return; // ❌ 상대방 리뷰 미작성
+
+        // ✅ 3. 거래 상태 → COMPLETED 로 변경
+        ExchangeRequest exchangeRequest = exchangeRequestRepository.findById(request.getRequestId())
+                .orElseThrow(() -> new IllegalArgumentException("거래 요청이 존재하지 않습니다."));
+        exchangeRequest.complete();
+
+        // ✅ 4. 도서 소유권 이전 처리 (Library + Book 모두)
+        Users reviewee = Users.builder().userId(revieweeId).build();
+
+        for (ReviewSubmitRequest.ReviewedBook book : request.getBooks()) {
+            // 📚 Library 기준 도서 조회
+            Library lib = libraryRepository.findById(book.getLibraryId())
+                    .orElseThrow(() -> new IllegalArgumentException("도서가 존재하지 않습니다."));
+            lib.transferTo(reviewee); // 소유자 변경 (Library.user)
+
+            // 📘 Book도 같이 이전해야 일관성 유지
+            Book entity = lib.getBook();
+            if (entity != null) {
+                entity.transferTo(reviewee); // Book.user 변경
+            }
+        }
+    }
+
 }

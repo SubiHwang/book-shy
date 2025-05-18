@@ -18,8 +18,12 @@ public class ExchangeRequestReview extends TimeStampEntity {
 
     private Long requestId;
 
-    private Long reviewerId; // 후기를 남긴 사람
-    private Long revieweeId; // 후기를 받은 사람
+    private Long reviewerId;
+    private Long revieweeId;
 
     private Double rating;
+
+    private int condition;
+    private int punctuality;
+    private int manner;
 }

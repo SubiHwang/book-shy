@@ -33,4 +33,8 @@ public class Library {
 
     @Column(name = "registered_at")
     private LocalDateTime registeredAt;
+
+    public void transferTo(Users newUser) {
+        this.user = newUser;
+    }
 }
