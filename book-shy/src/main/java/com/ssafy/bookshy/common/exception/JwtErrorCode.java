@@ -15,7 +15,9 @@ public enum JwtErrorCode implements ErrorCode {
     REFRESH_NOT_VALID("유효하지 않은 리프레쉬 토큰입니다.", 401),
     EXPIRED_TOKEN("만료된 토큰입니다", 401),
     TOKEN_NOT_FOUND("토큰을 찾을 수 없습니다", 401),
-    AUTHENTICATION_FAILED("인증에 실패했습니다", 401);
+    AUTHENTICATION_FAILED("인증에 실패했습니다", 401),
+    TOKEN_GENERATION_FAILED("엑세스 토큰 발급에 실패했습니다.", 400),
+    TOKEN_PROCESSING_ERROR("토큰 생성 중에 오류가 발생했습니다,", 400);
 
     private final String message;
     private final int status;

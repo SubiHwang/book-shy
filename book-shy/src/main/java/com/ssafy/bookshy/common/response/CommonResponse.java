@@ -1,9 +1,11 @@
 package com.ssafy.bookshy.common.response;
 
 import lombok.Builder;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+@Getter
 @Builder
 public class CommonResponse<T> { // 인자로 어떠한 것도 들어올 수 있음
     private int status;

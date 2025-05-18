@@ -5,6 +5,7 @@ import com.ssafy.bookshy.domain.autocomplete.dto.AutoCompleteResponseDto;
 import com.ssafy.bookshy.domain.autocomplete.service.AutoCompleteService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,7 +20,7 @@ public class AutoCompleteController {
     private final AutoCompleteService autoCompleteService;
 
 
-    @GetMapping
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)  // 명시적으로 JSON 응답 지정
     public CommonResponse<AutoCompleteResponseDto> getAutoCompletion(
             @RequestParam("q") String query
     ) {
