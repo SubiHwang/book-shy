@@ -3,6 +3,7 @@ import {
   ChatRoomSummary,
   RegisterSchedulePayload,
   ChatCalendarEventDto,
+  ChatRoomUserIds,
 } from '@/types/chat/chat';
 import { authAxiosInstance } from '@/services/axiosInstance';
 
@@ -33,4 +34,9 @@ export async function deleteEmoji(messageId: number): Promise<void> {
 // 채팅방의 거래 일정 가져오기
 export async function fetchScheduleByRoomId(roomId: number): Promise<ChatCalendarEventDto> {
   return await authAxiosInstance.get(`/chats/calendar?roomId=${roomId}`);
+}
+
+// ✅ 채팅방 참여자 ID 조회
+export async function fetchChatRoomUserIds(chatRoomId: number): Promise<ChatRoomUserIds> {
+  return await authAxiosInstance.get(`/chats/users?chatRoomId=${chatRoomId}`);
 }

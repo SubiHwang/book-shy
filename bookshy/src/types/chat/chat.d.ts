@@ -60,3 +60,8 @@ export interface ChatCalendarEventDto {
   startDate?: string; // type === 'RENTAL'일 때만 존재
   endDate?: string; // type === 'RENTAL'일 때만 존재
 }
+
+export interface ChatRoomUserIds {
+  userAId: number;
+  userBId: number;
+}

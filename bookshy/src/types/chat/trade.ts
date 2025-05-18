@@ -1,13 +1,3 @@
-export interface TradeReviewRequest {
-  requestId: number;
-  ratings: {
-    condition: number;
-    punctuality: number;
-    manner: number;
-  };
-  selectedBookTitles: string[];
-}
-
 export interface TradeReviewResponse {
   success: boolean;
   message?: string;
@@ -23,8 +13,7 @@ export interface ReviewedBook {
 
 export interface TradeReviewRequest {
   requestId: number;
-  reviewerId: number;
-  revieweeId: number;
+  userIds: number[]; // reviewer + reviewee 둘 다 포함
   rating: number;
   ratings: {
     condition: number;

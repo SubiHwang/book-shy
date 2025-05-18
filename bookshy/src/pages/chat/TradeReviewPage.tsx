@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { fetchUserPublicLibrary } from '@/services/mylibrary/libraryApi';
 import { fetchBookDetailByBookId } from '@/services/book/search';
-import { fetchScheduleByRoomId } from '@/services/chat/chat';
+import { fetchScheduleByRoomId, fetchChatRoomUserIds } from '@/services/chat/chat';
 import { submitTradeReview } from '@/services/chat/trade';
 
 import type { Library } from '@/types/mylibrary/library';
 import type { ChatCalendarEventDto } from '@/types/chat/chat';
-import type { TradeReviewRequest } from '@/types/chat/trade';
 
 import StarRating from '@/components/chat/tradereview/StarRating';
 import BookSelector from '@/components/chat/tradereview/BookSelector';
@@ -128,23 +127,44 @@ const TradeReviewPage = () => {
       return;
     }
 
-    // 📌 매칭 당시 + 추가 선택 도서 중 선택된 것만 추출
+    // 📦 선택된 책 정보 구성
     const allBooks = [...defaultBooks, ...myLibraryBooks];
-    const selectedReviewedBooks: ReviewedBook[] = allBooks
-      .filter((book) => selectedBooks.includes(book.title))
-      .map((book) => ({
-        title: book.title,
-        bookId: book.bookId,
-        libraryId: book.libraryId,
-        aladinItemId: book.aladinItemId,
-        fromMatching: defaultBooks.some((b) => b.title === book.title),
-      }));
 
-    const payload: TradeReviewRequest = {
+    const selectedReviewedBooks = allBooks
+      .filter((book) => selectedBooks.includes(book.title))
+      .map((book) => {
+        if (
+          book.bookId === undefined ||
+          book.libraryId === undefined ||
+          book.aladinItemId === undefined
+        ) {
+          throw new Error('선택된 도서 정보에 누락된 값이 있습니다.');
+        }
+
+        return {
+          title: book.title,
+          bookId: book.bookId,
+          libraryId: book.libraryId,
+          aladinItemId: book.aladinItemId,
+          fromMatching: defaultBooks.some((b) => b.title === book.title),
+        };
+      });
+
+    // 👥 참여자 ID 불러오기
+    let userIds: number[] = [];
+    try {
+      const { userAId, userBId } = await fetchChatRoomUserIds(roomId!); // roomId는 이미 존재 검증 완료
+      userIds = [userAId, userBId];
+    } catch (e) {
+      alert('참여자 정보를 불러오지 못했습니다.');
+      return;
+    }
+
+    // 📤 서버에 전송할 리뷰 payload 구성
+    const payload = {
       requestId: calendar.requestId,
-      reviewerId: 1, // TODO: 사용자 정보에서 가져오기
-      revieweeId: 2, // TODO: 상대방 ID 추출
-      rating: (ratings.condition + ratings.punctuality + ratings.manner) / 3,
+      userIds,
+      rating: Number(((ratings.condition + ratings.punctuality + ratings.manner) / 3).toFixed(1)),
       ratings,
       books: selectedReviewedBooks,
     };
