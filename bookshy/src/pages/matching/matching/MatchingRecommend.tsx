@@ -119,7 +119,7 @@ const MatchingRecommend: FC = () => {
                 <button
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
-                  className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors disabled:opacity-70"
+                  className="px-6 py-2 bg-primary text-white rounded-full disabled:opacity-70"
                 >
                   {isLoadingMore ? (
                     <span className="flex items-center gap-2">

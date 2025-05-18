@@ -10,7 +10,7 @@ const ScrollToTopButton: FC<ScrollToTopButtonProps> = ({ onClick }) => {
     <div className="fixed bottom-4 right-4 z-20">
       <button
         onClick={onClick}
-        className="bg-primary-dark text-white p-3 rounded-full shadow-lg hover:bg-primary-dark/90 transition-colors"
+        className="bg-primary text-white p-3 rounded-full shadow-lg"
         aria-label="맨 위로 스크롤"
       >
         <ArrowUp size={20} />
