@@ -5,6 +5,8 @@ import com.ssafy.bookshy.domain.notification.dto.ChatNotificationFcmDto;
 import com.ssafy.bookshy.domain.notification.dto.FcmMessageTemplate;
 import com.ssafy.bookshy.domain.notification.dto.FcmNotificationType;
 import com.ssafy.bookshy.domain.notification.dto.MatchCompleteFcmDto;
+import com.ssafy.bookshy.domain.notification.exception.NotificationErrorCode;
+import com.ssafy.bookshy.domain.notification.exception.NotificationException;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -25,12 +28,10 @@ public class NotificationService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // v1 방식용 상수
     private static final String FIREBASE_SCOPE = "https://www.googleapis.com/auth/firebase.messaging";
     private static final String FCM_API_URL_TEMPLATE = "https://fcm.googleapis.com/v1/projects/%s/messages:send";
     private final UserRepository userRepository;
 
-    // 테스트용 알림
     public void sendTestNotification(Long userId, FcmNotificationType type) {
         sendFcm(userId, type, Map.of(
                 "targetName", "제니",
@@ -93,27 +94,27 @@ public class NotificationService {
         ));
     }
 
-    // 공통 FCM 전송 로직 (v1 방식)
     private void sendFcm(Long userId, FcmNotificationType type, Map<String, String> data) {
         String targetToken = userRepository.findById(userId)
                 .map(Users::getFcmToken)
-                .orElse(null);
+                .orElseThrow(() -> new NotificationException(NotificationErrorCode.USER_NOT_FOUND));
 
-        if (targetToken == null) {
-            log.warn("❌ FCM 토큰 없음 - userId: {}", userId);
-            return;
+        if (targetToken == null || targetToken.isBlank()) {
+            throw new NotificationException(NotificationErrorCode.FCM_TOKEN_NOT_FOUND);
         }
 
         try {
-            // 1. OAuth2 인증 토큰 발급
             String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+            if (credentialsPath == null || credentialsPath.isBlank()) {
+                throw new NotificationException(NotificationErrorCode.FIREBASE_CREDENTIALS_MISSING);
+            }
+
             GoogleCredentials credentials = GoogleCredentials
                     .fromStream(new FileInputStream(credentialsPath))
                     .createScoped(List.of(FIREBASE_SCOPE));
             credentials.refreshIfExpired();
             String accessToken = credentials.getAccessToken().getTokenValue();
 
-            // 2. 메시지 구성
             FcmMessageTemplate.FcmMessage message = FcmMessageTemplate.build(type, data);
 
             JSONObject dataPayload = new JSONObject();
@@ -129,7 +130,6 @@ public class NotificationService {
             JSONObject payload = new JSONObject();
             payload.put("message", messageBody);
 
-            // 3. 전송
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(accessToken);
@@ -141,8 +141,11 @@ public class NotificationService {
             ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, request, String.class);
             log.info("✅ v1 FCM 푸시 전송 성공: {}", response.getBody());
 
+        } catch (IOException e) {
+            throw new NotificationException(NotificationErrorCode.FIREBASE_AUTH_FAILED);
         } catch (Exception e) {
             log.error("❌ v1 FCM 푸시 전송 실패", e);
+            throw new NotificationException(NotificationErrorCode.FIREBASE_SEND_FAILED);
         }
     }
 }

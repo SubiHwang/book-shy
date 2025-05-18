@@ -4,6 +4,8 @@ import com.ssafy.bookshy.common.response.CommonResponse;
 import com.ssafy.bookshy.domain.book.dto.BookListResponseDto;
 import com.ssafy.bookshy.domain.book.dto.BookListTotalResponseDto;
 import com.ssafy.bookshy.domain.notification.dto.FcmNotificationType;
+import com.ssafy.bookshy.domain.notification.exception.NotificationErrorCode;
+import com.ssafy.bookshy.domain.notification.exception.NotificationException;
 import com.ssafy.bookshy.domain.notification.service.NotificationService;
 import com.ssafy.bookshy.domain.recommend.service.BookRecommendationService;
 import com.ssafy.bookshy.domain.users.entity.Users;
@@ -52,7 +54,7 @@ public class FcmTestController {
             @RequestParam Long userId
     ) {
         Users user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+                .orElseThrow(() -> new NotificationException(NotificationErrorCode.USER_NOT_FOUND));
 
         BookListTotalResponseDto recs = bookRecommendationService.getAllRecommendations(userId);
 
