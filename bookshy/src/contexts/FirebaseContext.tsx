@@ -3,7 +3,6 @@ import { FirebaseApp } from 'firebase/app';
 import { Messaging, onMessage } from 'firebase/messaging';
 import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken } from 'firebase/messaging';
-import { useNavigate } from 'react-router-dom';
 
 // FirebaseContextType 정의 (알림 처리 함수 추가)
 interface FirebaseContextType {
@@ -227,7 +226,6 @@ export const FirebaseProvider: FC<{ children: React.ReactNode }> = ({ children }
 
   // 포그라운드 메시지 핸들러 설정
   const setupForegroundMessageHandler = (messagingInstance: Messaging) => {
-    const navigate = useNavigate();
     try {
       onMessage(messagingInstance, (payload) => {
         console.log('포그라운드 메시지 수신:', payload);
@@ -251,7 +249,7 @@ export const FirebaseProvider: FC<{ children: React.ReactNode }> = ({ children }
           notification.onclick = () => {
             // 앱 내 특정 페이지로 이동 등의 작업
             const url = payload.data?.url || '/';
-            navigate(url);
+            window.location.href = url;
             notification.close();
           };
         }
