@@ -22,6 +22,8 @@ const TradeReviewPage = () => {
     };
   };
 
+  console.log(state.chatSummary);
+
   const [ratings, setRatings] = useState({ condition: 0, punctuality: 0, manner: 0 });
   const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
   const [myLibraryBooks, setMyLibraryBooks] = useState<Library[]>([]);

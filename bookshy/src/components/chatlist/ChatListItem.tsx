@@ -15,6 +15,10 @@ function ChatListItem({ room }: Props) {
         partnerName: room.partnerName,
         partnerProfileImage: room.partnerProfileImage,
         bookShyScore: room.bookshyScore,
+        myBookId: room.myBookId,
+        myBookName: room.myBookName,
+        otherBookId: room.otherBookId,
+        otherBookName: room.otherBookName,
       },
     });
   };
