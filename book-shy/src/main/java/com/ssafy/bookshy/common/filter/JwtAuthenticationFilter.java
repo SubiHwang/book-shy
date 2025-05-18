@@ -32,7 +32,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/auth/oauth/callback",
             "/api/health",
             "/swagger-ui",
-            "/v3/api-docs"
+            "/v3/api-docs",
+            "/ws-chat"
     );
     private final JwtProvider jwtProvider;
     private final ObjectMapper objectMapper;
