@@ -5,10 +5,10 @@ import type { UserProfile, AddressUpdateRequest } from '@/types/User/user';
 export const fetchUserProfile = async (): Promise<UserProfile> => {
   try {
     const res = await authAxiosInstance.get<string, UserProfile>('/user/profile');
-    console.log(res)
+    console.log(res);
     return res;
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return Promise.reject(error);
   }
 };
@@ -21,21 +21,24 @@ export const updateUserProfile = async (payload: {
   latitude: number | null;
   longitude: number | null;
 }): Promise<{ accessToken?: string; refreshToken?: string }> => {
-  const res = await authAxiosInstance.put('/user/profile', payload);
-  return res.data;
+  const res: { accessToken?: string; refreshToken?: string } = await authAxiosInstance.put(
+    '/user/profile',
+    payload,
+  );
+  return res;
 };
 
-// 이미지 업로드
+// 프로필 이미지 수정
 export const uploadProfileImage = async (formData: FormData): Promise<{ imageUrl: string }> => {
-  const res = await authAxiosInstance.put('/user/profile/image', formData, {
+  const res: { imageUrl: string } = await authAxiosInstance.put('/user/profile/image', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
   });
-  return res.data;
+  return res;
 };
 
-// 주소
+// 주소 업데이트
 export const updateUserAddress = async (payload: AddressUpdateRequest): Promise<void> => {
   await authAxiosInstance.put('/user/profile/address', payload);
 };
