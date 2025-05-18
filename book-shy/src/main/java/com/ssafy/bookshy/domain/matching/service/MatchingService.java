@@ -125,50 +125,50 @@ public class MatchingService {
     /**
      * 🤝 [채팅 매칭 요청]
      *
-     * 📌 상대방 ID를 기반으로 매칭 요청을 생성하거나,
-     *     기존에 매칭된 기록이 있다면 해당 매칭을 재사용합니다.
+     * 📌 요청자(senderId)와 상대방(receiverId) 간의 매칭을 생성하거나,
+     *     기존 매칭이 있다면 재사용합니다.
      *
-     * 💬 이후 채팅방이 없을 경우 생성하며,
-     *     채팅방이 새로 만들어질 경우 notice 메시지도 함께 추가됩니다.
+     * 💬 이후 채팅방이 없다면 새로 생성하며, 채팅방이 새로 만들어질 경우
+     *     notice 메시지를 추가하고, 요청자/상대방의 책 정보도 함께 저장합니다.
      *
      * 🔔 최초 매칭일 경우 Kafka 이벤트(`MatchCreatedEvent`)도 발행합니다.
      *
      * @param senderId 현재 로그인 사용자 ID
-     * @param dto 매칭 요청 (상대 userId 포함)
-     * @return MatchResponseDto (채팅방 ID, 상대방 닉네임/이미지/온도 포함)
+     * @param dto 요청자 및 상대방의 책 정보 포함
+     * @return MatchResponseDto (채팅방 ID, 상대방 닉네임/이미지/온도/책 정보 포함)
      */
     @Transactional
     public MatchResponseDto chatMatching(Long senderId, MatchChatRequestDto dto) {
         Long receiverId = dto.getReceiverId();
 
-        // 🔍 기존 Matching 존재 여부 확인 (양방향 체크 필요)
+        // 👤 상대방 정보 조회
+        Users partner = userService.getUserById(receiverId);
+
+        // 🔍 기존 매칭 존재 여부 확인
         Optional<Matching> existingMatchOpt = matchingRepository.findByUsers(senderId, receiverId);
 
         if (existingMatchOpt.isPresent()) {
             Matching existingMatch = existingMatchOpt.get();
 
-            // 🔍 해당 매칭에 대한 채팅방이 이미 있는지 확인
+            // 🔍 기존 채팅방 존재 여부 확인
             Optional<ChatRoom> existingChatRoomOpt = chatRoomRepository.findByMatching(existingMatch);
-
-            // 👤 상대방 정보 조회
-            Users partner = userService.getUserById(receiverId);
-
             if (existingChatRoomOpt.isPresent()) {
+                // ✅ 기존 채팅방이 있는 경우 그대로 응답
                 return MatchResponseDto.builder()
                         .matchId(existingMatch.getMatchId())
                         .chatRoomId(existingChatRoomOpt.get().getId())
                         .nickname(partner.getNickname())
                         .profileImageUrl(partner.getProfileImageUrl())
                         .temperature(partner.getTemperature())
+                        .myBookId(dto.getMyBookId())
+                        .myBookName(dto.getMyBookName())
+                        .otherBookId(dto.getOtherBookId())
+                        .otherBookName(dto.getOtherBookName())
                         .build();
             }
 
-            // 🔧 채팅방만 없는 경우 → 서비스 레이어 메서드로 생성 (notice 메시지 포함)
-            ChatRoom chatRoom = chatRoomService.createChatRoomFromMatch(
-                    existingMatch.getSenderId(),
-                    existingMatch.getReceiverId(),
-                    existingMatch.getMatchId()
-            );
+            // 🔧 채팅방은 없을 경우 새로 생성
+            ChatRoom chatRoom = chatRoomService.createChatRoomFromMatch(existingMatch.getMatchId(), dto);
 
             return MatchResponseDto.builder()
                     .matchId(existingMatch.getMatchId())
@@ -176,10 +176,14 @@ public class MatchingService {
                     .nickname(partner.getNickname())
                     .profileImageUrl(partner.getProfileImageUrl())
                     .temperature(partner.getTemperature())
+                    .myBookId(dto.getMyBookId())
+                    .myBookName(dto.getMyBookName())
+                    .otherBookId(dto.getOtherBookId())
+                    .otherBookName(dto.getOtherBookName())
                     .build();
         }
 
-        // ❌ 매칭 자체가 없다면 새로 생성
+        // ❌ 매칭이 없을 경우 새로 생성
         Matching match = matchingRepository.save(
                 Matching.builder()
                         .senderId(senderId)
@@ -189,14 +193,12 @@ public class MatchingService {
                         .build()
         );
 
-        // 💬 채팅방 생성 (부가 기능 포함)
-        ChatRoom chatRoom = chatRoomService.createChatRoomFromMatch(senderId, receiverId, match.getMatchId());
+        // 💬 채팅방 생성 (책 정보 포함)
+        dto.setSenderId(senderId); // 명시적 설정 (안 되어 있으면 방어용)
+        ChatRoom chatRoom = chatRoomService.createChatRoomFromMatch(match.getMatchId(), dto);
 
         // 🔔 Kafka 이벤트 발행
         applicationEventPublisher.publishEvent(new MatchCreatedEvent(match));
-
-        // 👤 상대방 정보 조회
-        Users partner = userService.getUserById(receiverId);
 
         return MatchResponseDto.builder()
                 .matchId(match.getMatchId())
@@ -204,8 +206,14 @@ public class MatchingService {
                 .nickname(partner.getNickname())
                 .profileImageUrl(partner.getProfileImageUrl())
                 .temperature(partner.getTemperature())
+                .myBookId(dto.getMyBookId())
+                .myBookName(dto.getMyBookName())
+                .otherBookId(dto.getOtherBookId())
+                .otherBookName(dto.getOtherBookName())
                 .build();
     }
+
+
 
     /**
      * 📖 [매칭 후보 페이징 조회]

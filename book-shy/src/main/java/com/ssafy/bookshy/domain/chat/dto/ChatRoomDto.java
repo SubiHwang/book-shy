@@ -6,25 +6,29 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * 💬 채팅방 목록에 사용되는 DTO
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class ChatRoomDto {
-    private Long id;                     // 채팅방 ID
-    private Long participantId;          // 현재 사용자의 ID
-    private Long partnerId;              // 상대방 사용자 ID
-    private String partnerName;          // 상대방 이름
-    private String partnerProfileImage;  // 상대방 프리포일 이미지 URL
-    private Float bookshyScore;          // 상대방 온도 점수
-    private String lastMessage;          // 마지막 메시지
-    private String lastMessageTime;      // 마지막 메시지 시간 (ISO 포맷)
-    private int unreadCount;             // 안 읽은 메시지 수
+    private Long id;
+    private Long participantId;
+    private Long partnerId;
+    private String partnerName;
+    private String partnerProfileImage;
+    private Float bookshyScore;
+    private String lastMessage;
+    private String lastMessageTime;
+    private int unreadCount;
+
+    // ✅ 추가 필드
+    private List<Long> myBookId;
+    private List<String> myBookName;
+    private List<Long> otherBookId;
+    private List<String> otherBookName;
 
     public static ChatRoomDto from(ChatRoom room,
                                    Long participantId,
@@ -33,10 +37,27 @@ public class ChatRoomDto {
                                    String partnerProfileImage,
                                    Float bookshyScore,
                                    int unreadCount) {
+
         String lastMessage = room.getLastMessage();
         String lastMessageTime = room.getLastMessageTimestamp() != null
-                ? room.getLastMessageTimestamp().toString()  // ISO 8601 포맷 유지
+                ? room.getLastMessageTimestamp().toString()
                 : "";
+
+        // ✅ 책 정보 분기
+        List<Long> myBookId = new ArrayList<>();
+        List<String> myBookName = new ArrayList<>();
+        List<Long> otherBookId = new ArrayList<>();
+        List<String> otherBookName = new ArrayList<>();
+
+        room.getBooks().forEach(book -> {
+            if (book.getUserId().equals(participantId)) {
+                myBookId.add(book.getBookId());
+                myBookName.add(book.getBookName());
+            } else {
+                otherBookId.add(book.getBookId());
+                otherBookName.add(book.getBookName());
+            }
+        });
 
         return ChatRoomDto.builder()
                 .id(room.getId())
@@ -48,6 +69,10 @@ public class ChatRoomDto {
                 .lastMessage(lastMessage)
                 .lastMessageTime(lastMessageTime)
                 .unreadCount(unreadCount)
+                .myBookId(myBookId)
+                .myBookName(myBookName)
+                .otherBookId(otherBookId)
+                .otherBookName(otherBookName)
                 .build();
     }
 }

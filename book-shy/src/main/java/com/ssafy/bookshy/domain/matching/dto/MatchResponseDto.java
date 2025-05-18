@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,4 +19,10 @@ public class MatchResponseDto {
     private String nickname;
     private String profileImageUrl;
     private Float temperature;
+
+    // 책
+    private List<Long> myBookId;
+    private List<String> myBookName;
+    private List<Long> otherBookId;
+    private List<String> otherBookName;
 }
