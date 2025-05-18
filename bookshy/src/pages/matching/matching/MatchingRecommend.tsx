@@ -69,7 +69,7 @@ const MatchingRecommend: FC = () => {
   const hasFewMatches = matchingList.length > 0 && matchingList.length <= MIN_SUFFICIENT_MATCHES;
 
   return (
-    <div className="flex flex-col bg-light-bg">
+    <div className="flex flex-col bg-light-bg mb-24">
       <MatchingHeader matchingCount={matchingList.length} />
 
       <div className="flex flex-col px-5 sm:px-8 md:px-10 pt-3 sm:pt-4">

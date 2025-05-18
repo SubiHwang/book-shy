@@ -67,7 +67,7 @@ const NeighborhoodList: FC = () => {
   }
 
   return (
-    <div className="flex flex-col mb-24">
+    <div className="flex flex-col">
       {isLoading ? (
         // 로딩 중일 때는 스켈레톤 UI를 여러 개 표시
         Array.from({ length: skeletonCount }).map((_, index) => (
