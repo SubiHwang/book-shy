@@ -213,6 +213,47 @@ public class MatchingService {
                 .build();
     }
 
+    /**
+     * 💬 [단순 채팅방 생성 요청]
+     *
+     * 📌 로그인한 사용자와 상대방 간에 **단순 채팅방**을 생성하거나,
+     *     이미 존재하는 경우 해당 채팅방을 반환합니다.
+     *
+     * - 도서 매칭 정보 없이 자유롭게 대화를 시작하고 싶은 경우에 사용됩니다.
+     * - 동일 사용자 조합에 대해 중복 채팅방 생성을 방지합니다.
+     * - 새 채팅방이 생성되면 `"채팅방이 생성되었습니다."`라는 시스템 메시지가 자동 추가됩니다.
+     *
+     * @param senderId 현재 로그인한 사용자 ID
+     * @param receiverId 채팅을 시작할 상대방 사용자 ID
+     * @return SimpleChatResponseDto (채팅방 ID, 상대방 프로필 정보 등 포함)
+     */
+    @Transactional
+    public SimpleChatResponseDto createSimpleChatRoom(Long senderId, Long receiverId) {
+        // 👤 상대방 정보 조회
+        Users partner = userService.getUserById(receiverId);
+
+        // 🔄 기존 채팅방 존재 여부 확인
+        Optional<ChatRoom> existing = chatRoomRepository.findByParticipants(senderId, receiverId);
+        if (existing.isPresent()) {
+            ChatRoom chatRoom = existing.get();
+            return SimpleChatResponseDto.builder()
+                    .chatRoomId(chatRoom.getId())
+                    .nickname(partner.getNickname())
+                    .profileImageUrl(partner.getProfileImageUrl())
+                    .temperature(partner.getTemperature())
+                    .build();
+        }
+
+        // 🆕 새로운 채팅방 생성 (책 정보 없이)
+        ChatRoom chatRoom = chatRoomService.createChatRoomFromSimple(senderId, receiverId);
+
+        return SimpleChatResponseDto.builder()
+                .chatRoomId(chatRoom.getId())
+                .nickname(partner.getNickname())
+                .profileImageUrl(partner.getProfileImageUrl())
+                .temperature(partner.getTemperature())
+                .build();
+    }
 
 
     /**

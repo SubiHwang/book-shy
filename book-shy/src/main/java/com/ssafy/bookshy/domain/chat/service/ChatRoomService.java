@@ -151,6 +151,49 @@ public class ChatRoomService {
         return chatRoom;
     }
 
+    /**
+     * 💬 [단순 채팅방 생성]
+     *
+     * 📌 두 사용자 간 책 정보 없이 단순히 채팅을 시작하고자 할 때 사용됩니다.
+     *
+     * ✅ 기능 요약:
+     * - sender와 receiver 간 채팅방이 존재하지 않는다는 전제 하에 호출됩니다.
+     * - 새로운 ChatRoom을 생성하고, 시스템 메시지("채팅방이 생성되었습니다.")를 자동 추가합니다.
+     * - Matching 없이도 채팅방 생성이 가능합니다 (즉, Matching 엔티티와 무관).
+     *
+     * @param senderId 채팅을 시작하는 사용자 ID
+     * @param receiverId 채팅을 받을 사용자 ID
+     * @return 생성된 ChatRoom 엔티티
+     */
+    @Transactional
+    public ChatRoom createChatRoomFromSimple(Long senderId, Long receiverId) {
+        // 🆕 1. 채팅방 생성
+        ChatRoom chatRoom = ChatRoom.builder()
+                .userAId(senderId)
+                .userBId(receiverId)
+                .build();
+
+        chatRoom = chatRoomRepository.save(chatRoom);
+
+        // 📝 2. 시스템 메시지 저장
+        LocalDateTime now = LocalDateTime.now();
+        String systemMessage = "채팅방이 생성되었습니다.";
+
+        ChatMessage noticeMessage = ChatMessage.builder()
+                .chatRoom(chatRoom)
+                .senderId(senderId) // 최초 요청자 기준
+                .content(systemMessage)
+                .type("notice")
+                .timestamp(now)
+                .build();
+
+        chatMessageRepository.save(noticeMessage);
+
+        // 💬 3. 채팅방에 마지막 메시지 정보 업데이트
+        chatRoom.updateLastMessage(systemMessage, now);
+
+        return chatRoom;
+    }
 
 
 

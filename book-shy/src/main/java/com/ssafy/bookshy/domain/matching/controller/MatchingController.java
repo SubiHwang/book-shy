@@ -59,6 +59,31 @@ public class MatchingController {
     }
 
     @Operation(
+            summary = "💬 단순 채팅방 생성",
+            description = """
+        로그인한 사용자가 상대방과 **단순 채팅방**을 생성합니다.  
+        책 정보를 포함하지 않고 자유롭게 대화를 시작하고 싶은 경우에 사용합니다.  
+        이미 채팅방이 존재하면 해당 채팅방을 반환하며,  
+        존재하지 않으면 새 채팅방을 만들고 `"채팅방이 생성되었습니다."`라는 시스템 메시지가 자동 등록됩니다.
+        """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "채팅방 생성 또는 재사용 성공"),
+            @ApiResponse(responseCode = "400", description = "요청이 잘못된 경우"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @PostMapping("/chat/simple")
+    public ResponseEntity<SimpleChatResponseDto> createSimpleChatRoom(
+            @Parameter(hidden = true) @AuthenticationPrincipal Users user,
+            @RequestParam @Parameter(description = "채팅을 시작할 상대 사용자 ID", example = "42") Long receiverId
+    ) {
+        SimpleChatResponseDto response = matchingService.createSimpleChatRoom(user.getUserId(), receiverId);
+        return ResponseEntity.ok(response);
+    }
+
+
+    @Operation(
             summary = "📍 주변 이웃 목록 조회",
             description = "현재 사용자의 위치를 기준으로 반경 20km 이내에 있는 다른 사용자들을 거리순으로 조회합니다."
     )
