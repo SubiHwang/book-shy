@@ -90,9 +90,7 @@ public class UserController {
             UserProfileUpdateRequestDto requestDto
     ) {
         log.info("latitude: {}, longitude: {}", requestDto.getLatitude(), requestDto.getLongitude());
-
-        userService.updateUserProfile(user.getUserId(), requestDto);
-        return CommonResponse.success();
+        return CommonResponse.success(userService.updateUserProfile(user.getUserId(), requestDto));
     }
 
     @Operation(

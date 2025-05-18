@@ -1,5 +1,7 @@
 package com.ssafy.bookshy.domain.users.service;
 
+import com.ssafy.bookshy.common.jwt.JwtProvider;
+import com.ssafy.bookshy.domain.users.dto.JwtTokenDto;
 import com.ssafy.bookshy.domain.users.dto.UserProfileResponseDto;
 import com.ssafy.bookshy.domain.users.dto.UserProfileUpdateRequestDto;
 import com.ssafy.bookshy.domain.users.entity.Users;
@@ -19,7 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.*;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,6 +33,7 @@ import static com.ssafy.bookshy.common.constants.ImageUrlConstants.PROFILE_IMAGE
 public class UserService {
 
     private final UserRepository userRepository;
+    private final JwtProvider jwtProvider;
 
     /**
      * 🔍 사용자 ID로 사용자 엔티티를 조회합니다.
@@ -117,7 +120,7 @@ public class UserService {
      * @param dto    수정할 정보가 담긴 DTO
      */
     @Transactional
-    public void updateUserProfile(Long userId, UserProfileUpdateRequestDto dto) {
+    public JwtTokenDto updateUserProfile(Long userId, UserProfileUpdateRequestDto dto) {
         Users user = getUserById(userId);
         user.updateProfile(
                 dto.getNickname(),
@@ -126,6 +129,13 @@ public class UserService {
                 dto.getLatitude(),
                 dto.getLongitude()
         );
+        String accessToken = jwtProvider.generateToken(user.getNickname(), user.getUserId());
+        String refreshToken = jwtProvider.generateRefreshToken(user.getNickname(), user.getUserId());
+
+        return JwtTokenDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     /**

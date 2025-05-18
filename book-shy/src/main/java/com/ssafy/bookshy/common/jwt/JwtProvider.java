@@ -13,6 +13,7 @@ import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -36,7 +37,7 @@ public class JwtProvider {
     private final UserRepository userRepository;
 
     public JwtProvider(@Value("${jwt.secret-key}") String secretKey, @Value("${jwt.expiration-time}") long expiration,
-                       @Value("${issuer}") String issuer, UserService userService, UserRepository userRepository) {
+                       @Value("${issuer}") String issuer, @Lazy UserService userService, UserRepository userRepository) {
         this.secretKey = secretKey;
         this.expiration = expiration;
         this.issuer = issuer;
