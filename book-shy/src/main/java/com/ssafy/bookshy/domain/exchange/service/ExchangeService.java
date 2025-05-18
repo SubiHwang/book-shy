@@ -130,16 +130,22 @@ public class ExchangeService {
      * 2️⃣ 해당 거래 요청의 리뷰 수가 2개인지 확인 (양쪽 모두 작성 여부)
      * 3️⃣ 모두 완료 시 거래 상태 COMPLETED 로 변경
      * 4️⃣ 내가 제출한 책들을 상대방에게 소유권 이전 (Library + Book 모두 이전)
+     * @return true: 거래 완료됨, false: 아직 상대방이 리뷰 미제출
      */
     @Transactional
-    public void submitReview(Long reviewerId, ReviewSubmitRequest request) {
-        // 🧍‍♂️ 1. 상대방 ID 식별 (토큰 기준 reviewerId 제외)
+    public boolean submitReview(Long reviewerId, ReviewSubmitRequest request) {
+        // 🧍‍♂️ 1. 상대방 ID 식별
         Long revieweeId = request.getUserIds().stream()
                 .filter(id -> !id.equals(reviewerId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("상대방 ID를 찾을 수 없습니다."));
 
-        // 📝 리뷰 정보 저장
+        // ⚠️ 중복 리뷰 방지 (선택)
+        if (reviewRepository.existsByRequestIdAndReviewerId(request.getRequestId(), reviewerId)) {
+            throw new IllegalStateException("이미 리뷰를 제출한 사용자입니다.");
+        }
+
+        // 📝 2. 리뷰 정보 저장
         ExchangeRequestReview review = ExchangeRequestReview.builder()
                 .requestId(request.getRequestId())
                 .reviewerId(reviewerId)
@@ -151,30 +157,30 @@ public class ExchangeService {
                 .build();
         reviewRepository.save(review);
 
-        // ✅ 2. 리뷰가 2개 모두 작성되었는지 확인
+        // ✅ 3. 리뷰 개수 확인 (2개일 때만 진행)
         List<ExchangeRequestReview> reviews = reviewRepository.findByRequestId(request.getRequestId());
-        if (reviews.size() < 2) return; // ❌ 상대방 리뷰 미작성
+        if (reviews.size() < 2) return false; // ❌ 상대방 리뷰 아직
 
-        // ✅ 3. 거래 상태 → COMPLETED 로 변경
+        // ✅ 4. 거래 상태 → COMPLETED
         ExchangeRequest exchangeRequest = exchangeRequestRepository.findById(request.getRequestId())
                 .orElseThrow(() -> new IllegalArgumentException("거래 요청이 존재하지 않습니다."));
         exchangeRequest.complete();
 
-        // ✅ 4. 도서 소유권 이전 처리 (Library + Book 모두)
+        // ✅ 5. 소유권 이전
         Users reviewee = Users.builder().userId(revieweeId).build();
 
         for (ReviewSubmitRequest.ReviewedBook book : request.getBooks()) {
-            // 📚 Library 기준 도서 조회
             Library lib = libraryRepository.findById(book.getLibraryId())
                     .orElseThrow(() -> new IllegalArgumentException("도서가 존재하지 않습니다."));
-            lib.transferTo(reviewee); // 소유자 변경 (Library.user)
-
-            // 📘 Book도 같이 이전해야 일관성 유지
+            lib.transferTo(reviewee); // 📚 Library 소유자 변경
             Book entity = lib.getBook();
             if (entity != null) {
-                entity.transferTo(reviewee); // Book.user 변경
+                entity.transferTo(reviewee); // 📘 Book 소유자 변경
             }
         }
+
+        return true; // 🎉 거래 완료됨
     }
+
 
 }

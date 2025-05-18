@@ -19,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/trades")
@@ -110,11 +111,15 @@ public class ExchangeController {
             }
     )
     @PostMapping("/reviews")
-    public CommonResponse submitTradeReview(
+    public CommonResponse<Map<String, Object>> submitTradeReview(
             @AuthenticationPrincipal Users user,
             @RequestBody ReviewSubmitRequest request
     ) {
-        exchangeService.submitReview(user.getUserId(), request);
-        return CommonResponse.success("리뷰가 성공적으로 제출되었습니다.");
+        boolean isCompleted = exchangeService.submitReview(user.getUserId(), request);
+
+        return CommonResponse.success(Map.of(
+                "message", "리뷰가 성공적으로 제출되었습니다.",
+                "isTradeCompleted", isCompleted
+        ));
     }
 }
