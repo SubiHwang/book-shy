@@ -68,4 +68,8 @@ public class ExchangeRequest extends TimeStampEntity {
     public void setStatus(RequestStatus status) {
         this.status = status;
     }
+
+    public void complete() {
+        this.status = RequestStatus.COMPLETED;
+    }
 }
