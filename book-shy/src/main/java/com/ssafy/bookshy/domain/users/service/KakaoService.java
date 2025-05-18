@@ -2,8 +2,6 @@ package com.ssafy.bookshy.domain.users.service;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.ssafy.bookshy.common.exception.GlobalErrorCode;
-import com.ssafy.bookshy.common.exception.GlobalException;
 import com.ssafy.bookshy.domain.users.config.KakaoConfig;
 import com.ssafy.bookshy.domain.users.dto.OAuthUserInfoDto;
 import lombok.RequiredArgsConstructor;

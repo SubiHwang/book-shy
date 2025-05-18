@@ -1,6 +1,5 @@
 package com.ssafy.bookshy.domain.users.exception;
 
-import com.ssafy.bookshy.common.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

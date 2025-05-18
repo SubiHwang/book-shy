@@ -1,6 +1,5 @@
 package com.ssafy.bookshy.domain.users.service;
 
-import com.ssafy.bookshy.common.exception.GlobalException;
 import com.ssafy.bookshy.common.jwt.JwtProvider;
 import com.ssafy.bookshy.domain.users.dto.JwtTokenDto;
 import com.ssafy.bookshy.domain.users.entity.Users;

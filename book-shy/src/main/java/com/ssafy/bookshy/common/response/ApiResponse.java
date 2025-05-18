@@ -18,7 +18,6 @@ public class ApiResponse<T> { // 인자로 어떠한 것도 들어올 수 있음
         return ApiResponse.<T>builder()
                 .status(200)
                 .success(true)
-                .message("요청이 성공적으로 처리되었습니다.")
                 .data(data)
                 .timestamp(LocalDateTime.now())
                 .build();
@@ -40,28 +39,16 @@ public class ApiResponse<T> { // 인자로 어떠한 것도 들어올 수 있음
         return ApiResponse.<Void>builder()
                 .status(200)
                 .success(true)
-                .message("요청이 성공적으로 처리되었습니다")
                 .timestamp(LocalDateTime.now())
                 .build();
     }
 
     // 실패 응답 - 에러 정보와 함께
-    public static <T> ApiResponse<T> fail(int status, String message, ErrorResponse error) {
+    public static <T> ApiResponse<T> fail(ErrorResponse error) {
         return ApiResponse.<T>builder()
-                .status(status)
+                .status(error.getStatus())
                 .success(false)
-                .message(message)
                 .error(error)
-                .timestamp(LocalDateTime.now())
-                .build();
-    }
-
-    // 실패 응답 - 간단한 메시지만
-    public static <T> ApiResponse<T> fail(int status, String message) {
-        return ApiResponse.<T>builder()
-                .status(status)
-                .success(false)
-                .message(message)
                 .timestamp(LocalDateTime.now())
                 .build();
     }

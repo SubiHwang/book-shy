@@ -1,6 +1,5 @@
 package com.ssafy.bookshy.domain.autocomplete.service;
 
-import com.ssafy.bookshy.common.exception.GlobalException;
 import com.ssafy.bookshy.domain.autocomplete.dto.AutoCompleteItem;
 import com.ssafy.bookshy.domain.autocomplete.dto.AutoCompleteResponseDto;
 import com.ssafy.bookshy.domain.autocomplete.exception.AutoCompletionErrorCode;

@@ -1,7 +1,7 @@
 package com.ssafy.bookshy.common.jwt;
 
-import com.ssafy.bookshy.common.exception.GlobalException;
 import com.ssafy.bookshy.common.exception.JwtErrorCode;
+import com.ssafy.bookshy.common.exception.JwtException;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.exception.UserErrorCode;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
@@ -116,7 +116,7 @@ public class JwtProvider {
     public Authentication getAuthentication(String token) {
         UserDetails userDetails = userService.loadUserByNickname(this.getNickname(token));
         if (userDetails == null) {
-            throw new GlobalException(UserErrorCode.INVALID_USER_ID);
+            throw new UserExcpetion(UserErrorCode.INVALID_USER_ID);
         }
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
@@ -196,11 +196,11 @@ public class JwtProvider {
         log.info("💚 재발행을 위한 username:{}, userId:{}", username, userId);
         Users user = userRepository.findByRefreshToken(refreshToken);
         if (user == null) {
-            throw new GlobalException(JwtErrorCode.TOKEN_NOT_FOUND);
+            throw new JwtException(JwtErrorCode.TOKEN_NOT_FOUND);
         }
 
         if (!refreshToken.equals(user.getRefreshToken())) {
-            throw new GlobalException(JwtErrorCode.REFRESH_NOT_VALID);
+            throw new JwtException(JwtErrorCode.REFRESH_NOT_VALID);
         }
 
         String reToken = generateToken(username, userId);
