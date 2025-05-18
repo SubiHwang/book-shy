@@ -1,4 +1,9 @@
-import { ChatMessage, ChatRoomSummary, RegisterSchedulePayload } from '@/types/chat/chat';
+import {
+  ChatMessage,
+  ChatRoomSummary,
+  RegisterSchedulePayload,
+  ChatCalendarEventDto,
+} from '@/types/chat/chat';
 import { authAxiosInstance } from '@/services/axiosInstance';
 
 export async function fetchChatList(): Promise<ChatRoomSummary[]> {
@@ -23,4 +28,9 @@ export async function registerSchedule(payload: RegisterSchedulePayload): Promis
 
 export async function deleteEmoji(messageId: number): Promise<void> {
   await authAxiosInstance.delete(`/messages/${messageId}/emoji`);
+}
+
+// 채팅방의 거래 일정 가져오기
+export async function fetchScheduleByRoomId(roomId: number): Promise<ChatCalendarEventDto> {
+  return await authAxiosInstance.get(`/chats/calendar?roomId=${roomId}`);
 }

@@ -46,3 +46,17 @@ export interface EmojiUpdatePayload {
   type: 'ADD' | 'REMOVE';
   updatedBy: number;
 }
+
+export type CalendarType = 'EXCHANGE' | 'RENTAL';
+
+export interface ChatCalendarEventDto {
+  eventId: number;
+  requestId: number;
+  roomId: number;
+  type: CalendarType;
+  title: string;
+  description: string | null;
+  eventDate?: string; // type === 'EXCHANGE'일 때만 존재
+  startDate?: string; // type === 'RENTAL'일 때만 존재
+  endDate?: string; // type === 'RENTAL'일 때만 존재
+}
