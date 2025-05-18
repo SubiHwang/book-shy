@@ -23,6 +23,10 @@ interface Props {
   partnerProfileImage: string;
   initialMessages?: ChatMessage[];
   bookShyScore: number;
+  myBookId: number[];
+  myBookName: string[];
+  otherBookId: number[];
+  otherBookName: string[];
 }
 
 interface EmojiUpdatePayload {
@@ -32,7 +36,15 @@ interface EmojiUpdatePayload {
   updatedBy: number;
 }
 
-function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
+function ChatRoom({
+  partnerName,
+  partnerProfileImage,
+  bookShyScore,
+  myBookId,
+  myBookName,
+  otherBookId,
+  otherBookName,
+}: Props) {
   const { roomId } = useParams();
   const numericRoomId = Number(roomId);
   const myUserId = getUserIdFromToken();
@@ -357,6 +369,10 @@ function ChatRoom({ partnerName, partnerProfileImage, bookShyScore }: Props) {
                     partnerName,
                     partnerProfileImage,
                     bookShyScore,
+                    myBookId,
+                    myBookName,
+                    otherBookId,
+                    otherBookName,
                   },
                 },
               })

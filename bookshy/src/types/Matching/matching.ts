@@ -26,6 +26,11 @@ export interface MatchingConfirmResponse {
   nickname: string;
   profileImageUrl: string;
   temperature: number;
+
+  myBookId: number[];
+  myBookName: string[];
+  otherBookId: number[];
+  otherBookName: string[];
 }
 
 export interface Neighborhood {
