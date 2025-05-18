@@ -1,7 +1,5 @@
 package com.ssafy.bookshy.domain.matching.controller;
 
-import com.ssafy.bookshy.domain.library.dto.LibraryResponseDto;
-import com.ssafy.bookshy.domain.library.service.LibraryService;
 import com.ssafy.bookshy.domain.matching.dto.*;
 import com.ssafy.bookshy.domain.matching.service.MatchingService;
 import com.ssafy.bookshy.domain.users.entity.Users;
@@ -25,7 +23,6 @@ import java.util.List;
 public class MatchingController {
 
     private final MatchingService matchingService;
-    private final LibraryService libraryService;
 
     @Operation(summary = "📋 매칭 후보 조회", description = "도서 조건이 맞는 상대방 중, 점수 높은 순으로 목록을 반환합니다.")
     @ApiResponse(responseCode = "200", description = "매칭 후보 조회 성공")

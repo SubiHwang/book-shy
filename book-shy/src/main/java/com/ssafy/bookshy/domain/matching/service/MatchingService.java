@@ -87,8 +87,6 @@ public class MatchingService {
                     otherBookNames.add(l.getBook().getTitle());
                 }
 
-                double score = MatchingScoreCalculator.totalScore(me, other);
-
                 double distKm = MatchingScoreCalculator.calculateDistance(
                         me.getLatitude(), me.getLongitude(),
                         other.getLatitude(), other.getLongitude()
