@@ -55,7 +55,7 @@ const BookNoteCreatePage: React.FC = () => {
       {/* 👈 하단 탭바만큼 여백 확보 */}
       <Header
         title="독서 기록 작성하기"
-        onBackClick={() => navigate(-1)}
+        onBackClick={() => navigate('/booknotes')}
         showBackButton
         showNotification
       />
