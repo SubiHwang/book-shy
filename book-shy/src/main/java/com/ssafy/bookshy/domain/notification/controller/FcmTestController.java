@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.notification.controller;
 
+import com.ssafy.bookshy.common.response.CommonResponse;
 import com.ssafy.bookshy.domain.book.dto.BookListResponseDto;
 import com.ssafy.bookshy.domain.book.dto.BookListTotalResponseDto;
 import com.ssafy.bookshy.domain.notification.dto.FcmNotificationType;
@@ -11,8 +12,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "🔔 FCM 테스트 API", description = "FCM 알림 테스트용 컨트롤러")
 @RestController
@@ -29,7 +32,7 @@ public class FcmTestController {
             - type 예시: TRANSACTION_DATE, CHAT_RECEIVE, MATCH_COMPLETE, BOOK_RECOMMEND
             """)
     @PostMapping("/send")
-    public ResponseEntity<Void> testSend(
+    public CommonResponse<Void> testSend(
             @Parameter(description = "알림 수신 대상 사용자 ID", example = "1")
             @RequestParam Long userId,
             @Parameter(description = "알림 유형", example = "CHAT_RECEIVE")
@@ -39,12 +42,12 @@ public class FcmTestController {
                 userId,
                 FcmNotificationType.valueOf(type.toUpperCase())
         );
-        return ResponseEntity.ok().build();
+        return CommonResponse.success();
     }
 
     @Operation(summary = "📬 도서 추천 알림 테스트", description = "지금 해당 사용자에게 도서 추천 알림을 전송합니다.")
     @PostMapping("/send/book-recommend")
-    public ResponseEntity<Void> sendBookRecommendationTest(
+    public CommonResponse<Void> sendBookRecommendationTest(
             @Parameter(description = "알림 수신 대상 사용자 ID", example = "9")
             @RequestParam Long userId
     ) {
@@ -63,6 +66,6 @@ public class FcmTestController {
             );
         }
 
-        return ResponseEntity.ok().build();
+        return CommonResponse.success();
     }
 }

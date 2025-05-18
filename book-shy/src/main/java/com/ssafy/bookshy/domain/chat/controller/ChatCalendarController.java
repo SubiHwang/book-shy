@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.chat.controller;
 
+import com.ssafy.bookshy.common.response.CommonResponse;
 import com.ssafy.bookshy.domain.chat.dto.ChatCalendarCreateRequestDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatCalendarCreateResponseDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatCalendarEventDto;
@@ -9,12 +10,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody; // ✅ Swagger용 (문서 설명용)
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,10 +42,10 @@ public class ChatCalendarController {
             }
     )
     @GetMapping
-    public ResponseEntity<List<ChatCalendarEventDto>> getChatCalendar(
+    public CommonResponse<List<ChatCalendarEventDto>> getChatCalendar(
             @AuthenticationPrincipal Users user,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return ResponseEntity.ok(chatCalendarService.getCalendarEventsByDate(user.getUserId(), date));
+        return CommonResponse.success(chatCalendarService.getCalendarEventsByDate(user.getUserId(), date));
     }
 
     @Operation(
@@ -64,9 +64,9 @@ public class ChatCalendarController {
             }
     )
     @PostMapping
-    public ResponseEntity<ChatCalendarCreateResponseDto> createCalendar(
+    public CommonResponse<ChatCalendarCreateResponseDto> createCalendar(
             @org.springframework.web.bind.annotation.RequestBody ChatCalendarCreateRequestDto dto,
             @AuthenticationPrincipal Users user) {
-        return ResponseEntity.ok(chatCalendarService.createCalendar(dto, user.getUserId()));
+        return CommonResponse.success(chatCalendarService.createCalendar(dto, user.getUserId()));
     }
 }

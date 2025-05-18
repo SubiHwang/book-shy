@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.booknote.controller;
 
+import com.ssafy.bookshy.common.response.CommonResponse;
 import com.ssafy.bookshy.domain.booknote.dto.BookNoteQuoteRequest;
 import com.ssafy.bookshy.domain.booknote.dto.BookNoteQuoteResponse;
 import com.ssafy.bookshy.domain.booknote.dto.BookNoteQuoteUpdateRequest;
@@ -29,10 +30,10 @@ public class BookNoteQuoteController {
     @Operation(
             summary = "📝✍️ 독후감 + 인용구 등록",
             description = """
-                🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 독후감과 인용구를 동시에 등록합니다.<br><br>
-                - 독후감은 <code>book_reviews</code>, 인용구는 <code>book_quotes</code> 테이블에 저장됩니다.<br>
-                - 도서가 존재하지 않으면 <b>자동으로 등록</b>됩니다.
-                """,
+                    🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 독후감과 인용구를 동시에 등록합니다.<br><br>
+                    - 독후감은 <code>book_reviews</code>, 인용구는 <code>book_quotes</code> 테이블에 저장됩니다.<br>
+                    - 도서가 존재하지 않으면 <b>자동으로 등록</b>됩니다.
+                    """,
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "도서 ID, 독후감 내용, 인용 문장을 포함합니다.",
                     required = true,
@@ -69,10 +70,10 @@ public class BookNoteQuoteController {
     @Operation(
             summary = "📝✏️ 독후감 + 인용구 수정",
             description = """
-                사용자가 <b>기존에 등록한 독후감과 인용구를 동시에 수정</b>합니다.<br><br>
-                🔑 수정 대상은 <code>reviewId</code>와 <code>quoteId</code>를 쿼리 파라미터로 전달합니다.<br>
-                ✏️ 요청 바디에는 수정할 <b>새 독후감 내용</b>과 <b>인용 문장</b>을 포함해야 합니다.
-                """,
+                    사용자가 <b>기존에 등록한 독후감과 인용구를 동시에 수정</b>합니다.<br><br>
+                    🔑 수정 대상은 <code>reviewId</code>와 <code>quoteId</code>를 쿼리 파라미터로 전달합니다.<br>
+                    ✏️ 요청 바디에는 수정할 <b>새 독후감 내용</b>과 <b>인용 문장</b>을 포함해야 합니다.
+                    """,
             parameters = {
                     @Parameter(name = "reviewId", description = "수정할 독후감 ID", required = true, example = "15"),
                     @Parameter(name = "quoteId", description = "수정할 인용구 ID", required = true, example = "37")
@@ -83,12 +84,12 @@ public class BookNoteQuoteController {
                     @ApiResponse(responseCode = "500", description = "💥 서버 오류")
             }
     )
-    public ResponseEntity<BookNoteQuoteResponse> updateNoteAndQuote(
+    public CommonResponse<BookNoteQuoteResponse> updateNoteAndQuote(
             @RequestParam Long reviewId,
             @RequestParam Long quoteId,
             @RequestBody BookNoteQuoteUpdateRequest request
     ) {
         BookNoteQuoteResponse response = bookNoteQuoteService.updateNoteAndQuote(reviewId, quoteId, request);
-        return ResponseEntity.ok(response);
+        return CommonResponse.success(response);
     }
 }

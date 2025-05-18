@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.booknote.controller;
 
+import com.ssafy.bookshy.common.response.CommonResponse;
 import com.ssafy.bookshy.domain.booknote.dto.BookNoteRequest;
 import com.ssafy.bookshy.domain.booknote.dto.BookNoteResponseDto;
 import com.ssafy.bookshy.domain.booknote.entity.BookNote;
@@ -12,7 +13,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,9 +29,9 @@ public class BookNoteController {
     @Operation(
             summary = "✏️ 독후감 등록",
             description = """
-                🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 독후감을 작성합니다.<br>
-                - 도서 ID와 내용만 전달하면 됩니다.
-            """,
+                        🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 독후감을 작성합니다.<br>
+                        - 도서 ID와 내용만 전달하면 됩니다.
+                    """,
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "도서 ID, 내용 포함",
                     required = true,
@@ -55,12 +55,12 @@ public class BookNoteController {
             }
     )
     @PostMapping
-    public ResponseEntity<BookNote> create(
+    public CommonResponse<BookNote> create(
             @RequestBody BookNoteRequest request,
             @AuthenticationPrincipal Users user
     ) {
         request.setUserId(user.getUserId());
-        return ResponseEntity.ok(bookNoteService.create(request));
+        return CommonResponse.success(bookNoteService.create(request));
     }
 
     @Operation(
@@ -86,40 +86,40 @@ public class BookNoteController {
             )
     )
     @PutMapping("/{reviewId}")
-    public ResponseEntity<BookNote> update(
+    public CommonResponse<BookNote> update(
             @PathVariable Long reviewId,
             @RequestBody BookNoteRequest request,
             @AuthenticationPrincipal Users user
     ) {
         request.setUserId(user.getUserId());
-        return ResponseEntity.ok(bookNoteService.update(reviewId, request));
+        return CommonResponse.success(bookNoteService.update(reviewId, request));
     }
 
     @GetMapping
     @Operation(
             summary = "📘 나의 독서 기록 전체 조회",
             description = """
-        🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 <b>내가 작성한 모든 독후감 목록</b>을 조회합니다.<br>
-        - 도서 정보(title, author 등)와 함께 반환됩니다.
-        """,
+                    🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 <b>내가 작성한 모든 독후감 목록</b>을 조회합니다.<br>
+                    - 도서 정보(title, author 등)와 함께 반환됩니다.
+                    """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "✅ 조회 성공"),
                     @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
             }
     )
-    public ResponseEntity<List<BookNoteResponseDto>> getMyNotes(
+    public CommonResponse<List<BookNoteResponseDto>> getMyNotes(
             @AuthenticationPrincipal Users user
     ) {
-        return ResponseEntity.ok(bookNoteService.findNoteResponsesByUserId(user.getUserId()));
+        return CommonResponse.success(bookNoteService.findNoteResponsesByUserId(user.getUserId()));
     }
 
     @GetMapping("/by-book")
     @Operation(
             summary = "📕 특정 도서에 대한 나의 독후감 조회",
             description = """
-        🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 <b>특정 도서(bookId)에 대한 독후감</b>을 조회합니다.<br>
-        - 존재하지 않는 도서 ID를 입력할 경우 404 에러가 발생할 수 있습니다.
-        """,
+                    🔒 <b>로그인 사용자</b>의 인증 정보를 기반으로 <b>특정 도서(bookId)에 대한 독후감</b>을 조회합니다.<br>
+                    - 존재하지 않는 도서 ID를 입력할 경우 404 에러가 발생할 수 있습니다.
+                    """,
             parameters = {
                     @Parameter(name = "bookId", description = "📚 조회할 도서의 ID", required = true, example = "101")
             },
@@ -129,13 +129,13 @@ public class BookNoteController {
                     @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
             }
     )
-    public ResponseEntity<BookNoteResponseDto> getMyNoteByBookId(
+    public CommonResponse<BookNoteResponseDto> getMyNoteByBookId(
             @RequestParam Long bookId,
             @AuthenticationPrincipal Users user
     ) {
         BookNoteResponseDto dto = bookNoteService.findNoteResponseByUserIdAndBookId(user.getUserId(), bookId);
 
-        return ResponseEntity.ok(dto); // null이면 JSON null 반환
+        return CommonResponse.success(dto); // null이면 JSON null 반환
     }
 
 }

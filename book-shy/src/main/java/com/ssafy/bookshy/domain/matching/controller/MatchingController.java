@@ -1,6 +1,6 @@
 package com.ssafy.bookshy.domain.matching.controller;
 
-import com.ssafy.bookshy.domain.library.dto.LibraryResponseDto;
+import com.ssafy.bookshy.common.response.CommonResponse;
 import com.ssafy.bookshy.domain.library.service.LibraryService;
 import com.ssafy.bookshy.domain.matching.dto.*;
 import com.ssafy.bookshy.domain.matching.service.MatchingService;
@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,13 +29,13 @@ public class MatchingController {
     @Operation(summary = "📋 매칭 후보 조회", description = "도서 조건이 맞는 상대방 중, 점수 높은 순으로 목록을 반환합니다.")
     @ApiResponse(responseCode = "200", description = "매칭 후보 조회 성공")
     @GetMapping("/candidates")
-    public ResponseEntity<MatchingPageResponseDto> getMatchingCandidates(
+    public CommonResponse<MatchingPageResponseDto> getMatchingCandidates(
             @Parameter(hidden = true) @AuthenticationPrincipal Users user,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "score") String sort
     ) {
         MatchingPageResponseDto response = matchingService.findPagedCandidates(user.getUserId(), page, 2, sort);
-        return ResponseEntity.ok(response);
+        return CommonResponse.success(response);
     }
 
     @Operation(
@@ -48,7 +47,7 @@ public class MatchingController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
     })
     @PostMapping("/chat")
-    public ResponseEntity<MatchResponseDto> chatMatching(
+    public CommonResponse<MatchResponseDto> chatMatching(
             @Parameter(hidden = true) @AuthenticationPrincipal Users user,
             @RequestParam @Parameter(description = "상대 사용자 ID", example = "1") Long receiverId) {
 
@@ -56,7 +55,7 @@ public class MatchingController {
         requestDto.setReceiverId(receiverId);
 
         MatchResponseDto response = matchingService.chatMatching(user.getUserId(), requestDto);
-        return ResponseEntity.ok(response);
+        return CommonResponse.success(response);
     }
 
     @Operation(
@@ -69,11 +68,11 @@ public class MatchingController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/neighbors")
-    public ResponseEntity<List<NearbyUserResponseDto>> getNearbyUsers(
+    public CommonResponse<List<NearbyUserResponseDto>> getNearbyUsers(
             @Parameter(hidden = true) @AuthenticationPrincipal Users user
     ) {
         List<NearbyUserResponseDto> neighbors = matchingService.findNearbyUsers(user);
-        return ResponseEntity.ok(neighbors);
+        return CommonResponse.success(neighbors);
     }
 
     @Operation(
@@ -86,11 +85,11 @@ public class MatchingController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/public/{userId}")
-    public ResponseEntity<NeighborLibraryResponseDto> getPublicLibraryByUserId(
+    public CommonResponse<NeighborLibraryResponseDto> getPublicLibraryByUserId(
             @Parameter(description = "공개 서재를 조회할 이웃 주민 ID", example = "1")
             @PathVariable Long userId,
             @AuthenticationPrincipal Users viewer
     ) {
-        return ResponseEntity.ok(matchingService.getNeighborLibrary(userId, viewer.getUserId()));
+        return CommonResponse.success(matchingService.getNeighborLibrary(userId, viewer.getUserId()));
     }
 }
