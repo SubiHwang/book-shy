@@ -82,18 +82,6 @@ public class KafkaEventConsumer {
             MatchSuccessDto event = record.value();
             log.info("🤝 Match Success Event received: {}", event);
 
-            // 🎯 채팅방 생성
-            Optional<ChatRoom> existing = chatRoomService.findByMatchId(event.getMatchId());
-            ChatRoom chatRoom;
-            if (existing.isPresent()) {
-                chatRoom = existing.get();
-                log.info("⚠️ ChatRoom already exists: {}", chatRoom.getId());
-            } else {
-                chatRoom = chatRoomService.createChatRoomFromMatch(event.getUserAId(), event.getUserBId(), event.getMatchId());
-                log.info("💬 ChatRoom created for matchId {} -> chatRoomId={}", event.getMatchId(), chatRoom.getId());
-            }
-            log.info("💬 ChatRoom created for matchId {} -> chatRoomId={}", event.getMatchId(), chatRoom.getId());
-
             // 🔔 매칭 완료 알림 전송
             String senderName = userRepository.findById(event.getUserAId())
                     .map(Users::getNickname)

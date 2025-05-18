@@ -50,11 +50,10 @@ public class MatchingController {
     @PostMapping("/chat")
     public ResponseEntity<MatchResponseDto> chatMatching(
             @Parameter(hidden = true) @AuthenticationPrincipal Users user,
-            @RequestParam @Parameter(description = "상대 사용자 ID", example = "1") Long receiverId) {
+            @RequestParam @Parameter(description = "상대 사용자 ID", example = "1") Long receiverId,
+            @RequestBody MatchChatRequestDto requestDto) {
 
-        MatchChatRequestDto requestDto = new MatchChatRequestDto();
         requestDto.setReceiverId(receiverId);
-
         MatchResponseDto response = matchingService.chatMatching(user.getUserId(), requestDto);
         return ResponseEntity.ok(response);
     }

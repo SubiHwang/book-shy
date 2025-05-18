@@ -39,6 +39,10 @@ public class ChatRoom extends TimeStampEntity {
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatMessage> messages = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(name = "chat_room_books", joinColumns = @JoinColumn(name = "chat_room_id"))
+    public List<ChatRoomBook> books = new ArrayList<>();
+
     public ChatRoom(Long userAId, Long userBId) {
         this.userAId = userAId;
         this.userBId = userBId;
