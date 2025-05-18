@@ -28,17 +28,17 @@ export const updateUserProfile = async (payload: {
   return res;
 };
 
-// 이미지 업로드
+// 프로필 이미지 수정
 export const uploadProfileImage = async (formData: FormData): Promise<{ imageUrl: string }> => {
-  const res = await authAxiosInstance.put('/user/profile/image', formData, {
+  const res: { imageUrl: string } = await authAxiosInstance.put('/user/profile/image', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
   });
-  return res.data;
+  return res;
 };
 
-// 주소
+// 주소 업데이트
 export const updateUserAddress = async (payload: AddressUpdateRequest): Promise<void> => {
   await authAxiosInstance.put('/user/profile/address', payload);
 };
