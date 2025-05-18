@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchUserProfile, updateUserProfile, uploadProfileImage } from '@/services/mypage/profile';
 import Header from '@/components/common/Header';
 import { useNavigate } from 'react-router-dom';
@@ -67,11 +67,17 @@ const EditProfilePage = () => {
     if (currentLng !== null) setLongitude(currentLng);
   }, [fetchedAddress, currentLat, currentLng]);
 
+  const queryClient = useQueryClient();
+
   const { mutate: saveProfile, isPending } = useMutation({
     mutationFn: updateUserProfile,
     onSuccess: (res) => {
       if (res.accessToken) localStorage.setItem('auth_token', res.accessToken);
       if (res.refreshToken) localStorage.setItem('refresh_token', res.refreshToken);
+
+      // ✅ 캐시 무효화
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+
       notify.success('프로필 저장에 성공했습니다.');
       navigate('/mypage');
     },
