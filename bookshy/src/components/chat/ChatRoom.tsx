@@ -57,9 +57,22 @@ function ChatRoom({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLDivElement>(null);
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
   const messageAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const updateHeight = () => {
+      const visual = window.visualViewport;
+      const height = visual
+        ? visual.height + visual.offsetTop // 정확한 visible 영역
+        : window.innerHeight;
+      setViewportHeight(height);
+    };
+
+    updateHeight();
+    window.visualViewport?.addEventListener('resize', updateHeight);
+    return () => window.visualViewport?.removeEventListener('resize', updateHeight);
+  }, []);
 
   useEffect(() => {
     const handleVisualViewPortResize = () => {
@@ -73,26 +86,6 @@ function ChatRoom({
     window.visualViewport?.addEventListener('resize', handleVisualViewPortResize);
     return () => {
       window.visualViewport?.removeEventListener('resize', handleVisualViewPortResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    function setMessageAreaHeight() {
-      const visualHeight = window.visualViewport?.height || window.innerHeight;
-      const headerHeight = headerRef.current?.offsetHeight || 0;
-      const inputHeight = inputRef.current?.offsetHeight || 0;
-      const padding = 0;
-      const areaHeight = visualHeight - headerHeight - inputHeight - padding;
-      if (messageAreaRef.current && areaHeight > 0) {
-        messageAreaRef.current.style.height = `${areaHeight}px`;
-      }
-    }
-    setMessageAreaHeight();
-    window.visualViewport?.addEventListener('resize', setMessageAreaHeight);
-    window.addEventListener('resize', setMessageAreaHeight);
-    return () => {
-      window.visualViewport?.removeEventListener('resize', setMessageAreaHeight);
-      window.removeEventListener('resize', setMessageAreaHeight);
     };
   }, []);
 
@@ -326,9 +319,12 @@ function ChatRoom({
   let lastDateLabel = '';
 
   return (
-    <div className="flex flex-col h-full min-h-0 bg-white">
+    <div
+      style={{ height: viewportHeight }}
+      className="flex flex-col bg-white pb-safe fixed inset-0"
+    >
       {/* 헤더 */}
-      <div ref={headerRef} className="shrink-0 z-10">
+      <div className="shrink-0 z-10">
         <ChatRoomHeader
           partnerName={partnerName}
           partnerProfileImage={partnerProfileImage}
@@ -339,7 +335,7 @@ function ChatRoom({
       {/* 메시지 영역 */}
       <div
         ref={messageAreaRef}
-        className={`overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
+        className={`flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
           showOptions
             ? 'pb-[35vh]' // 확장 기능 보이면 큰 여백
             : 'pb-20' // 기본 여백
@@ -436,7 +432,7 @@ function ChatRoom({
         </div>
       )}
 
-      <div ref={inputRef} className="shrink-0 z-20 bg-white border-t border-light-border px-4">
+      <div className="shrink-0 z-20 bg-white border-t border-light-border px-4">
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
