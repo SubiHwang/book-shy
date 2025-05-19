@@ -1,8 +1,8 @@
 package com.ssafy.bookshy.domain.users.controller;
 
 import com.ssafy.bookshy.domain.users.dto.FavoriteCategoryResponseDto;
+import com.ssafy.bookshy.domain.users.dto.ReadingLevelResponseDto;
 import com.ssafy.bookshy.domain.users.service.UserStatsService;
-import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.common.response.CommonResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,8 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "📈 사용자 통계 API", description = "사용자 독서 통계 및 분석 관련 API입니다.")
@@ -41,5 +39,24 @@ public class UserStatsController {
     ) {
         FavoriteCategoryResponseDto result = userStatsService.getFavoriteCategory(userId);
         return CommonResponse.success(result);
+    }
+
+    @Operation(
+            summary = "📏 누적 독서량 환산",
+            description = """
+            지금까지 읽은 권수를 계산하여 실생활 높이(와인병, 문 높이 등)로 비유한 단계 메시지를 반환합니다.
+            """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "환산 성공"),
+            @ApiResponse(responseCode = "404", description = "사용자 없음"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @GetMapping("/reading-level")
+    public CommonResponse<ReadingLevelResponseDto> getReadingLevel(
+            @Parameter(description = "사용자 ID", example = "1")
+            @RequestParam Long userId
+    ) {
+        return CommonResponse.success(userStatsService.getReadingLevel(userId));
     }
 }

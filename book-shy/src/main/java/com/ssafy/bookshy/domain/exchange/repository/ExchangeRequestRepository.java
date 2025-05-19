@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.exchange.repository;
 
 import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequest;
+import com.ssafy.bookshy.domain.users.entity.Users;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -67,5 +68,4 @@ public interface ExchangeRequestRepository extends JpaRepository<ExchangeRequest
     ORDER BY e.requestedAt DESC
 """)
     List<ExchangeRequest> findByUserAndStatus(@Param("userId") Long userId, @Param("status") ExchangeRequest.RequestStatus status, Pageable pageable);
-
 }
