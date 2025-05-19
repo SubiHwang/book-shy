@@ -9,6 +9,7 @@ import com.ssafy.bookshy.domain.users.exception.UserErrorCode;
 import com.ssafy.bookshy.domain.users.exception.UserException;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import com.ssafy.bookshy.domain.users.util.CategoryNormalizer;
+import com.ssafy.bookshy.domain.users.util.CategoryTitleMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +43,7 @@ public class UserStatsService {
         }
 
         String favorite = Collections.max(countMap.entrySet(), Map.Entry.comparingByValue()).getKey();
-
-        return new FavoriteCategoryResponseDto(favorite, favorite + " 도서 마니아입니다!");
+        String title = CategoryTitleMapper.getCategoryTitle(favorite);
+        return new FavoriteCategoryResponseDto(favorite, title);
     }
 }
