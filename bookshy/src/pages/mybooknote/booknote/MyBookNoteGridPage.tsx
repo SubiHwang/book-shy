@@ -87,7 +87,7 @@ const MyBookNoteGridPage: React.FC<BookGridPetalPageProps> = ({ bookNotes }) => 
       </div>
 
       {/* 책 추가 플로팅 액션 버튼 */}
-      <div className="fixed bottom-32 right-6">
+      <div className="fixed bottom-24 right-6">
         <button
           onClick={() => navigate('/booknotes/select')}
           className="w-14 h-14 rounded-xl bg-primary text-white flex justify-center items-center shadow-lg"

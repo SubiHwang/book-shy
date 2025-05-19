@@ -140,7 +140,8 @@ const MyLibraryPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="fixed bottom-32 right-6">
+        {/* 책 추가 플로팅 액션 버튼*/}
+        <div className="fixed bottom-24 right-6">
           <button
             className="w-14 h-14 rounded-xl bg-primary text-white flex justify-center items-center shadow-lg"
             onClick={() => toggleDialog(true)}
