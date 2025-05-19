@@ -1,10 +1,18 @@
 // src/services/mylibrary/bannersService.ts
 import { authAxiosInstance } from '@/services/axiosInstance';
+import { getDefaultReadingMessage, getDefaultGenreMessage } from '@/utils/library/messageUtils';
 
 // 선호 카테고리 데이터 타입
 export interface FavoriteCategoryData {
   favoriteCategory: string;
   message: string;
+}
+
+// 독서량 환산 데이터 타입
+export interface ReadingLevelData {
+  readCount: number;
+  height: string;
+  stageMessage: string;
 }
 
 // 선호 카테고리 조회 함수
@@ -31,16 +39,10 @@ export const fetchFavoriteCategory = async (userId: number): Promise<FavoriteCat
     // 오류 발생 시 기본 데이터 반환
     return {
       favoriteCategory: '정보 없음',
-      message: '도서를 추가하시면 선호 장르를 분석해 드립니다.',
+      message: getDefaultGenreMessage(),
     };
   }
 };
-
-export interface ReadingLevelData {
-  readCount: number;
-  height: string;
-  stageMessage: string;
-}
 
 // 독서량 환산 조회 함수
 export const fetchReadingLevel = async (userId: number): Promise<ReadingLevelData> => {
@@ -62,11 +64,11 @@ export const fetchReadingLevel = async (userId: number): Promise<ReadingLevelDat
   } catch (error) {
     console.error('독서량 환산 조회 오류:', error);
 
-    // 오류 발생 시 기본 데이터 반환
+    // 오류 발생 시 기본 데이터 반환 - 유틸리티 함수 사용
     return {
       readCount: 0,
       height: '0cm',
-      stageMessage: '아직 첫 권을 기다리고 있어요.',
+      stageMessage: getDefaultReadingMessage(0),
     };
   }
 };

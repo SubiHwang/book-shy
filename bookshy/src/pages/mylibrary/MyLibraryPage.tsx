@@ -1,4 +1,4 @@
-// src/pages/MyLibrary/MyLibraryPage.tsx
+// src/pages/mylibrary/MyLibraryPage.tsx
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/common/Header';
 import BannerCarousel from '@/components/mylibrary/BookShelf/BannerCarousel';
@@ -8,6 +8,7 @@ import TabNavBar from '@/components/common/TabNavBar';
 import { AllBannersData } from '@/types/mylibrary/components';
 import { fetchFavoriteCategory, fetchReadingLevel } from '@/services/mylibrary/bannersService';
 import { getUserIdFromToken } from '@/utils/jwt';
+import { getDefaultReadingMessage, getDefaultGenreMessage } from '@/utils/library/messageUtils';
 
 const MyLibraryPage: React.FC = () => {
   const navigate = useNavigate();
@@ -50,8 +51,7 @@ const MyLibraryPage: React.FC = () => {
         const newBannerData = {
           booksData: {
             totalBooks: readingLevelData.readCount,
-            // 메시지를 줄바꿈으로 분리 (적절한 위치에 \n 삽입)
-            achievement: readingLevelData.stageMessage.replace('!', '!\n'),
+            achievement: readingLevelData.stageMessage,
           },
           genreData: {
             favoriteGenre: categoryData.favoriteCategory,
@@ -63,6 +63,7 @@ const MyLibraryPage: React.FC = () => {
             lastExchangeDate: '2023-05-15',
           },
         };
+
         console.log('새 배너 데이터 구성:', newBannerData);
         setBannerData(newBannerData);
         console.log('배너 데이터 상태 업데이트 완료');
@@ -76,15 +77,15 @@ const MyLibraryPage: React.FC = () => {
         setError('데이터를 불러오는 중 오류가 발생했습니다.');
         console.log('오류 상태 설정:', '데이터를 불러오는 중 오류가 발생했습니다.');
 
-        // 기본 데이터 설정
+        // 기본 데이터 설정 - 유틸리티 함수 사용
         const fallbackData = {
           booksData: {
             totalBooks: 0,
-            achievement: '아직 첫 권을 기다리고 있어요.',
+            achievement: getDefaultReadingMessage(0),
           },
           genreData: {
             favoriteGenre: '정보 없음',
-            genreDescription: '도서를 추가하시면 선호 장르를 분석해 드립니다.',
+            genreDescription: getDefaultGenreMessage(),
           },
           exchangeData: {
             exchangeCount: 0,
@@ -128,16 +129,6 @@ const MyLibraryPage: React.FC = () => {
 
       <div className="pb-16 bg-light-bg flex-1">
         <div className="max-w-screen-md mx-auto px-4 py-4">
-          {/* 디버깅 정보 표시 (개발 중에만 사용) */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="bg-yellow-100 p-2 mb-2 rounded text-xs">
-              <p>사용자 ID: {userId || '없음'}</p>
-              <p>로딩 상태: {isLoading ? '로딩 중' : '완료'}</p>
-              <p>오류: {error || '없음'}</p>
-              <p>데이터: {bannerData ? '있음' : '없음'}</p>
-            </div>
-          )}
-
           <BannerCarousel data={bannerData} isLoading={isLoading} error={error} />
 
           <div className="bg-white rounded-xl shadow-md mt-4 pt-3 px-4 min-h-screen">
