@@ -63,10 +63,10 @@ const AppLayout: FC = () => {
   const isReviewPage = matchPath('/chat/:roomId/review', location.pathname);
 
   return (
-    <div className="app-container">
+    <div className="app-container h-full min-h-screen min-h-0">
       <ErrorHandler />
       <CustomToastContainer />
-      <div className="content">
+      <div className="content h-full min-h-0">
         <Routes>
           {/* 공개 라우트 - 로그인하지 않아도 접근 가능 */}
           <Route path="/login" element={<Login />} />
