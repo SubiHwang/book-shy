@@ -12,6 +12,9 @@ import com.ssafy.bookshy.domain.book.repository.BookRepository;
 import com.ssafy.bookshy.domain.book.repository.WishRepository;
 import com.ssafy.bookshy.domain.library.repository.LibraryRepository;
 import com.ssafy.bookshy.domain.users.entity.Users;
+import com.ssafy.bookshy.domain.users.exception.UserErrorCode;
+import com.ssafy.bookshy.domain.users.exception.UserException;
+import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import com.ssafy.bookshy.domain.users.service.UserService;
 import com.ssafy.bookshy.external.aladin.AladinClient;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,7 @@ public class BookService {
     private final AladinClient aladinClient;
     private final WishRepository wishRepository;
     private final LibraryRepository libraryRepository;
+    private final UserRepository userRepository;
 
     // 공개 여부 변경
     @Transactional
@@ -183,8 +187,14 @@ public class BookService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
 
-        return BookResponseDto.from(book, true); // 실제 사용자는 찜 여부를 조회해도 됨
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+
+        boolean isLiked = wishRepository.existsByUserAndBook(user, book);
+
+        return BookResponseDto.from(book, true, isLiked);
     }
+
 
     public boolean isInLibrary(Long userId, Long itemId) {
         return libraryRepository.existsByUserUserIdAndBookItemId(userId, itemId);
