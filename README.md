@@ -145,7 +145,7 @@ ISBN, 알라딘 책 검색, 직접 등록을 통해서 책을 등록할 수 있�
 #### Frontend
 ![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react)
 ![Vite](https://img.shields.io/badge/Vite-6.0.5-646CFF?logo=vite)
-![TypeScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?logo=typescript&logoColor=000)
+![TypeScript](https://img.shields.io/badge/TypeScript-ES6+-F7DF1E?logo=typescript&logoColor=000)
 ![Redux](https://img.shields.io/badge/Redux-Toolkit-764ABC?logo=redux&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.3.3-38B2AC?logo=tailwindcss)
 
@@ -178,12 +178,15 @@ ISBN, 알라딘 책 검색, 직접 등록을 통해서 책을 등록할 수 있�
 ![image](/uploads/7e4a5b4ad04b7b02f038884dd4d75412/image.png){width=1276 height=520}
 
 <br>
+
 ### 💾 ERD Diagram
 
-
+![image](/uploads/4fd9e41d300f594753b5f952b6402ffc/image__14_.png
+){width=500 height=120}
 
 
 <br>
+
 ### 👥 팀 소개 및 역할
 
 버뮤다 삼각김밥 팀입니다!
