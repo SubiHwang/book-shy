@@ -6,6 +6,8 @@ import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.exception.ChatErrorCode;
 import com.ssafy.bookshy.domain.chat.exception.ChatException;
 import com.ssafy.bookshy.domain.chat.repository.ChatCalendarRepository;
+import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequest;
+import com.ssafy.bookshy.domain.exchange.repository.ExchangeRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ public class ChatCalendarService {
 
     private final ChatCalendarRepository chatCalendarRepository;
     private final ChatMessageService chatMessageService;
+    private final ExchangeRequestRepository exchangeRequestRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
     /**
@@ -37,31 +40,58 @@ public class ChatCalendarService {
     }
 
     /**
-     * 📌 거래 일정 등록 (교환 or 대여)
-     * - 입력값 유효성 검사
-     * - 캘린더 저장
-     * - 시스템 메시지 발송
-     * - 실시간 브로드캐스트
+     * 📌 거래 일정 + 요청 동시 등록 처리 메서드
+     * - 거래 요청이 존재하지 않으면 생성
+     * - 거래 일정 등록
+     * - 시스템 메시지 및 실시간 알림 처리
      */
     @Transactional
-    public ChatCalendarCreateResponseDto createCalendar(ChatCalendarCreateRequestDto dto, Long userId) {
-
+    public ChatCalendarCreateResponseDto createCalendarWithRequest(ChatCalendarCreateRequestDto dto) {
         // 1️⃣ 거래 유형 유효성 검사
-        if (!"EXCHANGE".equalsIgnoreCase(dto.getType()) && !"RENTAL".equalsIgnoreCase(dto.getType())) {
+        String type = dto.getType();
+        if (!"EXCHANGE".equalsIgnoreCase(type) && !"RENTAL".equalsIgnoreCase(type)) {
             throw new ChatException(ChatErrorCode.INVALID_CALENDAR_TYPE);
         }
 
-        // 2️⃣ 필수 날짜 확인
-        if ("EXCHANGE".equalsIgnoreCase(dto.getType()) && dto.getEventDate() == null) {
+        // 2️⃣ 날짜 유효성 검사
+        if ("EXCHANGE".equalsIgnoreCase(type) && dto.getEventDate() == null) {
             throw new ChatException(ChatErrorCode.MISSING_EXCHANGE_DATE);
         }
-
-        if ("RENTAL".equalsIgnoreCase(dto.getType()) &&
+        if ("RENTAL".equalsIgnoreCase(type) &&
                 (dto.getStartDate() == null || dto.getEndDate() == null)) {
             throw new ChatException(ChatErrorCode.MISSING_RENTAL_DATES);
         }
 
-        // 3️⃣ ChatCalendar 생성 및 저장
+        // 3️⃣ 사용자 ID 검증
+        if (dto.getUserIds() == null || dto.getUserIds().size() != 2) {
+            throw new ChatException(ChatErrorCode.INVALID_USER_IDS);
+        }
+        Long requesterId = dto.getUserIds().get(0);
+        Long responderId = dto.getUserIds().get(1);
+
+        // 4️⃣ 도서 ID 검증
+        if (dto.getBookAId() == null || dto.getBookBId() == null) {
+            throw new ChatException(ChatErrorCode.MISSING_BOOK_IDS);
+        }
+
+        // 5️⃣ 교환 요청 생성
+        ExchangeRequest.RequestType requestType;
+        try {
+            requestType = ExchangeRequest.RequestType.valueOf(type.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ChatException(ChatErrorCode.INVALID_CALENDAR_TYPE);
+        }
+
+        ExchangeRequest request = ExchangeRequest.builder()
+                .bookAId(dto.getBookAId())
+                .bookBId(dto.getBookBId())
+                .requesterId(requesterId)
+                .responderId(responderId)
+                .type(requestType)
+                .build();
+        exchangeRequestRepository.save(request);
+
+        // 6️⃣ 일정 등록
         ChatCalendar calendar = ChatCalendar.builder()
                 .title(dto.getTitle())
                 .description(dto.getDescription())
@@ -69,31 +99,32 @@ public class ChatCalendarService {
                 .rentalStartDate(parseDateTimeOrNull(dto.getStartDate()))
                 .rentalEndDate(parseDateTimeOrNull(dto.getEndDate()))
                 .chatRoom(ChatRoom.builder().id(dto.getRoomId()).build())
-                .requestId(dto.getRequestId())
+                .requestId(request.getRequestId())
                 .build();
 
         ChatCalendar saved = chatCalendarRepository.save(calendar);
 
-        // 4️⃣ 시스템 메시지 저장
+        // 7️⃣ 시스템 메시지 저장
         String systemMessage = String.format("📌 일정 등록됨: %s", dto.getTitle());
         chatMessageService.saveMessage(ChatMessageRequestDto.builder()
                 .chatRoomId(dto.getRoomId())
                 .senderId(0L)
                 .content(systemMessage)
                 .type("info")
-                .build(), userId);
+                .build(), requesterId); // 보낸 사람은 요청자 기준으로 설정
 
-        // 5️⃣ WebSocket 브로드캐스트
+        // 8️⃣ WebSocket 브로드캐스트
         ChatCalendarEventDto createdDto = ChatCalendarEventDto.from(saved);
         messagingTemplate.convertAndSend("/topic/calendar/" + dto.getRoomId(), createdDto);
 
-        // 6️⃣ 응답 반환
+        // 9️⃣ 응답 반환
         return ChatCalendarCreateResponseDto.builder()
                 .eventId(saved.getCalendarId())
                 .status("SUCCESS")
-                .message("일정이 등록되었습니다.")
+                .message("일정과 거래 요청이 등록되었습니다.")
                 .build();
     }
+
 
     /**
      * 📥 특정 채팅방의 거래 일정 단건 조회

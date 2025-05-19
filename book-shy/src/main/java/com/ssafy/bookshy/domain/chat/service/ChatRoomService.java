@@ -9,6 +9,8 @@ import com.ssafy.bookshy.domain.chat.entity.ChatCalendar;
 import com.ssafy.bookshy.domain.chat.entity.ChatMessage;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoomBook;
+import com.ssafy.bookshy.domain.chat.exception.ChatErrorCode;
+import com.ssafy.bookshy.domain.chat.exception.ChatException;
 import com.ssafy.bookshy.domain.chat.repository.ChatCalendarRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatMessageRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
@@ -224,7 +226,7 @@ public class ChatRoomService {
      */
     public ChatRoomUserIds getUserIdsByChatRoomId(Long chatRoomId) {
         return chatRoomRepository.findUserIdsByChatRoomId(chatRoomId)
-                .orElseThrow(() -> new IllegalArgumentException("❌ 채팅방이 존재하지 않습니다. ID=" + chatRoomId));
+                .orElseThrow(() -> new ChatException(ChatErrorCode.CHATROOM_NOT_FOUND));
     }
 
     /**
@@ -249,7 +251,7 @@ public class ChatRoomService {
 
         // 1. 채팅방 조회
         ChatRoom room = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new IllegalArgumentException("❌ 채팅방이 존재하지 않습니다. ID=" + chatRoomId));
+                .orElseThrow(() -> new ChatException(ChatErrorCode.CHATROOM_NOT_FOUND));
 
         // 2. 상대방 ID 결정
         Long partnerId = room.getUserAId().equals(senderId) ? room.getUserBId() : room.getUserAId();
@@ -303,7 +305,7 @@ public class ChatRoomService {
             // 3. 연결된 거래 요청 확인
             Long requestId = calendar.getRequestId();
             ExchangeRequest request = exchangeRequestRepository.findById(requestId)
-                    .orElse(null);
+                    .orElseThrow(() -> new ChatException(ChatErrorCode.EXCHANGE_REQUEST_NOT_FOUND));
             if (request == null || !request.getType().name().equals("RENTAL")) continue;
 
             // 4. 현재 사용자가 요청자인 경우 → 상대방 도서 = bookB
@@ -317,7 +319,8 @@ public class ChatRoomService {
                 continue; // 해당 거래의 참여자가 아님
             }
 
-            Book book = bookRepository.findById(bookId).orElse(null);
+            Book book = bookRepository.findById(bookId)
+                    .orElseThrow(() -> new ChatException(ChatErrorCode.BOOK_NOT_FOUND));
             if (book != null) {
                 results.add(BookResponseDto.from(book, false));
             }

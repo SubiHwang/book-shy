@@ -2,6 +2,8 @@ package com.ssafy.bookshy.domain.chat.dto;
 
 import lombok.*;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,4 +20,8 @@ public class ChatCalendarCreateRequestDto {
     private String eventDate;       // 📆 교환일 (EXCHANGE 전용)
     private String startDate;       // 🔐 대여 시작일 (RENTAL 전용)
     private String endDate;         // 🔓 대여 종료일 (RENTAL 전용)
+
+    private List<Long> userIds;
+    private Long bookAId;
+    private Long bookBId;
 }
