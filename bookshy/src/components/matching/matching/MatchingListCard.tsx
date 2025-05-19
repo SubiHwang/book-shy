@@ -75,7 +75,11 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
               </div>
             </div>
             <div className="text-xs sm:text-sm text-light-text-muted mt-0.5 sm:mt-1">
-              <p>{matching.address}</p>
+              <>
+                  <span>{matching.address}</span>
+                  <span className="mx-2">|</span>
+                  <span>{matching.distanceKm > 0 ? `${matching.distanceKm}km` : '근처'}</span>
+                </>
             </div>
           </div>
         </div>
