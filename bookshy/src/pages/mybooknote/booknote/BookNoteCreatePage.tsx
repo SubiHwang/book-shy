@@ -6,6 +6,7 @@ import BookNoteForm from '@/components/mybooknote/booknote/BookNoteForm';
 import Header from '@/components/common/Header';
 import BookNoteHeader from '@/components/mybooknote/booknote/BookNoteHeader';
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 const BookNoteCreatePage: React.FC = () => {
   const navigate = useNavigate();
@@ -39,11 +40,10 @@ const BookNoteCreatePage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['my-bookquotes'] });
       queryClient.invalidateQueries({ queryKey: ['my-booknotes'] });
 
-      alert('📚 독서기록 등록이 완료되었습니다.');
+      toast.success('독서기록 등록이 완료되었습니다.');
       navigate('/booknotes');
     } catch (error) {
       console.error('등록 실패:', error);
-      alert('❌ 등록에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -55,7 +55,7 @@ const BookNoteCreatePage: React.FC = () => {
       {/* 👈 하단 탭바만큼 여백 확보 */}
       <Header
         title="독서 기록 작성하기"
-        onBackClick={() => navigate(-1)}
+        onBackClick={() => navigate('/booknotes')}
         showBackButton
         showNotification
       />

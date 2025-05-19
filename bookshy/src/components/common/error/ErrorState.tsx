@@ -50,12 +50,14 @@ const ErrorState: FC<ErrorPageProps> = ({ type, message, onRetry, bgHeight = '' 
         <p className="text-sm text-[#8a7b70] mb-8 whitespace-pre-line">{description}</p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button
-            onClick={primaryAction.onClick}
-            className="px-6 py-3 bg-primary-accent text-white rounded-lg shadow-sm font-medium"
-          >
-            {primaryAction.label}
-          </button>
+          {type !== 'server-error' && (
+            <button
+              onClick={primaryAction.onClick}
+              className="px-6 py-3 bg-primary-accent text-white rounded-lg shadow-sm font-medium"
+            >
+              {primaryAction.label}
+            </button>
+          )}
 
           {type !== 'not-found' && (
             <button

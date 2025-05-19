@@ -318,7 +318,7 @@ function ChatRoom({
           bookShyScore={bookShyScore}
         />
       </div>
-  
+
       {/* 메시지 영역: 헤더 높이만큼 padding-top, 인풋 높이만큼 padding-bottom */}
       <div
         className="overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300"
@@ -334,7 +334,7 @@ function ChatRoom({
           const dateLabel = formatDateLabel(msg.sentAt);
           const showDate = dateLabel !== lastDateLabel;
           lastDateLabel = dateLabel;
-  
+
           const isSystem = ['info', 'notice', 'warning'].includes(msg.type ?? '');
           return (
             <div key={`${msg.id}-${idx}`}>
@@ -351,8 +351,8 @@ function ChatRoom({
                     msg.type === 'notice'
                       ? '거래 시 주의해주세요!'
                       : msg.type === 'info'
-                      ? '약속이 등록되었습니다!'
-                      : '알림'
+                        ? '약속이 등록되었습니다!'
+                        : '알림'
                   }
                   content={msg.content}
                   variant={msg.type as 'notice' | 'info' | 'warning'}
@@ -372,7 +372,7 @@ function ChatRoom({
             </div>
           );
         })}
-  
+
         {/* 📌 교환 완료 유도 메시지 */}
         <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm">
           <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
@@ -400,10 +400,10 @@ function ChatRoom({
             거래 완료
           </button>
         </div>
-  
+
         <div ref={messagesEndRef} className="h-4" />
       </div>
-  
+
       {/* ↓ 아래로 버튼 */}
       {showScrollToBottom && (
         <div
@@ -420,7 +420,7 @@ function ChatRoom({
           </button>
         </div>
       )}
-  
+
       {/* 입력창: fixed bottom-0 */}
       <div
         className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-light-border px-4"
@@ -434,9 +434,9 @@ function ChatRoom({
             const wasAtBottom = container
               ? container.scrollHeight - container.scrollTop - container.clientHeight < 50
               : false;
-  
+
             setShowOptions((prev) => !prev);
-  
+
             if (wasAtBottom) {
               setTimeout(() => {
                 requestAnimationFrame(() => {
@@ -448,7 +448,7 @@ function ChatRoom({
           onScheduleClick={() => setShowScheduleModal(true)}
         />
       </div>
-  
+
       {/* 일정 모달 */}
       {showScheduleModal && (
         <ScheduleModal

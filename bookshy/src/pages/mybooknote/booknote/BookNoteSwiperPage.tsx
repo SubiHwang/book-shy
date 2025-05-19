@@ -4,11 +4,11 @@ import type { BookNote } from '@/types/mybooknote/booknote';
 import BookNoteCard from '@/components/mybooknote/booknote/BookNoteCard';
 import AdjacentBookPreview from '@/components/mybooknote/booknote/AdjacentBookPreview';
 import FilterChips from '@/components/common/FilterChips';
-import { PlusCircle, BookOpen, CheckCircle, CircleSlash } from 'lucide-react';
+import { BookOpen, CheckCircle, CircleSlash, Handshake } from 'lucide-react';
 import { useSwipeable } from 'react-swipeable';
 
 interface BookNoteSwiperPageProps {
-  bookNotes: (BookNote & { libraryId: number })[];
+  bookNotes: (BookNote & { libraryId: number; fromRental?: boolean })[];
 }
 
 type FilterType = 'all' | 'has' | 'none';
@@ -63,6 +63,22 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
 
   return (
     <div className="min-h-screen bg-light-bg pb-28">
+      <div className="w-full bg-primary-light/20 px-5 sm:px-8 py-3 sm:py-4">
+        <div className="flex items-center gap-1 mb-1 sm:mb-2">
+          <BookOpen className="text-primary-dark w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1} />
+          <h1 className="text-primary-dark font-medium text-sm sm:text-base md:text-lg">
+            내 독서 기록 보기 시스템
+          </h1>
+        </div>
+        <p className="text-light-text-secondary font-light text-xs sm:text-sm leading-tight sm:leading-normal">
+          내가 남긴 감상과 인용구를 다시 떠올려보세요.
+          <span className="hidden sm:inline"> </span>
+          <span className="inline sm:hidden">
+            <br />
+          </span>
+          한 줄 한 줄에 담긴 감정과 생각을 되새겨볼 수 있어요.
+        </p>
+      </div>
       <div className="px-4 pt-4 space-y-4">
         <div className="text-sm text-light-text-secondary">총 {filteredNotes.length}권</div>
 
@@ -75,17 +91,6 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
             setStage('cover');
           }}
         />
-
-        <div className="bg-[#FFF3F3] border border-[#FF8080] rounded-md px-5 py-3">
-          <div className="flex items-center gap-1 mb-1">
-            <span className="text-[#FF4040]">📢</span>
-            <h1 className="text-[#FF4040] font-medium text-sm">내 독서 기록 보기 시스템</h1>
-          </div>
-          <p className="text-[gray] text-xs sm:text-sm leading-relaxed">
-            내가 남긴 감상과 인용구를 다시 떠올려보세요. <br />한 줄 한 줄에 담긴 감정과 생각을
-            되새겨볼 수 있어요.
-          </p>
-        </div>
       </div>
 
       {/* 카드 영역 */}
@@ -106,7 +111,12 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
         )}
 
         {/* 현재 카드 */}
-        <div className="z-20">
+        <div className="z-20 relative">
+          {currentBook.fromRental && (
+            <div className="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+              <Handshake size={12} /> 대여 도서
+            </div>
+          )}
           <BookNoteCard
             coverUrl={currentBook.coverUrl}
             title={currentBook.title}
@@ -130,7 +140,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
       </div>
 
       {/* 인용구 버튼 */}
-      <div className="fixed bottom-24 left-6 z-[50]">
+      <div className="fixed bottom-32 left-6 z-[50]">
         <button
           onClick={() => navigate('/booknotes/quote-galaxy')}
           className="w-14 h-14 rounded-full bg-cyan-500/20 backdrop-blur-md shadow-xl shadow-cyan-400/40 
@@ -142,14 +152,14 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
       </div>
 
       {/* 등록 버튼 */}
-      <div className="fixed bottom-24 right-6 z-50">
+      {/* <div className="fixed bottom-32 right-6 z-50">
         <button
           onClick={() => navigate('/booknotes/select')}
           className="w-14 h-14 rounded-xl bg-primary text-white flex justify-center items-center shadow-lg"
         >
           <PlusCircle size={32} strokeWidth={1} />
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };

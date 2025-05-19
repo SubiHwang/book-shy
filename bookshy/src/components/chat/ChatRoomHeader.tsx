@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Bell } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import NotificationButton from '../common/NotificationButton';
 
 interface ChatRoomHeaderProps {
   partnerName: string;
@@ -48,21 +49,8 @@ const ChatRoomHeader: FC<ChatRoomHeaderProps> = ({
       </div>
 
       {/* 오른쪽: 일정/알림 */}
-      <div className="flex items-center gap-2 sm:gap-3 py-3">
-        <button
-          type="button"
-          className="p-2 rounded-full active:bg-gray-100 transition"
-          aria-label="일정 보기"
-        >
-          <Calendar size={20} />
-        </button>
-        <button
-          type="button"
-          className="p-2 rounded-full active:bg-gray-100 transition"
-          aria-label="알림 보기"
-        >
-          <Bell size={20} />
-        </button>
+      <div className="flex items-center gap-2 sm:gap-3">
+        <NotificationButton></NotificationButton>
       </div>
     </header>
   );

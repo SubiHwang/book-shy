@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { getUserIdFromToken } from '@/utils/jwt';
 import { ChatRoomSummary } from '@/types/chat/chat';
 import { useLocation } from 'react-router-dom';
+import Loading from '../common/Loading';
 
 function ChatList() {
   const queryClient = useQueryClient();
@@ -65,11 +66,7 @@ function ChatList() {
   }, [myUserId, queryClient, subscribeUser, unsubscribe]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center bg-light-bg px-4">
-        <span className="text-sm text-light-text-muted">불러오는 중...</span>
-      </div>
-    );
+    return <Loading loadingText="채팅 목록 불러오는 중..." />;
   }
 
   if (isError || !data) {

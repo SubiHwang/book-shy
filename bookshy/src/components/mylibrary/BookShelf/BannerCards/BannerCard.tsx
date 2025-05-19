@@ -28,7 +28,7 @@ const BannerCard: React.FC<BannerCardProps> = ({
 }) => {
   return (
     <div
-      className={`${backgroundColor} rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200 h-32 flex items-center`}
+      className={`${backgroundColor} rounded-xl p-4 shadow transition-all duration-200 h-32 flex items-center relative overflow-visible`}
     >
       <div className="flex items-center w-full">
         <div className="flex-1 min-w-0 flex flex-col justify-center m-1">

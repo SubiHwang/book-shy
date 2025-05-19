@@ -141,20 +141,20 @@ const BannerCarousel: React.FC<BannerCarouselProps> = ({ data, isLoading, error 
 
   return (
     <div className="relative mb-1">
-      {/* 배너 컨테이너 */}
+      {/* 배너 컨테이너 - overflow-hidden 제거 */}
       <div
         ref={carouselRef}
-        className="relative overflow-hidden"
+        className="relative"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* 현재 활성화된 배너 */}
-        <div className="transition-all duration-300 ease-in-out relative">
+        {/* 현재 활성화된 배너 - overflow-visible 추가 */}
+        <div className="transition-all duration-300 ease-in-out relative overflow-visible">
           {banners[activeIndex].component}
 
-          {/* 인디케이터를 배너 내부 하단에 위치시킴 */}
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+          {/* 인디케이터를 배너 내부 하단에 위치시킴 - z-index 추가 */}
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center z-10">
             {banners.map((banner, index) => (
               <button
                 key={banner.id}

@@ -1,4 +1,11 @@
-import { ChatMessage, ChatRoomSummary, RegisterSchedulePayload } from '@/types/chat/chat';
+import {
+  ChatMessage,
+  ChatRoomSummary,
+  RegisterSchedulePayload,
+  ChatCalendarEventDto,
+  ChatRoomUserIds,
+} from '@/types/chat/chat';
+import { Book } from '@/types/book/book';
 import { authAxiosInstance } from '@/services/axiosInstance';
 
 export async function fetchChatList(): Promise<ChatRoomSummary[]> {
@@ -23,4 +30,20 @@ export async function registerSchedule(payload: RegisterSchedulePayload): Promis
 
 export async function deleteEmoji(messageId: number): Promise<void> {
   await authAxiosInstance.delete(`/messages/${messageId}/emoji`);
+}
+
+// 채팅방의 거래 일정 가져오기
+export async function fetchScheduleByRoomId(roomId: number): Promise<ChatCalendarEventDto> {
+  return await authAxiosInstance.get(`/chats/calendar?roomId=${roomId}`);
+}
+
+// ✅ 채팅방 참여자 ID 조회
+export async function fetchChatRoomUserIds(chatRoomId: number): Promise<ChatRoomUserIds> {
+  return await authAxiosInstance.get(`/chats/users?chatRoomId=${chatRoomId}`);
+}
+
+// ✅ 현재 로그인 사용자가 대여 중인 모든 도서 목록 조회
+export async function fetchRentalBooksInUse(): Promise<Book[]> {
+  const { data } = await authAxiosInstance.get(`/chats/rental-books`);
+  return data;
 }

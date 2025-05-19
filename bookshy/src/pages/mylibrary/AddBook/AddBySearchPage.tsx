@@ -54,7 +54,6 @@ const AddBySearchPage: FC = () => {
     } catch (err) {
       console.error('책 검색 중 오류 발생:', err);
       setError('책 검색에 실패했습니다. 다시 시도해주세요.');
-      toast.error('책 검색에 실패했습니다. 다시 시도해주세요.');
       setBooks([]);
       setTotalResults(0);
     } finally {
@@ -115,7 +114,6 @@ const AddBySearchPage: FC = () => {
       toast.success('책이 성공적으로 등록되었습니다!');
     } catch (error) {
       console.error('책 추가 중 오류 발생:', error);
-      toast.error('책 추가에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsAdding(false);
     }

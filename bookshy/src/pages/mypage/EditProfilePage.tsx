@@ -9,8 +9,9 @@ import GenderSelector from '@/components/mypage/profile/GenderSelector';
 import { useLocationFetcher } from '@/hooks/location/useLocationFetcher';
 import useSearchAddress from '@/hooks/location/useSearchAddress';
 import { Locate, Search } from 'lucide-react';
-import { notify } from '@/components/common/CustomToastContainer';
 import { authAxiosInstance } from '@/services/axiosInstance';
+import { toast } from 'react-toastify';
+import Loading from '@/components/common/Loading';
 
 const EditProfilePage = () => {
   const navigate = useNavigate();
@@ -85,17 +86,17 @@ const EditProfilePage = () => {
       // ✅ 캐시 무효화
       queryClient.invalidateQueries({ queryKey: ['profile'] });
 
-      notify.success('프로필 저장에 성공했습니다.');
+      toast.success('프로필 저장에 성공했습니다.');
       navigate('/mypage');
     },
     onError: () => {
-      notify.error('프로필 저장에 실패했습니다.');
+      toast.error('프로필 저장에 실패했습니다.');
     },
   });
 
   const handleSave = () => {
-    if (!nickname.trim()) return alert('닉네임을 입력해주세요.');
-    if (gender === '') return alert('성별을 선택해주세요.');
+    if (!nickname.trim()) return toast.warn('닉네임을 입력해주세요.');
+    if (gender === '') return toast.warn('성별을 선택해주세요.');
 
     saveProfile({
       nickname,
@@ -113,9 +114,9 @@ const EditProfilePage = () => {
     try {
       const res = await uploadProfileImage(formData);
       setProfileImageUrl(res.imageUrl);
-      alert('프로필 이미지가 변경되었습니다.');
+      toast.success('프로필 이미지가 변경되었습니다.');
     } catch {
-      alert('이미지 업로드에 실패했습니다.');
+      toast.error('이미지 업로드에 실패했습니다.');
     }
   };
 
@@ -135,11 +136,11 @@ const EditProfilePage = () => {
   };
 
   if (isLoading) {
-    return <p className="p-4">프로필을 불러오는 중입니다...</p>;
+    return <Loading loadingText="프로필 불러오는 중..." />;
   }
 
   return (
-    <div className="bg-light-bg min-h-screen">
+    <div className="bg-light-bg min-h-screen pb-28">
       <Header title="프로필" onBackClick={() => navigate(-1)} showNotification={false} />
 
       <div className="px-6 py-4">

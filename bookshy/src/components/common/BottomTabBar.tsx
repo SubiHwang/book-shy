@@ -1,10 +1,13 @@
 import { FC, useState, useEffect } from 'react';
-import { LibraryBig, BookCopy, MessageCircle, NotepadText, UserRound } from 'lucide-react';
-import { TabBarItem, TabBarProps } from '@/types/common/bottomTabBar';
-import { useLocation } from 'react-router-dom';
+import { LibraryBig, BookCopy, NotepadText, UserRound } from 'lucide-react';
+import { TabBarProps } from '@/types/common/bottomTabBar';
+import { useLocation, useNavigate } from 'react-router-dom';
+import ChatButton from './ChatButton';
+import TabButton from './TabButton';
 
 const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>(() => {
     return sessionStorage.getItem('activeTab') || 'bookshelf';
   });
@@ -21,7 +24,7 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
     '/bookshelf/add/search',
     '/bookshelf/add/ocr-result',
     '/setting-location',
-    '/notifications'
+    '/notifications',
   ];
 
   // 현재 경로가 숨김 목록에 있는지 확인
@@ -72,18 +75,13 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
     // 탭 변경 시 스크롤 위치 초기화
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
+    // 기본 경로로 이동 (bookshelf는 루트 경로)
+    navigate(`/${tabId === 'bookshelf' ? '' : tabId}`);
+
     if (onTabChange) {
       onTabChange(tabId); // 부모 컴포넌트에 탭 변경 알림
     }
   };
-
-  const tabs: TabBarItem[] = [
-    { id: 'bookshelf', name: '내 서재', icon: LibraryBig },
-    { id: 'matching', name: '매칭 추천', icon: BookCopy },
-    { id: 'chat', name: '채팅', icon: MessageCircle },
-    { id: 'booknotes', name: '독서 기록', icon: NotepadText },
-    { id: 'mypage', name: '마이', icon: UserRound },
-  ];
 
   if (shouldHideTabBar) {
     return null; // 경로가 숨김 목록에 포함되면 탭바를 렌더링하지 않음
@@ -96,27 +94,40 @@ const BottomTabBar: FC<TabBarProps> = ({ onTabChange }) => {
       <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-b from-black/[0.02] to-transparent transform -translate-y-full"></div>
 
       <nav className={`flex justify-around items-center ${tabHeight} pt-2 pb-2`}>
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
+        {/* 내 서재 탭 */}
+        <TabButton
+          name="내 서재"
+          Icon={LibraryBig}
+          isActive={activeTab === 'bookshelf'}
+          onClick={() => handleTabChange('bookshelf')}
+        />
 
-          return (
-            <button
-              key={tab.id}
-              className={`flex flex-col items-center justify-center w-full h-full ${
-                isActive ? 'text-primary' : 'text-light-text-secondary'
-              } py-1`}
-              onClick={() => handleTabChange(tab.id)}
-            >
-              <div className="flex items-center justify-center mb-1">
-                {/* 활성화 상태에 따라 아이콘 스타일 변경 */}
-                <Icon size={window.innerHeight < 667 ? 20 : 24} strokeWidth={isActive ? 2 : 0.5} />
-              </div>
-              <p className={`text-xs ${isActive ? 'font-semibold' : 'font-medium'}`}>{tab.name}</p>
-              {isActive && <div className="bg-primary h-1 w-3 rounded-sm mt-1"></div>}
-            </button>
-          );
-        })}
+        {/* 매칭 추천 탭 */}
+        <TabButton
+          name="매칭 추천"
+          Icon={BookCopy}
+          isActive={activeTab === 'matching'}
+          onClick={() => handleTabChange('matching')}
+        />
+
+        {/* 채팅 탭 - 별도 컴포넌트 사용 */}
+        <ChatButton isActive={activeTab === 'chat'} onClick={() => handleTabChange('chat')} />
+
+        {/* 독서 기록 탭 */}
+        <TabButton
+          name="독서 기록"
+          Icon={NotepadText}
+          isActive={activeTab === 'booknotes'}
+          onClick={() => handleTabChange('booknotes')}
+        />
+
+        {/* 마이 페이지 탭 */}
+        <TabButton
+          name="마이"
+          Icon={UserRound}
+          isActive={activeTab === 'mypage'}
+          onClick={() => handleTabChange('mypage')}
+        />
       </nav>
     </div>
   );

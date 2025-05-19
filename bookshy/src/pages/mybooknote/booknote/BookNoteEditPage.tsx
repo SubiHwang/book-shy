@@ -60,7 +60,7 @@ const BookNoteEditPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['my-booknotes'] });
 
       toast.success('독서 기록이 성공적으로 수정되었습니다.');
-      navigate(`/booknotes/detail/${bookId}`);
+      navigate(`/booknotes`);
     },
     onError: (error) => {
       console.error('수정 실패:', error);

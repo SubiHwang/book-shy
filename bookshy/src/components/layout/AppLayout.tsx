@@ -46,6 +46,7 @@ import ErrorHandler from '../common/error/ErrorHandler';
 import NotificationPage from '@/pages/common/NotificationPage';
 import QuoteGalaxyPage from '@/pages/mybooknote/booknote/QuoteGalaxyPage';
 import BookTripMapPage from '@/pages/mybooknote/booktrip/BookTripMapPage';
+import TradeCompletedPage from '@/pages/chat/TradeCompletedPage';
 import { CustomToastContainer } from '../common/CustomToastContainer';
 const AppLayout: FC = () => {
   const navigate = useNavigate();
@@ -62,10 +63,10 @@ const AppLayout: FC = () => {
   const isReviewPage = matchPath('/chat/:roomId/review', location.pathname);
 
   return (
-    <div className="app-container">
+    <div className="app-container h-full min-h-screen min-h-0">
       <ErrorHandler />
       <CustomToastContainer />
-      <div className="content">
+      <div className="content h-full min-h-0">
         <Routes>
           {/* 공개 라우트 - 로그인하지 않아도 접근 가능 */}
           <Route path="/login" element={<Login />} />
@@ -134,6 +135,7 @@ const AppLayout: FC = () => {
                   <Route path="/chat" element={<ChatListPage />} />
                   <Route path="/chat/:roomId" element={<ChatRoomPage />} />
                   <Route path="/chat/:roomId/review" element={<TradeReviewPage />} />
+                  <Route path="/exchange/completed" element={<TradeCompletedPage />} />
 
                   {/* 독서기록 페이지 - 탭이 있는 부분은 중첩 라우팅 적용용 */}
                   <Route path="/booknotes" element={<BookNotePage />}>

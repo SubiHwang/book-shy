@@ -1,12 +1,14 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { searchBooksByKeyword, addBookFromSearch } from '@/services/mylibrary/bookSearchService';
+import { searchBooksByKeyword } from '@/services/mylibrary/bookSearchService';
+import { uploadBookByItemId } from '@/services/book/upload';
 import BookSelectCard from '@/components/mybooknote/booknote/BookSelectCard';
+import { toast } from 'react-toastify';
+import Loading from '@/components/common/Loading';
 
 const BookNoteSelectPage: React.FC = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [keyword, setKeyword] = useState('');
   const [submittedKeyword, setSubmittedKeyword] = useState('');
 
@@ -46,7 +48,7 @@ const BookNoteSelectPage: React.FC = () => {
       </div>
 
       <div className="px-4 mt-4 space-y-4">
-        {isLoading && <p className="text-center">불러오는 중...</p>}
+        {isLoading && <Loading loadingText="검색 결과 불러오는 중..." />}
         {!isLoading && data?.books?.length === 0 && (
           <p className="text-center text-gray-500">검색 결과가 없습니다.</p>
         )}
@@ -56,12 +58,11 @@ const BookNoteSelectPage: React.FC = () => {
             book={book}
             onSelect={async () => {
               try {
-                const added = await addBookFromSearch(book.itemId);
-                await queryClient.invalidateQueries({ queryKey: ['user-library'] });
-                alert(`📚 "${added.title}" 서재에 등록되었습니다.`);
-                navigate(`/booknotes/create?libraryId=${added.libraryId}`);
+                const uploaded = await uploadBookByItemId(book.itemId);
+                toast.success(`"${uploaded.title}" 도서가 등록되었습니다.`);
+                navigate(`/booknotes/create?bookId=${uploaded.bookId}`);
               } catch (err) {
-                alert('❌ 등록에 실패했습니다. 다시 시도해주세요.');
+                console.error(err);
               }
             }}
           />

@@ -19,6 +19,18 @@ body,
 #root {
   background-color: #fffdf8;
   height: 100%;
+  width: 100%;
+}
+
+/* iOS 키보드 관련 스타일 */
+@supports (-webkit-touch-callout: none) {
+  body {
+    height: -webkit-fill-available;
+  }
+  
+  input, textarea {
+    font-size: 16px !important; /* iOS에서 자동 확대 방지 */
+  }
 }
 
 /* 스크롤바 커스텀 */

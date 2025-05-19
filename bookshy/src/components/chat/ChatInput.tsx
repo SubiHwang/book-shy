@@ -52,6 +52,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
           value={content}
           onChange={(e) => setContent(e.target.value)}
           className="w-full max-w-full px-4 py-2 bg-primary-light text-white placeholder-white rounded-full focus:outline-none box-border"
+          style={{ WebkitOverflowScrolling: 'touch' }}
         />
 
         <div
