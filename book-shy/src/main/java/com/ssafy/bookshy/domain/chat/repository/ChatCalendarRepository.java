@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface ChatCalendarRepository extends JpaRepository<ChatCalendar, Long> {
 
@@ -25,4 +26,6 @@ public interface ChatCalendarRepository extends JpaRepository<ChatCalendar, Long
     """)
     List<ChatCalendar> findByUserIdAndDate(@Param("userId") Long userId,
                                            @Param("date") LocalDate date);
+
+    Optional<ChatCalendar> findByChatRoomId(Long roomId);
 }
