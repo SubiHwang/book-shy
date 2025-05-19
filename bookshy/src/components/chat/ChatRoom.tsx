@@ -108,14 +108,11 @@ function ChatRoom({
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-white relative overflow-hidden">
-      {/* 헤더 */}
-      <header className="shrink-0 px-4 py-3 border-b bg-white z-10">
+    <div className="relative h-[100dvh] bg-white">
+      <header className="fixed top-0 left-0 right-0 h-[56px] bg-white z-10 border-b flex items-center px-4">
         <div className="font-bold">책친구</div>
       </header>
-
-      {/* 메시지 영역 */}
-      <main ref={messageContainerRef} className="overflow-y-auto px-4 py-2 flex-1 min-h-0">
+      <main ref={messageContainerRef} className="pt-[56px] pb-[72px] overflow-y-auto h-full">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -133,10 +130,8 @@ function ChatRoom({
         ))}
         <div ref={messagesEndRef} className="h-4" />
       </main>
-
-      {/* 입력창 */}
       <footer
-        className="fixed bottom-0 inset-x-0 bg-white px-4 py-2 border-t z-20"
+        className="fixed bottom-0 left-0 right-0 bg-white px-4 py-2 border-t z-20"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <form onSubmit={handleSendMessage} className="flex items-center gap-2">
