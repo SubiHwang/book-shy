@@ -39,7 +39,7 @@ public class AutoCompleteService {
         // 입력값 검증
         validateQuery(query);
 
-        String normalizedQuery = query.trim().toLowerCase();
+        String normalizedQuery = query.replaceAll(" ", "").toLowerCase();
 
         try {
             log.info("알라딘 API 호출 시작 - query: {}", query);

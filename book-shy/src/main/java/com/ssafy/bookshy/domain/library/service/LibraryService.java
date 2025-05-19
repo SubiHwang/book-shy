@@ -13,8 +13,10 @@ import com.ssafy.bookshy.domain.library.dto.LibrarySearchAddRequestDto;
 import com.ssafy.bookshy.domain.library.dto.LibrarySelfAddRequestDto;
 import com.ssafy.bookshy.domain.library.dto.LibraryWithTripResponseDto;
 import com.ssafy.bookshy.domain.library.entity.Library;
+import com.ssafy.bookshy.domain.library.entity.LibraryReadLog;
 import com.ssafy.bookshy.domain.library.exception.LibraryErrorCode;
 import com.ssafy.bookshy.domain.library.exception.LibraryException;
+import com.ssafy.bookshy.domain.library.repository.LibraryReadLogRepository;
 import com.ssafy.bookshy.domain.library.repository.LibraryRepository;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.service.UserService;
@@ -34,6 +36,8 @@ import java.util.stream.Collectors;
 
 import static com.ssafy.bookshy.common.constants.ImageUrlConstants.COVER_IMAGE_BASE_URL;
 
+// 생략된 import 문은 동일
+
 @Service
 @RequiredArgsConstructor
 public class LibraryService {
@@ -45,6 +49,7 @@ public class LibraryService {
     private final WishRepository wishRepository;
     private final BookNoteRepository bookNoteRepository;
     private final BookTripRepository bookTripRepository;
+    private final LibraryReadLogRepository libraryReadLogRepository;
 
     @Value("${file.upload-dir}")
     private String uploadPath;
@@ -95,7 +100,133 @@ public class LibraryService {
                 .registeredAt(LocalDateTime.now())
                 .build();
 
-        return LibraryResponseDto.from(libraryRepository.save(library));
+        Library saved = libraryRepository.save(library);
+
+        // 누적 독서 로그 기록
+        if (!libraryReadLogRepository.existsByUserIdAndBookId(user.getUserId(), book.getId())) {
+            libraryReadLogRepository.save(
+                    LibraryReadLog.builder()
+                            .userId(user.getUserId())
+                            .bookId(book.getId())
+                            .registeredAt(LocalDateTime.now())
+                            .build()
+            );
+        }
+
+        return LibraryResponseDto.from(saved);
+    }
+
+    @Transactional
+    public LibraryResponseDto addBookFromSearch(LibrarySearchAddRequestDto dto) {
+        Users user = userService.getUserById(dto.getUserId());
+        if (user == null) throw new LibraryException(LibraryErrorCode.USER_NOT_FOUND);
+
+        Book book = bookRepository.findByitemId(dto.getItemId())
+                .orElseGet(() -> {
+                    BookResponseDto response = aladinClient.searchByItemIdToDto(dto.getItemId());
+
+                    if (response.getTitle() == null) {
+                        throw new LibraryException(LibraryErrorCode.ITEM_ID_NOT_FOUND);
+                    }
+
+                    return bookRepository.save(Book.builder()
+                            .itemId(response.getItemId())
+                            .isbn(response.getIsbn13())
+                            .title(response.getTitle())
+                            .author(response.getAuthor())
+                            .publisher(response.getPublisher())
+                            .pubDate(parseDate(response.getPubDate()))
+                            .coverImageUrl(response.getCoverImageUrl())
+                            .description(response.getDescription())
+                            .category(response.getCategory())
+                            .pageCount(response.getPageCount())
+                            .exchangeCount(0)
+                            .status(Book.Status.AVAILABLE)
+                            .createdAt(LocalDateTime.now())
+                            .user(user)
+                            .build());
+                });
+
+        if (libraryRepository.existsByUserAndBook(user, book)) {
+            throw new LibraryException(LibraryErrorCode.DUPLICATE_LIBRARY_ENTRY);
+        }
+
+        wishRepository.deleteByUserAndBook(user, book);
+
+        Library library = Library.builder()
+                .user(user)
+                .book(book)
+                .isPublic(false)
+                .registeredAt(LocalDateTime.now())
+                .build();
+
+        Library saved = libraryRepository.save(library);
+
+        // 누적 독서 로그 기록
+        if (!libraryReadLogRepository.existsByUserIdAndBookId(user.getUserId(), book.getId())) {
+            libraryReadLogRepository.save(
+                    LibraryReadLog.builder()
+                            .userId(user.getUserId())
+                            .bookId(book.getId())
+                            .registeredAt(LocalDateTime.now())
+                            .build()
+            );
+        }
+
+        return LibraryResponseDto.from(saved);
+    }
+
+    @Transactional
+    public LibraryResponseDto addSelfBook(LibrarySelfAddRequestDto dto) {
+        Users user = userService.getUserById(dto.getUserId());
+        if (user == null) throw new LibraryException(LibraryErrorCode.USER_NOT_FOUND);
+
+        String fileName = UUID.randomUUID() + "_" + dto.getCoverImage().getOriginalFilename();
+        String savePath = uploadPath + "/" + fileName;
+
+        try {
+            dto.getCoverImage().transferTo(new File(savePath));
+        } catch (IOException e) {
+            throw new LibraryException(LibraryErrorCode.IMAGE_UPLOAD_FAILED);
+        }
+
+        Book book = Book.builder()
+                .isbn("SELF_" + UUID.randomUUID())
+                .title(dto.getTitle())
+                .author(dto.getAuthor())
+                .publisher(dto.getPublisher())
+                .description(dto.getDescription())
+                .coverImageUrl(COVER_IMAGE_BASE_URL + fileName)
+                .status(Book.Status.AVAILABLE)
+                .exchangeCount(0)
+                .createdAt(LocalDateTime.now())
+                .user(user)
+                .build();
+
+        bookRepository.save(book);
+        wishRepository.deleteByUserAndBook(user, book);
+
+        Library library = Library.builder()
+                .user(user)
+                .book(book)
+                .isPublic(dto.isPublic())
+                .registeredAt(LocalDateTime.now())
+                .build();
+
+        Library saved = libraryRepository.save(library);
+
+        // 누적 독서 로그 기록
+        if (!libraryReadLogRepository.existsByUserIdAndBookId(user.getUserId(), book.getId())) {
+            libraryReadLogRepository.save(
+                    LibraryReadLog.builder()
+                            .userId(user.getUserId())
+                            .bookId(book.getId())
+                            .registeredAt(LocalDateTime.now())
+                            .build()
+            );
+        }
+
+        return LibraryResponseDto.from(saved);
     }
 
     @Transactional
@@ -149,93 +280,6 @@ public class LibraryService {
         } catch (Exception e) {
             throw new LibraryException(LibraryErrorCode.INVALID_PUB_DATE);
         }
-    }
-
-    @Transactional
-    public LibraryResponseDto addBookFromSearch(LibrarySearchAddRequestDto dto) {
-        Users user = userService.getUserById(dto.getUserId());
-        if (user == null) throw new LibraryException(LibraryErrorCode.USER_NOT_FOUND);
-
-        Book book = bookRepository.findByitemId(dto.getItemId())
-                .orElseGet(() -> {
-                    BookResponseDto response = aladinClient.searchByItemIdToDto(dto.getItemId());
-
-                    if (response.getTitle() == null) {
-                        throw new LibraryException(LibraryErrorCode.ITEM_ID_NOT_FOUND);
-                    }
-
-                    return bookRepository.save(Book.builder()
-                            .itemId(response.getItemId())
-                            .isbn(response.getIsbn13())
-                            .title(response.getTitle())
-                            .author(response.getAuthor())
-                            .publisher(response.getPublisher())
-                            .pubDate(parseDate(response.getPubDate()))
-                            .coverImageUrl(response.getCoverImageUrl())
-                            .description(response.getDescription())
-                            .category(response.getCategory())
-                            .pageCount(response.getPageCount())
-                            .exchangeCount(0)
-                            .status(Book.Status.AVAILABLE)
-                            .createdAt(LocalDateTime.now())
-                            .user(user)
-                            .build());
-                });
-
-        if (libraryRepository.existsByUserAndBook(user, book)) {
-            throw new LibraryException(LibraryErrorCode.DUPLICATE_LIBRARY_ENTRY);
-        }
-
-        wishRepository.deleteByUserAndBook(user, book);
-
-        Library library = Library.builder()
-                .user(user)
-                .book(book)
-                .isPublic(false)
-                .registeredAt(LocalDateTime.now())
-                .build();
-
-        return LibraryResponseDto.from(libraryRepository.save(library));
-    }
-
-    @Transactional
-    public LibraryResponseDto addSelfBook(LibrarySelfAddRequestDto dto) {
-        Users user = userService.getUserById(dto.getUserId());
-        if (user == null) throw new LibraryException(LibraryErrorCode.USER_NOT_FOUND);
-
-        String fileName = UUID.randomUUID() + "_" + dto.getCoverImage().getOriginalFilename();
-        String savePath = uploadPath + "/" + fileName;
-
-        try {
-            dto.getCoverImage().transferTo(new File(savePath));
-        } catch (IOException e) {
-            throw new LibraryException(LibraryErrorCode.IMAGE_UPLOAD_FAILED);
-        }
-
-        Book book = Book.builder()
-                .isbn("SELF_" + UUID.randomUUID())
-                .title(dto.getTitle())
-                .author(dto.getAuthor())
-                .publisher(dto.getPublisher())
-                .description(dto.getDescription())
-                .coverImageUrl(COVER_IMAGE_BASE_URL + fileName)
-                .status(Book.Status.AVAILABLE)
-                .exchangeCount(0)
-                .createdAt(LocalDateTime.now())
-                .user(user)
-                .build();
-
-        bookRepository.save(book);
-        wishRepository.deleteByUserAndBook(user, book);
-
-        Library library = Library.builder()
-                .user(user)
-                .book(book)
-                .isPublic(dto.isPublic())
-                .registeredAt(LocalDateTime.now())
-                .build();
-
-        return LibraryResponseDto.from(libraryRepository.save(library));
     }
 
     @Transactional(readOnly = true)
