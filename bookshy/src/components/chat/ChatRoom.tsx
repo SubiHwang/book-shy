@@ -50,27 +50,23 @@ function ChatRoom({
   const [input, setInput] = useState('');
 
   useLayoutEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
   }, [messages]);
 
   useEffect(() => {
-    const handleVisualViewPortResize = () => {
-      const currentVisualViewport = Number(window.visualViewport?.height);
-      if (messageContainerRef.current) {
-        messageContainerRef.current.style.height = `${currentVisualViewport - 100}px`; // 헤더+입력창 여유 고려
-        window.scrollTo(0, 40); // 사파리에서 화면 밀림 방지
-      }
+    const handleResize = () => {
+      const visual = window.visualViewport;
+      if (!visual || !messageContainerRef.current) return;
+
+      const headerHeight = 56;
+      const inputHeight = 64;
+      const newHeight = visual.height - headerHeight - inputHeight;
+      messageContainerRef.current.style.height = `${newHeight}px`;
     };
 
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleVisualViewPortResize);
-    }
-
-    return () => {
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', handleVisualViewPortResize);
-      }
-    };
+    handleResize();
+    window.visualViewport?.addEventListener('resize', handleResize);
+    return () => window.visualViewport?.removeEventListener('resize', handleResize);
   }, []);
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -92,18 +88,23 @@ function ChatRoom({
   };
 
   const scrollToBottom = (smooth = true) => {
-    messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    });
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] overflow-hidden bg-white">
+    <div className="flex flex-col min-h-screen h-auto bg-white">
       {/* 헤더 */}
       <header className="shrink-0 px-4 py-3 border-b bg-white z-10">
         <div className="font-bold">책친구</div>
       </header>
 
       {/* 메시지 영역 */}
-      <div ref={messageContainerRef} className="flex-1 overflow-y-auto px-4 py-2">
+      <main
+        ref={messageContainerRef}
+        className="overflow-y-auto px-4 py-2 transition-all duration-200"
+      >
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -120,7 +121,7 @@ function ChatRoom({
           </div>
         ))}
         <div ref={messagesEndRef} className="h-4" />
-      </div>
+      </main>
 
       {/* 입력창 */}
       <footer className="shrink-0 px-4 py-2 border-t bg-white">
