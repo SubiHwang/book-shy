@@ -5,16 +5,14 @@ import com.ssafy.bookshy.domain.chat.dto.ChatRoomDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomUserIdsResponseDto;
 import com.ssafy.bookshy.domain.chat.service.ChatRoomService;
 import com.ssafy.bookshy.domain.users.entity.Users;
+import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -51,5 +49,26 @@ public class ChatRoomController {
         return CommonResponse.success(
                 ChatRoomUserIdsResponseDto.from(chatRoomService.getUserIdsByChatRoomId(chatRoomId))
         );
+    }
+
+    @Operation(
+            summary = "📚 현재 대여 중인 도서 전체 조회",
+            description = """
+        📦 현재 로그인 사용자가 **대여한 상태인 도서들**을 모두 조회합니다.
+
+        - 사용자의 참여 중인 채팅방에서 연결된 일정(`ChatCalendar`)을 가져옵니다.
+        - 일정이 현재 날짜 기준으로 `rentalStartDate ~ rentalEndDate` 사이에 포함되는 경우만 필터링합니다.
+        - 해당 일정에 연결된 거래 요청(`ExchangeRequest`)이 RENTAL 타입인지 확인합니다.
+        - 거래 상대방의 도서 정보를 조회하여 반환합니다.
+
+        ✅ 독서 기록 swiper, 리뷰 작성 등에서 사용됩니다.
+        """
+    )
+    @ApiResponse(responseCode = "200", description = "대여 도서 목록 조회 성공")
+    @GetMapping("/rental-books")
+    public CommonResponse<List<BookResponseDto>> getRentalBooksInUse(
+            @AuthenticationPrincipal Users user
+    ) {
+        return CommonResponse.success(chatRoomService.getRentalBooksInUse(user.getUserId()));
     }
 }
