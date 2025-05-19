@@ -57,21 +57,21 @@ function ChatRoom({
     const main = messageContainerRef.current;
     if (!main) return;
 
-    const updateHeight = () => {
+    const updateMaxHeight = () => {
       const visual = window.visualViewport;
       if (!visual) return;
       const headerHeight = 56;
-      const footerHeight = 72;
-      main.style.height = `${visual.height - headerHeight - footerHeight}px`;
+      const footerHeight = 64;
+      main.style.maxHeight = `${visual.height - headerHeight - footerHeight}px`;
     };
 
-    updateHeight();
-    window.visualViewport?.addEventListener('resize', updateHeight);
-    window.addEventListener('orientationchange', updateHeight);
+    updateMaxHeight();
+    window.visualViewport?.addEventListener('resize', updateMaxHeight);
+    window.addEventListener('orientationchange', updateMaxHeight);
 
     return () => {
-      window.visualViewport?.removeEventListener('resize', updateHeight);
-      window.removeEventListener('orientationchange', updateHeight);
+      window.visualViewport?.removeEventListener('resize', updateMaxHeight);
+      window.removeEventListener('orientationchange', updateMaxHeight);
     };
   }, []);
 
@@ -100,18 +100,11 @@ function ChatRoom({
   };
 
   return (
-    <div className="relative min-h-screen bg-white">
-      <header className="fixed top-0 left-0 right-0 h-[56px] bg-white z-10 border-b flex items-center px-4">
+    <div className="flex flex-col min-h-screen bg-white">
+      <header className="shrink-0 h-[56px] border-b flex items-center px-4 bg-white z-10">
         <div className="font-bold">책친구</div>
       </header>
-      <main
-        ref={messageContainerRef}
-        className="absolute left-0 right-0 overflow-y-auto"
-        style={{
-          top: 56, // header 높이
-          bottom: 72, // footer 높이
-        }}
-      >
+      <main ref={messageContainerRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -130,7 +123,7 @@ function ChatRoom({
         <div ref={messagesEndRef} className="h-4" />
       </main>
       <footer
-        className="fixed bottom-0 left-0 right-0 bg-white px-4 py-2 border-t z-20"
+        className="shrink-0 bg-white px-4 py-2 border-t z-20"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <form onSubmit={handleSendMessage} className="flex items-center gap-2">
