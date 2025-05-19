@@ -126,31 +126,50 @@ const QuoteGalaxyPage = () => {
 
   return (
     <>
-      <div className="fixed top-0 left-0 w-full z-50 bg-black/70 text-white flex items-center gap-2 px-4 py-3">
-        <button onClick={() => navigate(-1)} className="hover:text-cyan-300">
+      <div className="fixed top-0 left-0 w-full z-50 bg-gradient-to-r from-blue-900/60 via-indigo-900/50 to-purple-900/60 backdrop-blur-md text-white px-4 py-3 flex items-center gap-2 shadow-lg border-b border-white/10">
+        <button
+          onClick={() => navigate(-1)}
+          className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
+        >
           <ArrowLeft size={24} />
         </button>
-        <h1 className="text-lg font-semibold">📘 인용구 별자리</h1>
+        <h1 className="text-lg font-medium flex items-center gap-2">
+          <span className="text-xl">✨</span>
+          <span className="bg-gradient-to-r from-blue-200 to-purple-200 text-transparent bg-clip-text">
+            인용구 별자리
+          </span>
+        </h1>
       </div>
 
       <div ref={mountRef} className="fixed inset-0 z-0" />
 
       {selectedQuote && (
         <div
-          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
+          className="fixed inset-0 backdrop-blur-sm bg-black/40 flex items-center justify-center z-50 p-4"
           onClick={() => setSelectedQuote(null)}
         >
           <div
-            className="bg-white max-w-md w-full mx-4 p-6 rounded-lg shadow-xl"
+            className="max-w-md w-full bg-gradient-to-b from-blue-900/90 to-purple-900/90 backdrop-blur-md p-6 rounded-2xl shadow-[0_0_15px_rgba(147,197,253,0.3)] border border-blue-300/20"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="text-lg font-semibold whitespace-pre-wrap">{selectedQuote}</p>
-            <button
-              onClick={() => setSelectedQuote(null)}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 float-right"
-            >
-              닫기
-            </button>
+            <div className="flex items-center gap-2 mb-4 text-blue-200">
+              <span className="text-lg">💫</span>
+              <span className="text-sm font-medium">별빛 속 문장</span>
+            </div>
+            <p className="text-lg text-blue-50 font-medium leading-relaxed whitespace-pre-wrap">
+              {selectedQuote}
+            </p>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setSelectedQuote(null)}
+                className="px-5 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 rounded-lg transition-colors duration-200 flex items-center gap-2 group"
+              >
+                닫기
+                <span className="transform translate-x-0 group-hover:translate-x-1 transition-transform">
+                  →
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       )}
