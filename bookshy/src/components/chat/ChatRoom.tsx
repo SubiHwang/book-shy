@@ -1,4 +1,16 @@
-import React, { useRef, useEffect, useState } from 'react';
+import { ChatMessage } from '@/types/chat/chat';
+import { useRef, useEffect, useState } from 'react';
+
+interface Props {
+  partnerName: string;
+  partnerProfileImage: string;
+  initialMessages: ChatMessage[];
+  bookShyScore: number;
+  myBookId: number[];
+  myBookName: string[];
+  otherBookId: number[];
+  otherBookName: string[];
+}
 
 const HEADER_HEIGHT = 64;
 const INPUT_HEIGHT = 56;
@@ -26,7 +38,16 @@ const DUMMY_MESSAGES = [
   '더미 메시지 10',
 ];
 
-const ChatRoom = () => {
+const ChatRoom = ({
+  partnerName: _partnerName,
+  partnerProfileImage: _partnerProfileImage,
+  initialMessages: _initialMessages,
+  bookShyScore: _bookShyScore,
+  myBookId: _myBookId,
+  myBookName: _myBookName,
+  otherBookId: _otherBookId,
+  otherBookName: _otherBookName,
+}: Props) => {
   const [viewportHeight, setViewportHeight] = useState(
     window.visualViewport?.height || window.innerHeight,
   );
