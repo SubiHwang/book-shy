@@ -135,7 +135,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
       </div>
 
       {/* 인용구 버튼 */}
-      <div className="fixed bottom-24 left-6 z-[50]">
+      <div className="fixed bottom-32 right-6 z-[50]">
         <button
           onClick={() => navigate('/booknotes/quote-galaxy')}
           className="w-14 h-14 rounded-full bg-cyan-500/20 backdrop-blur-md shadow-xl shadow-cyan-400/40 
@@ -147,7 +147,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
       </div>
 
       {/* 등록 버튼 */}
-      <div className="fixed bottom-24 right-6 z-50">
+      <div className="fixed bottom-32 right-6 z-50">
         <button
           onClick={() => navigate('/booknotes/select')}
           className="w-14 h-14 rounded-xl bg-primary text-white flex justify-center items-center shadow-lg"
