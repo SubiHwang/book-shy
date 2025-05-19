@@ -187,6 +187,22 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // 최상위 div: 100dvh로 모바일 키보드 대응
+  const [viewportHeight, setViewportHeight] = useState(
+    window.visualViewport?.height || window.innerHeight,
+  );
+  useEffect(() => {
+    const updateHeight = () => {
+      setViewportHeight(window.visualViewport?.height || window.innerHeight);
+    };
+    window.visualViewport?.addEventListener('resize', updateHeight);
+    window.addEventListener('orientationchange', updateHeight);
+    return () => {
+      window.visualViewport?.removeEventListener('resize', updateHeight);
+      window.removeEventListener('orientationchange', updateHeight);
+    };
+  }, []);
+
   // Scroll to bottom when messages change
   useLayoutEffect(() => {
     const container = messageContainerRef.current;
@@ -339,7 +355,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   }
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col bg-white" style={{ height: `${viewportHeight}px` }}>
       {/* Header */}
       <header className="shrink-0 h-[64px] border-b flex items-center px-4 bg-white z-10">
         <button
@@ -368,6 +384,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         style={{
           transition: 'padding-bottom 0.3s',
           paddingBottom: INPUT_BAR_HEIGHT + (showOptions ? EXPAND_AREA_HEIGHT : 0),
+          maxHeight:
+            viewportHeight - 64 - INPUT_BAR_HEIGHT - (showOptions ? EXPAND_AREA_HEIGHT : 0),
         }}
       >
         {messages.map((msg, idx) => {
