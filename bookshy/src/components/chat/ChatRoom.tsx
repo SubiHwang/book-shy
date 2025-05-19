@@ -13,7 +13,15 @@ interface Props {
   otherBookName: string[];
 }
 
-function ChatInput({ onSend }: { onSend: (msg: string) => void }) {
+function ChatInput({
+  onSend,
+  onFocus,
+  inputRef,
+}: {
+  onSend: (msg: string) => void;
+  onFocus?: () => void;
+  inputRef?: React.RefObject<HTMLInputElement>;
+}) {
   const [message, setMessage] = useState('');
 
   const handleSend = () => {
@@ -31,9 +39,11 @@ function ChatInput({ onSend }: { onSend: (msg: string) => void }) {
       className="flex items-center gap-2 px-4 py-2"
     >
       <input
+        ref={inputRef}
         type="text"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
+        onFocus={onFocus}
         placeholder="메시지를 입력하세요"
         className="flex-1 border rounded-full px-4 py-2 focus:outline-none"
       />
@@ -71,6 +81,8 @@ export default function ChatRoom({
 }: Props) {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: '1', senderId: 1, content: '안녕하세요~', sentAt: '오후 05:54', read: true },
     { id: '2', senderId: 2, content: '하이용 ㅎㅎㅎㅎ', sentAt: '오후 06:17', read: true },
@@ -78,6 +90,7 @@ export default function ChatRoom({
     { id: '4', senderId: 2, content: '책 읽을거예요 📚', sentAt: '오후 06:19', read: true },
   ]);
 
+  // ✅ 키보드 대응 - visualViewport로 메시지 영역 동적 높이 조절
   useEffect(() => {
     const handleResize = () => {
       const visual = window.visualViewport;
@@ -93,6 +106,13 @@ export default function ChatRoom({
     return () => window.visualViewport?.removeEventListener('resize', handleResize);
   }, []);
 
+  // ✅ 입력창 포커스 시 스크롤 아래로
+  const handleInputFocus = () => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
   useLayoutEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -102,17 +122,23 @@ export default function ChatRoom({
       id: Date.now().toString(),
       senderId: 1,
       content: msg,
-      sentAt: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+      sentAt: new Date().toLocaleTimeString('ko-KR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
       read: true,
     };
     setMessages((prev) => [...prev, newMessage]);
   };
 
   return (
-    <div className="flex flex-col bg-white">
+    <div className="flex flex-col bg-white h-screen">
       <ChatRoomHeader partnerName="책친구" partnerProfileImage={''} bookShyScore={0} />
 
-      <div ref={messagesContainerRef} className="overflow-y-auto px-4 sm:px-6 py-3">
+      <div
+        ref={messagesContainerRef}
+        className="overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300"
+      >
         {messages.map((msg) => (
           <ChatMessageItem key={msg.id} message={msg} isMyMessage={msg.senderId === 1} />
         ))}
@@ -120,7 +146,7 @@ export default function ChatRoom({
       </div>
 
       <div className="fixed bottom-0 inset-x-0 bg-white z-50 border-t">
-        <ChatInput onSend={handleSend} />
+        <ChatInput onSend={handleSend} onFocus={handleInputFocus} inputRef={inputRef} />
       </div>
     </div>
   );
