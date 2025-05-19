@@ -5,20 +5,10 @@ import { fetchBookQuoteList } from '@/services/mybooknote/booknote/bookquote';
 import { fetchUserAllLibrary } from '@/services/mylibrary/libraryApi';
 import { fetchBookDetailByBookId } from '@/services/book/search';
 import { fetchRentalBooksInUse } from '@/services/chat/chat';
-
 import BookNoteSwiperPage from './BookNoteSwiperPage';
 import LibraryBookListPage from './LibraryBookListPage';
 import type { Book } from '@/types/book/book';
 import Loading from '@/components/common/Loading';
-
-interface ApiResponse<T> {
-  status: number;
-  success: boolean;
-  message: string | null;
-  data: T;
-  error: string | null;
-  timestamp: string;
-}
 
 const MyBookNotePage = () => {
   const { data: libraries = [], isLoading: isLoadingLib } = useQuery({
