@@ -71,12 +71,24 @@ const NotificationPage = () => {
     localStorage.setItem('notifications', JSON.stringify([]));
   };
 
-  // 알림 클릭 핸들러 수정
+  // 알림 클릭 핸들러 수정 (읽음 처리 추가)
   const handleNotificationClick = (notification: NotificationData) => {
-    // 현재 알림 페이지 URL을 이전 페이지 URL로 교체
+    // 1. 현재 알림을 읽음 처리
+    const updatedNotifications = notifications.map((item) => {
+      if (item.id === notification.id) {
+        return { ...item, read: true }; // 해당 알림만 읽음 처리
+      }
+      return item;
+    });
+
+    // 2. 상태 및 로컬 스토리지 업데이트
+    setNotifications(updatedNotifications);
+    localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+
+    // 3. 현재 알림 페이지 URL을 이전 페이지 URL로 교체
     history.replaceState(null, '', previousPath);
 
-    // 새 페이지로 navigate 사용하여 이동
+    // 4. 새 페이지로 navigate 사용하여 이동
     navigate(notification.url);
   };
 
