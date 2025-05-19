@@ -1,7 +1,7 @@
 import React, { useRef, useState, useLayoutEffect, useEffect } from 'react';
 import { Plus, Minus, Camera, Image, CalendarDays, Phone, ArrowLeft } from 'lucide-react';
 import ScheduleModal from './ScheduleModal';
-import { registerSchedule, markMessagesAsRead, sendEmoji, deleteEmoji } from '@/services/chat/chat';
+import { registerSchedule, sendEmoji, deleteEmoji } from '@/services/chat/chat';
 import { RegisterSchedulePayload } from '@/types/chat/chat';
 
 interface ChatMessage {
@@ -21,7 +21,6 @@ interface ChatRoomProps {
   myBookName: string[];
   otherBookId: number[];
   otherBookName: string[];
-  roomId: number;
 }
 
 const INPUT_BAR_HEIGHT = 56;
@@ -56,7 +55,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   myBookName: _myBookName,
   otherBookId: _otherBookId,
   otherBookName: _otherBookName,
-  roomId: _roomId,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     ...initialMessages,
@@ -188,15 +186,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // 읽음 처리: mount 및 messages 변경 시
-  useEffect(() => {
-    if (_roomId) {
-      markMessagesAsRead(_roomId).catch((e) => {
-        console.error('읽음 처리 실패:', e);
-      });
-    }
-  }, [_roomId, messages]);
 
   // Scroll to bottom when messages change
   useLayoutEffect(() => {
@@ -593,6 +582,15 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
               <CalendarDays size={28} strokeWidth={1.5} />
               <span className="text-xs">약속</span>
             </button>
+            <button
+              onClick={() => {
+                // TODO: 전화 기능
+              }}
+              className="flex flex-col items-center gap-1"
+            >
+              <Phone size={28} strokeWidth={1.5} />
+              <span className="text-xs">전화</span>
+            </button>
           </div>
         </div>
         <input
@@ -608,10 +606,10 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         <ScheduleModal
           partnerName={partnerName}
           partnerProfileImage={partnerProfileImage}
-          roomId={_roomId}
           requestId={0}
           onClose={() => setShowScheduleModal(false)}
           onConfirm={registerScheduleAndNotify}
+          roomId={0}
         />
       )}
     </div>
