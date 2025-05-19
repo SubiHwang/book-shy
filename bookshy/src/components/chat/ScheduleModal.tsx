@@ -2,6 +2,7 @@ import { FC, useState } from 'react';
 import { X } from 'lucide-react';
 import TimePickerModal from './TimePickerModal';
 import { RegisterSchedulePayload } from '@/types/chat/chat';
+import { toast } from 'react-toastify';
 
 interface Props {
   partnerName: string;
@@ -76,7 +77,7 @@ const ScheduleModal: FC<Props> = ({
 
   const handleComplete = () => {
     if (!startDate || !borrowTime || (tab === '대여' && (!returnTime || !endDate))) {
-      alert('날짜와 시간을 모두 선택해주세요');
+      toast.warn('날짜와 시간을 모두 선택해주세요');
       return;
     }
 
