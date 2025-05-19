@@ -17,7 +17,6 @@ import {
 import { useStomp } from '@/hooks/chat/useStomp.ts';
 import { useWebSocket } from '@/contexts/WebSocketProvider';
 import { getUserIdFromToken } from '@/utils/jwt.ts';
-import { useDynamicViewportHeight } from '@/hooks/chat/useDynamicViewportHeight';
 
 interface Props {
   partnerName: string;
@@ -58,8 +57,21 @@ function ChatRoom({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
 
-  const dynamicHeight = useDynamicViewportHeight();
+  useEffect(() => {
+    const updateHeight = () => {
+      const visual = window.visualViewport;
+      const height = visual
+        ? visual.height + visual.offsetTop // 정확한 visible 영역
+        : window.innerHeight;
+      setViewportHeight(height);
+    };
+
+    updateHeight();
+    window.visualViewport?.addEventListener('resize', updateHeight);
+    return () => window.visualViewport?.removeEventListener('resize', updateHeight);
+  }, []);
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -292,7 +304,7 @@ function ChatRoom({
 
   return (
     <div
-      style={{ height: dynamicHeight, maxHeight: dynamicHeight }}
+      style={{ height: viewportHeight }}
       className="flex flex-col bg-white pb-safe fixed inset-0"
     >
       {/* 헤더 */}
