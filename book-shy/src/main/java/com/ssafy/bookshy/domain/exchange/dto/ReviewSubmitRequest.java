@@ -24,6 +24,9 @@ public class ReviewSubmitRequest {
     @Schema(description = "내가 넘긴 책들에 대한 정보 리스트")
     private List<ReviewedBook> books;
 
+    @Schema(description = "거래 타입 : EXCHANGE(교환) or RENTAL(대여)")
+    private String tradeType; // "EXCHANGE" or "RENTAL"
+
     @Getter
     @Schema(description = "🧾 세부 평점 항목")
     public static class RatingDetail {
