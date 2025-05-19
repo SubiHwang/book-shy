@@ -6,6 +6,17 @@ interface ChatMessage {
   content: string;
 }
 
+interface ChatRoomProps {
+  partnerName: string;
+  partnerProfileImage: string;
+  initialMessages: ChatMessage[];
+  bookShyScore: number;
+  myBookId: number;
+  myBookName: string;
+  otherBookId: number;
+  otherBookName: string;
+}
+
 function ChatRoomHeader({ partnerName }: { partnerName: string }) {
   return (
     <div className="h-14 flex items-center px-4 border-b text-lg font-semibold bg-white">
@@ -59,15 +70,19 @@ function ChatMessageItem({ message, isMyMessage }: { message: ChatMessage; isMyM
   );
 }
 
-export default function ChatRoom() {
+export default function ChatRoom({
+  partnerName,
+  partnerProfileImage: _partnerProfileImage,
+  initialMessages,
+  bookShyScore: _bookShyScore,
+  myBookId: _myBookId,
+  myBookName: _myBookName,
+  otherBookId: _otherBookId,
+  otherBookName: _otherBookName,
+}: ChatRoomProps) {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: 1, senderId: 1, content: '안녕하세요~' },
-    { id: 2, senderId: 2, content: '하이용 ㅎㅎㅎㅎ' },
-    { id: 3, senderId: 1, content: '오늘 뭐해요?' },
-    { id: 4, senderId: 2, content: '책 읽을거예요 📚' },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
 
   useEffect(() => {
     const handleResize = () => {
@@ -99,7 +114,7 @@ export default function ChatRoom() {
 
   return (
     <div className="flex flex-col bg-white">
-      <ChatRoomHeader partnerName="책친구" />
+      <ChatRoomHeader partnerName={partnerName} />
 
       <div ref={messagesContainerRef} className="overflow-y-auto px-4 sm:px-6 py-3">
         {messages.map((msg) => (
