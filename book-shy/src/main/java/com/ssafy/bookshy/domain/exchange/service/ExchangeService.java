@@ -166,16 +166,16 @@ public class ExchangeService {
                 .orElseThrow(() -> new IllegalArgumentException("거래 요청이 존재하지 않습니다."));
         exchangeRequest.complete();
 
-        // ✅ 5. 소유권 이전
-        Users reviewee = Users.builder().userId(revieweeId).build();
+        // ✅ 5. EXCHANGE인 경우에만 도서 소유권 이전
+        if ("EXCHANGE".equalsIgnoreCase(request.getTradeType())) {
+            Users reviewee = Users.builder().userId(revieweeId).build();
 
-        for (ReviewSubmitRequest.ReviewedBook book : request.getBooks()) {
-            Library lib = libraryRepository.findById(book.getLibraryId())
-                    .orElseThrow(() -> new IllegalArgumentException("도서가 존재하지 않습니다."));
-            lib.transferTo(reviewee); // 📚 Library 소유자 변경
-            Book entity = lib.getBook();
-            if (entity != null) {
-                entity.transferTo(reviewee); // 📘 Book 소유자 변경
+            for (ReviewSubmitRequest.ReviewedBook book : request.getBooks()) {
+                Library lib = libraryRepository.findById(book.getLibraryId())
+                        .orElseThrow(() -> new IllegalArgumentException("도서가 존재하지 않습니다."));
+                lib.transferTo(reviewee);
+                Book entity = lib.getBook();
+                if (entity != null) entity.transferTo(reviewee);
             }
         }
 
