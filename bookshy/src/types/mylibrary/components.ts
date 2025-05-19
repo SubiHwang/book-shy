@@ -13,14 +13,11 @@ export interface ExchangeBannerData {
   lastExchangeDate?: string; // 마지막 교환 날짜
 }
 
-// 장르 배너 데이터
 export interface GenreBannerData {
-  favoriteGenre: string; // 선호 장르
-  genreDescription: string; // 장르 설명
-  matchingRate: number; // 장르 일치율 (0-100)
+  favoriteGenre: string;
+  genreDescription: string;
 }
 
-// 모든 배너 데이터를 포함하는 타입
 export interface AllBannersData {
   booksData: BooksBannerData;
   exchangeData: ExchangeBannerData;
