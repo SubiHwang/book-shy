@@ -45,14 +45,15 @@ function ChatRoom({
   ]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState('');
 
   useLayoutEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = () => {
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!input.trim()) return;
     setMessages((prev) => [
       ...prev,
@@ -69,15 +70,19 @@ function ChatRoom({
     setInput('');
   };
 
+  const scrollToBottom = (smooth = true) => {
+    messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+  };
+
   return (
-    <div className="fixed inset-0 flex flex-col bg-white">
+    <div className="flex flex-col h-[100dvh] overflow-hidden bg-white">
       {/* 헤더 */}
-      <div className="shrink-0 border-b px-4 py-3 bg-white z-10">
+      <header className="shrink-0 px-4 py-3 border-b bg-white z-10">
         <div className="font-bold">책친구</div>
-      </div>
+      </header>
 
       {/* 메시지 영역 */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-2">
+      <div className="flex-1 overflow-y-auto px-4 py-2">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -97,26 +102,21 @@ function ChatRoom({
       </div>
 
       {/* 입력창 */}
-      <div className="shrink-0 border-t bg-white px-4 py-2">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSend();
-          }}
-          className="flex items-center gap-2"
-        >
+      <footer className="shrink-0 px-4 py-2 border-t bg-white">
+        <form onSubmit={handleSendMessage} className="flex items-center gap-2">
           <input
-            type="text"
+            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="메시지를 입력하세요"
+            onFocus={() => scrollToBottom(true)}
             className="flex-1 border px-4 py-2 rounded-full focus:outline-none"
+            placeholder="메시지를 입력하세요"
           />
           <button type="submit" className="text-blue-500 font-semibold">
             전송
           </button>
         </form>
-      </div>
+      </footer>
     </div>
   );
 }
