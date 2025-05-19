@@ -8,6 +8,7 @@ import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -144,6 +145,11 @@ public class AladinClient {
             String[] tokens = tokenizeQuery(query);
             String queryNormalized = query.toLowerCase().replaceAll("\\s+", "");
 
+            LevenshteinDistance distance = new LevenshteinDistance();
+            int threshold = 2;
+
+            String queryChosung = extractChosung(queryNormalized);
+
             for (JsonNode it : items) {
                 String title = it.path("title").asText("").toLowerCase();
                 String author = it.path("author").asText("").toLowerCase();
@@ -153,20 +159,44 @@ public class AladinClient {
                 String authorNormalized = author.replaceAll("\\s+", "");
                 String publisherNormalized = publisher.replaceAll("\\s+", "");
 
+                String titleChosung = extractChosung(titleNormalized);
+                String authorChosung = extractChosung(authorNormalized);
+                String publisherChosung = extractChosung(publisherNormalized);
+
                 boolean match = false;
 
+                // 1. 완전 포함 매칭
                 if (titleNormalized.contains(queryNormalized) ||
                         authorNormalized.contains(queryNormalized) ||
                         publisherNormalized.contains(queryNormalized)) {
                     match = true;
                 }
 
+                // 2. 오탈자 허용 (레벤슈타인 거리)
+                if (!match) {
+                    if (distance.apply(titleNormalized, queryNormalized) <= threshold ||
+                            distance.apply(authorNormalized, queryNormalized) <= threshold ||
+                            distance.apply(publisherNormalized, queryNormalized) <= threshold) {
+                        match = true;
+                    }
+                }
+
+                // 3. 키워드 토큰 일치
                 if (!match) {
                     for (String token : tokens) {
                         if (title.contains(token) || author.contains(token) || publisher.contains(token)) {
                             match = true;
                             break;
                         }
+                    }
+                }
+
+                // 4. 초성 비교
+                if (!match) {
+                    if (titleChosung.contains(queryChosung) ||
+                            authorChosung.contains(queryChosung) ||
+                            publisherChosung.contains(queryChosung)) {
+                        match = true;
                     }
                 }
 
@@ -316,5 +346,20 @@ public class AladinClient {
                 .replaceAll("\\s+", " ")
                 .trim()
                 .split(" ");
+    }
+
+    private String extractChosung(String text) {
+        StringBuilder sb = new StringBuilder();
+        for (char c : text.toCharArray()) {
+            if (c >= '가' && c <= '힣') {
+                int base = c - 0xAC00;
+                int choIndex = base / (21 * 28);
+                String chosungList = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ";
+                sb.append(chosungList.charAt(choIndex));
+            } else if (Character.isLetterOrDigit(c)) {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 }
