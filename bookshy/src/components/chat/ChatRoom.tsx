@@ -1,27 +1,10 @@
-import { useEffect, useRef, useState, useCallback, useLayoutEffect } from 'react';
-import { ChatMessage, RegisterSchedulePayload } from '@/types/chat/chat.ts';
-import ChatMessageItem from './ChatMessageItem.tsx';
-import ChatInput from './ChatInput.tsx';
-import ChatRoomHeader from './ChatRoomHeader.tsx';
-import ScheduleModal from './ScheduleModal.tsx';
-import SystemMessage from './SystemMessage.tsx';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  deleteEmoji,
-  fetchMessages,
-  markMessagesAsRead,
-  registerSchedule,
-  sendEmoji,
-} from '@/services/chat/chat.ts';
-import { useStomp } from '@/hooks/chat/useStomp.ts';
-import { useWebSocket } from '@/contexts/WebSocketProvider';
-import { getUserIdFromToken } from '@/utils/jwt.ts';
+// ✅ iOS 대응 + 카카오톡 스타일 완전 반응형 채팅방 (fixed/absolute/vh 없이)
+import { useRef, useState, useLayoutEffect, useEffect } from 'react';
 
 interface Props {
   partnerName: string;
   partnerProfileImage: string;
-  initialMessages?: ChatMessage[];
+  initialMessages: ChatMessage[];
   bookShyScore: number;
   myBookId: number[];
   myBookName: string[];
@@ -29,440 +12,141 @@ interface Props {
   otherBookName: string[];
 }
 
-interface EmojiUpdatePayload {
-  messageId: number;
-  emoji: string;
-  type: 'ADD' | 'REMOVE';
-  updatedBy: number;
+interface ChatMessage {
+  id: string;
+  content: string;
+  senderId: number;
+  sentAt: string;
 }
 
 function ChatRoom({
-  partnerName,
-  partnerProfileImage,
-  bookShyScore,
-  myBookId,
-  myBookName,
-  otherBookId,
-  otherBookName,
+  partnerName: _partnerName,
+  partnerProfileImage: _partnerProfileImage,
+  initialMessages: _initialMessages,
+  bookShyScore: _bookShyScore,
+  myBookId: _myBookId,
+  myBookName: _myBookName,
+  otherBookId: _otherBookId,
+  otherBookName: _otherBookName,
 }: Props) {
-  const { roomId } = useParams();
-  const numericRoomId = Number(roomId);
-  const myUserId = getUserIdFromToken();
-  if (myUserId === null) return null;
-  const userId = Number(myUserId);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { id: '1', senderId: 1, content: '안녕하세요~', sentAt: '오후 05:54' },
+    { id: '2', senderId: 2, content: '하이용 ㅎㅎㅎㅎ', sentAt: '오후 06:17' },
+    { id: '3', senderId: 1, content: '오늘 뭐해요?', sentAt: '오후 06:18' },
+    { id: '4', senderId: 2, content: '책 읽을거예요 📚', sentAt: '오후 06:19' },
+    { id: '5', senderId: 1, content: '안녕하세요~', sentAt: '오후 05:54' },
+    { id: '6', senderId: 2, content: '하이용 ㅎㅎㅎㅎ', sentAt: '오후 06:17' },
+    { id: '7', senderId: 1, content: '오늘 뭐해요?', sentAt: '오후 06:18' },
+    { id: '8', senderId: 2, content: '책 읽을거예요 📚', sentAt: '오후 06:19' },
+    { id: '9', senderId: 1, content: '안녕하세요~', sentAt: '오후 05:54' },
+    { id: '10', senderId: 2, content: '하이용 ㅎㅎㅎㅎ', sentAt: '오후 06:17' },
+    { id: '11', senderId: 1, content: '오늘 뭐해요?', sentAt: '오후 06:18' },
+    { id: '12', senderId: 2, content: '책 읽을거예요 📚', sentAt: '오후 06:19' },
+  ]);
 
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [showOptions, setShowOptions] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
-  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const messageContainerRef = useRef<HTMLDivElement>(null);
+  const [input, setInput] = useState('');
 
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-
-  const { data: initialMessages = [], isSuccess } = useQuery({
-    queryKey: ['chatMessages', numericRoomId],
-    queryFn: () => fetchMessages(numericRoomId),
-    enabled: !isNaN(numericRoomId),
-    retry: false,
-    staleTime: 0,
-  });
-
-  const prevMessageCountRef = useRef(messages.length);
-  const isInitialLoadRef = useRef(true);
-
+  // Scroll to bottom when messages change
   useLayoutEffect(() => {
-    const prevCount = prevMessageCountRef.current;
-    const currentCount = messages.length;
-
-    if (currentCount > prevCount) {
-      requestAnimationFrame(() => {
-        const container = messagesEndRef.current?.parentElement;
-        if (!container) return;
-
-        const distanceFromBottom =
-          container.scrollHeight - container.scrollTop - container.clientHeight;
-
-        const isAtBottom = distanceFromBottom < 100;
-
-        if (isInitialLoadRef.current) {
-          scrollToBottom(false);
-          isInitialLoadRef.current = false;
-        } else {
-          if (isAtBottom) {
-            scrollToBottom(false);
-          } else {
-            setShowScrollToBottom(true);
-          }
-        }
-
-        prevMessageCountRef.current = currentCount;
-      });
-    } else {
-      prevMessageCountRef.current = currentCount;
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
   }, [messages]);
 
+  // Handle viewport height changes (mobile keyboard)
   useEffect(() => {
-    if (!isNaN(numericRoomId)) {
-      markMessagesAsRead(numericRoomId).catch((err) => console.error('❌ 읽음 처리 실패:', err));
-      queryClient.setQueryData(['chatList'], (prev: any) => {
-        if (!Array.isArray(prev)) return prev;
-        return prev.map((room: any) =>
-          room.id === numericRoomId ? { ...room, unreadCount: 0 } : room,
-        );
-      });
-    }
-  }, [numericRoomId, queryClient]);
+    const main = messageContainerRef.current;
+    if (!main) return;
 
-  useEffect(() => {
-    if (!isSuccess) return;
-    setMessages(initialMessages);
-  }, [initialMessages, isSuccess]);
-
-  const onRead = useCallback(
-    (payload: { readerId: number; messageIds: number[] }) => {
-      if (payload.readerId === userId) return;
-      setMessages((prev) =>
-        prev.map((msg) =>
-          payload.messageIds.includes(Number(msg.id)) ? { ...msg, read: true } : msg,
-        ),
-      );
-    },
-    [userId],
-  );
-
-  const onMessage = useCallback(
-    (newMessage: ChatMessage) => {
-      setMessages((prev) =>
-        prev.some((m) => m.id === newMessage.id) ? prev : [...prev, newMessage],
-      );
-      if (newMessage.senderId !== myUserId) {
-        markMessagesAsRead(numericRoomId).catch((err) => console.error('❌ 읽음 실패:', err));
-      }
-      queryClient.setQueryData(['chatList'], (prev: any) =>
-        Array.isArray(prev)
-          ? prev.map((room: any) =>
-              room.id === newMessage.chatRoomId
-                ? { ...room, lastMessage: newMessage.content, lastMessageTime: newMessage.sentAt }
-                : room,
-            )
-          : prev,
-      );
-    },
-    [myUserId, numericRoomId, queryClient],
-  );
-
-  const { sendMessage } = useStomp(numericRoomId, onMessage, onRead);
-  const { subscribeCalendarTopic, subscribeEmojiTopic, unsubscribe, isConnected } = useWebSocket();
-
-  useEffect(() => {
-    if (!isConnected || isNaN(numericRoomId)) return;
-
-    const sub = subscribeCalendarTopic(numericRoomId, (calendarDto) => {
-      const rawDate =
-        calendarDto.exchangeDate || calendarDto.rentalStartDate || calendarDto.rentalEndDate;
-
-      if (!rawDate) return;
-
-      const formattedDate = new Date(rawDate).toLocaleString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        weekday: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-
-      const sysMsg: ChatMessage = {
-        id: calendarDto.id || Date.now(),
-        chatRoomId: numericRoomId,
-        senderId: 0,
-        content: `📌 일정 등록됨: ${formattedDate}`,
-        type: 'info',
-        sentAt: new Date().toISOString(),
-        read: false,
-        emoji: '',
-      };
-
-      setMessages((prev) => [...prev, sysMsg]);
-    });
-
-    return () => unsubscribe(sub);
-  }, [numericRoomId, subscribeCalendarTopic, unsubscribe, isConnected]);
-
-  useEffect(() => {
-    if (!isConnected || isNaN(numericRoomId)) return;
-
-    const sub = subscribeEmojiTopic(
-      numericRoomId,
-      ({ messageId, emoji, type }: EmojiUpdatePayload) => {
-        setMessages((prev) =>
-          prev.map((msg) =>
-            Number(msg.id) === messageId ? { ...msg, emoji: type === 'ADD' ? emoji : '' } : msg,
-          ),
-        );
-      },
-    );
-
-    return () => unsubscribe(sub);
-  }, [numericRoomId, subscribeEmojiTopic, unsubscribe, isConnected]);
-
-  useEffect(() => {
-    const container = messagesEndRef.current?.parentElement;
-    if (!container) return;
-    const onScroll = () => {
-      const show = container.scrollHeight - container.scrollTop - container.clientHeight > 100;
-      setShowScrollToBottom(show);
+    const updateMaxHeight = () => {
+      const visual = window.visualViewport;
+      if (!visual) return;
+      const headerHeight = 56;
+      const footerHeight = 64;
+      main.style.maxHeight = `${visual.height - headerHeight - footerHeight}px`;
     };
-    container.addEventListener('scroll', onScroll);
-    return () => container.removeEventListener('scroll', onScroll);
+
+    updateMaxHeight();
+    window.visualViewport?.addEventListener('resize', updateMaxHeight);
+    window.addEventListener('orientationchange', updateMaxHeight);
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', updateMaxHeight);
+      window.removeEventListener('orientationchange', updateMaxHeight);
+    };
   }, []);
+
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        senderId: 1,
+        content: input,
+        sentAt: new Date().toLocaleTimeString('ko-KR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      },
+    ]);
+    setInput('');
+  };
 
   const scrollToBottom = (smooth = true) => {
-    messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    });
   };
-
-  const handleSendMessage = (content: string) => {
-    if (isNaN(numericRoomId)) return;
-    sendMessage(numericRoomId, myUserId, content, 'chat');
-  };
-
-  const registerScheduleAndNotify = async (_message: string, payload: RegisterSchedulePayload) => {
-    try {
-      await registerSchedule(payload);
-    } catch (e) {
-      console.error('❌ 일정 등록 실패:', e);
-    }
-  };
-
-  const handleSelectEmoji = async (messageId: string, emoji: string) => {
-    setEmojiTargetId(null);
-
-    const targetMessage = messages.find((m) => m.id === messageId);
-    if (!targetMessage) return;
-
-    const currentEmoji = Array.isArray(targetMessage.emoji)
-      ? targetMessage.emoji[0]
-      : targetMessage.emoji;
-
-    if (currentEmoji === emoji) {
-      try {
-        await deleteEmoji(Number(messageId));
-      } catch (e) {
-        console.error('❌ 이모지 삭제 실패:', e);
-      }
-    } else {
-      try {
-        await sendEmoji(Number(messageId), emoji);
-      } catch (e) {
-        console.error('❌ 이모지 추가 실패:', e);
-      }
-    }
-  };
-
-  const handleLongPressOrRightClick = (messageId: string) => {
-    setEmojiTargetId((prev) => (prev === messageId ? null : messageId));
-  };
-
-  const formatDateLabel = (iso: string) => {
-    const d = new Date(iso);
-    return isNaN(d.getTime())
-      ? ''
-      : d.toLocaleDateString('ko-KR', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-          weekday: 'short',
-        });
-  };
-
-  const formatTime = (iso: string) => {
-    const d = new Date(iso);
-    return isNaN(d.getTime())
-      ? ''
-      : d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-  };
-
-  let lastDateLabel = '';
-
-  // 메시지 영역이 키보드에 가려지지 않도록 visualViewport와 safe-area-inset을 활용
-  useEffect(() => {
-    const handleResize = () => {
-      if (chatContainerRef.current && window.visualViewport) {
-        const headerHeight = 64;
-        const inputHeight = 56;
-        // CSS 변수에서 안전영역(inset) 값 가져오기
-        const safeArea =
-          Number(
-            getComputedStyle(document.documentElement)
-              .getPropertyValue('--sat-bottom')
-              .replace('px', ''),
-          ) || 0;
-        const vh = window.visualViewport.height;
-        chatContainerRef.current.style.height = `${vh - headerHeight - inputHeight - safeArea}px`;
-      }
-    };
-    window.visualViewport?.addEventListener('resize', handleResize);
-    handleResize();
-    return () => window.visualViewport?.removeEventListener('resize', handleResize);
-  }, []);
 
   return (
-    <div className="relative h-screen bg-white">
-      {/* 헤더 */}
-      <div className="fixed top-0 left-0 right-0 z-20 h-16 bg-white border-b">
-        <ChatRoomHeader
-          partnerName={partnerName}
-          partnerProfileImage={partnerProfileImage}
-          bookShyScore={bookShyScore}
-        />
-      </div>
+    <div className="flex flex-col h-screen bg-white">
+      {/* Fixed Header */}
+      <header className="shrink-0 h-[56px] border-b flex items-center px-4 bg-white z-10">
+        <div className="font-bold">{_partnerName}</div>
+      </header>
 
-      {/* 메시지 영역 */}
-      <div
-        ref={chatContainerRef}
-        className="absolute left-0 right-0 overflow-y-auto"
-        style={{
-          top: '64px',
-          bottom: '56px', // 입력창 높이
-          paddingBottom: 'env(safe-area-inset-bottom)',
-        }}
-      >
-        {messages.map((msg, idx) => {
-          const dateLabel = formatDateLabel(msg.sentAt);
-          const showDate = dateLabel !== lastDateLabel;
-          lastDateLabel = dateLabel;
-
-          const isSystem = ['info', 'notice', 'warning'].includes(msg.type ?? '');
-          return (
-            <div key={`${msg.id}-${idx}`}>
-              {showDate && (
-                <div className="flex items-center gap-2 text-[11px] sm:text-xs text-light-text-muted my-4">
-                  <div className="flex-grow border-t border-light-bg-shade" />
-                  <span className="px-2 whitespace-nowrap">{dateLabel}</span>
-                  <div className="flex-grow border-t border-light-bg-shade" />
-                </div>
-              )}
-              {isSystem ? (
-                <SystemMessage
-                  title={
-                    msg.type === 'notice'
-                      ? '거래 시 주의해주세요!'
-                      : msg.type === 'info'
-                        ? '약속이 등록되었습니다!'
-                        : '알림'
-                  }
-                  content={msg.content}
-                  variant={msg.type as 'notice' | 'info' | 'warning'}
-                />
-              ) : (
-                <ChatMessageItem
-                  message={{ ...msg, sentAt: formatTime(msg.sentAt), read: msg.read }}
-                  isMyMessage={msg.senderId === myUserId}
-                  showEmojiSelector={emojiTargetId === msg.id}
-                  onLongPress={() => handleLongPressOrRightClick(msg.id)}
-                  onRightClick={() => handleLongPressOrRightClick(msg.id)}
-                  onSelectEmoji={(emoji) => handleSelectEmoji(msg.id, emoji ?? '')}
-                  selectedEmoji={Array.isArray(msg.emoji) ? msg.emoji[0] : msg.emoji}
-                  onCloseEmoji={() => setEmojiTargetId(null)}
-                />
-              )}
+      {/* Scrollable Chat Area */}
+      <main ref={messageContainerRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`mb-2 flex ${msg.senderId === 1 ? 'justify-end' : 'justify-start'}`}
+          >
+            <div
+              className={`max-w-xs rounded-lg px-3 py-2 text-sm shadow-sm whitespace-pre-wrap ${
+                msg.senderId === 1 ? 'bg-blue-100 text-right' : 'bg-gray-100'
+              }`}
+            >
+              {msg.content}
+              <div className="text-[10px] text-gray-400 mt-1">{msg.sentAt}</div>
             </div>
-          );
-        })}
-
-        {/* 📌 교환 완료 유도 메시지 */}
-        <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm">
-          <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
-          <p className="text-xs mt-1 text-light-text-muted">
-            거래가 완료되었다면 리뷰를 남겨주세요.
-          </p>
-          <button
-            onClick={() =>
-              navigate(`/chat/${numericRoomId}/review`, {
-                state: {
-                  chatSummary: {
-                    partnerName,
-                    partnerProfileImage,
-                    bookShyScore,
-                    myBookId,
-                    myBookName,
-                    otherBookId,
-                    otherBookName,
-                  },
-                },
-              })
-            }
-            className="mt-3 inline-block bg-primary text-white text-xs font-medium px-4 py-2 rounded-full"
-          >
-            거래 완료
-          </button>
-        </div>
-
+          </div>
+        ))}
         <div ref={messagesEndRef} className="h-4" />
-      </div>
+      </main>
 
-      {/* ↓ 아래로 버튼 */}
-      {showScrollToBottom && (
-        <div
-          className="fixed left-0 right-0 flex justify-center z-30 transition-all duration-300 pointer-events-none"
-          style={{
-            bottom: '56px', // 입력창 높이
-          }}
-        >
-          <button
-            className="bg-black/60 hover:bg-black/80 text-white text-lg sm:text-xl px-3 py-1.5 rounded-full shadow-md pointer-events-auto"
-            onClick={() => scrollToBottom(true)}
-            aria-label="맨 아래로 스크롤"
-          >
-            ↓
-          </button>
-        </div>
-      )}
-
-      {/* 입력창 */}
-      <div
-        className="fixed left-0 right-0 bottom-0 z-20 bg-white border-t"
-        style={{ height: '56px' }}
+      {/* Fixed Input Bar */}
+      <footer
+        className="shrink-0 bg-white px-4 py-2 border-t z-20"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        <ChatInput
-          onSend={handleSendMessage}
-          showOptions={showOptions}
-          onToggleOptions={() => {
-            const container = messagesEndRef.current?.parentElement;
-            const wasAtBottom = container
-              ? container.scrollHeight - container.scrollTop - container.clientHeight < 50
-              : false;
-
-            setShowOptions((prev) => !prev);
-
-            // 확장된 후 DOM이 완전히 반영된 다음 스크롤 (조금 delay)
-            if (wasAtBottom) {
-              setTimeout(() => {
-                requestAnimationFrame(() => {
-                  scrollToBottom(true); // smooth 스크롤
-                });
-              }, 250); // 약간 더 넉넉한 시간
-            }
-          }}
-          onScheduleClick={() => setShowScheduleModal(true)}
-        />
-      </div>
-
-      {/* 일정 모달 */}
-      {showScheduleModal && (
-        <ScheduleModal
-          partnerName={partnerName}
-          partnerProfileImage={partnerProfileImage}
-          roomId={numericRoomId}
-          requestId={0}
-          onClose={() => setShowScheduleModal(false)}
-          onConfirm={registerScheduleAndNotify}
-        />
-      )}
+        <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+          <input
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onFocus={() => scrollToBottom(true)}
+            className="flex-1 border px-4 py-2 rounded-full focus:outline-none"
+            placeholder="메시지를 입력하세요"
+          />
+          <button type="submit" className="text-blue-500 font-semibold">
+            전송
+          </button>
+        </form>
+      </footer>
     </div>
   );
 }
