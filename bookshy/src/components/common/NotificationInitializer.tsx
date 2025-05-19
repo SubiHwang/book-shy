@@ -49,11 +49,11 @@ const NotificationInitializer: FC = () => {
       try {
         // Firebase 메시징 인스턴스 가져오기
         const messaging = getMessaging();
-        
+
         // 포그라운드 메시지 수신 핸들러
         const unsubscribe = onMessage(messaging, (payload) => {
           console.log('포그라운드 메시지 수신:', payload);
-          
+
           // 알림 데이터 생성
           const notificationData: NotificationData = {
             id: Date.now().toString(),
@@ -61,20 +61,20 @@ const NotificationInitializer: FC = () => {
             body: payload.data?.body || '',
             url: payload.data?.url || '/',
             timestamp: new Date().toISOString(),
-            read: false
+            read: false,
           };
-          
+
           // 알림 데이터를 로컬 스토리지에 저장
           saveNotificationToStorage(notificationData);
-          
+
           // 새 알림 이벤트 발행
           const event = new CustomEvent('new-notification', {
-            detail: notificationData
+            detail: notificationData,
           });
-          
+
           window.dispatchEvent(event);
         });
-        
+
         // 컴포넌트 언마운트 시 구독 해제
         return () => {
           unsubscribe();
@@ -90,18 +90,15 @@ const NotificationInitializer: FC = () => {
     try {
       // 기존 알림 가져오기
       const storedNotificationsJson = localStorage.getItem('notifications');
-      const storedNotifications: NotificationData[] = storedNotificationsJson 
-        ? JSON.parse(storedNotificationsJson) 
+      const storedNotifications: NotificationData[] = storedNotificationsJson
+        ? JSON.parse(storedNotificationsJson)
         : [];
-      
+
       // 새 알림 추가 (배열 앞에 추가)
       const updatedNotifications = [notification, ...storedNotifications];
-      
+
       // 다시 저장 (최대 20개로 제한)
-      localStorage.setItem(
-        'notifications', 
-        JSON.stringify(updatedNotifications.slice(0, 20))
-      );
+      localStorage.setItem('notifications', JSON.stringify(updatedNotifications.slice(0, 20)));
     } catch (error) {
       console.error('알림 저장 오류:', error);
     }
