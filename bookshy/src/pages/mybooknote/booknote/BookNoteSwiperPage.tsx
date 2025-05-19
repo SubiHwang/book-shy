@@ -4,11 +4,11 @@ import type { BookNote } from '@/types/mybooknote/booknote';
 import BookNoteCard from '@/components/mybooknote/booknote/BookNoteCard';
 import AdjacentBookPreview from '@/components/mybooknote/booknote/AdjacentBookPreview';
 import FilterChips from '@/components/common/FilterChips';
-import { BookOpen, CheckCircle, CircleSlash } from 'lucide-react';
+import { BookOpen, CheckCircle, CircleSlash, Handshake } from 'lucide-react';
 import { useSwipeable } from 'react-swipeable';
 
 interface BookNoteSwiperPageProps {
-  bookNotes: (BookNote & { libraryId: number })[];
+  bookNotes: (BookNote & { libraryId: number; fromRental?: boolean })[];
 }
 
 type FilterType = 'all' | 'has' | 'none';
@@ -111,7 +111,12 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
         )}
 
         {/* 현재 카드 */}
-        <div className="z-20">
+        <div className="z-20 relative">
+          {currentBook.fromRental && (
+            <div className="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+              <Handshake size={12} /> 대여 도서
+            </div>
+          )}
           <BookNoteCard
             coverUrl={currentBook.coverUrl}
             title={currentBook.title}
@@ -135,7 +140,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
       </div>
 
       {/* 인용구 버튼 */}
-      <div className="fixed bottom-32 right-6 z-[50]">
+      <div className="fixed bottom-32 left-6 z-[50]">
         <button
           onClick={() => navigate('/booknotes/quote-galaxy')}
           className="w-14 h-14 rounded-full bg-cyan-500/20 backdrop-blur-md shadow-xl shadow-cyan-400/40 

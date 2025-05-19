@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,7 +8,7 @@ interface ChatButtonProps {
 }
 
 const ChatButton: FC<ChatButtonProps> = ({ isActive, onClick }) => {
-  const [countChat, setCountChat] = useState(2);
+  const countChat = 2;
   const navigate = useNavigate();
 
   useEffect(() => {
