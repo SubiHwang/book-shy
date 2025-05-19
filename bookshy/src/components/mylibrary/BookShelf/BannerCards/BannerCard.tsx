@@ -40,7 +40,9 @@ const BannerCard: React.FC<BannerCardProps> = ({
             {postText && <> {postText}</>}
           </p>
           {description && (
-            <p className="text-gray-600 text-sm mb-4 line-clamp-1 overflow-hidden">{description}</p>
+            <p className="text-gray-600 text-sm mb-4 line-clamp-2 overflow-hidden whitespace-pre-line">
+              {description}
+            </p>
           )}
         </div>
         <div className="ml-2 flex-shrink-0 w-22 h-22 flex items-center justify-center">
