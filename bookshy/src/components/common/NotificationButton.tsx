@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { NotificationData } from '@/components/common/NotificationInitializer';
 
 const NotificationButton = () => {
   const [hasNotifications, setHasNotifications] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // 컴포넌트 마운트 시 로컬 스토리지에서 알림 상태 확인
   useEffect(() => {
@@ -14,7 +15,7 @@ const NotificationButton = () => {
         const storedNotificationsJson = localStorage.getItem('notifications');
         if (storedNotificationsJson) {
           const storedNotifications: NotificationData[] = JSON.parse(storedNotificationsJson);
-          
+
           // 읽지 않은 알림이 있는지 확인
           const unreadExists = storedNotifications.some((notification) => !notification.read);
           setHasNotifications(unreadExists);
@@ -34,7 +35,7 @@ const NotificationButton = () => {
     };
 
     window.addEventListener('storage', handleStorageChange);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
@@ -64,7 +65,7 @@ const NotificationButton = () => {
 
   // 알림 페이지로 이동
   const goToNotifications = () => {
-    navigate('/notifications');
+    navigate(`/notifications?from=${encodeURIComponent(location.pathname)}`);
   };
 
   return (
@@ -75,7 +76,7 @@ const NotificationButton = () => {
     >
       <Bell size={24} />
       {hasNotifications && (
-        <span className="absolute top-1 right-2 bg-red-500 rounded-full w-2 h-2"></span>
+        <span className="absolute top-1 right-2 bg-red-500 border border-light-bg rounded-full w-2 h-2"></span>
       )}
     </button>
   );
