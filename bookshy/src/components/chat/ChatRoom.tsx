@@ -80,6 +80,16 @@ function ChatRoom({
     }
   }, []);
 
+  useEffect(() => {
+    const resizeListener = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+    resizeListener();
+    window.addEventListener('resize', resizeListener);
+    return () => window.removeEventListener('resize', resizeListener);
+  }, []);
+
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -310,7 +320,10 @@ function ChatRoom({
   let lastDateLabel = '';
 
   return (
-    <div className="relative bg-white" style={{ height: viewportHeight }}>
+    <div
+      className="relative flex flex-col bg-white"
+      style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
+    >
       {/* 헤더: fixed top-0 */}
       <div
         className="fixed top-0 left-0 right-0 z-40 bg-white border-b border-light-border"
@@ -427,7 +440,7 @@ function ChatRoom({
 
       {/* 입력창: fixed bottom-0 */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-light-border px-4"
+        className="sticky bottom-0 left-0 right-0 z-40 bg-white border-t border-light-border px-4"
         style={{ height: 56 }}
       >
         <ChatInput
