@@ -8,10 +8,6 @@ import { fetchRentalBooksInUse } from '@/services/chat/chat';
 
 import BookNoteSwiperPage from './BookNoteSwiperPage';
 import LibraryBookListPage from './LibraryBookListPage';
-
-import type { BookNote } from '@/types/mybooknote/booknote';
-import type { BookQuote } from '@/types/mybooknote/booknote/bookquote';
-import type { Library } from '@/types/mylibrary/library';
 import type { Book } from '@/types/book/book';
 
 const MyBookNotePage = () => {
