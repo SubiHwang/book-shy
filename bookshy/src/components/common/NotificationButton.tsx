@@ -14,7 +14,7 @@ const NotificationButton = () => {
         const storedNotificationsJson = localStorage.getItem('notifications');
         if (storedNotificationsJson) {
           const storedNotifications: NotificationData[] = JSON.parse(storedNotificationsJson);
-          
+
           // 읽지 않은 알림이 있는지 확인
           const unreadExists = storedNotifications.some((notification) => !notification.read);
           setHasNotifications(unreadExists);
@@ -34,7 +34,7 @@ const NotificationButton = () => {
     };
 
     window.addEventListener('storage', handleStorageChange);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
@@ -75,7 +75,7 @@ const NotificationButton = () => {
     >
       <Bell size={24} />
       {hasNotifications && (
-        <span className="absolute top-1 right-2 bg-red-500 rounded-full w-2 h-2"></span>
+        <span className="absolute top-1 right-2 bg-red-500 border border-light-bg rounded-full w-2 h-2"></span>
       )}
     </button>
   );
