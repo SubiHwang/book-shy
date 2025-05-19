@@ -58,7 +58,7 @@ public class FcmMessageTemplate {
 
                 String itemId = data.get("itemId");
                 if (itemId != null && !itemId.isBlank()) {
-                    url = "/matching/books/" + itemId;
+                    url = "/matching/books/" + itemId + "?from=wish-book-card";
                 }
             }
         }
