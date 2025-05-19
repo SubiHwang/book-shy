@@ -57,21 +57,6 @@ function ChatRoom({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
-
-  useEffect(() => {
-    const updateHeight = () => {
-      const visual = window.visualViewport;
-      const height = visual
-        ? visual.height + visual.offsetTop // 정확한 visible 영역
-        : window.innerHeight;
-      setViewportHeight(height);
-    };
-
-    updateHeight();
-    window.visualViewport?.addEventListener('resize', updateHeight);
-    return () => window.visualViewport?.removeEventListener('resize', updateHeight);
-  }, []);
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -303,9 +288,9 @@ function ChatRoom({
   let lastDateLabel = '';
 
   return (
-    <div style={{ height: viewportHeight }} className="flex flex-col bg-white pb-safe relative">
+    <div className="relative h-screen bg-white">
       {/* 헤더 */}
-      <div className="shrink-0 z-10">
+      <div className="fixed top-0 left-0 right-0 z-20 h-16 bg-white border-b">
         <ChatRoomHeader
           partnerName={partnerName}
           partnerProfileImage={partnerProfileImage}
@@ -315,11 +300,11 @@ function ChatRoom({
 
       {/* 메시지 영역 */}
       <div
-        className={`flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
-          showOptions
-            ? 'pb-[35vh]' // 확장 기능 보이면 큰 여백
-            : 'pb-20' // 기본 여백
-        }`}
+        className="absolute left-0 right-0 overflow-y-auto"
+        style={{
+          top: '64px', // 헤더 높이
+          bottom: showOptions ? '35vh' : '56px', // 입력창 높이(56px) 또는 옵션
+        }}
       >
         {messages.map((msg, idx) => {
           const dateLabel = formatDateLabel(msg.sentAt);
@@ -398,12 +383,13 @@ function ChatRoom({
       {/* ↓ 아래로 버튼 */}
       {showScrollToBottom && (
         <div
-          className={`absolute inset-x-0 flex justify-center z-30 transition-all duration-300
-      ${showOptions ? 'bottom-[32vh]' : 'bottom-[88px]'}
-    `}
+          className="fixed left-0 right-0 flex justify-center z-30 transition-all duration-300 pointer-events-none"
+          style={{
+            bottom: showOptions ? '35vh' : '56px', // 입력창/옵션 높이만큼 띄움
+          }}
         >
           <button
-            className="bg-black/60 hover:bg-black/80 text-white text-lg sm:text-xl px-3 py-1.5 rounded-full shadow-md"
+            className="bg-black/60 hover:bg-black/80 text-white text-lg sm:text-xl px-3 py-1.5 rounded-full shadow-md pointer-events-auto"
             onClick={() => scrollToBottom(true)}
             aria-label="맨 아래로 스크롤"
           >
@@ -412,7 +398,11 @@ function ChatRoom({
         </div>
       )}
 
-      <div className="shrink-0 z-20 bg-white border-t border-light-border px-4">
+      {/* 입력창 */}
+      <div
+        className="fixed left-0 right-0 bottom-0 z-20 bg-white border-t"
+        style={{ height: '56px' }}
+      >
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
