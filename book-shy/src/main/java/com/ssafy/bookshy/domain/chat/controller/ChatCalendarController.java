@@ -76,6 +76,6 @@ public class ChatCalendarController {
     public CommonResponse<ChatCalendarCreateResponseDto> createCalendarWithExchange(
             @org.springframework.web.bind.annotation.RequestBody ChatCalendarCreateRequestDto dto,
             @AuthenticationPrincipal Users user) {
-        return CommonResponse.success(chatCalendarService.createCalendarWithRequest(dto, user.getUserId()));
+        return CommonResponse.success(chatCalendarService.createCalendarWithRequest(dto));
     }
 }
