@@ -13,6 +13,7 @@ interface StyledText extends Text {
   outlineColor?: string;
   outlineBlur?: number;
   opacity?: number;
+  baseColor?: string;
 }
 
 const QuoteGalaxyPage = () => {
@@ -97,6 +98,8 @@ const QuoteGalaxyPage = () => {
     const spherical = new THREE.Spherical(radius);
     const colorList = ['#fff', '#b2ccff', '#a5b4fc', '#f0e9ff', '#c7d2fe', '#e0e7ff'];
 
+    let hoveredText: StyledText | null = null;
+
     quotes.forEach((quote, idx) => {
       const phi = Math.PI / 4 + Math.random() * (Math.PI / 4);
       const theta = Math.random() * Math.PI * 2;
@@ -117,6 +120,7 @@ const QuoteGalaxyPage = () => {
       textMesh.anchorY = 'middle';
       textMesh.position.copy(pos);
       textMesh.userData.fullQuote = quote.content;
+      textMesh.userData.baseColor = textMesh.color;
       (textMesh as any).shadowColor = '#b2ccff';
       (textMesh as any).shadowBlur = 10;
       textMesh.sync(() => {
@@ -176,6 +180,42 @@ const QuoteGalaxyPage = () => {
     };
     window.addEventListener('resize', handleResize);
 
+    const handlePointerMove = (event: PointerEvent) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(quoteNodes);
+      if (intersects.length > 0) {
+        const hovered = intersects[0].object as StyledText;
+        if (hoveredText && hoveredText !== hovered) {
+          // 이전 hover 해제
+          hoveredText.outlineWidth = 0.13;
+          hoveredText.outlineColor = '#b2ccff';
+          (hoveredText as any).shadowBlur = 10;
+          hoveredText.color = hoveredText.userData.baseColor;
+        }
+        hoveredText = hovered;
+        hovered.outlineWidth = 0.22;
+        hovered.outlineColor = '#fffbe6';
+        (hovered as any).shadowBlur = 18;
+        hovered.color = '#fffbe6';
+      } else if (hoveredText) {
+        // hover 해제
+        hoveredText.outlineWidth = 0.13;
+        hoveredText.outlineColor = '#b2ccff';
+        (hoveredText as any).shadowBlur = 10;
+        hoveredText.color = hoveredText.userData.baseColor;
+        hoveredText = null;
+      }
+    };
+    renderer.domElement.addEventListener('pointermove', handlePointerMove);
+    renderer.domElement.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) {
+        handlePointerMove(e.touches[0] as any);
+      }
+    });
+
     const handleClick = (event: PointerEvent) => {
       const rect = renderer.domElement.getBoundingClientRect();
       mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -207,6 +247,7 @@ const QuoteGalaxyPage = () => {
       window.removeEventListener('resize', handleResize);
       if (mountRef.current) mountRef.current.removeChild(renderer.domElement);
       clearInterval(shootingStarInterval);
+      renderer.domElement.removeEventListener('pointermove', handlePointerMove);
     };
   }, [quotes]);
 
