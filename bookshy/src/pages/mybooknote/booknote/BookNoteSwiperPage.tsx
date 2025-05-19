@@ -4,7 +4,7 @@ import type { BookNote } from '@/types/mybooknote/booknote';
 import BookNoteCard from '@/components/mybooknote/booknote/BookNoteCard';
 import AdjacentBookPreview from '@/components/mybooknote/booknote/AdjacentBookPreview';
 import FilterChips from '@/components/common/FilterChips';
-import { PlusCircle, BookOpen, CheckCircle, CircleSlash } from 'lucide-react';
+import { BookOpen, CheckCircle, CircleSlash } from 'lucide-react';
 import { useSwipeable } from 'react-swipeable';
 
 interface BookNoteSwiperPageProps {
