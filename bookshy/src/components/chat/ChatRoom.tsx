@@ -57,6 +57,7 @@ function ChatRoom({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -287,6 +288,28 @@ function ChatRoom({
 
   let lastDateLabel = '';
 
+  // Add visualViewport handling
+  useEffect(() => {
+    const handleVisualViewportResize = () => {
+      if (chatContainerRef.current && window.visualViewport) {
+        const currentVisualViewport = window.visualViewport.height;
+        chatContainerRef.current.style.height = `${currentVisualViewport - 120}px`; // 헤더(64px) + 입력창(56px) 고려
+        window.scrollTo(0, 40);
+      }
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleVisualViewportResize);
+      handleVisualViewportResize(); // Initial setup
+    }
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleVisualViewportResize);
+      }
+    };
+  }, []);
+
   return (
     <div className="relative h-screen bg-white">
       {/* 헤더 */}
@@ -300,6 +323,7 @@ function ChatRoom({
 
       {/* 메시지 영역 */}
       <div
+        ref={chatContainerRef}
         className="absolute left-0 right-0 overflow-y-auto"
         style={{
           top: '64px', // 헤더 높이
