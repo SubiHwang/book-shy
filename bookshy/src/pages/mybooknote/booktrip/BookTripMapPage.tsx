@@ -81,6 +81,13 @@ const BookTripMapPage = () => {
       return new THREE.CanvasTexture(canvas);
     };
 
+    // 조명 추가
+    const ambientLight = new THREE.AmbientLight(0xffffff, 2.5);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    directionalLight.position.set(0, 50, 50);
+    scene.add(directionalLight);
+
     books.forEach((book, i) => {
       const angle = i * angleStep * 1.5;
       const x = radius * Math.cos(angle);
@@ -88,7 +95,7 @@ const BookTripMapPage = () => {
       const z = radius * Math.sin(angle);
 
       const texture = loader.load(book.coverImageUrl || '/images/book-placeholder.png');
-      const geometry = new THREE.PlaneGeometry(8, 12);
+      const geometry = new THREE.PlaneGeometry(10, 15);
       const material = new THREE.MeshBasicMaterial({ map: texture });
       const coverMesh = new THREE.Mesh(geometry, material);
 
@@ -206,6 +213,29 @@ const BookTripMapPage = () => {
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
+    const hoveredCover: THREE.Mesh | null = null;
+
+    const handleMove = (event: MouseEvent) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(coverMeshes);
+
+      if (intersects.length > 0) {
+        setHoveredTitle(intersects[0].object.userData.title);
+      } else {
+        setHoveredTitle(null);
+      }
+    };
+    renderer.domElement.addEventListener('pointermove', handleMove);
+    renderer.domElement.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) {
+        handleMove(e.touches[0] as any);
+      }
+    });
+
     const handleClick = (event: MouseEvent) => {
       const rect = renderer.domElement.getBoundingClientRect();
       mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -238,23 +268,7 @@ const BookTripMapPage = () => {
       }
     };
 
-    const handleMove = (event: MouseEvent) => {
-      const rect = renderer.domElement.getBoundingClientRect();
-      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-      raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObjects(coverMeshes);
-
-      if (intersects.length > 0) {
-        setHoveredTitle(intersects[0].object.userData.title);
-      } else {
-        setHoveredTitle(null);
-      }
-    };
-
     renderer.domElement.addEventListener('pointerdown', handleClick);
-    renderer.domElement.addEventListener('pointermove', handleMove);
 
     const clock = new THREE.Clock();
 
