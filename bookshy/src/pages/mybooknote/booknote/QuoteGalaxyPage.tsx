@@ -100,7 +100,7 @@ const QuoteGalaxyPage = () => {
 
     let hoveredText: StyledText | null = null;
 
-    quotes.forEach((quote, idx) => {
+    quotes.forEach((quote) => {
       const phi = Math.PI / 4 + Math.random() * (Math.PI / 4);
       const theta = Math.random() * Math.PI * 2;
       spherical.phi = phi;
