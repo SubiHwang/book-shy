@@ -54,28 +54,32 @@ function ChatRoom({
   }, [messages]);
 
   useEffect(() => {
-    let raf: number;
+    const container = messageContainerRef.current;
+    if (!container) return;
+
     const updateHeight = () => {
       const visual = window.visualViewport;
-      const container = messageContainerRef.current;
-      if (!visual || !container) return;
+      if (!visual) return;
 
-      raf = requestAnimationFrame(() => {
-        const headerHeight = 56;
-        const inputHeight = 64;
-        const safeInset = 0;
-        const newHeight = visual.height - headerHeight - inputHeight - safeInset;
-        if (container) {
-          container.style.height = `${newHeight}px`;
-        }
-      });
+      const headerHeight = 56;
+      const footerHeight = 64;
+      const safeInset = Number(
+        getComputedStyle(document.documentElement)
+          .getPropertyValue('--safe-area-inset-bottom')
+          .replace('px', '') || 0,
+      );
+      const height = visual.height - headerHeight - footerHeight - safeInset;
+
+      container.style.height = `${height}px`;
     };
 
-    setTimeout(updateHeight, 100); // 초기 진입 대응
+    updateHeight();
     window.visualViewport?.addEventListener('resize', updateHeight);
+    window.addEventListener('orientationchange', updateHeight);
+
     return () => {
       window.visualViewport?.removeEventListener('resize', updateHeight);
-      cancelAnimationFrame(raf);
+      window.removeEventListener('orientationchange', updateHeight);
     };
   }, []);
 
@@ -104,17 +108,14 @@ function ChatRoom({
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white relative">
+    <div className="flex flex-col h-[100dvh] bg-white relative overflow-hidden">
       {/* 헤더 */}
       <header className="shrink-0 px-4 py-3 border-b bg-white z-10">
         <div className="font-bold">책친구</div>
       </header>
 
       {/* 메시지 영역 */}
-      <main
-        ref={messageContainerRef}
-        className="overflow-y-auto px-4 py-2 transition-all duration-200"
-      >
+      <main ref={messageContainerRef} className="overflow-y-auto px-4 py-2 flex-1 min-h-0">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -135,7 +136,7 @@ function ChatRoom({
 
       {/* 입력창 */}
       <footer
-        className="absolute bottom-0 inset-x-0 bg-white px-4 py-2 border-t z-20"
+        className="fixed bottom-0 inset-x-0 bg-white px-4 py-2 border-t z-20"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <form onSubmit={handleSendMessage} className="flex items-center gap-2">
