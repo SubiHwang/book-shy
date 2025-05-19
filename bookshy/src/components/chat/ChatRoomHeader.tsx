@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Bell } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import NotificationButton from '../common/NotificationButton';
 
 interface ChatRoomHeaderProps {

@@ -17,7 +17,6 @@ import {
 import { useStomp } from '@/hooks/chat/useStomp.ts';
 import { useWebSocket } from '@/contexts/WebSocketProvider';
 import { getUserIdFromToken } from '@/utils/jwt.ts';
-import { useViewportHeightFix } from '@/hooks/chat/useViewportHeightFix.ts';
 
 interface Props {
   partnerName: string;
@@ -59,8 +58,6 @@ function ChatRoom({
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
-  const containerRef = useRef<HTMLDivElement>(null);
-  useViewportHeightFix(containerRef);
 
   useEffect(() => {
     const updateHeight = () => {
@@ -306,7 +303,7 @@ function ChatRoom({
   let lastDateLabel = '';
 
   return (
-    <div ref={containerRef} className="flex flex-col bg-white pb-safe">
+    <div style={{ height: viewportHeight }} className="flex flex-col bg-white pb-safe">
       {/* 헤더 */}
       <div className="shrink-0 z-10">
         <ChatRoomHeader
