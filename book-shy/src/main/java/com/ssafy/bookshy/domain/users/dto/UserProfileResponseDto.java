@@ -21,20 +21,20 @@ public class UserProfileResponseDto {
     private String address;
     private int age;
     private Users.Gender gender;
-    private Double latitude;   // 추가
-    private Double longitude;  // 추가
+    private Double latitude;
+    private Double longitude;
 
     public static UserProfileResponseDto from(Users user) {
         return UserProfileResponseDto.builder()
                 .nickname(user.getNickname())
                 .bookShyScore(user.getTemperature() != null ? user.getTemperature() : 0)
-                .badge(user.getBadges() != null ? user.getBadges() : "북끄북끄 입문자")
+                .badge(user.getBadges() != null ? user.getBadges() : "\uD83C\uDF31 북끄북끄 입문자")
                 .profileImageUrl(user.getProfileImageUrl())
                 .address(user.getAddress())
                 .age(user.getAge())
                 .gender(user.getGender())
-                .latitude(user.getLatitude())      // 추가
-                .longitude(user.getLongitude())    // 추가
+                .latitude(user.getLatitude())
+                .longitude(user.getLongitude())
                 .build();
     }
 }

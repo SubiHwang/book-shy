@@ -51,7 +51,7 @@ public class Users extends TimeStampEntity implements UserDetails {
     private Float temperature;
 
     @Column(name = "badges")
-    private String badges = "북끄북끄 입문자";
+    private String badges = "\uD83C\uDF31 북끄북끄 입문자";
 
     @Column(name = "refresh_token")
     private String refreshToken;
@@ -85,7 +85,7 @@ public class Users extends TimeStampEntity implements UserDetails {
         this.age = age;
         this.gender = gender;
         this.temperature = temperature;
-        this.badges = badges != null ? badges : "북끄북끄 입문자";
+        this.badges = badges != null ? badges : "\uD83C\uDF31 북끄북끄 입문자";
         this.refreshToken = refreshToken;
         this.fcmToken = fcmToken;
         this.latitude = latitude;
