@@ -100,7 +100,6 @@ const LocationSetting: FC = () => {
       navigate('/');
     } catch (err) {
       console.error('주소 저장 중 오류 발생:', err);
-      toast.error('주소 저장에 실패했습니다.');
     }
   };
 

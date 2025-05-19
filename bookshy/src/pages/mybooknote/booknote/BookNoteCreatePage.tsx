@@ -44,7 +44,6 @@ const BookNoteCreatePage: React.FC = () => {
       navigate('/booknotes');
     } catch (error) {
       console.error('등록 실패:', error);
-      toast.error('❌ 등록에 실패했습니다. 다시 시도해주세요.');
     }
   };
 

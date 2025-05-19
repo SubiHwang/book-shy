@@ -106,7 +106,6 @@ const ISBNScanResultPage: React.FC = () => {
       }
 
       setRegistrationError(errorMessage);
-      toast.error(errorMessage);
     } finally {
       setIsRegistering(false);
     }

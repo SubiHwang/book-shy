@@ -148,7 +148,6 @@ const TradeReviewPage = () => {
       userIds = [userAId, userBId];
     } catch (e) {
       console.log(e);
-      toast.error('참여자 정보를 불러오지 못했습니다.');
       return;
     }
 
@@ -173,7 +172,6 @@ const TradeReviewPage = () => {
       }
     } catch (e) {
       console.error(e);
-      toast.error('리뷰 제출에 실패했습니다.');
     }
   };
 

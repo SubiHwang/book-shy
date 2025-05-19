@@ -62,7 +62,6 @@ const BookNoteSelectPage: React.FC = () => {
                 navigate(`/booknotes/create?bookId=${uploaded.bookId}`);
               } catch (err) {
                 console.error(err);
-                toast.error('❌ 도서 등록에 실패했습니다. 다시 시도해주세요.');
               }
             }}
           />
