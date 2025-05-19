@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useLayoutEffect } from 'react';
 
 interface ChatMessage {
-  id: number;
+  id: string;
   senderId: number;
   content: string;
 }
