@@ -42,10 +42,8 @@ export async function fetchChatRoomUserIds(chatRoomId: number): Promise<ChatRoom
   return await authAxiosInstance.get(`/chats/users?chatRoomId=${chatRoomId}`);
 }
 
-// 대여(RENTAL) 중인 도서 조회
-export async function fetchRentalBookForTrade(requestId: number): Promise<Book> {
-  const { data } = await authAxiosInstance.get(`/chats/rental-book`, {
-    params: { requestId },
-  });
+// ✅ 현재 로그인 사용자가 대여 중인 모든 도서 목록 조회
+export async function fetchRentalBooksInUse(): Promise<Book[]> {
+  const { data } = await authAxiosInstance.get(`/chats/rental-books`);
   return data;
 }

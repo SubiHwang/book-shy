@@ -4,7 +4,7 @@ import { fetchBookNoteList } from '@/services/mybooknote/booknote/booknote';
 import { fetchBookQuoteList } from '@/services/mybooknote/booknote/bookquote';
 import { fetchUserAllLibrary } from '@/services/mylibrary/libraryApi';
 import { fetchBookDetailByBookId } from '@/services/book/search';
-import { fetchScheduleByRoomId, fetchRentalBookForTrade } from '@/services/chat/chat';
+import { fetchRentalBooksInUse } from '@/services/chat/chat';
 
 import BookNoteSwiperPage from './BookNoteSwiperPage';
 import LibraryBookListPage from './LibraryBookListPage';
@@ -15,19 +15,19 @@ import type { Library } from '@/types/mylibrary/library';
 import type { Book } from '@/types/book/book';
 
 const MyBookNotePage = () => {
-  const { data: libraries = [] } = useQuery<Library[]>({
+  const { data: libraries = [] } = useQuery({
     queryKey: ['user-library'],
-    queryFn: () => fetchUserAllLibrary(),
+    queryFn: fetchUserAllLibrary,
   });
 
-  const { data: notes = [] } = useQuery<BookNote[]>({
+  const { data: notes = [] } = useQuery({
     queryKey: ['my-booknotes'],
-    queryFn: () => fetchBookNoteList(),
+    queryFn: fetchBookNoteList,
   });
 
-  const { data: quotes = [] } = useQuery<BookQuote[]>({
+  const { data: quotes = [] } = useQuery({
     queryKey: ['my-bookquotes'],
-    queryFn: () => fetchBookQuoteList(),
+    queryFn: fetchBookQuoteList,
   });
 
   const [enrichedBooks, setEnrichedBooks] = useState<any[]>([]);
@@ -65,31 +65,25 @@ const MyBookNotePage = () => {
         }),
       );
 
-      // ✅ 렌탈 도서 포함 조건
+      // 🔄 렌탈 도서 추가
       try {
-        const calendar = await fetchScheduleByRoomId(123); // 실제 roomId로 교체 필요
-        const isRental = calendar.type === 'RENTAL';
-        const now = new Date();
-        const rentalStart = calendar.startDate ? new Date(calendar.startDate) : null;
-        const isAvailable = rentalStart ? now >= rentalStart : false;
-
-        if (isRental && isAvailable) {
-          const rentalBook = await fetchRentalBookForTrade(calendar.requestId);
+        const rentalBooks = await fetchRentalBooksInUse();
+        rentalBooks.forEach((book) => {
           results.push({
-            bookId: rentalBook.bookId!,
             libraryId: -1,
-            title: rentalBook.title!,
-            author: rentalBook.author!,
-            coverUrl: rentalBook.coverImageUrl!,
+            bookId: book.bookId!,
+            title: book.title ?? '제목 없음',
+            author: book.author ?? '',
+            coverUrl: book.coverImageUrl ?? '',
             reviewId: undefined,
             content: '',
             createdAt: '',
             quoteContent: '',
             fromRental: true,
           });
-        }
+        });
       } catch (e) {
-        console.warn('렌탈 도서 포함 실패', e);
+        console.warn('렌탈 도서 추가 실패:', e);
       }
 
       setEnrichedBooks(results);

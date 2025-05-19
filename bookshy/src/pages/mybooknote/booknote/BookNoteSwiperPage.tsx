@@ -4,7 +4,7 @@ import type { BookNote } from '@/types/mybooknote/booknote';
 import BookNoteCard from '@/components/mybooknote/booknote/BookNoteCard';
 import AdjacentBookPreview from '@/components/mybooknote/booknote/AdjacentBookPreview';
 import FilterChips from '@/components/common/FilterChips';
-import { BookOpen, CheckCircle, CircleSlash } from 'lucide-react';
+import { BookOpen, CheckCircle, CircleSlash, Handshake } from 'lucide-react';
 import { useSwipeable } from 'react-swipeable';
 
 interface BookNoteSwiperPageProps {
@@ -108,8 +108,8 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
         {/* 현재 카드 */}
         <div className="z-20 relative">
           {currentBook.fromRental && (
-            <div className="absolute top-2 left-2 bg-yellow-400 text-white text-xs px-2 py-1 rounded">
-              대여 도서
+            <div className="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+              <Handshake size={12} /> 대여 도서
             </div>
           )}
           <BookNoteCard
