@@ -142,24 +142,38 @@ public class AladinClient {
             List<BookListResponseDto> result = new ArrayList<>();
 
             String[] tokens = tokenizeQuery(query);
+            String queryNormalized = query.toLowerCase().replaceAll("\\s+", "");
+
             for (JsonNode it : items) {
                 String title = it.path("title").asText("").toLowerCase();
                 String author = it.path("author").asText("").toLowerCase();
                 String publisher = it.path("publisher").asText("").toLowerCase();
 
-                boolean allMatch = true;
-                for (String token : tokens) {
-                    if (!(title.contains(token) || author.contains(token) || publisher.contains(token))) {
-                        allMatch = false;
-                        break;
+                String titleNormalized = title.replaceAll("\\s+", "");
+                String authorNormalized = author.replaceAll("\\s+", "");
+                String publisherNormalized = publisher.replaceAll("\\s+", "");
+
+                boolean match = false;
+
+                if (titleNormalized.contains(queryNormalized) ||
+                        authorNormalized.contains(queryNormalized) ||
+                        publisherNormalized.contains(queryNormalized)) {
+                    match = true;
+                }
+
+                if (!match) {
+                    for (String token : tokens) {
+                        if (title.contains(token) || author.contains(token) || publisher.contains(token)) {
+                            match = true;
+                            break;
+                        }
                     }
                 }
 
-                if (allMatch) {
+                if (match) {
                     result.add(BookListResponseDto.from(it));
                 }
             }
-            
 
             return BookListTotalResponseDto.builder()
                     .total(result.size())
@@ -296,9 +310,11 @@ public class AladinClient {
     }
 
     private String[] tokenizeQuery(String query) {
-        return query.replaceAll("[,\\.\\-\\+\"'!@#$%^&*()\\[\\]{}]", " ")
-                .toLowerCase()
+        return query.toLowerCase()
+                .replaceAll("개의", "의")
+                .replaceAll("[^ㄱ-ㅎ가-힣a-zA-Z0-9\\s]", "")
+                .replaceAll("\\s+", " ")
                 .trim()
-                .split("\\s+");
+                .split(" ");
     }
 }

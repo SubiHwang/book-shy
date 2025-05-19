@@ -1,7 +1,6 @@
 package com.ssafy.bookshy.domain.matching.controller;
 
 import com.ssafy.bookshy.common.response.CommonResponse;
-import com.ssafy.bookshy.domain.library.service.LibraryService;
 import com.ssafy.bookshy.domain.matching.dto.*;
 import com.ssafy.bookshy.domain.matching.service.MatchingService;
 import com.ssafy.bookshy.domain.users.entity.Users;
@@ -11,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +23,6 @@ import java.util.List;
 public class MatchingController {
 
     private final MatchingService matchingService;
-    private final LibraryService libraryService;
 
     @Operation(summary = "📋 매칭 후보 조회", description = "도서 조건이 맞는 상대방 중, 점수 높은 순으로 목록을 반환합니다.")
     @ApiResponse(responseCode = "200", description = "매칭 후보 조회 성공")
@@ -81,7 +78,6 @@ public class MatchingController {
         SimpleChatResponseDto response = matchingService.createSimpleChatRoom(user.getUserId(), receiverId);
         return CommonResponse.success(response);
     }
-
 
     @Operation(
             summary = "📍 주변 이웃 목록 조회",
