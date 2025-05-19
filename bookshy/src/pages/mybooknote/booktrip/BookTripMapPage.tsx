@@ -88,6 +88,9 @@ const BookTripMapPage = () => {
     directionalLight.position.set(0, 50, 50);
     scene.add(directionalLight);
 
+    // 라인 위를 따라 움직이는 별(점) 애니메이션을 위한 배열
+    const movingStars: { points: THREE.Vector3[]; mesh: THREE.Mesh }[] = [];
+
     books.forEach((book, i) => {
       const angle = i * angleStep * 1.5;
       const x = radius * Math.cos(angle);
@@ -195,6 +198,17 @@ const BookTripMapPage = () => {
         glowLine.userData.initialOpacity = glowMaterial.opacity;
         line.userData.material = material;
         glowLine.userData.material = glowMaterial;
+
+        // ⭐ 라인 위를 따라 움직이는 별(점) 추가
+        const starGeometry = new THREE.SphereGeometry(0.5, 12, 12);
+        const starMaterial = new THREE.MeshBasicMaterial({
+          color: 0xfffbe6,
+          transparent: true,
+          opacity: 0.95,
+        });
+        const starMesh = new THREE.Mesh(starGeometry, starMaterial);
+        scene.add(starMesh);
+        movingStars.push({ points, mesh: starMesh });
       }
     });
 
@@ -285,6 +299,20 @@ const BookTripMapPage = () => {
         if (child instanceof THREE.Line && child.userData.initialOpacity !== undefined) {
           const material = child.userData.material as THREE.LineBasicMaterial;
           material.opacity = child.userData.initialOpacity + Math.sin(time * 2) * 0.2;
+        }
+      });
+
+      // ⭐ 라인 위를 따라 별(점) 이동 애니메이션
+      movingStars.forEach((starObj, idx) => {
+        const t = (time * 0.25 + idx * 0.2) % 1; // 각 라인별로 phase 다르게
+        const points = starObj.points;
+        const seg = Math.floor(t * (points.length - 1));
+        const frac = t * (points.length - 1) - seg;
+        if (points[seg + 1]) {
+          // 선형 보간으로 위치 계산
+          starObj.mesh.position.lerpVectors(points[seg], points[seg + 1], frac);
+        } else {
+          starObj.mesh.position.copy(points[points.length - 1]);
         }
       });
 
