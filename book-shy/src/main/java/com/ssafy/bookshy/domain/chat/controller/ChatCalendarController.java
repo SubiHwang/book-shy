@@ -54,24 +54,28 @@ public class ChatCalendarController {
 
 
     @Operation(
-            summary = "📌 거래 일정 등록",
-            description = "📥 사용자 간 <b>교환(EXCHANGE)</b> 또는 <b>대여(RENTAL)</b> 일정을 캘린더에 등록합니다.",
+            summary = "📆 거래 일정 및 요청 등록",
+            description = """
+            📦 채팅방 내 도서 교환(EXCHANGE) 또는 대여(RENTAL) 일정을 등록합니다.<br>
+            📌 동시에 `exchange_requests` 테이블에 거래 요청도 함께 저장됩니다.<br>
+            ⚠️ myBookId / otherBookId / 참여자 정보는 캘린더에서 요청을 생성하기 위해 필요합니다.
+            """,
             requestBody = @RequestBody(
                     description = "📑 등록할 거래 일정 정보",
                     required = true,
                     content = @Content(schema = @Schema(implementation = ChatCalendarCreateRequestDto.class))
             ),
             responses = {
-                    @ApiResponse(responseCode = "200", description = "✅ 일정 등록 성공", content = @Content(schema = @Schema(implementation = ChatCalendarCreateResponseDto.class))),
+                    @ApiResponse(responseCode = "200", description = "✅ 거래 요청 및 일정 등록 성공", content = @Content(schema = @Schema(implementation = ChatCalendarCreateResponseDto.class))),
                     @ApiResponse(responseCode = "400", description = "❌ 입력값 오류 또는 날짜 누락"),
-                    @ApiResponse(responseCode = "404", description = "❌ 존재하지 않는 교환 요청 ID"),
+                    @ApiResponse(responseCode = "404", description = "❌ 존재하지 않는 채팅방 또는 사용자"),
                     @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
             }
     )
     @PostMapping
-    public CommonResponse<ChatCalendarCreateResponseDto> createCalendar(
+    public CommonResponse<ChatCalendarCreateResponseDto> createCalendarWithExchange(
             @org.springframework.web.bind.annotation.RequestBody ChatCalendarCreateRequestDto dto,
             @AuthenticationPrincipal Users user) {
-        return CommonResponse.success(chatCalendarService.createCalendar(dto, user.getUserId()));
+        return CommonResponse.success(chatCalendarService.createCalendarWithRequest(dto, user.getUserId()));
     }
 }
