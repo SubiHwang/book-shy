@@ -195,7 +195,6 @@ public class BookService {
         return BookResponseDto.from(book, true, isLiked);
     }
 
-
     public boolean isInLibrary(Long userId, Long itemId) {
         return libraryRepository.existsByUserUserIdAndBookItemId(userId, itemId);
     }
