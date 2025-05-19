@@ -33,13 +33,23 @@ function ChatRoom({
     { id: '1', senderId: 1, content: '안녕하세요~', sentAt: '오후 05:54' },
     { id: '2', senderId: 2, content: '하이용 ㅎㅎㅎㅎ', sentAt: '오후 06:17' },
     { id: '3', senderId: 1, content: '오늘 뭐해요?', sentAt: '오후 06:18' },
+    { id: '4', senderId: 2, content: '책 읽을거예요 📚', sentAt: '오후 06:19' },
+    { id: '5', senderId: 1, content: '안녕하세요~', sentAt: '오후 05:54' },
+    { id: '6', senderId: 2, content: '하이용 ㅎㅎㅎㅎ', sentAt: '오후 06:17' },
+    { id: '7', senderId: 1, content: '오늘 뭐해요?', sentAt: '오후 06:18' },
+    { id: '8', senderId: 2, content: '책 읽을거예요 📚', sentAt: '오후 06:19' },
+    { id: '9', senderId: 1, content: '안녕하세요~', sentAt: '오후 05:54' },
+    { id: '10', senderId: 2, content: '하이용 ㅎㅎㅎㅎ', sentAt: '오후 06:17' },
+    { id: '11', senderId: 1, content: '오늘 뭐해요?', sentAt: '오후 06:18' },
+    { id: '12', senderId: 2, content: '책 읽을거예요 📚', sentAt: '오후 06:19' },
   ]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState('');
 
   useLayoutEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
   }, [messages]);
 
   const handleSend = () => {
@@ -60,14 +70,14 @@ function ChatRoom({
   };
 
   return (
-    <div className="h-screen w-full flex flex-col bg-white">
+    <div className="fixed inset-0 flex flex-col bg-white">
       {/* 헤더 */}
       <div className="shrink-0 border-b px-4 py-3 bg-white z-10">
         <div className="font-bold">책친구</div>
       </div>
 
       {/* 메시지 영역 */}
-      <div className="flex-1 overflow-y-auto px-4 py-2" ref={messagesEndRef}>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-2">
         {messages.map((msg) => (
           <div
             key={msg.id}
