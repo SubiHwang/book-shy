@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { NotificationData } from '@/components/common/NotificationInitializer';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const NotificationPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [_hasNotifications, setHasNotifications] = useState(false);
+
+  const queryParams = new URLSearchParams(location.search);
+  const previousPath = queryParams.get('from') || '/';
 
   // 컴포넌트 마운트 시 로컬 스토리지에서 알림 불러오기
   useEffect(() => {
@@ -67,9 +71,18 @@ const NotificationPage = () => {
     localStorage.setItem('notifications', JSON.stringify([]));
   };
 
+  // 알림 클릭 핸들러 수정
+  const handleNotificationClick = (notification: NotificationData) => {
+    // 현재 알림 페이지 URL을 이전 페이지 URL로 교체
+    history.replaceState(null, '', previousPath);
+
+    // 새 페이지로 navigate 사용하여 이동
+    navigate(notification.url);
+  };
+
   // 뒤로 가기
   const goBack = () => {
-    navigate(-1);
+    navigate(previousPath);
   };
 
   return (
@@ -111,7 +124,12 @@ const NotificationPage = () => {
                 }`}
               >
                 <div className="flex justify-between items-start">
-                  <div className="flex-1" onClick={()=>{navigate(notification.url)}}>
+                  <div
+                    className="flex-1"
+                    onClick={() => {
+                      handleNotificationClick(notification);
+                    }}
+                  >
                     <h3 className="font-medium text-gray-900">{notification.title}</h3>
                     <p className="text-gray-600 text-sm mt-1">{notification.body}</p>
                     <p className="text-gray-400 text-xs mt-2">

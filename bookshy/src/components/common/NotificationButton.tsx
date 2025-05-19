@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { NotificationData } from '@/components/common/NotificationInitializer';
 
 const NotificationButton = () => {
   const [hasNotifications, setHasNotifications] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // 컴포넌트 마운트 시 로컬 스토리지에서 알림 상태 확인
   useEffect(() => {
@@ -64,7 +65,7 @@ const NotificationButton = () => {
 
   // 알림 페이지로 이동
   const goToNotifications = () => {
-    navigate('/notifications');
+    navigate(`/notifications?from=${encodeURIComponent(location.pathname)}`);
   };
 
   return (
