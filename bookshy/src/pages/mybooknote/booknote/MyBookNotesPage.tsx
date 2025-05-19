@@ -11,6 +11,15 @@ import LibraryBookListPage from './LibraryBookListPage';
 import type { Book } from '@/types/book/book';
 import Loading from '@/components/common/Loading';
 
+interface ApiResponse<T> {
+  status: number;
+  success: boolean;
+  message: string | null;
+  data: T;
+  error: string | null;
+  timestamp: string;
+}
+
 const MyBookNotePage = () => {
   const { data: libraries = [], isLoading: isLoadingLib } = useQuery({
     queryKey: ['user-library'],
@@ -65,22 +74,28 @@ const MyBookNotePage = () => {
         );
 
         // 렌탈 도서도 추가
-        const rentalBooks = await fetchRentalBooksInUse();
-        if (Array.isArray(rentalBooks)) {
-          rentalBooks.forEach((book) => {
-            results.push({
-              libraryId: -1,
-              bookId: book.bookId!,
-              title: book.title ?? '제목 없음',
-              author: book.author ?? '',
-              coverUrl: book.coverImageUrl ?? '',
-              reviewId: undefined,
-              content: '',
-              createdAt: '',
-              quoteContent: '',
-              fromRental: true,
+        try {
+          const rentalBooks = await fetchRentalBooksInUse();
+          if (Array.isArray(rentalBooks) && rentalBooks.length > 0) {
+            rentalBooks.forEach((book) => {
+              if (book && book.bookId) {
+                results.push({
+                  libraryId: -1,
+                  bookId: book.bookId,
+                  title: book.title ?? '제목 없음',
+                  author: book.author ?? '',
+                  coverUrl: book.coverImageUrl ?? '',
+                  reviewId: undefined,
+                  content: '',
+                  createdAt: '',
+                  quoteContent: '',
+                  fromRental: true,
+                });
+              }
             });
-          });
+          }
+        } catch (e) {
+          console.warn('렌탈 도서 정보 가져오기 실패:', e);
         }
 
         setEnrichedBooks(results);

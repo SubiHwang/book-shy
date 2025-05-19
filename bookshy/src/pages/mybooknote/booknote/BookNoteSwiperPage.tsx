@@ -17,7 +17,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
-  const [stage, setStage] = useState<'cover' | 'quote'>('cover');
+  const [stage, setStage] = useState<'quote' | 'review'>('quote');
 
   const filteredNotes = bookNotes.filter((book) => {
     const hasReview = !!book.reviewId && book.content.trim() !== '';
@@ -42,8 +42,8 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
   if (!currentBook) return <p className="p-4">조건에 맞는 독서 기록이 없습니다.</p>;
 
   const handleCardClick = () => {
-    if (stage === 'cover') {
-      setStage('quote');
+    if (stage === 'quote') {
+      setStage('review');
     } else {
       navigate(`/booknotes/full/${currentBook.bookId}`);
     }
@@ -52,7 +52,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
   const goTo = (offset: number) => {
     const newIdx = (currentIndex + offset + total) % total;
     setCurrentIndex(newIdx);
-    setStage('cover');
+    setStage('quote');
   };
 
   const filterOptions: { label: string; value: FilterType; icon: React.ReactNode }[] = [
@@ -88,7 +88,7 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
           onSelect={(val) => {
             setSelectedFilter(val);
             setCurrentIndex(0);
-            setStage('cover');
+            setStage('quote');
           }}
         />
       </div>
@@ -122,7 +122,8 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
             title={currentBook.title}
             author={currentBook.author}
             quote={currentBook.quoteContent}
-            flipped={stage === 'quote'}
+            content={currentBook.content}
+            flipped={stage === 'review'}
             onMoreClick={() => navigate(`/booknotes/full/${currentBook.bookId}`)}
           />
         </div>
