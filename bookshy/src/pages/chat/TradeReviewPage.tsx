@@ -11,6 +11,7 @@ import type { ChatCalendarEventDto } from '@/types/chat/chat';
 import StarRating from '@/components/chat/tradereview/StarRating';
 import BookSelector from '@/components/chat/tradereview/BookSelector';
 import BookModal from '@/components/chat/tradereview/BookModal';
+import { toast } from 'react-toastify';
 
 const TradeReviewPage = () => {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ const TradeReviewPage = () => {
 
   useEffect(() => {
     if (!roomId) {
-      alert('유효하지 않은 접근입니다.');
+      toast.error('유효하지 않은 접근입니다.');
       navigate(-1);
       return;
     }
@@ -59,7 +60,7 @@ const TradeReviewPage = () => {
       .then(setCalendar)
       .catch((err) => {
         console.error(err);
-        alert('거래 일정을 불러올 수 없습니다.');
+        toast.error('거래 일정을 불러올 수 없습니다.');
         navigate(-1);
       });
   }, [roomId]);
@@ -83,6 +84,7 @@ const TradeReviewPage = () => {
               public: false,
             };
           } catch (e) {
+            console.log(e);
             return {
               libraryId: -id,
               bookId: id,
@@ -118,12 +120,12 @@ const TradeReviewPage = () => {
 
   const handleSubmit = async () => {
     if (!calendar) {
-      alert('일정 정보가 없습니다.');
+      toast.warn('일정 정보가 없습니다.');
       return;
     }
 
     if (Object.values(ratings).some((v) => v === 0)) {
-      alert('모든 항목을 평가해주세요.');
+      toast.warn('모든 항목을 평가해주세요.');
       return;
     }
 
@@ -145,7 +147,8 @@ const TradeReviewPage = () => {
       const { userAId, userBId } = await fetchChatRoomUserIds(roomId!);
       userIds = [userAId, userBId];
     } catch (e) {
-      alert('참여자 정보를 불러오지 못했습니다.');
+      console.log(e);
+      toast.error('참여자 정보를 불러오지 못했습니다.');
       return;
     }
 
@@ -159,7 +162,7 @@ const TradeReviewPage = () => {
 
     try {
       const { isTradeCompleted } = await submitTradeReview(payload);
-      alert('리뷰가 성공적으로 제출되었습니다!');
+      toast.success('리뷰가 성공적으로 제출되었습니다!');
 
       // ✅ 거래가 최종 완료된 경우 → 완료 페이지로 이동
       if (isTradeCompleted) {
@@ -170,7 +173,7 @@ const TradeReviewPage = () => {
       }
     } catch (e) {
       console.error(e);
-      alert('리뷰 제출에 실패했습니다.');
+      toast.error('리뷰 제출에 실패했습니다.');
     }
   };
 

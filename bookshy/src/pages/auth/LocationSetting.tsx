@@ -6,6 +6,7 @@ import useSearchAddress from '@/hooks/location/useSearchAddress'; // 주소 검�
 import { useNavigate } from 'react-router-dom';
 import { updateUserAddress } from '@/services/mypage/profile';
 import type { AddressUpdateRequest } from '@/types/User/user';
+import { toast } from 'react-toastify';
 
 const LocationSetting: FC = () => {
   const { fetchCurrentLocation, address, latitude, longitude, loading, error } =
@@ -25,12 +26,16 @@ const LocationSetting: FC = () => {
   const finalLongitude = selectedLongitude !== null ? selectedLongitude : longitude;
 
   // 주소 검색 훅 사용 - 위도/경도 정보를 포함한 결과 처리
-  const { openAddressSearch, isLoading: isAddressSearchLoading, error: addressSearchError } = useSearchAddress((data) => {
+  const {
+    openAddressSearch,
+    isLoading: isAddressSearchLoading,
+    error: addressSearchError,
+  } = useSearchAddress((data) => {
     // 주소 검색 결과 처리
     if (data && data.address) {
       // 상태 업데이트 - 이제 실제 좌표 정보 사용
       setSelectedAddress(data.address);
-      
+
       if (data.latitude !== undefined && data.longitude !== undefined) {
         setSelectedLatitude(data.latitude);
         setSelectedLongitude(data.longitude);
@@ -81,7 +86,7 @@ const LocationSetting: FC = () => {
   const handleAddressSelect = async () => {
     try {
       if (!finalAddress || finalLatitude === null || finalLongitude === null) {
-        alert('위치 정보를 먼저 가져와주세요.');
+        toast.warn('위치 정보를 먼저 가져와주세요.');
         return;
       }
 
@@ -95,7 +100,7 @@ const LocationSetting: FC = () => {
       navigate('/');
     } catch (err) {
       console.error('주소 저장 중 오류 발생:', err);
-      alert('주소 저장에 실패했습니다.');
+      toast.error('주소 저장에 실패했습니다.');
     }
   };
 
