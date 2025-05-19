@@ -1,5 +1,5 @@
 import { ChatMessage } from '@/types/chat/chat';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Props {
   partnerName: string;
@@ -46,21 +46,39 @@ const ChatRoom = ({
   otherBookName: _otherBookName,
 }: Props) => {
   const [input, setInput] = useState('');
+  const [resizeHeight, setResizeHeight] = useState<number>(0);
+
+  useEffect(() => {
+    const resizeHandler = (event: Event) =>
+      setResizeHeight(window.innerHeight - (event.currentTarget as VisualViewport)?.height);
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    visualViewport && visualViewport.addEventListener('resize', resizeHandler);
+
+    return () => visualViewport?.removeEventListener('resize', resizeHandler);
+  }, []);
 
   return (
-    <div className="relative bg-white pb-20 px-4 pt-4 min-h-screen">
-      {/* 채팅창 (WishBooks처럼 자연스러운 flow, height/overflow 없음) */}
-      <div className="mb-4">
+    <div className="relative bg-white min-h-screen px-4 pt-4 pb-20">
+      {/* 헤더 (flow) */}
+      <div className="mb-4 flex items-center">...</div>
+      {/* 메시지 영역 (스크롤) */}
+      <div
+        className="mb-4"
+        style={{ paddingBottom: 'calc(56px + env(safe-area-inset-bottom, 0px))' }}
+      >
         {DUMMY_MESSAGES.map((msg, i) => (
           <div key={i} className="mb-3 p-3 bg-gray-100 rounded-xl w-fit max-w-[70%]">
             {msg}
           </div>
         ))}
       </div>
-      {/* 인풋 (WishBooks처럼 fixed) */}
+      {/* 입력창 (fixed) */}
       <div
-        className="fixed bottom-0 left-0 w-full bg-white border-t flex items-center px-4 z-10"
-        style={{ height: 56 }}
+        className="fixed left-0 w-full bg-white border-t flex items-center px-4 z-10"
+        style={{
+          height: 56,
+          bottom: `calc(0px + ${resizeHeight}px)`,
+        }}
       >
         <input
           className="flex-1 border rounded-full px-4 py-2 focus:outline-none"
