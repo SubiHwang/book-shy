@@ -9,6 +9,7 @@ import LibraryBookListPage from './LibraryBookListPage';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import type { BookQuote } from '@/types/mybooknote/booknote/bookquote';
 import type { Library } from '@/types/mylibrary/library';
+import Loading from '@/components/common/Loading';
 
 const MyBookNotePage = () => {
   const { data: libraries = [], isLoading: libLoading } = useQuery<Library[]>({
@@ -43,7 +44,7 @@ const MyBookNotePage = () => {
     };
   });
 
-  if (libLoading) return <p className="p-4">불러오는 중...</p>;
+  if (libLoading) return <Loading loadingText="불러오는 중..." />;
 
   return enrichedBooks.length > 0 ? (
     <BookNoteSwiperPage bookNotes={enrichedBooks} />

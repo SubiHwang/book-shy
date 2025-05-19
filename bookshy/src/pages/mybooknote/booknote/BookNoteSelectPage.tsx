@@ -5,6 +5,7 @@ import { searchBooksByKeyword } from '@/services/mylibrary/bookSearchService';
 import { uploadBookByItemId } from '@/services/book/upload';
 import BookSelectCard from '@/components/mybooknote/booknote/BookSelectCard';
 import { toast } from 'react-toastify';
+import Loading from '@/components/common/Loading';
 
 const BookNoteSelectPage: React.FC = () => {
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ const BookNoteSelectPage: React.FC = () => {
       </div>
 
       <div className="px-4 mt-4 space-y-4">
-        {isLoading && <p className="text-center">불러오는 중...</p>}
+        {isLoading && <Loading loadingText="검색 결과 불러오는 중..." />}
         {!isLoading && data?.books?.length === 0 && (
           <p className="text-center text-gray-500">검색 결과가 없습니다.</p>
         )}

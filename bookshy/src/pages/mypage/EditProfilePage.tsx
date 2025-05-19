@@ -12,6 +12,7 @@ import { Locate, Search } from 'lucide-react';
 import { notify } from '@/components/common/CustomToastContainer';
 import { authAxiosInstance } from '@/services/axiosInstance';
 import { toast } from 'react-toastify';
+import Loading from '@/components/common/Loading';
 
 const EditProfilePage = () => {
   const navigate = useNavigate();
@@ -136,7 +137,7 @@ const EditProfilePage = () => {
   };
 
   if (isLoading) {
-    return <p className="p-4">프로필을 불러오는 중입니다...</p>;
+    return <Loading loadingText="프로필 불러오는 중..." />;
   }
 
   return (

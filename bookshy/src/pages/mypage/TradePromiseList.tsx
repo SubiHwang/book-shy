@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchTradePromises } from '@/services/mypage/trade';
 import TradePromiseCard from '@/components/mypage/trade/TradePromiseCard';
 import type { TradePromise } from '@/types/trade';
+import Loading from '@/components/common/Loading';
 
 const TradePromiseList: FC = () => {
   const { data, isLoading, error } = useQuery<TradePromise[], Error>({
@@ -10,7 +11,7 @@ const TradePromiseList: FC = () => {
     queryFn: fetchTradePromises,
   });
 
-  if (isLoading) return <div className="p-4">거래 약속 불러오는 중...</div>;
+  if (isLoading) return <Loading loadingText="거래 약속 불러오는 중..." />;
   if (error || !data) return <div className="p-4 text-red-500">거래 약속 불러오기 실패</div>;
 
   // 거래 목록이 없는 경우 처리
