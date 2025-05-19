@@ -57,6 +57,24 @@ function ChatRoom({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(
+    window.visualViewport?.height ?? window.innerHeight,
+  );
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportHeight(window.visualViewport?.height ?? window.innerHeight);
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize);
+      return () => window.visualViewport.removeEventListener('resize', handleResize);
+    } else {
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, []);
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -288,27 +306,35 @@ function ChatRoom({
   let lastDateLabel = '';
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-white">
-      {/* 헤더 */}
-      <div className="shrink-0 z-10">
+    <div className="relative bg-white" style={{ height: viewportHeight }}>
+      {/* 헤더: fixed top-0 */}
+      <div
+        className="fixed top-0 left-0 right-0 z-40 bg-white border-b border-light-border"
+        style={{ height: 56 }}
+      >
         <ChatRoomHeader
           partnerName={partnerName}
           partnerProfileImage={partnerProfileImage}
           bookShyScore={bookShyScore}
         />
       </div>
-
-      {/* 메시지 영역 */}
+  
+      {/* 메시지 영역: 헤더 높이만큼 padding-top, 인풋 높이만큼 padding-bottom */}
       <div
-        className={`flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
-          showOptions ? 'pb-[35vh]' : 'pb-20'
-        }`}
+        className="overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300"
+        style={{
+          paddingTop: 56,
+          paddingBottom: showOptions ? '35vh' : 88,
+          height: viewportHeight,
+          boxSizing: 'border-box',
+        }}
+        ref={messagesContainerRef}
       >
         {messages.map((msg, idx) => {
           const dateLabel = formatDateLabel(msg.sentAt);
           const showDate = dateLabel !== lastDateLabel;
           lastDateLabel = dateLabel;
-
+  
           const isSystem = ['info', 'notice', 'warning'].includes(msg.type ?? '');
           return (
             <div key={`${msg.id}-${idx}`}>
@@ -325,8 +351,8 @@ function ChatRoom({
                     msg.type === 'notice'
                       ? '거래 시 주의해주세요!'
                       : msg.type === 'info'
-                        ? '약속이 등록되었습니다!'
-                        : '알림'
+                      ? '약속이 등록되었습니다!'
+                      : '알림'
                   }
                   content={msg.content}
                   variant={msg.type as 'notice' | 'info' | 'warning'}
@@ -346,7 +372,7 @@ function ChatRoom({
             </div>
           );
         })}
-
+  
         {/* 📌 교환 완료 유도 메시지 */}
         <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm">
           <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
@@ -374,16 +400,16 @@ function ChatRoom({
             거래 완료
           </button>
         </div>
-
+  
         <div ref={messagesEndRef} className="h-4" />
       </div>
-
+  
       {/* ↓ 아래로 버튼 */}
       {showScrollToBottom && (
         <div
           className={`absolute inset-x-0 flex justify-center z-30 transition-all duration-300
-      ${showOptions ? 'bottom-[32vh]' : 'bottom-[88px]'}
-    `}
+        ${showOptions ? 'bottom-[32vh]' : 'bottom-[88px]'}
+      `}
         >
           <button
             className="bg-black/60 hover:bg-black/80 text-white text-lg sm:text-xl px-3 py-1.5 rounded-full shadow-md"
@@ -394,32 +420,35 @@ function ChatRoom({
           </button>
         </div>
       )}
-
-      <div className="shrink-0 z-20 bg-white border-t border-light-border px-4">
+  
+      {/* 입력창: fixed bottom-0 */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-light-border px-4"
+        style={{ height: 56 }}
+      >
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
           onToggleOptions={() => {
-            const container = messagesEndRef.current?.parentElement;
+            const container = messagesContainerRef.current;
             const wasAtBottom = container
               ? container.scrollHeight - container.scrollTop - container.clientHeight < 50
               : false;
-
+  
             setShowOptions((prev) => !prev);
-
-            // 확장된 후 DOM이 완전히 반영된 다음 스크롤 (조금 delay)
+  
             if (wasAtBottom) {
               setTimeout(() => {
                 requestAnimationFrame(() => {
-                  scrollToBottom(true); // smooth 스크롤
+                  scrollToBottom(true);
                 });
-              }, 250); // 약간 더 넉넉한 시간
+              }, 250);
             }
           }}
           onScheduleClick={() => setShowScheduleModal(true)}
         />
       </div>
-
+  
       {/* 일정 모달 */}
       {showScheduleModal && (
         <ScheduleModal

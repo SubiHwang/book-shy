@@ -16,10 +16,14 @@ const ChatRoomHeader: FC<ChatRoomHeaderProps> = ({
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 w-full px-4 py-3 flex items-center justify-between border-b border-[#E5E5E5]">
+    <header
+      className="fixed top-0 left-0 right-0 z-40 w-full px-4 flex items-center justify-between border-b border-[#E5E5E5] bg-white"
+      style={{ height: 56, paddingTop: 'env(safe-area-inset-top)' }}
+    >
       {/* 왼쪽: 뒤로가기 + 프로필 */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 py-3">
         <button
+          type="button"
           onClick={() => navigate(-1)}
           className="p-2 rounded-full active:bg-gray-200 transition-colors"
           aria-label="뒤로가기"
@@ -44,11 +48,19 @@ const ChatRoomHeader: FC<ChatRoomHeaderProps> = ({
       </div>
 
       {/* 오른쪽: 일정/알림 */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        <button className="p-2 rounded-full active:bg-gray-100 transition" aria-label="일정 보기">
+      <div className="flex items-center gap-2 sm:gap-3 py-3">
+        <button
+          type="button"
+          className="p-2 rounded-full active:bg-gray-100 transition"
+          aria-label="일정 보기"
+        >
           <Calendar size={20} />
         </button>
-        <button className="p-2 rounded-full active:bg-gray-100 transition" aria-label="알림 보기">
+        <button
+          type="button"
+          className="p-2 rounded-full active:bg-gray-100 transition"
+          aria-label="알림 보기"
+        >
           <Bell size={20} />
         </button>
       </div>
