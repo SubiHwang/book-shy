@@ -29,9 +29,8 @@ public enum ChatErrorCode implements ErrorCode {
     EMOJI_UPDATE_FAILED(400, "⚠️ 이모지 처리 중 오류가 발생했습니다."),
 
     // 🔹 기타
-    INVALID_SENDER_ID(403, "🚫 메시지를 전송할 수 있는 권한이 없습니다."),
-    INVALID_CHAT_REQUEST(400, "📛 잘못된 채팅 요청입니다."),
-    WEBSOCKET_SUBSCRIPTION_ERROR(500, "💥 WebSocket 구독 처리 중 오류가 발생했습니다.");
+    BOOK_NOT_FOUND(404, "📕 도서를 찾을 수 없습니다."),
+    EXCHANGE_REQUEST_NOT_FOUND(404, "📄 거래 요청을 찾을 수 없습니다.");
 
     private final int status;
     private final String message;
