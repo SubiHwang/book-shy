@@ -50,7 +50,7 @@ public class UserStatsService {
         String favorite = Collections.max(countMap.entrySet(), Map.Entry.comparingByValue()).getKey();
         String title = CategoryTitleMapper.getCategoryTitle(favorite);
 
-        user.updateBadges(title);
+//        user.updateBadges(title);
         userRepository.save(user);
 
         return new FavoriteCategoryResponseDto(favorite, title);
