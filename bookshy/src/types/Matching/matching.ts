@@ -38,7 +38,7 @@ export interface Neighborhood {
   nickname: string;
   address: string;
   profileImageUrl: string;
-  shyScore?: number;
+  temperature?: number;
   distance: number;
 }
 

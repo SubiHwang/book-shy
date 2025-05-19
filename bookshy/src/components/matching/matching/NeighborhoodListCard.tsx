@@ -44,7 +44,7 @@ const NeighborhoodListCard: FC<NeighborhoodCardProps> = ({ neighborhood, isLoadi
 
                   <div className="badge bg-primary-light/30 px-2 py-0.5 rounded-full">
                     <p className="text-primary text-xs sm:text-sm">
-                      북끄지수 {neighborhood.shyScore}
+                      북끄지수 {neighborhood.temperature}
                     </p>
                   </div>
                 </>
