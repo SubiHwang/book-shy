@@ -57,18 +57,6 @@ function ChatRoom({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
-  const viewportRef = useRef(window.visualViewport);
-
-  useEffect(() => {
-    const handleResize = () => {
-      const heightDiff = window.innerHeight - viewportRef.current?.height!;
-      setIsKeyboardOpen(heightDiff > 100);
-    };
-
-    viewportRef.current?.addEventListener('resize', handleResize);
-    return () => viewportRef.current?.removeEventListener('resize', handleResize);
-  }, []);
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -300,7 +288,7 @@ function ChatRoom({
   let lastDateLabel = '';
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-[100dvh] bg-white">
       {/* 헤더 */}
       <div className="shrink-0 z-10">
         <ChatRoomHeader
@@ -313,11 +301,7 @@ function ChatRoom({
       {/* 메시지 영역 */}
       <div
         className={`flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
-          isKeyboardOpen
-            ? 'pb-6' // 키보드가 열렸을 때
-            : showOptions
-              ? 'pb-[35vh]' // 옵션이 열렸을 때
-              : 'pb-20' // 기본 상태
+          showOptions ? 'pb-[35vh]' : 'pb-20'
         }`}
       >
         {messages.map((msg, idx) => {
