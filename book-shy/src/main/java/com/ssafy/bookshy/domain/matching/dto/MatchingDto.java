@@ -29,6 +29,10 @@ public class MatchingDto {
     private double score;
     private double distanceKm;
 
+    public double getDistanceKm() {
+        return Math.round(distanceKm * 10.0) / 10.0;
+    }
+
     public static MatchingDto from(
             Long userId,
             String nickname,
