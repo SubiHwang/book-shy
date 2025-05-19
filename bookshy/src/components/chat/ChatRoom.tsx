@@ -60,14 +60,17 @@ function ChatRoom({
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
 
   useEffect(() => {
-    const handleResize = () => {
-      const height = window.visualViewport?.height ?? window.innerHeight;
+    const updateHeight = () => {
+      const visual = window.visualViewport;
+      const height = visual
+        ? visual.height + visual.offsetTop // 정확한 visible 영역
+        : window.innerHeight;
       setViewportHeight(height);
     };
 
-    handleResize(); // 초기값 반영
-    window.visualViewport?.addEventListener('resize', handleResize);
-    return () => window.visualViewport?.removeEventListener('resize', handleResize);
+    updateHeight();
+    window.visualViewport?.addEventListener('resize', updateHeight);
+    return () => window.visualViewport?.removeEventListener('resize', updateHeight);
   }, []);
 
   const queryClient = useQueryClient();
