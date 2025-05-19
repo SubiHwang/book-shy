@@ -288,26 +288,26 @@ function ChatRoom({
 
   let lastDateLabel = '';
 
-  // Add visualViewport handling
+  // 메시지 영역이 키보드에 가려지지 않도록 visualViewport와 safe-area-inset을 활용
   useEffect(() => {
-    const handleVisualViewportResize = () => {
+    const handleResize = () => {
       if (chatContainerRef.current && window.visualViewport) {
-        const currentVisualViewport = window.visualViewport.height;
-        chatContainerRef.current.style.height = `${currentVisualViewport - 120}px`; // 헤더(64px) + 입력창(56px) 고려
-        window.scrollTo(0, 40);
+        const headerHeight = 64;
+        const inputHeight = 56;
+        // CSS 변수에서 안전영역(inset) 값 가져오기
+        const safeArea =
+          Number(
+            getComputedStyle(document.documentElement)
+              .getPropertyValue('--sat-bottom')
+              .replace('px', ''),
+          ) || 0;
+        const vh = window.visualViewport.height;
+        chatContainerRef.current.style.height = `${vh - headerHeight - inputHeight - safeArea}px`;
       }
     };
-
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleVisualViewportResize);
-      handleVisualViewportResize(); // Initial setup
-    }
-
-    return () => {
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', handleVisualViewportResize);
-      }
-    };
+    window.visualViewport?.addEventListener('resize', handleResize);
+    handleResize();
+    return () => window.visualViewport?.removeEventListener('resize', handleResize);
   }, []);
 
   return (
@@ -326,8 +326,9 @@ function ChatRoom({
         ref={chatContainerRef}
         className="absolute left-0 right-0 overflow-y-auto"
         style={{
-          top: '64px', // 헤더 높이
-          bottom: showOptions ? '35vh' : '56px', // 입력창 높이(56px) 또는 옵션
+          top: '64px',
+          bottom: '56px', // 입력창 높이
+          paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
         {messages.map((msg, idx) => {
@@ -409,7 +410,7 @@ function ChatRoom({
         <div
           className="fixed left-0 right-0 flex justify-center z-30 transition-all duration-300 pointer-events-none"
           style={{
-            bottom: showOptions ? '35vh' : '56px', // 입력창/옵션 높이만큼 띄움
+            bottom: '56px', // 입력창 높이
           }}
         >
           <button
