@@ -21,4 +21,5 @@ export interface TradeReviewRequest {
     manner: number;
   };
   books: ReviewedBook[];
+  tradeType?: 'EXCHANGE' | 'RENTAL'; // ✅ 추가
 }
