@@ -132,8 +132,8 @@ const BookTripMapPage = () => {
       title.anchorX = 'center';
       title.anchorY = 'top';
       title.color = 0xffffff;
-      title.position.set(x, y - 7, z);
-      title.lookAt(new THREE.Vector3(0, y - 7, 0));
+      title.position.set(x, y - 9, z);
+      title.lookAt(new THREE.Vector3(0, y - 9, 0));
       title.sync(() => scene.add(title));
       titleTexts.push(title);
 
@@ -223,8 +223,8 @@ const BookTripMapPage = () => {
     flag.fontSize = 4;
     flag.anchorX = 'center';
     flag.anchorY = 'bottom';
-    flag.position.set(last.position.x, last.position.y + 10, last.position.z);
-    flag.lookAt(new THREE.Vector3(0, last.position.y + 10, 0));
+    flag.position.set(last.position.x, last.position.y + 13, last.position.z);
+    flag.lookAt(new THREE.Vector3(0, last.position.y + 13, 0));
     flag.sync(() => scene.add(flag));
 
     const raycaster = new THREE.Raycaster();
