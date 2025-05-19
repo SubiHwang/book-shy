@@ -57,6 +57,18 @@ function ChatRoom({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const viewportRef = useRef(window.visualViewport);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const heightDiff = window.innerHeight - viewportRef.current?.height!;
+      setIsKeyboardOpen(heightDiff > 100);
+    };
+
+    viewportRef.current?.addEventListener('resize', handleResize);
+    return () => viewportRef.current?.removeEventListener('resize', handleResize);
+  }, []);
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -288,7 +300,7 @@ function ChatRoom({
   let lastDateLabel = '';
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-white">
+    <div className="flex flex-col min-h-[100dvh] bg-white pb-safe">
       {/* 헤더 */}
       <div className="shrink-0 z-10">
         <ChatRoomHeader
@@ -301,7 +313,11 @@ function ChatRoom({
       {/* 메시지 영역 */}
       <div
         className={`flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
-          showOptions ? 'pb-[35vh]' : 'pb-20'
+          isKeyboardOpen
+            ? 'pb-6' // 키보드 올라오면 메시지 영역에 여유 공간 적게 줌
+            : showOptions
+              ? 'pb-[35vh]' // 확장 기능 보이면 큰 여백
+              : 'pb-20' // 기본 여백
         }`}
       >
         {messages.map((msg, idx) => {
