@@ -67,10 +67,11 @@ public class ChatMessageController {
                     """
     )
     @PostMapping("/{chatRoomId}/read")
-    public void markMessagesAsRead(
+    public CommonResponse<Void> markMessagesAsRead(
             @PathVariable Long chatRoomId,
             @AuthenticationPrincipal Users user
     ) {
         chatMessageService.markMessagesAsRead(chatRoomId, user.getUserId());
+        return CommonResponse.success();
     }
 }
