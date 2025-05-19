@@ -5,6 +5,7 @@ import {
   ChatCalendarEventDto,
   ChatRoomUserIds,
 } from '@/types/chat/chat';
+import { Book } from '@/types/book/book';
 import { authAxiosInstance } from '@/services/axiosInstance';
 
 export async function fetchChatList(): Promise<ChatRoomSummary[]> {
@@ -39,4 +40,12 @@ export async function fetchScheduleByRoomId(roomId: number): Promise<ChatCalenda
 // ✅ 채팅방 참여자 ID 조회
 export async function fetchChatRoomUserIds(chatRoomId: number): Promise<ChatRoomUserIds> {
   return await authAxiosInstance.get(`/chats/users?chatRoomId=${chatRoomId}`);
+}
+
+// 대여(RENTAL) 중인 도서 조회
+export async function fetchRentalBookForTrade(requestId: number): Promise<Book> {
+  const { data } = await authAxiosInstance.get(`/chats/rental-book`, {
+    params: { requestId },
+  });
+  return data;
 }

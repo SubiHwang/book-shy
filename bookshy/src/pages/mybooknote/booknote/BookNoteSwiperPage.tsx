@@ -8,7 +8,7 @@ import { BookOpen, CheckCircle, CircleSlash } from 'lucide-react';
 import { useSwipeable } from 'react-swipeable';
 
 interface BookNoteSwiperPageProps {
-  bookNotes: (BookNote & { libraryId: number })[];
+  bookNotes: (BookNote & { libraryId: number; fromRental?: boolean })[];
 }
 
 type FilterType = 'all' | 'has' | 'none';
@@ -106,7 +106,12 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
         )}
 
         {/* 현재 카드 */}
-        <div className="z-20">
+        <div className="z-20 relative">
+          {currentBook.fromRental && (
+            <div className="absolute top-2 left-2 bg-yellow-400 text-white text-xs px-2 py-1 rounded">
+              대여 도서
+            </div>
+          )}
           <BookNoteCard
             coverUrl={currentBook.coverUrl}
             title={currentBook.title}
@@ -140,16 +145,6 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
           <BookOpen size={28} strokeWidth={2} color="white" />
         </button>
       </div>
-
-      {/* 등록 버튼 */}
-      {/* <div className="fixed bottom-24 right-6 z-50">
-        <button
-          onClick={() => navigate('/booknotes/select')}
-          className="w-14 h-14 rounded-xl bg-primary text-white flex justify-center items-center shadow-lg"
-        >
-          <PlusCircle size={32} strokeWidth={1} />
-        </button>
-      </div> */}
     </div>
   );
 };
