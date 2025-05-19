@@ -62,6 +62,25 @@ const BookTripMapPage = () => {
     const heightStep = 6;
     const angleStep = (2 * Math.PI) / books.length;
 
+    const createGradientTexture = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 1;
+      const context = canvas.getContext('2d');
+      if (!context) return null;
+
+      const gradient = context.createLinearGradient(0, 0, canvas.width, 0);
+      gradient.addColorStop(0, '#FF9F9F'); // 부드러운 핑크
+      gradient.addColorStop(0.33, '#FFD6A5'); // 파스텔 오렌지
+      gradient.addColorStop(0.66, '#FFFEC4'); // 부드러운 노랑
+      gradient.addColorStop(1, '#CBFFA9'); // 파스텔 그린
+
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      return new THREE.CanvasTexture(canvas);
+    };
+
     books.forEach((book, i) => {
       const angle = i * angleStep * 1.5;
       const x = radius * Math.cos(angle);
@@ -107,13 +126,68 @@ const BookTripMapPage = () => {
 
       if (i > 0) {
         const prev = coverMeshes[i - 1];
-        const geometry = new THREE.BufferGeometry().setFromPoints([
-          prev.position.clone(),
-          coverMesh.position.clone(),
-        ]);
-        const material = new THREE.LineBasicMaterial({ color: 0xd4f4fa });
+        const points = [];
+        const segments = 50; // 곡선의 부드러움을 위한 세그먼트 수
+
+        for (let j = 0; j <= segments; j++) {
+          const t = j / segments;
+          // 베지어 곡선의 중간 제어점
+          const midPoint = new THREE.Vector3(
+            (prev.position.x + coverMesh.position.x) / 2,
+            Math.max(prev.position.y, coverMesh.position.y) + 10,
+            (prev.position.z + coverMesh.position.z) / 2,
+          );
+
+          // 이차 베지어 곡선 계산
+          const point = new THREE.Vector3();
+          point.x =
+            Math.pow(1 - t, 2) * prev.position.x +
+            2 * (1 - t) * t * midPoint.x +
+            Math.pow(t, 2) * coverMesh.position.x;
+          point.y =
+            Math.pow(1 - t, 2) * prev.position.y +
+            2 * (1 - t) * t * midPoint.y +
+            Math.pow(t, 2) * coverMesh.position.y;
+          point.z =
+            Math.pow(1 - t, 2) * prev.position.z +
+            2 * (1 - t) * t * midPoint.z +
+            Math.pow(t, 2) * coverMesh.position.z;
+
+          points.push(point);
+        }
+
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const gradientTexture = createGradientTexture();
+
+        const material = new THREE.LineBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.7,
+          linewidth: 2,
+        });
+
+        if (gradientTexture) {
+          material.map = gradientTexture;
+        }
+
         const line = new THREE.Line(geometry, material);
         scene.add(line);
+
+        // 빛나는 효과를 위한 추가 라인
+        const glowMaterial = new THREE.LineBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.3,
+          linewidth: 4,
+        });
+        const glowLine = new THREE.Line(geometry, glowMaterial);
+        scene.add(glowLine);
+
+        // 라인 애니메이션을 위한 속성 추가
+        line.userData.initialOpacity = material.opacity;
+        glowLine.userData.initialOpacity = glowMaterial.opacity;
+        line.userData.material = material;
+        glowLine.userData.material = glowMaterial;
       }
     });
 
@@ -192,6 +266,14 @@ const BookTripMapPage = () => {
         mesh.position.y += Math.sin(time + i) * 0.005;
       });
 
+      // 모든 라인의 애니메이션 업데이트
+      scene.children.forEach((child) => {
+        if (child instanceof THREE.Line && child.userData.initialOpacity !== undefined) {
+          const material = child.userData.material as THREE.LineBasicMaterial;
+          material.opacity = child.userData.initialOpacity + Math.sin(time * 2) * 0.2;
+        }
+      });
+
       flag.rotation.z = Math.sin(time * 3) * 0.05;
 
       controls.update();
@@ -218,15 +300,15 @@ const BookTripMapPage = () => {
 
   return (
     <>
-      <div className="fixed top-0 left-0 w-full z-[1000] bg-black/60 backdrop-blur-sm text-white px-4 py-3 flex items-center gap-2 shadow-md">
-        <button onClick={() => navigate(-1)} className="p-1 hover:text-cyan-300 transition">
+      <div className="fixed top-0 left-0 w-full z-[1000] bg-gradient-to-r from-orange-400/40 via-rose-300/30 to-purple-400/40 backdrop-blur-md text-white px-4 py-3 flex items-center gap-2 shadow-lg">
+        <button onClick={() => navigate(-1)} className="p-1 hover:text-cyan-100 transition-colors">
           <ArrowLeft size={24} />
         </button>
-        <h1 className="text-lg font-semibold">📚 책의 여정 맵</h1>
+        <h1 className="text-lg font-semibold text-white/90">📚 책의 여정 맵</h1>
       </div>
       <div ref={mountRef} className="fixed inset-0 z-0" />
       {hoveredTitle && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 bg-white text-black px-3 py-2 rounded shadow max-w-xs text-sm whitespace-pre-wrap">
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 bg-white/90 backdrop-blur-sm text-black px-3 py-2 rounded-lg shadow-lg max-w-xs text-sm whitespace-pre-wrap">
           <p>{hoveredTitle}</p>
         </div>
       )}
