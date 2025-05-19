@@ -1,5 +1,5 @@
 // ✅ iOS 대응 + 카카오톡 스타일 완전 반응형 채팅방 (fixed/absolute/vh 없이)
-import { useRef, useState, useLayoutEffect } from 'react';
+import { useRef, useState, useLayoutEffect, useEffect } from 'react';
 
 interface Props {
   partnerName: string;
@@ -46,11 +46,32 @@ function ChatRoom({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const messageContainerRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState('');
 
   useLayoutEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    const handleVisualViewPortResize = () => {
+      const currentVisualViewport = Number(window.visualViewport?.height);
+      if (messageContainerRef.current) {
+        messageContainerRef.current.style.height = `${currentVisualViewport - 100}px`; // 헤더+입력창 여유 고려
+        window.scrollTo(0, 40); // 사파리에서 화면 밀림 방지
+      }
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleVisualViewPortResize);
+    }
+
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleVisualViewPortResize);
+      }
+    };
+  }, []);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +103,7 @@ function ChatRoom({
       </header>
 
       {/* 메시지 영역 */}
-      <div className="flex-1 overflow-y-auto px-4 py-2">
+      <div ref={messageContainerRef} className="flex-1 overflow-y-auto px-4 py-2">
         {messages.map((msg) => (
           <div
             key={msg.id}
