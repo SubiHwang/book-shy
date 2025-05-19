@@ -53,7 +53,7 @@ public class BookService {
             throw new BookException(BookErrorCode.USER_NOT_FOUND);
         }
 
-        Book book = bookRepository.findByitemId(dto.getItemId())
+        Book book = bookRepository.findFirstByItemId(dto.getItemId())
                 .orElseGet(() -> {
                     BookResponseDto response = aladinClient.searchByItemIdToDto(dto.getItemId());
 
@@ -105,7 +105,7 @@ public class BookService {
             throw new BookException(BookErrorCode.USER_NOT_FOUND);
         }
 
-        Book book = bookRepository.findByitemId(itemId)
+        Book book = bookRepository.findFirstByItemId(itemId)
                 .orElseThrow(() -> new BookException(BookErrorCode.BOOK_NOT_FOUND));
 
         Wish wish = wishRepository.findByUserAndBook(user, book)
@@ -163,7 +163,7 @@ public class BookService {
             throw new BookException(BookErrorCode.USER_NOT_FOUND);
         }
 
-        return bookRepository.findByitemId(itemId)
+        return bookRepository.findFirstByItemId(itemId)
                 .map(book -> wishRepository.existsByUserAndBook(user, book))
                 .orElse(false);
     }

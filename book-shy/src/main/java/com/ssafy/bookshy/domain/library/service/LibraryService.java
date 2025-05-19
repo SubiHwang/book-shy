@@ -121,7 +121,7 @@ public class LibraryService {
         Users user = userService.getUserById(dto.getUserId());
         if (user == null) throw new LibraryException(LibraryErrorCode.USER_NOT_FOUND);
 
-        Book book = bookRepository.findByitemId(dto.getItemId())
+        Book book = bookRepository.findFirstByItemId(dto.getItemId())
                 .orElseGet(() -> {
                     BookResponseDto response = aladinClient.searchByItemIdToDto(dto.getItemId());
 
