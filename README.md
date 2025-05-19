@@ -188,6 +188,9 @@ ISBN, 알라딘 책 검색, 직접 등록을 통해서 책을 등록할 수 있�
 
 버뮤다 삼각김밥 팀입니다!
 
+![image](/uploads/876e2b52203d81adf8c1e4b2e79a1605/KakaoTalk_20250519_125233859.png
+){width=300 height=120}
+
 
 
 | Frontend | Frontend | Frontend | Backend | Backend | Backend |
