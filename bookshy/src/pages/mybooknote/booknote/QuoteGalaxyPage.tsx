@@ -125,6 +125,8 @@ const QuoteGalaxyPage = () => {
       });
     });
 
+    const waveEffects: { mesh: THREE.Mesh; start: number }[] = [];
+
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
@@ -151,6 +153,18 @@ const QuoteGalaxyPage = () => {
         }
       }
 
+      const now = performance.now();
+      for (let i = waveEffects.length - 1; i >= 0; i--) {
+        const { mesh, start } = waveEffects[i];
+        const elapsed = (now - start) / 1000;
+        mesh.scale.setScalar(1 + elapsed * 3);
+        (mesh.material as THREE.MeshBasicMaterial).opacity = 0.5 * (1 - elapsed / 1.1);
+        if (elapsed > 1.1) {
+          scene.remove(mesh);
+          waveEffects.splice(i, 1);
+        }
+      }
+
       renderer.render(scene, camera);
     };
     animate();
@@ -173,6 +187,18 @@ const QuoteGalaxyPage = () => {
       if (intersects.length > 0) {
         const clicked = intersects[0].object as Text;
         setSelectedQuote(clicked.userData.fullQuote || '');
+        const waveGeometry = new THREE.RingGeometry(1.2, 1.7, 48);
+        const waveMaterial = new THREE.MeshBasicMaterial({
+          color: 0xb2ccff,
+          transparent: true,
+          opacity: 0.5,
+          side: THREE.DoubleSide,
+        });
+        const waveMesh = new THREE.Mesh(waveGeometry, waveMaterial);
+        waveMesh.position.copy(clicked.position);
+        waveMesh.position.z += 0.1;
+        scene.add(waveMesh);
+        waveEffects.push({ mesh: waveMesh, start: performance.now() });
       }
     };
     renderer.domElement.addEventListener('pointerdown', handleClick);
