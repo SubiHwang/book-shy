@@ -58,6 +58,7 @@ function ChatRoom({
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+  const messageAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const updateHeight = () => {
@@ -71,6 +72,21 @@ function ChatRoom({
     updateHeight();
     window.visualViewport?.addEventListener('resize', updateHeight);
     return () => window.visualViewport?.removeEventListener('resize', updateHeight);
+  }, []);
+
+  useEffect(() => {
+    const handleVisualViewPortResize = () => {
+      const currentVisualViewport = Number(window.visualViewport?.height);
+      if (messageAreaRef.current) {
+        messageAreaRef.current.style.height = `${currentVisualViewport - 30}px`;
+        window.scrollTo(0, 40);
+      }
+    };
+    handleVisualViewPortResize();
+    window.visualViewport?.addEventListener('resize', handleVisualViewPortResize);
+    return () => {
+      window.visualViewport?.removeEventListener('resize', handleVisualViewPortResize);
+    };
   }, []);
 
   const queryClient = useQueryClient();
@@ -318,7 +334,8 @@ function ChatRoom({
 
       {/* 메시지 영역 */}
       <div
-        className={`flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
+        ref={messageAreaRef}
+        className={`flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
           showOptions
             ? 'pb-[35vh]' // 확장 기능 보이면 큰 여백
             : 'pb-20' // 기본 여백
