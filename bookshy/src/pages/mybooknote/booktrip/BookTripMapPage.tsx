@@ -131,7 +131,13 @@ const BookTripMapPage = () => {
       title.fontSize = 1.2;
       title.anchorX = 'center';
       title.anchorY = 'top';
-      title.color = 0xffffff;
+      title.color = '#fff';
+      (title as any).outlineWidth = 0.18;
+      (title as any).outlineColor = '#a5b4fc';
+      (title as any).outlineBlur = 1.2;
+      (title as any).shadowColor = '#b2ccff';
+      (title as any).shadowBlur = 8;
+      (title as any).fontWeight = 'bold';
       title.position.set(x, y - 9, z);
       title.lookAt(new THREE.Vector3(0, y - 9, 0));
       title.sync(() => scene.add(title));
@@ -309,6 +315,11 @@ const BookTripMapPage = () => {
 
       coverMeshes.forEach((mesh, i) => {
         mesh.position.y += Math.sin(time + i) * 0.005;
+        // 책 하단 텍스트 애니메이션 (살짝 흔들림)
+        if (titleTexts[i]) {
+          const baseY = mesh.position.y - 9;
+          titleTexts[i].position.y = baseY + Math.sin(time * 1.2 + i) * 0.3;
+        }
       });
 
       // 모든 라인의 애니메이션 업데이트
