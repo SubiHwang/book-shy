@@ -1,12 +1,19 @@
 package com.ssafy.bookshy.domain.chat.service;
 
+import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
+import com.ssafy.bookshy.domain.book.entity.Book;
+import com.ssafy.bookshy.domain.book.repository.BookRepository;
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomUserIds;
+import com.ssafy.bookshy.domain.chat.entity.ChatCalendar;
 import com.ssafy.bookshy.domain.chat.entity.ChatMessage;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoomBook;
+import com.ssafy.bookshy.domain.chat.repository.ChatCalendarRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatMessageRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
+import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequest;
+import com.ssafy.bookshy.domain.exchange.repository.ExchangeRequestRepository;
 import com.ssafy.bookshy.domain.matching.dto.MatchChatRequestDto;
 import com.ssafy.bookshy.domain.matching.entity.Matching;
 import com.ssafy.bookshy.domain.users.entity.Users;
@@ -16,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +45,9 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final UserService userService;
+    private final ExchangeRequestRepository exchangeRequestRepository;
+    private final BookRepository bookRepository;
+    private final ChatCalendarRepository chatCalendarRepository;
 
     /**
      * 📋 특정 사용자의 채팅방 목록을 조회합니다.
@@ -261,4 +272,57 @@ public class ChatRoomService {
         );
     }
 
+    /**
+     * 📚 현재 로그인 사용자가 대여 중인 도서들을 모두 조회합니다.
+     *
+     * ✅ 조건:
+     * - rentalStartDate ≤ 오늘 ≤ rentalEndDate
+     * - ExchangeRequest 타입이 RENTAL
+     * - 현재 사용자가 해당 거래에 참여한 경우만 포함
+     */
+    public List<BookResponseDto> getRentalBooksInUse(Long userId) {
+        List<BookResponseDto> results = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+
+        // 1. 사용자 참여 채팅방 ID 목록 조회
+        List<ChatRoom> rooms = chatRoomRepository.findByUserId(userId);
+
+        for (ChatRoom room : rooms) {
+            Optional<ChatCalendar> optionalCalendar = chatCalendarRepository.findByChatRoomId(room.getId());
+
+            if (optionalCalendar.isEmpty()) continue;
+            ChatCalendar calendar = optionalCalendar.get();
+
+            // 2. 대여 기간 내인지 확인
+            if (calendar.getRentalStartDate() == null || calendar.getRentalEndDate() == null) continue;
+            LocalDate start = calendar.getRentalStartDate().toLocalDate();
+            LocalDate end = calendar.getRentalEndDate().toLocalDate();
+
+            if (today.isBefore(start) || today.isAfter(end)) continue;
+
+            // 3. 연결된 거래 요청 확인
+            Long requestId = calendar.getRequestId();
+            ExchangeRequest request = exchangeRequestRepository.findById(requestId)
+                    .orElse(null);
+            if (request == null || !request.getType().name().equals("RENTAL")) continue;
+
+            // 4. 현재 사용자가 요청자인 경우 → 상대방 도서 = bookB
+            //    응답자인 경우 → 상대방 도서 = bookA
+            Long bookId = null;
+            if (request.getRequesterId().equals(userId)) {
+                bookId = request.getBookBId();
+            } else if (request.getResponderId().equals(userId)) {
+                bookId = request.getBookAId();
+            } else {
+                continue; // 해당 거래의 참여자가 아님
+            }
+
+            Book book = bookRepository.findById(bookId).orElse(null);
+            if (book != null) {
+                results.add(BookResponseDto.from(book, false));
+            }
+        }
+
+        return results;
+    }
 }

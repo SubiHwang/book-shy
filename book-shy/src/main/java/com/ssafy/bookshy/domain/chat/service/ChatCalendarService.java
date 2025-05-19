@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -98,9 +99,8 @@ public class ChatCalendarService {
      * 📥 특정 채팅방의 거래 일정 단건 조회
      */
     public ChatCalendarEventDto getCalendarByRoomId(Long roomId) {
-        ChatCalendar calendar = chatCalendarRepository.findByChatRoomId(roomId)
-                .orElseThrow(() -> new ChatException(ChatErrorCode.CALENDAR_NOT_FOUND));
-        return ChatCalendarEventDto.from(calendar);
+        Optional<ChatCalendar> calendarOpt = chatCalendarRepository.findByChatRoomId(roomId);
+        return calendarOpt.map(ChatCalendarEventDto::from).orElse(null);
     }
 
     private LocalDateTime parseDateTimeOrNull(String dateTimeStr) {
