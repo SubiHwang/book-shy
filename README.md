@@ -68,16 +68,16 @@
 #### ✅ 카카오 로그인
 카카오 로그인을 통해서 서비스에 접근할 수 있습니다. 
 
-<img src="/uploads/321a21091c6d9595a1aa5c40262ddf9f/KakaoTalk_20250519_110958856.jpg" width="150" height="100">
+<img src="/uploads/321a21091c6d9595a1aa5c40262ddf9f/KakaoTalk_20250519_110958856.jpg" width="200" height="150">
 
 #### ✅ 책 등록
 ISBN, 알라딘 책 검색, 직접 등록을 통해서 책을 등록할 수 있습니다. 
 
-<img src="/uploads/cda2a0d163cc9356d6279df0a43e554b/KakaoTalk_20250519_110958856_02.jpg" width="150" height="100">
+<img src="/uploads/cda2a0d163cc9356d6279df0a43e554b/KakaoTalk_20250519_110958856_02.jpg" width="200" height="150">
 
-<img src="/uploads/f17667cee071510951d799f155050bc4/KakaoTalk_20250519_110958856_04.jpg" width="150" height="100">
+<img src="/uploads/f17667cee071510951d799f155050bc4/KakaoTalk_20250519_110958856_04.jpg" width="200" height="150">
 
-<img src="/uploads/92aaa40d3d1b85f6c8cac5b7c8ddad17/KakaoTalk_20250519_110958856_05.jpg" width="150" height="100">
+<img src="/uploads/92aaa40d3d1b85f6c8cac5b7c8ddad17/KakaoTalk_20250519_110958856_05.jpg" width="200" height="150">
 
 #### ✅ 나의 서재
 등록한 서재를 내 전체 서재 탭을 통해 확인할 수 있습니다.
@@ -86,9 +86,9 @@ ISBN, 알라딘 책 검색, 직접 등록을 통해서 책을 등록할 수 있�
 <br>
 공개 서재는 다른 유저들에게 보이게 됩니다.
 
-<img src="/uploads/5231112c182aa22be4fdba6ec048a4a9/KakaoTalk_20250519_110958856_01.jpg" width="150" height="100">
+<img src="/uploads/5231112c182aa22be4fdba6ec048a4a9/KakaoTalk_20250519_110958856_01.jpg" width="200" height="150">
 
-<img src="/uploads/e30ce0e05ce820bd2fe671b37de86a50/KakaoTalk_20250519_110958856_06.jpg" width="150" height="100">
+<img src="/uploads/e30ce0e05ce820bd2fe671b37de86a50/KakaoTalk_20250519_110958856_06.jpg" width="200" height="150">
 
 
 #### ✅ 매칭
@@ -97,8 +97,8 @@ ISBN, 알라딘 책 검색, 직접 등록을 통해서 책을 등록할 수 있�
 이때, 매칭률은 북끄지수,거리,최근 활동성을 종합하여 나타냅니다.
 <br>
 
-<img src="/uploads/424296340d7df735c4d92921fe1b455e/KakaoTalk_20250519_110958856_07.jpg" width="150" height="100">
-<img src="/uploads/60e1737c331f47b6ebc7d32fc2335daf/KakaoTalk_20250519_110958856_08.jpg" width="150" height="100">
+<img src="/uploads/424296340d7df735c4d92921fe1b455e/KakaoTalk_20250519_110958856_07.jpg" width="200" height="150">
+<img src="/uploads/60e1737c331f47b6ebc7d32fc2335daf/KakaoTalk_20250519_110958856_08.jpg" width="200" height="150">
 
 
 
@@ -107,8 +107,8 @@ ISBN, 알라딘 책 검색, 직접 등록을 통해서 책을 등록할 수 있�
 <br>
 실시간 인기 검색어, 검색어 자동완성 또한 같이 볼 수 있습니다.
 
-<img src="/uploads/2af8f6068732b9ba836c6313c6b19e83/KakaoTalk_20250519_110958856_09.jpg" width="150" height="100">
-<img src="/uploads/9f7d220c12a686d40f2e10d8a9776b43/KakaoTalk_20250519_110958856_10.jpg" width="150" height="100">
+<img src="/uploads/2af8f6068732b9ba836c6313c6b19e83/KakaoTalk_20250519_110958856_09.jpg" width="200" height="150">
+<img src="/uploads/9f7d220c12a686d40f2e10d8a9776b43/KakaoTalk_20250519_110958856_10.jpg" width="200" height="150">
 
 #### ✅ 채팅
 매칭된 이웃과 도서를 교환 또는 거래하고 싶은 경우 채팅을 통해 날짜를 정합니다.
