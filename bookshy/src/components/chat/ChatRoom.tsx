@@ -97,11 +97,12 @@ export default function ChatRoom({
       if (!visual || !messagesContainerRef.current) return;
       const headerHeight = 56;
       const inputHeight = 64;
-      const adjustedHeight = visual.height - headerHeight - inputHeight;
-      messagesContainerRef.current.style.height = `${adjustedHeight}px`;
+
+      const availableHeight = visual.height - headerHeight - inputHeight;
+      messagesContainerRef.current.style.height = `${availableHeight}px`;
     };
 
-    handleResize();
+    handleResize(); // 초기 실행
     window.visualViewport?.addEventListener('resize', handleResize);
     return () => window.visualViewport?.removeEventListener('resize', handleResize);
   }, []);
@@ -132,7 +133,7 @@ export default function ChatRoom({
   };
 
   return (
-    <div className="flex flex-col bg-white h-screen">
+    <div className="flex flex-col bg-white pb-safe">
       <ChatRoomHeader partnerName="책친구" partnerProfileImage={''} bookShyScore={0} />
 
       <div
