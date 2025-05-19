@@ -19,9 +19,9 @@ public enum ChatErrorCode implements ErrorCode {
     MISSING_BOOK_IDS(400, "📚 거래 요청에는 도서 A와 B의 ID가 모두 필요합니다."),
 
     // 🔹 채팅방 관련
-    CHAT_ROOM_NOT_FOUND(404, "❌ 채팅방이 존재하지 않습니다."),
-    CHAT_ROOM_PARTICIPANT_NOT_FOUND(404, "❌ 채팅방의 참여자 정보를 찾을 수 없습니다."),
-    CHAT_ROOM_ALREADY_EXISTS(409, "⚠️ 동일한 구성의 채팅방이 이미 존재합니다."),
+    CHATROOM_NOT_FOUND(404, "❌ 채팅방을 찾을 수 없습니다."),
+    CHATROOM_PARTICIPANT_NOT_FOUND(404, "❌ 채팅방의 참여자 정보를 찾을 수 없습니다."),
+    CHATROOM_ALREADY_EXISTS(409, "⚠️ 동일한 구성의 채팅방이 이미 존재합니다."),
 
     // 🔹 메시지 관련
     MESSAGE_NOT_FOUND(404, "❌ 채팅 메시지를 찾을 수 없습니다."),

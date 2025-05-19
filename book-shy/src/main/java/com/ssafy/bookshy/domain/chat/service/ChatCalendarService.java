@@ -75,7 +75,13 @@ public class ChatCalendarService {
         }
 
         // 5️⃣ 교환 요청 생성
-        ExchangeRequest.RequestType requestType = ExchangeRequest.RequestType.valueOf(type.toUpperCase());
+        ExchangeRequest.RequestType requestType;
+        try {
+            requestType = ExchangeRequest.RequestType.valueOf(type.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ChatException(ChatErrorCode.INVALID_CALENDAR_TYPE);
+        }
+
         ExchangeRequest request = ExchangeRequest.builder()
                 .bookAId(dto.getBookAId())
                 .bookBId(dto.getBookBId())

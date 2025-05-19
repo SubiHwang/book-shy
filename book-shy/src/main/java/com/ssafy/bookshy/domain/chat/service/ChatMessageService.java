@@ -6,11 +6,14 @@ import com.ssafy.bookshy.domain.chat.dto.EmojiUpdatePayload;
 import com.ssafy.bookshy.domain.chat.dto.ReadReceiptPayload;
 import com.ssafy.bookshy.domain.chat.entity.ChatMessage;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
+import com.ssafy.bookshy.domain.chat.exception.ChatErrorCode;
+import com.ssafy.bookshy.domain.chat.exception.ChatException;
 import com.ssafy.bookshy.domain.chat.repository.ChatMessageRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
 import com.ssafy.bookshy.domain.users.service.UserService;
 import com.ssafy.bookshy.kafka.dto.ChatMessageKafkaDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +32,7 @@ import java.util.stream.Collectors;
  * - 읽음 처리
  * - 이모지 추가
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -70,7 +74,7 @@ public class ChatMessageService {
     @Transactional
     public ChatMessageResponseDto saveMessage(ChatMessageRequestDto request, Long userId) {
         ChatRoom chatRoom = chatRoomRepository.findById(request.getChatRoomId())
-                .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
+                .orElseThrow(() -> new ChatException(ChatErrorCode.CHATROOM_NOT_FOUND));
 
         ChatMessage message = ChatMessage.builder()
                 .chatRoom(chatRoom)
@@ -103,7 +107,7 @@ public class ChatMessageService {
     @Transactional
     public ChatMessageResponseDto saveMessageFromKafka(ChatMessageKafkaDto dto) {
         ChatRoom chatRoom = chatRoomRepository.findById(dto.getChatRoomId())
-                .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
+                .orElseThrow(() -> new ChatException(ChatErrorCode.CHATROOM_NOT_FOUND));
 
         ChatMessage message = ChatMessage.builder()
                 .chatRoom(chatRoom)
@@ -131,7 +135,7 @@ public class ChatMessageService {
     @Transactional
     public void addEmojiToMessage(Long messageId, String emoji) {
         ChatMessage message = chatMessageRepository.findById(messageId)
-                .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ChatException(ChatErrorCode.MESSAGE_NOT_FOUND));
 
         message.addEmoji(emoji);
 
@@ -155,7 +159,7 @@ public class ChatMessageService {
     @Transactional
     public void removeEmojiFromMessage(Long messageId) {
         ChatMessage message = chatMessageRepository.findById(messageId)
-                .orElseThrow(() -> new IllegalArgumentException("메시지를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ChatException(ChatErrorCode.MESSAGE_NOT_FOUND));
 
         message.removeEmoji();
 
@@ -180,17 +184,26 @@ public class ChatMessageService {
      */
     @Transactional
     public void markMessagesAsRead(Long chatRoomId, Long userId) {
-        List<ChatMessage> unreadMessages = chatMessageRepository.findUnreadMessages(chatRoomId, userId);
-        if (unreadMessages.isEmpty()) return;
+        // 1️⃣ 채팅방 유효성 검사
+        chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new ChatException(ChatErrorCode.CHATROOM_NOT_FOUND));
 
+        // 2️⃣ 안 읽은 메시지 조회
+        List<ChatMessage> unreadMessages = chatMessageRepository.findUnreadMessages(chatRoomId, userId);
+        if (unreadMessages.isEmpty()) {
+            log.debug("✅ 이미 모두 읽음 처리됨: roomId={}, userId={}", chatRoomId, userId);
+            return;
+        }
+
+        // 3️⃣ 읽음 처리
         unreadMessages.forEach(ChatMessage::markAsRead);
 
         List<Long> readMessageIds = unreadMessages.stream()
                 .map(ChatMessage::getId)
                 .collect(Collectors.toList());
 
+        // 4️⃣ WebSocket으로 읽음 전파
         ReadReceiptPayload payload = new ReadReceiptPayload(readMessageIds, userId);
-
         messagingTemplate.convertAndSend("/topic/read/" + chatRoomId, payload);
     }
 }
