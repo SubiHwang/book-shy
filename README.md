@@ -1,17 +1,17 @@
 
 
-# 북끄북끄끄
+# 북끄북끄
 
-> **"데이터 기반 맞춤형 귀농 지역 추천 서비스"**  
+> **"중고 도서 거래/대여 및 추천 서비스"**  
 
 
 📽️ [시연 영상 바로가기]() 
-📝 [회의록 보기]()
+📝 [회의록 보기](https://evergreen-frost-592.notion.site/1d501e071b1b80908df8d696e7c0d1dd?pvs=4)
 
 
 ## 목차
 
-🌱 북끄북끄끄 서비스 소개
+🌱 북끄북끄 서비스 소개
 <br>
 ⏰ 개발 기간
 <br>
@@ -28,23 +28,26 @@
 💾 ERD 다이어그램
 <br>
 
-
-## 👥 팀 소개 및 역할
-
 ### ⏰ 개발 기간 (6주)
-2025.03.03 ~ 2025.03.14 (2주) 기획, 설계
+2025.04.14 ~ 2025.04.30 (2주) 기획, 설계
 <br>
-2025.04.15 ~ 2025.04.11 (4주) 개발
+2025.05.01 ~ 20.05.22 (4주) 개발
 
 ### 💡 기획 배경
 
-귀농을 고려하는 사람들은 지역 선택에 많은 어려움을 느낍니다. <br>환경, 비용, 인프라 등 다양한 요소를 고려해야 하지만, 이러한 정보를 종합적으로 제공하는 서비스
+읽고 싶은 책이 많지만, 굳이 사고 싶지는 않다고?
+내가 소장한 책을 다른 사람과 교환하고 싶다고?
+나에게 맞는 맟춤형 책을 추천받고 싶다고?
+
+<br> 중고 도서를 대여/교환할 수 있고 맞춤형 도서까지 추천해주는, 북끄북끄
+
 
 ### 🎯 목표 및 주요 기능
 
-**데이터 기반 의사결정 지원**
-
-
+본 서비스는 중고 도서를 교환함으로써 지식을 선순환하며 독서 문화를 활성화하고자 하는 목표를 가진다. 
+위시리스트 기반의 실시간 도서 매칭과 추천 서비스를 통해 사용자 맞춤형 서비스를 제공한다. 
+또한, 북끄지수로 사용자 간 신뢰도를 측정하며 실시간 채팅을 통해 대면 거래를 활성화한다. 
+결과적으로 단순한 도서 교환 플랫폼을 넘어, 지식과 경험을 나누는 소통의 창구로써의 역할을 가진다.
 
 
 ### 🔧 기능 소개
@@ -60,16 +63,10 @@
 
 ## 📢 기술 스택 소개
 
-#### Big-data distribution
-![Hadoop](https://img.shields.io/badge/Hadoop-3.3.6-66CCFF?logo=apachehadoop)
-![Spark](https://img.shields.io/badge/Apache%20Spark-3.5.0-E25A1C?logo=apachespark)
-![Zeppelin](https://img.shields.io/badge/Zeppelin-0.10.1-2D2D2D?logo=apachezeppelin)
-![Zookeeper](https://img.shields.io/badge/Zookeeper-3.7.1-7E3794?logo=apachezookeeper)
-
 #### Frontend
 ![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react)
 ![Vite](https://img.shields.io/badge/Vite-6.0.5-646CFF?logo=vite)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?logo=javascript&logoColor=000)
+![TypeScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?logo=typescript&logoColor=000)
 ![Redux](https://img.shields.io/badge/Redux-Toolkit-764ABC?logo=redux&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.3.3-38B2AC?logo=tailwindcss)
 
@@ -77,15 +74,7 @@
 ![Java](https://img.shields.io/badge/Java-17-blue?logo=java)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.3-brightgreen?logo=springboot)
 ![JPA](https://img.shields.io/badge/JPA-Hibernate-59666C?logo=hibernate)
-![JWT](https://img.shields.io/badge/JWT-Authentication-000000?logo=jsonwebtokens)
 ![Gradle](https://img.shields.io/badge/Gradle-7.6-02303A?logo=gradle)
-
-#### Data Processing & ML
-![Pandas](https://img.shields.io/badge/Pandas-1.5.3-150458?logo=pandas)
-![NumPy](https://img.shields.io/badge/NumPy-1.24-013243?logo=numpy)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-1.4.1-F7931E?logo=scikitlearn)
-![Matplotlib](https://img.shields.io/badge/Matplotlib-3.7.1-11557C?logo=matplotlib)
-![Jupyter](https://img.shields.io/badge/Jupyter-Lab-orange?logo=jupyter)
 
 #### Build & Deployment
 ![EC2](https://img.shields.io/badge/AWS%20EC2-t3.medium-FF9900?logo=amazonaws&logoColor=white)
@@ -96,14 +85,17 @@
 #### Database & Cache
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14-336791?logo=postgresql)
 ![Redis](https://img.shields.io/badge/Redis-7.2-DC382D?logo=redis)
+![ElasticSearch](https://img.shields.io/badge/elasticsearch-7.2-DC382D?logo=elasticsearch)
 
 #### Infrastructure
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04-E95420?logo=ubuntu)
 ![Prometheus](https://img.shields.io/badge/Prometheus-Metrics-orange?logo=prometheus)
 ![Grafana](https://img.shields.io/badge/Grafana-Dashboard-F46800?logo=grafana)
+![apachekafka](https://img.shields.io/badge/apachekafka-Dashboard-F46800?logo=apachekafka)
 
 
 ## 🔍 시스템 아키텍처
+
 
 
 
@@ -111,8 +103,10 @@
 
 
 
-## 👥 우아한 자매들
 
+## 👥 팀 소개 및 역할
+
+버뮤다 삼각김밥 팀입니다!
 
 
 
