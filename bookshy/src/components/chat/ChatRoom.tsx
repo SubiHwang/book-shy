@@ -54,23 +54,15 @@ function ChatRoom({
   }, [messages]);
 
   useEffect(() => {
-    const container = messageContainerRef.current;
-    if (!container) return;
+    const main = messageContainerRef.current;
+    if (!main) return;
 
     const updateHeight = () => {
       const visual = window.visualViewport;
       if (!visual) return;
-
       const headerHeight = 56;
-      const footerHeight = 64;
-      const safeInset = Number(
-        getComputedStyle(document.documentElement)
-          .getPropertyValue('--safe-area-inset-bottom')
-          .replace('px', '') || 0,
-      );
-      const height = visual.height - headerHeight - footerHeight - safeInset;
-
-      container.style.height = `${height}px`;
+      const footerHeight = 72;
+      main.style.height = `${visual.height - headerHeight - footerHeight}px`;
     };
 
     updateHeight();
@@ -108,11 +100,18 @@ function ChatRoom({
   };
 
   return (
-    <div className="relative h-[100dvh] bg-white">
+    <div className="relative min-h-screen bg-white">
       <header className="fixed top-0 left-0 right-0 h-[56px] bg-white z-10 border-b flex items-center px-4">
         <div className="font-bold">책친구</div>
       </header>
-      <main ref={messageContainerRef} className="pt-[56px] pb-[72px] overflow-y-auto h-full">
+      <main
+        ref={messageContainerRef}
+        className="absolute left-0 right-0 overflow-y-auto"
+        style={{
+          top: 56, // header 높이
+          bottom: 72, // footer 높이
+        }}
+      >
         {messages.map((msg) => (
           <div
             key={msg.id}
