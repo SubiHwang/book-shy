@@ -243,6 +243,37 @@ const QuoteGalaxyPage = () => {
     };
     renderer.domElement.addEventListener('pointerdown', handleClick);
 
+    // ⭐ 별자리 선(Line) 연결 효과 추가
+    if (quoteNodes.length >= 5) {
+      // 랜덤하게 5~8개 인덱스 선택 후 정렬
+      const count = Math.min(8, Math.max(5, Math.floor(Math.random() * 4) + 5));
+      const indices = Array.from({ length: quoteNodes.length }, (_, i) => i);
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      const selected = indices.slice(0, count).sort((a, b) => a - b);
+      const points = selected.map((idx) => quoteNodes[idx].position.clone());
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      const material = new THREE.LineBasicMaterial({
+        color: 0xb2ccff,
+        linewidth: 2,
+        transparent: true,
+        opacity: 0.7,
+      });
+      const line = new THREE.Line(geometry, material);
+      scene.add(line);
+      // glow 효과용 라인
+      const glowMaterial = new THREE.LineBasicMaterial({
+        color: 0xffffff,
+        linewidth: 5,
+        transparent: true,
+        opacity: 0.18,
+      });
+      const glowLine = new THREE.Line(geometry, glowMaterial);
+      scene.add(glowLine);
+    }
+
     return () => {
       window.removeEventListener('resize', handleResize);
       if (mountRef.current) mountRef.current.removeChild(renderer.domElement);
