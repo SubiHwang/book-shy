@@ -5,7 +5,6 @@ import BannerCarousel from '@/components/mylibrary/BookShelf/BannerCarousel';
 import AddBookDialog from '@/components/mylibrary/BookAdd/AddBookDialog';
 import { useNavigate, Outlet } from 'react-router-dom';
 import TabNavBar from '@/components/common/TabNavBar';
-import { getHeightAchievementMessage } from '@/utils/achievementUtils';
 import { AllBannersData } from '@/types/mylibrary/components';
 import { fetchFavoriteCategory, fetchReadingLevel } from '@/services/mylibrary/bannersService';
 import { getUserIdFromToken } from '@/utils/jwt';
