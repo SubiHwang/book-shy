@@ -128,11 +128,7 @@ const AllMyBooksTab: React.FC = () => {
     <div className="all-books-tab">
       <div className="container mx-auto px-4 pb-16">
         {/* 도서 수를 표시하는 헤더 */}
-        <div className="flex justify-end mt-3 mb-4">
-          <div className="text-sm font-medium text-gray-600">
-            전체 서재: <span className="text-primary">{books.length}권</span>
-          </div>
-        </div>
+        <div className="flex justify-end mt-6 mb-4"></div>
 
         {/* 책장 컨테이너 */}
         <div className="space-y-8">
