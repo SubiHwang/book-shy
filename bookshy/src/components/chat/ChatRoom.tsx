@@ -88,6 +88,14 @@ export default function ChatRoom({
     { id: '2', senderId: 2, content: '하이용 ㅎㅎㅎㅎ', sentAt: '오후 06:17', read: true },
     { id: '3', senderId: 1, content: '오늘 뭐해요?', sentAt: '오후 06:18', read: true },
     { id: '4', senderId: 2, content: '책 읽을거예요 📚', sentAt: '오후 06:19', read: true },
+    { id: '5', senderId: 1, content: '안녕하세요~', sentAt: '오후 05:54', read: true },
+    { id: '6', senderId: 2, content: '하이용 ㅎㅎㅎㅎ', sentAt: '오후 06:17', read: true },
+    { id: '7', senderId: 1, content: '오늘 뭐해요?', sentAt: '오후 06:18', read: true },
+    { id: '8', senderId: 2, content: '책 읽을거예요 📚', sentAt: '오후 06:19', read: true },
+    { id: '9', senderId: 1, content: '안녕하세요~', sentAt: '오후 05:54', read: true },
+    { id: '10', senderId: 2, content: '하이용 ㅎㅎㅎㅎ', sentAt: '오후 06:17', read: true },
+    { id: '11', senderId: 1, content: '오늘 뭐해요?', sentAt: '오후 06:18', read: true },
+    { id: '12', senderId: 2, content: '책 읽을거예요 📚', sentAt: '오후 06:19', read: true },
   ]);
 
   // ✅ 키보드 대응 - visualViewport로 메시지 영역 동적 높이 조절
@@ -133,20 +141,17 @@ export default function ChatRoom({
   };
 
   return (
-    <div className="flex flex-col bg-white pb-safe">
+    <div className="flex flex-col h-screen bg-white pb-safe">
       <ChatRoomHeader partnerName="책친구" partnerProfileImage={''} bookShyScore={0} />
 
-      <div
-        ref={messagesContainerRef}
-        className="overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300"
-      >
+      <div ref={messagesContainerRef} className="overflow-y-auto px-4 sm:px-6 py-3">
         {messages.map((msg) => (
           <ChatMessageItem key={msg.id} message={msg} isMyMessage={msg.senderId === 1} />
         ))}
         <div ref={messagesEndRef} className="h-4" />
       </div>
 
-      <div className="fixed bottom-0 inset-x-0 bg-white z-50 border-t">
+      <div className="shrink-0 border-t">
         <ChatInput onSend={handleSend} onFocus={handleInputFocus} inputRef={inputRef} />
       </div>
     </div>
