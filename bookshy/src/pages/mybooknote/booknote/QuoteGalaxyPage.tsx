@@ -1,3 +1,5 @@
+// QuoteGalaxyPage.tsx — textMesh.sync() 내부에서 scene 추가 및 quoteNodes 등록
+
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
@@ -62,10 +64,9 @@ const QuoteGalaxyPage = () => {
       textMesh.text = quote.content.slice(0, 12) + '...';
       textMesh.font = '/fonts/NotoSansKR-Regular.ttf';
       textMesh.fontSize = 2;
-      // textMesh.color = '#b8d7ff';
       textMesh.color = '#ffffff';
-      textMesh.outlineWidth = 0.005;
-      textMesh.outlineColor = '#0100ff';
+      textMesh.outlineWidth = 0.05;
+      textMesh.outlineColor = '#b2ccff';
       textMesh.outlineBlur = 0.6;
       textMesh.opacity = 1;
       textMesh.anchorX = 'center';
@@ -73,8 +74,10 @@ const QuoteGalaxyPage = () => {
       textMesh.position.copy(pos);
       textMesh.userData.fullQuote = quote.content;
 
-      textMesh.sync(() => scene.add(textMesh));
-      quoteNodes.push(textMesh);
+      textMesh.sync(() => {
+        scene.add(textMesh);
+        quoteNodes.push(textMesh); // ✅ push를 이 위치로 이동
+      });
     });
 
     const raycaster = new THREE.Raycaster();
