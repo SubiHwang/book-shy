@@ -141,7 +141,7 @@ const EditProfilePage = () => {
   }
 
   return (
-    <div className="bg-light-bg min-h-screen">
+    <div className="bg-light-bg min-h-screen pb-28">
       <Header title="프로필" onBackClick={() => navigate(-1)} showNotification={false} />
 
       <div className="px-6 py-4">
