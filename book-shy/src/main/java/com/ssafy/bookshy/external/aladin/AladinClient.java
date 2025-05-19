@@ -160,9 +160,6 @@ public class AladinClient {
                 }
             }
 
-            if (result.isEmpty()) {
-                throw new AladinException(AladinErrorCode.NO_SEARCH_RESULT);
-            }
 
             return BookListTotalResponseDto.builder()
                     .total(result.size())
