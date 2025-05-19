@@ -13,6 +13,15 @@ const TradePromiseList: FC = () => {
   if (isLoading) return <div className="p-4">거래 약속 불러오는 중...</div>;
   if (error || !data) return <div className="p-4 text-red-500">거래 약속 불러오기 실패</div>;
 
+  // 거래 목록이 없는 경우 처리
+  if (data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center text-gray-500 h-[50vh]">
+        <p className="text-lg mb-2">예정된 거래 약속이 없습니다</p>
+      </div>
+    );
+  }
+
   return (
     <div className="px-4 mt-4 space-y-4 pb-32">
       {data.map((item) => (

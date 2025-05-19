@@ -49,7 +49,6 @@ const SearchBookDetailPage = () => {
         setBookDetail(response);
       } catch (error) {
         console.error('책 상세 정보 가져오기 실패:', error);
-        toast.error('책 정보를 불러오는데 실패했습니다.');
       } finally {
         setIsLoading(false);
       }
@@ -81,7 +80,6 @@ const SearchBookDetailPage = () => {
         console.error('책 추가 중 오류:', error);
         // 에러 발생 시 상태 원복
         setInLibrary(false);
-        toast.error('책 추가에 실패했습니다. 다시 시도해주세요.');
       }
     },
     [queryClient],

@@ -1,13 +1,13 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { searchBooksByKeyword } from '@/services/mylibrary/bookSearchService';
 import { uploadBookByItemId } from '@/services/book/upload';
 import BookSelectCard from '@/components/mybooknote/booknote/BookSelectCard';
+import { toast } from 'react-toastify';
 
 const BookNoteSelectPage: React.FC = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [keyword, setKeyword] = useState('');
   const [submittedKeyword, setSubmittedKeyword] = useState('');
 
@@ -58,11 +58,10 @@ const BookNoteSelectPage: React.FC = () => {
             onSelect={async () => {
               try {
                 const uploaded = await uploadBookByItemId(book.itemId);
-                alert(`📖 "${uploaded.title}" 도서가 등록되었습니다.`);
+                toast.success(`"${uploaded.title}" 도서가 등록되었습니다.`);
                 navigate(`/booknotes/create?bookId=${uploaded.bookId}`);
               } catch (err) {
                 console.error(err);
-                alert('❌ 도서 등록에 실패했습니다. 다시 시도해주세요.');
               }
             }}
           />

@@ -11,6 +11,7 @@ import useSearchAddress from '@/hooks/location/useSearchAddress';
 import { Locate, Search } from 'lucide-react';
 import { notify } from '@/components/common/CustomToastContainer';
 import { authAxiosInstance } from '@/services/axiosInstance';
+import { toast } from 'react-toastify';
 
 const EditProfilePage = () => {
   const navigate = useNavigate();
@@ -94,8 +95,8 @@ const EditProfilePage = () => {
   });
 
   const handleSave = () => {
-    if (!nickname.trim()) return alert('닉네임을 입력해주세요.');
-    if (gender === '') return alert('성별을 선택해주세요.');
+    if (!nickname.trim()) return toast.warn('닉네임을 입력해주세요.');
+    if (gender === '') return toast.warn('성별을 선택해주세요.');
 
     saveProfile({
       nickname,
@@ -113,9 +114,9 @@ const EditProfilePage = () => {
     try {
       const res = await uploadProfileImage(formData);
       setProfileImageUrl(res.imageUrl);
-      alert('프로필 이미지가 변경되었습니다.');
+      toast.success('프로필 이미지가 변경되었습니다.');
     } catch {
-      alert('이미지 업로드에 실패했습니다.');
+      toast.error('이미지 업로드에 실패했습니다.');
     }
   };
 

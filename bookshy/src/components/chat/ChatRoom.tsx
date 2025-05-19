@@ -375,7 +375,6 @@ function ChatRoom({
               navigate(`/chat/${numericRoomId}/review`, {
                 state: {
                   chatSummary: {
-                    roomId: numericRoomId,
                     partnerName,
                     partnerProfileImage,
                     bookShyScore,
