@@ -8,6 +8,13 @@ import type { BookQuote } from '@/types/mybooknote/booknote/bookquote';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
+interface StyledText extends Text {
+  outlineWidth?: number;
+  outlineColor?: string;
+  outlineBlur?: number;
+  opacity?: number;
+}
+
 const QuoteGalaxyPage = () => {
   const navigate = useNavigate();
   const mountRef = useRef<HTMLDivElement | null>(null);
@@ -40,22 +47,27 @@ const QuoteGalaxyPage = () => {
     scene.background = new THREE.TextureLoader().load('/images/night-sky.png');
 
     const radius = 50;
-    const quoteNodes: Text[] = [];
+    const quoteNodes: StyledText[] = [];
     const spherical = new THREE.Spherical(radius);
 
     quotes.forEach((quote, idx) => {
-      const phi = Math.PI / 4 + Math.random() * (Math.PI / 4); // → PI/4 ~ PI/2 범위
+      const phi = Math.PI / 4 + Math.random() * (Math.PI / 4);
       const theta = Math.random() * Math.PI * 2;
       spherical.phi = phi;
       spherical.theta = theta;
 
       const pos = new THREE.Vector3().setFromSpherical(spherical);
 
-      const textMesh = new Text();
+      const textMesh = new Text() as StyledText;
       textMesh.text = quote.content.slice(0, 12) + '...';
       textMesh.font = '/fonts/NotoSansKR-Regular.ttf';
       textMesh.fontSize = 2;
-      textMesh.color = 0xffffff;
+      // textMesh.color = '#b8d7ff';
+      textMesh.color = '#ffffff';
+      textMesh.outlineWidth = 0.005;
+      textMesh.outlineColor = '#0100ff';
+      textMesh.outlineBlur = 0.6;
+      textMesh.opacity = 1;
       textMesh.anchorX = 'center';
       textMesh.anchorY = 'middle';
       textMesh.position.copy(pos);
@@ -73,13 +85,8 @@ const QuoteGalaxyPage = () => {
       controls.update();
 
       quoteNodes.forEach((text, i) => {
-        const flicker = 0.8 + 0.2 * Math.sin(Date.now() * 0.002 + i);
-        const baseColor = new THREE.Color(0xffffff);
-        (text.material as THREE.MeshBasicMaterial).color.setRGB(
-          baseColor.r * flicker,
-          baseColor.g * flicker,
-          baseColor.b * flicker,
-        );
+        const flicker = 0.85 + 0.15 * Math.sin(Date.now() * 0.002 + i);
+        text.opacity = flicker;
       });
 
       renderer.render(scene, camera);
