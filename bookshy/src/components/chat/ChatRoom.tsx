@@ -99,7 +99,7 @@ export default function ChatRoom({
 
   const handleSend = (msg: string) => {
     const newMessage: ChatMessage = {
-      id: Date.now(),
+      id: Date.now().toString(),
       senderId: 1,
       content: msg,
       sentAt: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
