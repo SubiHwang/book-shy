@@ -54,19 +54,29 @@ function ChatRoom({
   }, [messages]);
 
   useEffect(() => {
-    const handleResize = () => {
+    let raf: number;
+    const updateHeight = () => {
       const visual = window.visualViewport;
-      if (!visual || !messageContainerRef.current) return;
+      const container = messageContainerRef.current;
+      if (!visual || !container) return;
 
-      const headerHeight = 56;
-      const inputHeight = 64;
-      const newHeight = visual.height - headerHeight - inputHeight;
-      messageContainerRef.current.style.height = `${newHeight}px`;
+      raf = requestAnimationFrame(() => {
+        const headerHeight = 56;
+        const inputHeight = 64;
+        const safeInset = 0;
+        const newHeight = visual.height - headerHeight - inputHeight - safeInset;
+        if (container) {
+          container.style.height = `${newHeight}px`;
+        }
+      });
     };
 
-    handleResize();
-    window.visualViewport?.addEventListener('resize', handleResize);
-    return () => window.visualViewport?.removeEventListener('resize', handleResize);
+    setTimeout(updateHeight, 100); // 초기 진입 대응
+    window.visualViewport?.addEventListener('resize', updateHeight);
+    return () => {
+      window.visualViewport?.removeEventListener('resize', updateHeight);
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -94,7 +104,7 @@ function ChatRoom({
   };
 
   return (
-    <div className="flex flex-col min-h-screen h-auto bg-white">
+    <div className="flex flex-col min-h-screen bg-white relative">
       {/* 헤더 */}
       <header className="shrink-0 px-4 py-3 border-b bg-white z-10">
         <div className="font-bold">책친구</div>
@@ -124,7 +134,10 @@ function ChatRoom({
       </main>
 
       {/* 입력창 */}
-      <footer className="shrink-0 px-4 py-2 border-t bg-white">
+      <footer
+        className="absolute bottom-0 inset-x-0 bg-white px-4 py-2 border-t z-20"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
         <form onSubmit={handleSendMessage} className="flex items-center gap-2">
           <input
             ref={inputRef}
