@@ -19,6 +19,7 @@ const GenreBanner: React.FC<GenreBannerProps> = ({ data }) => {
       iconSrc="/icons/mytype.svg"
       iconAlt="장르 유형"
       preText="당신의 선호 장르는"
+      postText="!"
     />
   );
 };
