@@ -22,8 +22,8 @@ public class CategoryNormalizer {
         map.put("전기/자서전", "전기/자서전");
         map.put("청소년", "청소년");
         map.put("초등학교참고서", "아동교육");
-        map.put("어린이", "아동");
-        map.put("유아", "아동");
+        map.put("어린이", "동화");
+        map.put("유아", "동화");
         map.put("컴퓨터/모바일", "IT");
         map.put("예술/대중문화", "예술");
         map.put("건강/취미", "취미");
