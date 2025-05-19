@@ -9,7 +9,6 @@ import GenderSelector from '@/components/mypage/profile/GenderSelector';
 import { useLocationFetcher } from '@/hooks/location/useLocationFetcher';
 import useSearchAddress from '@/hooks/location/useSearchAddress';
 import { Locate, Search } from 'lucide-react';
-import { notify } from '@/components/common/CustomToastContainer';
 import { authAxiosInstance } from '@/services/axiosInstance';
 import { toast } from 'react-toastify';
 import Loading from '@/components/common/Loading';
@@ -87,11 +86,11 @@ const EditProfilePage = () => {
       // ✅ 캐시 무효화
       queryClient.invalidateQueries({ queryKey: ['profile'] });
 
-      notify.success('프로필 저장에 성공했습니다.');
+      toast.success('프로필 저장에 성공했습니다.');
       navigate('/mypage');
     },
     onError: () => {
-      notify.error('프로필 저장에 실패했습니다.');
+      toast.error('프로필 저장에 실패했습니다.');
     },
   });
 
