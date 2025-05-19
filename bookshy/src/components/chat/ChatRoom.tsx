@@ -318,7 +318,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   // 이모지 팝업 외부 클릭 감지
   useEffect(() => {
     if (!emojiTargetId) return;
-    const handleClick = (e: MouseEvent) => {
+    const handleClick = (_e: MouseEvent) => {
       setEmojiTargetId(null);
     };
     document.addEventListener('mousedown', handleClick);
