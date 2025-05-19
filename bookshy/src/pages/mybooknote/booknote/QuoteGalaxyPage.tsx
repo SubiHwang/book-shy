@@ -1,5 +1,3 @@
-// QuoteGalaxyPage.tsx — textMesh.sync() 내부에서 scene 추가 및 quoteNodes 등록
-
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
@@ -48,35 +46,58 @@ const QuoteGalaxyPage = () => {
 
     scene.background = new THREE.TextureLoader().load('/images/night-sky.png');
 
+    const starCount = 200;
+    const starGeometry = new THREE.BufferGeometry();
+    const starPositions = [];
+    for (let i = 0; i < starCount; i++) {
+      const r = 60 + Math.random() * 30;
+      const phi = Math.random() * Math.PI;
+      const theta = Math.random() * Math.PI * 2;
+      const x = r * Math.sin(phi) * Math.cos(theta);
+      const y = r * Math.sin(phi) * Math.sin(theta);
+      const z = r * Math.cos(phi);
+      starPositions.push(x, y, z);
+    }
+    starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
+    const starMaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.7,
+      transparent: true,
+      opacity: 0.7,
+    });
+    const stars = new THREE.Points(starGeometry, starMaterial);
+    scene.add(stars);
+
     const radius = 50;
     const quoteNodes: StyledText[] = [];
     const spherical = new THREE.Spherical(radius);
+    const colorList = ['#fff', '#b2ccff', '#a5b4fc', '#f0e9ff', '#c7d2fe', '#e0e7ff'];
 
-    quotes.forEach((quote) => {
+    quotes.forEach((quote, idx) => {
       const phi = Math.PI / 4 + Math.random() * (Math.PI / 4);
       const theta = Math.random() * Math.PI * 2;
       spherical.phi = phi;
       spherical.theta = theta;
-
       const pos = new THREE.Vector3().setFromSpherical(spherical);
 
       const textMesh = new Text() as StyledText;
       textMesh.text = quote.content.slice(0, 20) + '...';
       textMesh.font = '/fonts/NotoSansKR-Regular.ttf';
       textMesh.fontSize = 2;
-      textMesh.color = '#ffffff';
-      textMesh.outlineWidth = 0.05;
+      textMesh.color = colorList[Math.floor(Math.random() * colorList.length)];
+      textMesh.outlineWidth = 0.13;
       textMesh.outlineColor = '#b2ccff';
-      textMesh.outlineBlur = 0.6;
+      textMesh.outlineBlur = 1.5;
       textMesh.opacity = 1;
       textMesh.anchorX = 'center';
       textMesh.anchorY = 'middle';
       textMesh.position.copy(pos);
       textMesh.userData.fullQuote = quote.content;
-
+      (textMesh as any).shadowColor = '#b2ccff';
+      (textMesh as any).shadowBlur = 10;
       textMesh.sync(() => {
         scene.add(textMesh);
-        quoteNodes.push(textMesh); // ✅ push를 이 위치로 이동
+        quoteNodes.push(textMesh);
       });
     });
 
@@ -88,9 +109,13 @@ const QuoteGalaxyPage = () => {
       controls.update();
 
       quoteNodes.forEach((text, i) => {
-        const flicker = 0.85 + 0.15 * Math.sin(Date.now() * 0.002 + i);
+        const flicker = 0.85 + 0.15 * Math.sin(Date.now() * 0.002 + i * 1.7);
         text.opacity = flicker;
+        const scale = 1 + 0.07 * Math.sin(Date.now() * 0.0015 + i * 2.3);
+        text.scale.set(scale, scale, scale);
       });
+
+      starMaterial.opacity = 0.6 + 0.2 * Math.sin(Date.now() * 0.001);
 
       renderer.render(scene, camera);
     };
