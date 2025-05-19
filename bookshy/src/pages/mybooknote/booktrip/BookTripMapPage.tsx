@@ -236,8 +236,6 @@ const BookTripMapPage = () => {
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
-    const hoveredCover: THREE.Mesh | null = null;
-
     const handleMove = (event: MouseEvent) => {
       const rect = renderer.domElement.getBoundingClientRect();
       mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
