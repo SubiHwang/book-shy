@@ -159,7 +159,7 @@ public class AladinClient {
                     result.add(BookListResponseDto.from(it));
                 }
             }
-
+            
 
             return BookListTotalResponseDto.builder()
                     .total(result.size())
