@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchTradeHistory } from '@/services/mypage/trade';
 import type { TradeHistoryGroup } from '@/types/trade';
 import TradeHistoryCard from '@/components/mypage/trade/TradeHistoryCard';
+import Loading from '@/components/common/Loading';
 
 const TradeHistoryList: FC = () => {
   const { data, isLoading, error } = useQuery<TradeHistoryGroup[], Error>({
@@ -10,7 +11,7 @@ const TradeHistoryList: FC = () => {
     queryFn: fetchTradeHistory,
   });
 
-  if (isLoading) return <div className="p-4">거래 내역 불러오는 중...</div>;
+  if (isLoading) return <Loading loadingText="거래 내역 불러오는 중..." />;
   if (error || !data) return <div className="p-4 text-red-500">거래 내역 불러오기 실패</div>;
 
   // 거래 내역이 없는 경우

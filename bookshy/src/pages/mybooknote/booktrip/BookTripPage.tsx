@@ -17,6 +17,7 @@ import BookTripBookList from '@/components/mybooknote/booktrip/BookTripBookList'
 import SearchBar from '@/components/common/SearchBar';
 import FilterChips from '@/components/common/FilterChips';
 import { MapPin, BookOpen, CheckCircle, CircleSlash } from 'lucide-react';
+import Loading from '@/components/common/Loading';
 
 // 📌 필터 타입 선언
 type FilterType = '전체 보기' | '여정이 있는 책' | '여정이 없는 책';
@@ -111,7 +112,7 @@ const BookTripPage: React.FC = () => {
 
         {/* 📚 리스트 */}
         {isLoading ? (
-          <p className="text-center text-gray-500">불러오는 중...</p>
+          <Loading loadingText="책의 여정 불러오는 중..." />
         ) : filteredBooks.length === 0 ? (
           <p className="text-center text-sm text-gray-400 mt-12">조건에 맞는 책이 없습니다.</p>
         ) : (

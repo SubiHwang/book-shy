@@ -12,6 +12,7 @@ import LibraryBookListPage from './LibraryBookListPage';
 import type { BookNote } from '@/types/mybooknote/booknote';
 import type { BookQuote } from '@/types/mybooknote/booknote/bookquote';
 import type { Library } from '@/types/mylibrary/library';
+import Loading from '@/components/common/Loading';
 import type { Book } from '@/types/book/book';
 
 const MyBookNotePage = () => {
@@ -90,14 +91,14 @@ const MyBookNotePage = () => {
       setLoading(false);
     };
 
+  if (libLoading) return <Loading loadingText="불러오는 중..." />;
+
     if (notes.length > 0) {
       enrich();
     } else {
       setLoading(false);
     }
   }, [notes, quotes, libraries]);
-
-  if (loading) return <p className="p-4">불러오는 중...</p>;
 
   return enrichedBooks.length > 0 ? (
     <BookNoteSwiperPage bookNotes={enrichedBooks} />

@@ -40,7 +40,7 @@ const BookTripDetailPage = () => {
   if (isTripsLoading || isBookLoading || isUserLoading) {
     return (
       <div className="bg-[#f9f4ec] min-h-screen flex items-center justify-center">
-        <Loading loadingText="책의 여정 정보를 불러오고 있어요..." />
+        <Loading loadingText="책의 여정 정보를 불러오는 중..." />
       </div>
     );
   }
