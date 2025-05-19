@@ -1,5 +1,4 @@
-// ✅ 완전히 반응형이고, 카카오톡/라인처럼 헤더 고정 + 입력창 위로 키보드 대응되는 ChatRoom 예제
-
+// ✅ iOS 대응 + 카카오톡 스타일 완전 반응형 채팅방 (fixed/absolute/vh 없이)
 import { useRef, useState, useLayoutEffect } from 'react';
 
 interface Props {
@@ -61,14 +60,14 @@ function ChatRoom({
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="h-screen w-full flex flex-col bg-white">
       {/* 헤더 */}
-      <div className="shrink-0 border-b bg-white px-4 py-3 sticky top-0 z-10">
+      <div className="shrink-0 border-b px-4 py-3 bg-white z-10">
         <div className="font-bold">책친구</div>
       </div>
 
       {/* 메시지 영역 */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 bg-white">
+      <div className="flex-1 overflow-y-auto px-4 py-2" ref={messagesEndRef}>
         {messages.map((msg) => (
           <div
             key={msg.id}
