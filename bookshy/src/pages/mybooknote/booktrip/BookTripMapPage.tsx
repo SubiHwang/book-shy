@@ -91,6 +91,9 @@ const BookTripMapPage = () => {
     // 라인 위를 따라 움직이는 별(점) 애니메이션을 위한 배열
     const movingStars: { points: THREE.Vector3[]; mesh: THREE.Mesh }[] = [];
 
+    // 파동(확산) 효과를 위한 배열
+    const waveEffects: { mesh: THREE.Mesh; start: number }[] = [];
+
     books.forEach((book, i) => {
       const angle = i * angleStep * 1.5;
       const x = radius * Math.cos(angle);
@@ -260,6 +263,20 @@ const BookTripMapPage = () => {
 
       if (intersects.length > 0) {
         const clicked = intersects[0].object as THREE.Mesh;
+        // ⭐ 파동(확산) 효과 추가
+        const waveGeometry = new THREE.RingGeometry(4, 5.5, 48);
+        const waveMaterial = new THREE.MeshBasicMaterial({
+          color: 0xfffbe6,
+          transparent: true,
+          opacity: 0.5,
+          side: THREE.DoubleSide,
+        });
+        const waveMesh = new THREE.Mesh(waveGeometry, waveMaterial);
+        waveMesh.position.copy(clicked.position);
+        waveMesh.position.z += 0.2; // 표지와 겹치지 않게 살짝 앞으로
+        scene.add(waveMesh);
+        waveEffects.push({ mesh: waveMesh, start: performance.now() });
+
         const clickedPos = clicked.position.clone();
         gsap.to(camera.position, {
           duration: 1.5,
@@ -315,6 +332,19 @@ const BookTripMapPage = () => {
           starObj.mesh.position.copy(points[points.length - 1]);
         }
       });
+
+      // ⭐ 파동(확산) 애니메이션
+      const now = performance.now();
+      for (let i = waveEffects.length - 1; i >= 0; i--) {
+        const { mesh, start } = waveEffects[i];
+        const elapsed = (now - start) / 1000;
+        mesh.scale.setScalar(1 + elapsed * 2.5);
+        (mesh.material as THREE.MeshBasicMaterial).opacity = 0.5 * (1 - elapsed / 1.1);
+        if (elapsed > 1.1) {
+          scene.remove(mesh);
+          waveEffects.splice(i, 1);
+        }
+      }
 
       flag.rotation.z = Math.sin(time * 3) * 0.05;
 
