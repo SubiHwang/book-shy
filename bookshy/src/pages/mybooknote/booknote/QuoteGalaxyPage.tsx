@@ -52,7 +52,7 @@ const QuoteGalaxyPage = () => {
     const quoteNodes: StyledText[] = [];
     const spherical = new THREE.Spherical(radius);
 
-    quotes.forEach((quote, idx) => {
+    quotes.forEach((quote) => {
       const phi = Math.PI / 4 + Math.random() * (Math.PI / 4);
       const theta = Math.random() * Math.PI * 2;
       spherical.phi = phi;
