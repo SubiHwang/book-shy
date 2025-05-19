@@ -67,12 +67,16 @@ function ChatRoom({
       setViewportHeight(window.visualViewport?.height ?? window.innerHeight);
     };
 
-    if (window.visualViewport) {
+    if (typeof window.visualViewport !== 'undefined' && window.visualViewport !== null) {
       window.visualViewport.addEventListener('resize', handleResize);
-      return () => window.visualViewport.removeEventListener('resize', handleResize);
+      return () => {
+        window.visualViewport?.removeEventListener('resize', handleResize);
+      };
     } else {
       window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
     }
   }, []);
 
