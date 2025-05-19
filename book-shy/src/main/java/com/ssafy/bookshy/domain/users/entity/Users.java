@@ -150,4 +150,8 @@ public class Users extends TimeStampEntity implements UserDetails {
     public void updateLastActiveAt(LocalDateTime time) {
         this.lastActiveAt = time;
     }
+
+    public void updateBadges(String badge) {
+        this.badges = badge;
+    }
 }
