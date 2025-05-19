@@ -22,6 +22,8 @@ const MatchingRecommend: FC = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   // 정렬 옵션 상태 추가
   const [sortOption, setSortOption] = useState<string>('score');
+  // 새로고침 상태 추가
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // 첫 페이지 데이터 가져오기
   const { data, isLoading, refetch } = useQuery<MatchingRecommendationResponse>({
@@ -46,6 +48,9 @@ const MatchingRecommend: FC = () => {
       // 총 아이템 수와 총 페이지 수 업데이트
       setTotalItems(data.results);
       setTotalPages(data.totalPages);
+      
+      // 새로고침 상태 리셋
+      setIsRefreshing(false);
     }
   }, [data, currentPage]);
 
@@ -75,9 +80,14 @@ const MatchingRecommend: FC = () => {
 
   // 새로고침 핸들러
   const handleRefresh = async () => {
+    // 이미 새로고침 중이거나 로딩 중이면 중복 실행 방지
+    if (isRefreshing || isLoading) return;
+    
+    setIsRefreshing(true);
     setCurrentPage(1);
     setMatchings([]);
     await refetch();
+    // refetch 후 데이터가 도착하면 useEffect에서 isRefreshing이 false로 설정됨
   };
 
   // 정렬 변경 핸들러
@@ -107,11 +117,14 @@ const MatchingRecommend: FC = () => {
           {!isLoading && (
             <button
               onClick={handleRefresh}
-              disabled={isLoading || isLoadingMore}
+              disabled={isLoading || isRefreshing || isLoadingMore}
               className="text-primary hover:text-primary-dark transition-colors"
               aria-label="추천 도서 새로고침"
             >
-              <RefreshCw size={16} className={`${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw 
+                size={16} 
+                className={`${isRefreshing ? 'animate-spin' : ''}`} 
+              />
             </button>
           )}
         </div>
@@ -120,7 +133,7 @@ const MatchingRecommend: FC = () => {
         <SortingChips onSortChange={handleSortChange} defaultSort={sortOption} />
       </div>
 
-      {isLoading && currentPage === 1 ? (
+      {(isLoading && currentPage === 1) || isRefreshing ? (
         <Loading loadingText="매칭 추천을 불러오는 중..." />
       ) : hasSufficientMatches ? (
         <>
@@ -133,7 +146,7 @@ const MatchingRecommend: FC = () => {
               {hasNextPage ? (
                 <button
                   onClick={handleLoadMore}
-                  disabled={isLoadingMore}
+                  disabled={isLoadingMore || isRefreshing}
                   className="px-6 py-2 bg-primary text-white rounded-full disabled:opacity-70"
                 >
                   {isLoadingMore ? (
