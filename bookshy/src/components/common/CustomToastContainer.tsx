@@ -45,7 +45,8 @@ const CustomToastContainer: React.FC = () => {
     <ToastContainer
       {...containerProps}
       toastClassName={
-        () => 'flex bg-[#6c6864] text-white border-0 shadow-lg w-full p-3 mb-2 overflow-hidden rounded-lg' // 더 둥근 모서리
+        () =>
+          'flex bg-[#6c6864] text-white border-0 shadow-lg w-full p-3 mb-2 overflow-hidden rounded-lg' // 더 둥근 모서리
       }
     />
   );
