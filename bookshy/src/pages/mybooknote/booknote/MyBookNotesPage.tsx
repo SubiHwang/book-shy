@@ -8,11 +8,6 @@ import { fetchRentalBooksInUse } from '@/services/chat/chat';
 
 import BookNoteSwiperPage from './BookNoteSwiperPage';
 import LibraryBookListPage from './LibraryBookListPage';
-
-import type { BookNote } from '@/types/mybooknote/booknote';
-import type { BookQuote } from '@/types/mybooknote/booknote/bookquote';
-import type { Library } from '@/types/mylibrary/library';
-import Loading from '@/components/common/Loading';
 import type { Book } from '@/types/book/book';
 
 const MyBookNotePage = () => {
@@ -91,7 +86,7 @@ const MyBookNotePage = () => {
       setLoading(false);
     };
 
-  if (libLoading) return <Loading loadingText="불러오는 중..." />;
+    if (libLoading) return <Loading loadingText="불러오는 중..." />;
 
     if (notes.length > 0) {
       enrich();

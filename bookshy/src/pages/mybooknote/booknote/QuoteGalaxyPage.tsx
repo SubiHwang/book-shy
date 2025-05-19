@@ -61,7 +61,7 @@ const QuoteGalaxyPage = () => {
       const pos = new THREE.Vector3().setFromSpherical(spherical);
 
       const textMesh = new Text() as StyledText;
-      textMesh.text = quote.content.slice(0, 12) + '...';
+      textMesh.text = quote.content.slice(0, 20) + '...';
       textMesh.font = '/fonts/NotoSansKR-Regular.ttf';
       textMesh.fontSize = 2;
       textMesh.color = '#ffffff';
