@@ -68,6 +68,30 @@ const QuoteGalaxyPage = () => {
     const stars = new THREE.Points(starGeometry, starMaterial);
     scene.add(stars);
 
+    const shootingStars: THREE.Mesh[] = [];
+    const createShootingStar = () => {
+      const geometry = new THREE.SphereGeometry(0.25, 8, 8);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 1,
+      });
+      const star = new THREE.Mesh(geometry, material);
+      star.position.set(
+        (Math.random() - 0.5) * 100,
+        40 + Math.random() * 20,
+        (Math.random() - 0.5) * 100,
+      );
+      star.userData.velocity = new THREE.Vector3(
+        Math.random() * 2 - 1,
+        -2 - Math.random() * 2,
+        Math.random() * 2 - 1,
+      );
+      scene.add(star);
+      shootingStars.push(star);
+    };
+    const shootingStarInterval = setInterval(createShootingStar, 3500);
+
     const radius = 50;
     const quoteNodes: StyledText[] = [];
     const spherical = new THREE.Spherical(radius);
@@ -117,6 +141,16 @@ const QuoteGalaxyPage = () => {
 
       starMaterial.opacity = 0.6 + 0.2 * Math.sin(Date.now() * 0.001);
 
+      for (let i = shootingStars.length - 1; i >= 0; i--) {
+        const star = shootingStars[i];
+        star.position.add(star.userData.velocity);
+        (star.material as THREE.Material).opacity! -= 0.02;
+        if ((star.material as THREE.Material).opacity! <= 0) {
+          scene.remove(star);
+          shootingStars.splice(i, 1);
+        }
+      }
+
       renderer.render(scene, camera);
     };
     animate();
@@ -146,6 +180,7 @@ const QuoteGalaxyPage = () => {
     return () => {
       window.removeEventListener('resize', handleResize);
       if (mountRef.current) mountRef.current.removeChild(renderer.domElement);
+      clearInterval(shootingStarInterval);
     };
   }, [quotes]);
 
