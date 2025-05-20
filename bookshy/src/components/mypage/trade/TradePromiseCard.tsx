@@ -49,16 +49,20 @@ const TradePromiseCard: FC<TradeCardProps> = ({
                 alt={`${userName} 프로필`}
                 className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
               />
-              <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm">
-                {type === 'EXCHANGE' ? (
-                  <span className="text-xs text-purple-600">📚 교환</span>
-                ) : (
-                  <span className="text-xs text-blue-600">📖 대여</span>
-                )}
-              </div>
             </div>
             <div>
-              <h3 className="font-bold text-gray-800">{userName} 님</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-gray-800">{userName} 님</h3>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                    type === 'EXCHANGE'
+                      ? 'bg-purple-100 text-purple-600'
+                      : 'bg-blue-100 text-blue-600'
+                  }`}
+                >
+                  {type === 'EXCHANGE' ? '📚 교환' : '📖 대여'}
+                </span>
+              </div>
               <p className="text-sm text-gray-500">{meetTime}</p>
             </div>
           </div>
