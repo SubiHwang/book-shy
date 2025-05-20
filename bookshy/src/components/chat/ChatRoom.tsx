@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback, useLayoutEffect } from 'react';
-import { ChatMessage, RegisterSchedulePayload } from '@/types/chat/chat.ts';
+import { ChatMessage, RegisterSchedulePayload, ChatCalendarEventDto } from '@/types/chat/chat.ts';
 import ChatMessageItem from './ChatMessageItem.tsx';
 import ChatInput from './ChatInput.tsx';
 import ChatRoomHeader from './ChatRoomHeader.tsx';
@@ -13,6 +13,8 @@ import {
   markMessagesAsRead,
   registerSchedule,
   sendEmoji,
+  fetchChatRoomUserIds,
+  fetchScheduleByRoomId,
   fetchPartnerInfo,
 } from '@/services/chat/chat.ts';
 import { useStomp } from '@/hooks/chat/useStomp.ts';
@@ -235,8 +237,41 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   };
 
   const registerScheduleAndNotify = async (_message: string, payload: RegisterSchedulePayload) => {
+    console.log('🚀 registerScheduleAndNotify 함수 호출됨');
+    console.log('📦 받은 payload:', payload);
+
     try {
-      await registerSchedule(payload);
+      // 채팅방 사용자 ID 조회
+      const { userAId, userBId } = await fetchChatRoomUserIds(numericRoomId);
+      console.log('👥 채팅방 사용자 ID:', { userAId, userBId });
+
+      // 일정 등록을 위한 페이로드 구성
+      const schedulePayload: RegisterSchedulePayload = {
+        roomId: numericRoomId,
+        type: payload.type,
+        userIds: [userAId, userBId],
+        bookAId: myBookId[0],
+        bookBId: otherBookId[0],
+        title: payload.title,
+        description: payload.description,
+        ...(payload.type === 'EXCHANGE'
+          ? { eventDate: payload.eventDate }
+          : { startDate: payload.startDate, endDate: payload.endDate }),
+      };
+
+      // 요청 데이터 로깅
+      console.log('📅 일정 등록 요청 데이터:', {
+        ...schedulePayload,
+        userIds: [userAId, userBId],
+        type: schedulePayload.type,
+        dates:
+          payload.type === 'EXCHANGE'
+            ? `eventDate: ${payload.eventDate}`
+            : `startDate: ${payload.startDate}, endDate: ${payload.endDate}`,
+      });
+
+      // 일정 등록
+      await registerSchedule(schedulePayload);
     } catch (e) {
       console.error('❌ 일정 등록 실패:', e);
     }
@@ -291,6 +326,53 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   };
 
   let lastDateLabel = '';
+
+  // 캘린더 일정 조회
+  const { data: calendarEvent } = useQuery({
+    queryKey: ['chatCalendar', numericRoomId],
+    queryFn: () => fetchScheduleByRoomId(numericRoomId),
+    enabled: !isNaN(numericRoomId),
+  });
+
+  // 당일 일정 여부 확인
+  const isTodayEvent = useCallback(() => {
+    if (!calendarEvent) {
+      console.log('❌ 캘린더 이벤트 없음');
+      return false;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let eventDate: Date;
+    if (calendarEvent.type === 'EXCHANGE' && calendarEvent.exchangeDate) {
+      eventDate = new Date(calendarEvent.exchangeDate);
+      console.log('📅 교환 일정:', {
+        type: calendarEvent.type,
+        exchangeDate: calendarEvent.exchangeDate,
+        parsedDate: eventDate.toISOString(),
+      });
+    } else if (calendarEvent.type === 'RENTAL' && calendarEvent.rentalEndDate) {
+      eventDate = new Date(calendarEvent.rentalEndDate);
+      console.log('📅 대여 일정:', {
+        type: calendarEvent.type,
+        rentalEndDate: calendarEvent.rentalEndDate,
+        parsedDate: eventDate.toISOString(),
+      });
+    } else {
+      console.log('❌ 유효하지 않은 일정 데이터:', calendarEvent);
+      return false;
+    }
+    eventDate.setHours(0, 0, 0, 0);
+
+    console.log('📊 날짜 비교:', {
+      today: today.toISOString(),
+      eventDate: eventDate.toISOString(),
+      isMatch: today.getTime() === eventDate.getTime(),
+    });
+
+    return today.getTime() === eventDate.getTime();
+  }, [calendarEvent]);
 
   return (
     <div className="relative h-full min-h-0 bg-white pb-safe">
@@ -353,33 +435,35 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
           );
         })}
 
-        {/* 📌 교환 완료 유도 메시지 */}
-        <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm max-w-[90%] mx-auto">
-          <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
-          <p className="text-xs mt-1 text-light-text-muted">
-            거래가 완료되었다면 리뷰를 남겨주세요.
-          </p>
-          <button
-            onClick={() =>
-              navigate(`/chat/${numericRoomId}/review`, {
-                state: {
-                  chatSummary: {
-                    partnerName: partnerInfo?.name ?? '로딩중...',
-                    partnerProfileImage: partnerInfo?.profileImage ?? '/default-profile.png',
-                    bookShyScore: partnerInfo?.bookShyScore ?? 0,
-                    myBookId,
-                    myBookName,
-                    otherBookId,
-                    otherBookName,
+        {/* 📌 교환 완료 유도 메시지 - 당일 일정인 경우에만 표시 */}
+        {isTodayEvent() && (
+          <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm">
+            <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
+            <p className="text-xs mt-1 text-light-text-muted">
+              거래가 완료되었다면 리뷰를 남겨주세요.
+            </p>
+            <button
+              onClick={() =>
+                navigate(`/chat/${numericRoomId}/review`, {
+                  state: {
+                    chatSummary: {
+                      partnerName: partnerInfo?.name ?? '',
+                      partnerProfileImage: partnerInfo?.profileImage ?? '',
+                      bookShyScore: partnerInfo?.bookShyScore ?? 0,
+                      myBookId: myBookId[0],
+                      myBookName: myBookName[0],
+                      otherBookId: otherBookId[0],
+                      otherBookName: otherBookName[0],
+                    },
                   },
-                },
-              })
-            }
-            className="mt-3 inline-block bg-primary text-white text-xs font-medium px-4 py-2 rounded-full"
-          >
-            거래 완료
-          </button>
-        </div>
+                })
+              }
+              className="mt-3 inline-block bg-primary text-white text-xs font-medium px-4 py-2 rounded-full"
+            >
+              거래 완료
+            </button>
+          </div>
+        )}
 
         <div ref={messagesEndRef} className="h-4" />
       </div>
