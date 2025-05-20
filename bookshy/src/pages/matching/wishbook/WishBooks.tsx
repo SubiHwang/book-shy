@@ -8,12 +8,13 @@ import Loading from '@/components/common/Loading';
 
 const WishBooks: FC = () => {
   const navigate = useNavigate();
-  const { data, isLoading } = useWishBooks();
+  const { data, isLoading } = useWishBooks(); // 실제 API 호출을 위한 훅 사용
 
   const [selectedFilter, setSelectedFilter] = useState<string>('전체 보기');
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
+  // 모든 useMemo hooks를 조건문 전에 호출 (data가 없을 경우 대비)
   const filterList = useMemo(() => {
     if (!data || !data.books) return ['전체 보기'];
 
@@ -48,79 +49,69 @@ const WishBooks: FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white">
-      {/* Header - Fixed at top */}
-      <div className="flex-none">
-        <div className="relative pb-16 px-4 pt-4">
-          <div className="mb-5">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search size={20} className="text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="내가 담아둔 읽고 싶은 책 검색 (책 제목, 저자, 출판사)"
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-200 text-sm"
-              />
-            </div>
+    <div className="relative pb-16 px-4 pt-4">
+      <div className="mb-5">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search size={20} className="text-gray-400" />
           </div>
-          <div className="mb-4">
-            <div className="flex justify-between items-center mb-2">
-              <div className="font-light text-light-text-secondary">총 {filteredBooks.length} 권</div>
-              <div className="relative">
-                <button
-                  className="flex items-center border rounded px-3 py-1 text-sm"
-                  onClick={() => setFilterOpen(!filterOpen)}
-                >
-                  <span>{selectedFilter}</span>
-                  <ChevronDown size={16} className="ml-1" />
-                </button>
+          <input
+            type="text"
+            placeholder="내가 담아둔 읽고 싶은 책 검색 (책 제목, 저자, 출판사)"
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-200 text-sm"
+          />
+        </div>
+      </div>
+      <div className="mb-4">
+        <div className="flex justify-between items-center mb-2">
+          <div className="font-light text-light-text-secondary">총 {filteredBooks.length} 권</div>
+          <div className="relative">
+            <button
+              className="flex items-center border rounded px-3 py-1 text-sm"
+              onClick={() => setFilterOpen(!filterOpen)}
+            >
+              <span>{selectedFilter}</span>
+              <ChevronDown size={16} className="ml-1" />
+            </button>
 
-                {filterOpen && (
-                  <div className="absolute right-0 mt-1 bg-white border rounded shadow-lg z-10 w-32">
-                    <ul className="py-1">
-                      {filterList.map((category) => (
-                        <li
-                          key={category}
-                          className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm font-light"
-                          onClick={() => {
-                            setSelectedFilter(category);
-                            setFilterOpen(false);
-                          }}
-                        >
-                          {category}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+            {filterOpen && (
+              <div className="absolute right-0 mt-1 bg-white border rounded shadow-lg z-10 w-32">
+                <ul className="py-1">
+                  {filterList.map((category) => (
+                    <li
+                      key={category}
+                      className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm font-light"
+                      onClick={() => {
+                        setSelectedFilter(category);
+                        setFilterOpen(false);
+                      }}
+                    >
+                      {category}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Content - Scrollable */}
-      <div className="flex-1 overflow-y-auto relative px-4 pb-16">
-        <div className="pb-4">
-          {filteredBooks.length > 0 ? (
-            <div>
-              {filteredBooks.map((book: WishBook) => (
-                <WishBookCard key={book.itemId} wishBook={book} />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-96 text-light-text-secondary">
-              <p>아직 읽고 싶은 책을 고르지 않았네요!</p>
-              <p>읽고 싶은 책들을 찾아볼까요?</p>
-            </div>
-          )}
-        </div>
+      <div className="pb-4">
+        {filteredBooks.length > 0 ? (
+          <div>
+            {filteredBooks.map((book: WishBook) => (
+              <WishBookCard key={book.itemId} wishBook={book} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-96 text-light-text-secondary">
+            <p>아직 읽고 싶은 책을 고르지 않았네요!</p>
+            <p>읽고 싶은 책들을 찾아볼까요?</p>
+          </div>
+        )}
       </div>
-
-      {/* Fixed Bottom Button */}
-      <div className="flex-none fixed bottom-24 right-6 z-20">
+      <div className="fixed bottom-24 right-6">
         <button
           onClick={() => navigate('/matching/search-wish-books')}
           className="w-14 h-14 rounded-xl bg-primary text-white flex justify-center items-center shadow-lg"

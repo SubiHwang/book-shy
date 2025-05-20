@@ -1,54 +1,112 @@
 import { FC } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { BookMarked, MessageCircle } from 'lucide-react';
 
 export interface TradeCardProps {
   tradeId: number;
+  type: 'EXCHANGE' | 'RENTAL';
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COMPLETED';
   userName: string;
   userProfileUrl: string;
-  statusText: string; // 예: "12시간 남음"
-  meetTime: string; // 예: "2025년 4월 24일 목 오후 12:00"
+  myBookTitle: string;
+  myBookCoverUrl: string;
+  partnerBookTitle: string;
+  partnerBookCoverUrl: string;
+  statusText: string;
+  meetTime: string;
+  timeLeft: {
+    days: number;
+    hours: number;
+    minutes: number;
+    display: string;
+  };
 }
 
 const TradePromiseCard: FC<TradeCardProps> = ({
-  // tradeId,
+  tradeId,
+  type,
   userName,
   userProfileUrl,
-  statusText,
   meetTime,
+  timeLeft,
 }) => {
+  const navigate = useNavigate();
+
+  const handleChatClick = () => {
+    navigate(`/chat/${tradeId}`);
+  };
+
+  const handleClickNeighborsBookshelf = (userId: number) => {
+    // TODO: 상대방 서재로 이동하는 기능 구현
+    navigate(`/bookshelf/${userId}`);
+  };
+
+  const renderTimeLeft = () => {
+    const { days, hours, minutes } = timeLeft;
+    const parts = [];
+
+    if (days > 0) parts.push(`${days}일`);
+    if (hours > 0) parts.push(`${hours}시간`);
+    if (minutes > 0) parts.push(`${minutes}분`);
+
+    return (
+      <div className="px-2 py-1.5 rounded-full bg-gradient-to-r from-pink-100 to-pink-50 text-primary text-sm font-medium shadow-sm">
+        <span className="font-bold">D-{parts.join(' ')}</span>
+      </div>
+    );
+  };
+
   return (
-    <div className="card p-4 rounded-xl shadow-sm space-y-3">
-      {/* 상단 프로필 및 상태 */}
-      <div className="flex justify-between items-start">
-        <div className="flex items-center">
-          <img
-            src={userProfileUrl}
-            alt={`${userName} 프로필`}
-            className="w-10 h-10 rounded-full object-cover mr-3"
-          />
-          <div>
-            <p className="font-semibold">{userName} 님</p>
-            <p className="text-xs text-gray-500">구미시 인의동</p>
+    <div className="card bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 m-4 w-full max-w-md mx-auto">
+      {/* 상단 프로필 섹션 */}
+      <div className="p-4 bg-light-bg-card">
+        <div className="flex justify-between items-center gap-2">
+          <div className="flex items-center gap-1">
+            <div className="relative">
+              <img
+                src={userProfileUrl || '#'}
+                alt={`${userName} 프로필`}
+                className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
+              />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-gray-800">{userName} 님</h3>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                  type === 'EXCHANGE'
+                    ? 'bg-blue-100 text-light-status-info'
+                    : 'bg-orange-100 text-light-status-warning'
+                }`}>
+                  {type === 'EXCHANGE' ? '교환' : '대여'}
+                </span>
+              </div>
+              <p className="text-sm text-light-text">{meetTime}</p>
+            </div>
+          </div>
+          <div className="flex flex-col items-end">
+            {renderTimeLeft()}
           </div>
         </div>
-        <div className="badge bg-pink-100 text-pink-600">{statusText}</div>
       </div>
 
-      {/* 만남 정보 */}
-      <div>
-        <p className="text-sm font-semibold flex items-center">
-          <span className="mr-1">🕒</span>반납 시간 (만나서 책 반납)
-        </p>
-        <p className="text-sm text-gray-600 mt-1">{meetTime}</p>
-      </div>
-
-      {/* 하단 버튼 */}
-      <div className="flex gap-2 mt-2">
-        <button className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm hover:bg-gray-100">
-          📖 공개 서재 보기
-        </button>
-        <button className="flex-1 bg-pink-400 hover:bg-pink-500 text-white rounded-lg px-3 py-1.5 text-sm">
-          💬 채팅 바로가기
-        </button>
+      {/* 하단 버튼 섹션 */}
+      <div className="p-4 bg-light-bg-shade border-t border-gray-50">
+        <div className="flex gap-3">
+          <button
+            onClick={() => handleClickNeighborsBookshelf(tradeId)}
+            className="flex-1 flex items-center justify-center gap-2 px-2 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+          >
+            <BookMarked className="w-4 h-4" strokeWidth={1.5} />
+            <span>서재 보기</span>
+          </button>
+          <button
+            onClick={handleChatClick}
+            className="flex-1 flex items-center justify-center gap-2 px-2 py-2 bg-primary-light text-white rounded-xl text-sm font-medium shadow-sm hover:shadow-md"
+          >
+            <MessageCircle className="w-4 h-4" strokeWidth={1.5} />
+            <span>채팅하기</span>
+          </button>
+        </div>
       </div>
     </div>
   );

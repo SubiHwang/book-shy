@@ -8,7 +8,6 @@ interface Props {
   partnerName: string;
   partnerProfileImage: string;
   roomId: number;
-  requestId: number;
   onClose: () => void;
   onConfirm: (message: string, payload: RegisterSchedulePayload) => void;
 }
@@ -19,7 +18,6 @@ const ScheduleModal: FC<Props> = ({
   onClose,
   onConfirm,
   roomId,
-  requestId,
 }) => {
   const today = new Date();
   const [tab, setTab] = useState<'대여' | '교환'>('교환');
@@ -33,6 +31,36 @@ const ScheduleModal: FC<Props> = ({
 
   const startDay = new Date(year, month, 1).getDay();
   const lastDate = new Date(year, month + 1, 0).getDate();
+
+  const formatFullDate = (day: string) => {
+    const date = new Date(year, month, parseInt(day));
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const toISOString = (day: string, time: string): string => {
+    const regex = /(오전|오후)\s(\d{2})시\s(\d{2})분/;
+    const match = time.match(regex);
+    if (!match) throw new Error('Invalid time format');
+
+    let hour = parseInt(match[2], 10);
+    const minute = parseInt(match[3], 10);
+    if (match[1] === '오후' && hour !== 12) hour += 12;
+    if (match[1] === '오전' && hour === 12) hour = 0;
+
+    const date = new Date(year, month, parseInt(day), hour, minute);
+
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const hh = String(date.getHours()).padStart(2, '0');
+    const mi = String(date.getMinutes()).padStart(2, '0');
+
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}:00`;
+  };
 
   const handleDateClick = (day: string) => {
     if (tab === '교환') {
@@ -75,60 +103,27 @@ const ScheduleModal: FC<Props> = ({
     setEndDate(null);
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     if (!startDate || !borrowTime || (tab === '대여' && (!returnTime || !endDate))) {
       toast.warn('날짜와 시간을 모두 선택해주세요');
       return;
     }
 
-    const formatFullDate = (day: string) => {
-      const date = new Date(year, month, parseInt(day));
-      return date.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-    };
-
-    const toISOString = (day: string, time: string): string => {
-      const regex = /(오전|오후)\s(\d{2})시\s(\d{2})분/;
-      const match = time.match(regex);
-      if (!match) throw new Error('Invalid time format');
-
-      let hour = parseInt(match[2], 10);
-      const minute = parseInt(match[3], 10);
-      if (match[1] === '오후' && hour !== 12) hour += 12;
-      if (match[1] === '오전' && hour === 12) hour = 0;
-
-      const date = new Date(year, month, parseInt(day), hour, minute);
-
-      const yyyy = date.getFullYear();
-      const mm = String(date.getMonth() + 1).padStart(2, '0');
-      const dd = String(date.getDate()).padStart(2, '0');
-      const hh = String(date.getHours()).padStart(2, '0');
-      const mi = String(date.getMinutes()).padStart(2, '0');
-
-      return `${yyyy}-${mm}-${dd}T${hh}:${mi}:00`;
-    };
-
     const msg = `${formatFullDate(startDate)} ${borrowTime}`;
-    const payload: RegisterSchedulePayload =
-      tab === '교환'
-        ? {
-            roomId,
-            requestId,
-            type: 'EXCHANGE',
-            title: msg,
-            eventDate: toISOString(startDate, borrowTime),
-          }
+    const payload: RegisterSchedulePayload = {
+      roomId,
+      type: tab === '교환' ? 'EXCHANGE' : 'RENTAL',
+      userIds: [],
+      bookAId: 0,
+      bookBId: 0,
+      title: msg,
+      ...(tab === '교환'
+        ? { exchangeDate: toISOString(startDate, borrowTime) }
         : {
-            roomId,
-            requestId,
-            type: 'RENTAL',
-            title: msg,
             startDate: toISOString(startDate, borrowTime),
-            endDate: toISOString(endDate!, returnTime!),
-          };
+            endDate: toISOString(endDate!, returnTime),
+          }),
+    };
 
     onConfirm(msg, payload);
     onClose();

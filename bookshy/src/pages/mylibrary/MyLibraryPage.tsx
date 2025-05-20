@@ -6,7 +6,11 @@ import AddBookDialog from '@/components/mylibrary/BookAdd/AddBookDialog';
 import { useNavigate, Outlet } from 'react-router-dom';
 import TabNavBar from '@/components/common/TabNavBar';
 import { AllBannersData } from '@/types/mylibrary/components';
-import { fetchFavoriteCategory, fetchReadingLevel } from '@/services/mylibrary/bannersService';
+import {
+  fetchFavoriteCategory,
+  fetchReadingLevel,
+  fetchExchangeSummary,
+} from '@/services/mylibrary/bannersService';
 import { getUserIdFromToken } from '@/utils/jwt';
 import { getDefaultReadingMessage, getDefaultGenreMessage } from '@/utils/library/messageUtils';
 
@@ -36,16 +40,18 @@ const MyLibraryPage: React.FC = () => {
         console.log('로딩 상태 설정: true');
 
         // 병렬로 모든 API 호출하기
-        console.log('API 호출 시작: 카테고리 및 독서량 데이터, userId =', userId);
+        console.log('API 호출 시작: 카테고리, 독서량, 교환 통계 데이터, userId =', userId);
 
         // Promise.all로 여러 API 동시 호출
-        const [categoryData, readingLevelData] = await Promise.all([
+        const [categoryData, readingLevelData, exchangeData] = await Promise.all([
           fetchFavoriteCategory(userId),
           fetchReadingLevel(userId),
+          fetchExchangeSummary(), // 교환 통계 API 추가
         ]);
 
         console.log('API 응답 (카테고리 데이터):', categoryData);
         console.log('API 응답 (독서량 데이터):', readingLevelData);
+        console.log('API 응답 (교환 통계 데이터):', exchangeData);
 
         // 배너 데이터 설정
         const newBannerData = {
@@ -58,9 +64,8 @@ const MyLibraryPage: React.FC = () => {
             genreDescription: categoryData.message,
           },
           exchangeData: {
-            exchangeCount: 12,
-            peopleCount: 5,
-            lastExchangeDate: '2023-05-15',
+            peopleCount: exchangeData.peopleCount,
+            bookCount: exchangeData.bookCount, // API에서 받은 이름 그대로 사용
           },
         };
 
@@ -88,9 +93,8 @@ const MyLibraryPage: React.FC = () => {
             genreDescription: getDefaultGenreMessage(),
           },
           exchangeData: {
-            exchangeCount: 0,
             peopleCount: 0,
-            lastExchangeDate: '',
+            bookCount: 0, // 기존의 exchangeCount 대신 bookCount 사용
           },
         };
 

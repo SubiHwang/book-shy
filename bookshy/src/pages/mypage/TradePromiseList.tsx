@@ -29,8 +29,14 @@ const TradePromiseList: FC = () => {
         <TradePromiseCard
           key={item.tradeId}
           tradeId={item.tradeId}
+          type={item.type}
+          status={item.status}
           userName={item.counterpart.nickname}
           userProfileUrl={item.counterpart.profileImageUrl}
+          myBookTitle={item.myBookTitle}
+          myBookCoverUrl={item.myBookCoverUrl}
+          partnerBookTitle={item.partnerBookTitle}
+          partnerBookCoverUrl={item.partnerBookCoverUrl}
           statusText={item.timeLeft.display}
           meetTime={new Date(item.scheduledTime).toLocaleString('ko-KR', {
             year: 'numeric',
@@ -40,6 +46,7 @@ const TradePromiseList: FC = () => {
             hour: '2-digit',
             minute: '2-digit',
           })}
+          timeLeft={item.timeLeft}
         />
       ))}
     </div>

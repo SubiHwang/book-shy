@@ -13,24 +13,29 @@ export interface ChatRoomSummary {
 }
 
 export interface ChatMessage {
-  id: string;
-  chatRoomId?: number;
+  id: number;
+  chatRoomId: number;
   senderId: number;
-  senderNickname?: string;
-  content: string;
-  sentAt: string;
-  type?: 'notice' | 'info' | 'warning' | 'text';
+  content: string | null;
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  type: 'text' | 'image' | 'notice' | 'info';
+  timestamp: string;
+  isRead: boolean;
   emoji?: string;
+  sentAt?: string;
   read?: boolean;
 }
 
 export interface RegisterSchedulePayload {
   roomId: number;
-  requestId: number;
   type: 'EXCHANGE' | 'RENTAL';
+  userIds: number[];
+  bookAId: number;
+  bookBId: number;
   title: string;
   description?: string;
-  eventDate?: string;
+  exchangeDate?: string;
   startDate?: string;
   endDate?: string;
 }
@@ -50,15 +55,15 @@ export interface EmojiUpdatePayload {
 export type CalendarType = 'EXCHANGE' | 'RENTAL';
 
 export interface ChatCalendarEventDto {
-  eventId: number;
+  calendarId: number;
   requestId: number;
   roomId: number;
   type: CalendarType;
   title: string;
   description: string | null;
-  eventDate?: string; // type === 'EXCHANGE'일 때만 존재
-  startDate?: string; // type === 'RENTAL'일 때만 존재
-  endDate?: string; // type === 'RENTAL'일 때만 존재
+  exchangeDate?: string; // type === 'EXCHANGE'일 때만 존재
+  rentalStartDate?: string; // type === 'RENTAL'일 때만 존재
+  rentalEndDate?: string; // type === 'RENTAL'일 때만 존재
 }
 
 export interface ChatRoomUserIds {

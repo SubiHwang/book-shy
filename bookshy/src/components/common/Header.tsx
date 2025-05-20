@@ -29,7 +29,6 @@ const Header: FC<HeaderProps> = ({
   return (
     <header
       className={`sticky top-0 w-full px-4 py-3 flex items-center justify-between z-50 ${className}`}
-      style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       <div className="flex items-center">
         {showBackButton && (

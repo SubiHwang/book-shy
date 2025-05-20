@@ -72,3 +72,37 @@ export const fetchReadingLevel = async (userId: number): Promise<ReadingLevelDat
     };
   }
 };
+
+export interface ExchangeSummaryData {
+  peopleCount: number;
+  bookCount: number;
+}
+
+// 교환 통계 조회 함수
+export const fetchExchangeSummary = async (): Promise<ExchangeSummaryData> => {
+  try {
+    console.log('교환 통계 조회 요청');
+
+    const url = `/trades/summary`;
+    console.log('API 요청 URL:', url);
+
+    // GET 요청 전송
+    const response = await authAxiosInstance.get(url);
+
+    // 응답을 ExchangeSummaryData 타입으로 캐스팅
+    const summaryData = response as unknown as ExchangeSummaryData;
+
+    console.log('교환 통계 조회 성공:', summaryData);
+
+    // API 응답을 그대로 반환
+    return summaryData;
+  } catch (error) {
+    console.error('교환 통계 조회 오류:', error);
+
+    // 오류 발생 시 기본 데이터 반환
+    return {
+      peopleCount: 0,
+      bookCount: 0,
+    };
+  }
+};
