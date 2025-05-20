@@ -59,31 +59,18 @@ function ChatRoom({
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
 
-  // 입력창/옵션 영역 높이 동적 관리
-  const inputRef = useRef<HTMLDivElement | null>(null);
-  const optionRef = useRef<HTMLDivElement | null>(null);
-  const [inputHeight, setInputHeight] = useState(64); // 기본값
-  const [optionHeight, setOptionHeight] = useState(0);
-
-  useEffect(() => {
-    if (inputRef.current) setInputHeight(inputRef.current.offsetHeight);
-    if (optionRef.current && showOptions) setOptionHeight(optionRef.current.offsetHeight);
-    else setOptionHeight(0);
-  }, [showOptions]);
-
   useEffect(() => {
     const updateHeight = () => {
       const visual = window.visualViewport;
-      if (visual) {
-        setViewportHeight(visual.height);
-      }
+      const height = visual
+        ? visual.height + visual.offsetTop // 정확한 visible 영역
+        : window.innerHeight;
+      setViewportHeight(height);
     };
+
+    updateHeight();
     window.visualViewport?.addEventListener('resize', updateHeight);
-    window.visualViewport?.addEventListener('scroll', updateHeight);
-    return () => {
-      window.visualViewport?.removeEventListener('resize', updateHeight);
-      window.visualViewport?.removeEventListener('scroll', updateHeight);
-    };
+    return () => window.visualViewport?.removeEventListener('resize', updateHeight);
   }, []);
 
   const queryClient = useQueryClient();
@@ -315,30 +302,24 @@ function ChatRoom({
 
   let lastDateLabel = '';
 
-  const HEADER_HEIGHT = 56;
-
   return (
-    <div
-      className="flex flex-col bg-white h-full relative"
-      style={{
-        height: viewportHeight,
-        paddingTop: `calc(${HEADER_HEIGHT}px + env(safe-area-inset-top))`,
-        paddingBottom: 'env(safe-area-inset-bottom)',
-      }}
-    >
-      {/* 헤더는 fixed로 따로 렌더링 */}
-      <ChatRoomHeader
-        partnerName={partnerName}
-        partnerProfileImage={partnerProfileImage}
-        bookShyScore={bookShyScore}
-      />
+    <div style={{ height: viewportHeight }} className="flex flex-col bg-white pb-safe">
+      {/* 헤더 */}
+      <div className="shrink-0 z-10">
+        <ChatRoomHeader
+          partnerName={partnerName}
+          partnerProfileImage={partnerProfileImage}
+          bookShyScore={bookShyScore}
+        />
+      </div>
 
       {/* 메시지 영역 */}
       <div
-        className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300"
-        style={{
-          paddingBottom: inputHeight + optionHeight + 8,
-        }}
+        className={`flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
+          showOptions
+            ? 'pb-[35vh]' // 확장 기능 보이면 큰 여백
+            : 'pb-20' // 기본 여백
+        }`}
       >
         {messages.map((msg, idx) => {
           const dateLabel = formatDateLabel(msg.sentAt);
@@ -417,17 +398,11 @@ function ChatRoom({
       {/* ↓ 아래로 버튼 */}
       {showScrollToBottom && (
         <div
-          className="w-full flex justify-center z-30"
-          style={{
-            position: 'absolute',
-            left: 0,
-            bottom: optionHeight + inputHeight + 16,
-            transition: 'bottom 0.3s',
-            pointerEvents: 'none',
-          }}
+          className={`absolute inset-x-0 flex justify-center z-30 transition-all duration-300
+      ${showOptions ? 'bottom-[32vh]' : 'bottom-[88px]'}
+    `}
         >
           <button
-            style={{ pointerEvents: 'auto' }}
             className="bg-black/60 hover:bg-black/80 text-white text-lg sm:text-xl px-3 py-1.5 rounded-full shadow-md"
             onClick={() => scrollToBottom(true)}
             aria-label="맨 아래로 스크롤"
@@ -437,8 +412,7 @@ function ChatRoom({
         </div>
       )}
 
-      {/* 입력창 영역 */}
-      <div ref={inputRef} className="shrink-0 z-20 bg-white border-t border-light-border">
+      <div className="shrink-0 z-20 bg-white border-t border-light-border px-4">
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
@@ -447,18 +421,20 @@ function ChatRoom({
             const wasAtBottom = container
               ? container.scrollHeight - container.scrollTop - container.clientHeight < 50
               : false;
+
             setShowOptions((prev) => !prev);
+
+            // 확장된 후 DOM이 완전히 반영된 다음 스크롤 (조금 delay)
             if (wasAtBottom) {
               setTimeout(() => {
                 requestAnimationFrame(() => {
-                  scrollToBottom(true);
+                  scrollToBottom(true); // smooth 스크롤
                 });
-              }, 250);
+              }, 250); // 약간 더 넉넉한 시간
             }
           }}
           onScheduleClick={() => setShowScheduleModal(true)}
           chatRoomId={numericRoomId}
-          optionRef={optionRef}
         />
       </div>
 
