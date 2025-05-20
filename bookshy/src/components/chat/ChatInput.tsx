@@ -31,31 +31,15 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // 파일 크기 체크 (5MB 제한)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('이미지 크기는 5MB를 초과할 수 없습니다.');
-      return;
-    }
-
-    // 이미지 파일 타입 체크
-    if (!file.type.startsWith('image/')) {
-      toast.error('이미지 파일만 업로드 가능합니다.');
-      return;
-    }
-
     try {
-      setIsUploading(true);
-      const { imageUrl } = await uploadChatImage(chatRoomId, file);
-      onSend(`[이미지](${imageUrl})`);
-    } catch (error) {
+      const result = await uploadChatImage(chatRoomId, file);
+      console.log('✅ 이미지 업로드 성공:', result);
+    } catch (error: any) {
       console.error('❌ 이미지 업로드 실패:', error);
-      toast.error('이미지 업로드에 실패했습니다.');
+      toast.error(error.message || '이미지 업로드에 실패했습니다.');
     } finally {
-      setIsUploading(false);
       // 파일 입력 초기화
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      e.target.value = '';
     }
   };
 
