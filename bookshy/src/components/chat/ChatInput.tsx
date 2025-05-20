@@ -9,9 +9,10 @@ interface Props {
   onToggleOptions: () => void;
   onScheduleClick: () => void;
   chatRoomId: number;
+  onFocus?: () => void;
 }
 
-function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chatRoomId }: Props) {
+function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chatRoomId, onFocus }: Props) {
   const [content, setContent] = useState('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -83,6 +84,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
           className="w-full max-w-full px-4 py-2 bg-primary-light text-white placeholder-white rounded-full focus:outline-none box-border"
           style={{ WebkitOverflowScrolling: 'touch' }}
           disabled={isUploading}
+          onFocus={onFocus}
         />
 
         <div
