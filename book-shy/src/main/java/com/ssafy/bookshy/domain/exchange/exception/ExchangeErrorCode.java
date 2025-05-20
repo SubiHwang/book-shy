@@ -24,10 +24,14 @@ public enum ExchangeErrorCode implements ErrorCode {
     REVIEW_ALREADY_SUBMITTED(409, "⚠️ 이미 리뷰를 제출한 사용자입니다."),
     UNAUTHORIZED_REVIEW_SUBMITTER(403, "🚫 해당 거래의 리뷰를 제출할 권한이 없습니다."),
     BOOK_NOT_FOUND(404, "❌ 서재에서 도서를 찾을 수 없습니다."),
+    CHATROOM_NOT_FOUND(404, "❌ 채팅방을 찾을 수 없습니다."),
 
     // 🔹 리뷰 관련
     INCOMPLETE_REVIEW(400, "📛 모든 평가 항목을 채워주세요."),
-    TRADE_ALREADY_COMPLETED(409, "✅ 해당 거래는 이미 완료 처리되었습니다.");
+    TRADE_ALREADY_COMPLETED(409, "✅ 해당 거래는 이미 완료 처리되었습니다."),
+
+    // 🔹 사용자 관련
+    USER_NOT_FOUND(404, "❌ 사용자를 찾을 수 없습니다.");
 
     private final int status;
     private final String message;
