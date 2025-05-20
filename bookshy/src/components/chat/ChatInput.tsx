@@ -9,9 +9,10 @@ interface Props {
   onToggleOptions: () => void;
   onScheduleClick: () => void;
   chatRoomId: number;
+  optionRef?: React.RefObject<HTMLDivElement>;
 }
 
-function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chatRoomId }: Props) {
+function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chatRoomId, optionRef }: Props) {
   const [content, setContent] = useState('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -60,7 +61,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
   };
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 w-full bg-light-bg-secondary border-t pb-[env(safe-area-inset-bottom)]">
+    <div className="w-full bg-light-bg-secondary border-t">
       {/* 입력창 */}
       <form
         onSubmit={handleSubmit}
@@ -103,13 +104,16 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
 
       {/* 확장 기능 옵션 */}
       <div
-        className={`transition-all duration-300 overflow-hidden ${
-          showOptions ? 'h-[25vh]' : 'h-0'
-        }`}
+        ref={optionRef}
+        className={`transition-all duration-300 overflow-hidden`}
+        style={{
+          height: showOptions ? 140 : 0,
+          minHeight: showOptions ? 140 : 0,
+        }}
       >
         <div className="h-full flex items-center justify-around px-6">
           <OptionButton
-            icon={<Camera size={28} strokeWidth={1.5} />}
+            icon={<Camera size={36} strokeWidth={1.5} />}
             label="카메라"
             onClick={() => {
               if (fileInputRef.current) {
@@ -121,7 +125,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
             disabled={isUploading}
           />
           <OptionButton
-            icon={<Image size={28} strokeWidth={1.5} />}
+            icon={<Image size={36} strokeWidth={1.5} />}
             label="앨범"
             onClick={() => {
               if (fileInputRef.current) {
@@ -133,13 +137,13 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
             disabled={isUploading}
           />
           <OptionButton
-            icon={<CalendarDays size={28} strokeWidth={1.5} />}
+            icon={<CalendarDays size={36} strokeWidth={1.5} />}
             label="약속"
             onClick={onScheduleClick}
             disabled={isUploading}
           />
           <OptionButton
-            icon={<Phone size={28} strokeWidth={1.5} />}
+            icon={<Phone size={36} strokeWidth={1.5} />}
             label="전화"
             onClick={() => {}}
             disabled={isUploading}
@@ -179,10 +183,10 @@ function OptionButton({
         disabled ? 'opacity-50 cursor-not-allowed' : ''
       }`}
     >
-      <div className="w-14 h-14 rounded-full border-2 border-primary flex items-center justify-center mb-2">
+      <div className="w-16 h-16 rounded-full border-2 border-primary flex items-center justify-center mb-2">
         {icon}
       </div>
-      <span className="text-sm font-medium">{label}</span>
+      <span className="text-base font-semibold">{label}</span>
     </div>
   );
 }
