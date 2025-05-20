@@ -44,7 +44,8 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   const { roomId } = useParams();
   const numericRoomId = Number(roomId);
   const myUserId = getUserIdFromToken();
-  const userId = myUserId ? Number(myUserId) : null;
+  if (myUserId === null) return null;
+  const userId = Number(myUserId);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showOptions, setShowOptions] = useState(false);
@@ -52,13 +53,9 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const [partnerInfo, setPartnerInfo] = useState<PartnerInfo | null>(null);
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-
-  const prevMessageCountRef = useRef(messages.length);
-  const isInitialLoadRef = useRef(true);
 
   const { data: initialMessages = [], isSuccess } = useQuery({
     queryKey: ['chatMessages', numericRoomId],
@@ -67,6 +64,12 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
     retry: false,
     staleTime: 0,
   });
+
+  const prevMessageCountRef = useRef(messages.length);
+  const isInitialLoadRef = useRef(true);
+
+  // 상대방 정보 상태
+  const [partnerInfo, setPartnerInfo] = useState<PartnerInfo | null>(null);
 
   useLayoutEffect(() => {
     const prevCount = prevMessageCountRef.current;
@@ -125,7 +128,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
 
   const onRead = useCallback(
     (payload: { readerId: number; messageIds: number[] }) => {
-      if (!userId || payload.readerId === userId) return;
+      if (payload.readerId === userId) return;
       setMessages((prev) =>
         prev.map((msg) =>
           payload.messageIds.includes(Number(msg.id)) ? { ...msg, read: true } : msg,
@@ -137,11 +140,10 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
 
   const onMessage = useCallback(
     (newMessage: ChatMessage) => {
-      if (!userId) return;
       setMessages((prev) =>
         prev.some((m) => m.id === newMessage.id) ? prev : [...prev, newMessage],
       );
-      if (newMessage.senderId !== userId) {
+      if (newMessage.senderId !== myUserId) {
         markMessagesAsRead(numericRoomId).catch((err) => console.error('❌ 읽음 실패:', err));
       }
       queryClient.setQueryData(['chatList'], (prev: any) =>
@@ -154,7 +156,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
           : prev,
       );
     },
-    [userId, numericRoomId, queryClient],
+    [myUserId, numericRoomId, queryClient],
   );
 
   const { sendMessage } = useStomp(numericRoomId, onMessage, onRead);
@@ -224,18 +226,12 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   }, []);
 
   const scrollToBottom = (smooth = true) => {
-    messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'end' });
-  };
-
-  const handleInputFocus = () => {
-    setTimeout(() => {
-      scrollToBottom(true);
-    }, 100);
+    messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
   };
 
   const handleSendMessage = (content: string) => {
-    if (isNaN(numericRoomId) || !userId) return;
-    sendMessage(numericRoomId, userId, content, 'chat');
+    if (isNaN(numericRoomId)) return;
+    sendMessage(numericRoomId, myUserId, content, 'chat');
   };
 
   const registerScheduleAndNotify = async (_message: string, payload: RegisterSchedulePayload) => {
@@ -296,8 +292,6 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
 
   let lastDateLabel = '';
 
-  if (!userId) return null;
-
   return (
     <div className="relative h-full min-h-0 bg-white pb-safe">
       {/* 헤더 - 항상 상단 고정 */}
@@ -311,89 +305,80 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
 
       {/* 메시지 영역 - 내부 스크롤, 헤더/인풋 높이만큼 패딩 */}
       <div
-        className={`flex flex-col overflow-y-auto transition-all duration-300 ${
-          showOptions ? 'pb-[35vh]' : ''
-        }`}
-        style={{
-          paddingTop: 56,
-          paddingBottom: showOptions ? '35vh' : 64,
-          height: '100dvh',
-          maxHeight: '-webkit-fill-available'
-        }}
+        className={`overflow-y-auto transition-all duration-300 ${showOptions ? 'pb-[35vh]' : ''}`}
+        style={{ paddingTop: 56, paddingBottom: showOptions ? '35vh' : 64, height: '100vh' }}
       >
-        <div className="flex-grow-0">
-          {messages.map((msg, idx) => {
-            const dateLabel = formatDateLabel(msg.sentAt);
-            const showDate = dateLabel !== lastDateLabel;
-            lastDateLabel = dateLabel;
+        {messages.map((msg, idx) => {
+          const dateLabel = formatDateLabel(msg.sentAt);
+          const showDate = dateLabel !== lastDateLabel;
+          lastDateLabel = dateLabel;
 
-            const isSystem = ['info', 'notice', 'warning'].includes(msg.type ?? '');
-            return (
-              <div key={`${msg.id}-${idx}`}>
-                {showDate && (
-                  <div className="flex items-center gap-2 text-[11px] sm:text-xs text-light-text-muted my-4">
-                    <div className="flex-grow border-t border-light-bg-shade" />
-                    <span className="px-2 whitespace-nowrap">{dateLabel}</span>
-                    <div className="flex-grow border-t border-light-bg-shade" />
-                  </div>
-                )}
-                {isSystem ? (
-                  <div className="max-w-[90%] mx-auto">
-                    <SystemMessage
-                      title={
-                        msg.type === 'notice'
-                          ? '거래 시 주의해주세요!'
-                          : msg.type === 'info'
-                            ? '약속이 등록되었습니다!'
-                            : '알림'
-                      }
-                      content={msg.content}
-                      variant={msg.type as 'notice' | 'info' | 'warning'}
-                    />
-                  </div>
-                ) : (
-                  <ChatMessageItem
-                    message={{ ...msg, sentAt: formatTime(msg.sentAt), read: msg.read }}
-                    isMyMessage={msg.senderId === userId}
-                    showEmojiSelector={emojiTargetId === msg.id}
-                    onLongPress={() => handleLongPressOrRightClick(msg.id)}
-                    onRightClick={() => handleLongPressOrRightClick(msg.id)}
-                    onSelectEmoji={(emoji) => handleSelectEmoji(msg.id, emoji ?? '')}
-                    selectedEmoji={Array.isArray(msg.emoji) ? msg.emoji[0] : msg.emoji}
-                    onCloseEmoji={() => setEmojiTargetId(null)}
+          const isSystem = ['info', 'notice', 'warning'].includes(msg.type ?? '');
+          return (
+            <div key={`${msg.id}-${idx}`}>
+              {showDate && (
+                <div className="flex items-center gap-2 text-[11px] sm:text-xs text-light-text-muted my-4">
+                  <div className="flex-grow border-t border-light-bg-shade" />
+                  <span className="px-2 whitespace-nowrap">{dateLabel}</span>
+                  <div className="flex-grow border-t border-light-bg-shade" />
+                </div>
+              )}
+              {isSystem ? (
+                <div className="max-w-[90%] mx-auto">
+                  <SystemMessage
+                    title={
+                      msg.type === 'notice'
+                        ? '거래 시 주의해주세요!'
+                        : msg.type === 'info'
+                          ? '약속이 등록되었습니다!'
+                          : '알림'
+                    }
+                    content={msg.content}
+                    variant={msg.type as 'notice' | 'info' | 'warning'}
                   />
-                )}
-              </div>
-            );
-          })}
+                </div>
+              ) : (
+                <ChatMessageItem
+                  message={{ ...msg, sentAt: formatTime(msg.sentAt), read: msg.read }}
+                  isMyMessage={msg.senderId === myUserId}
+                  showEmojiSelector={emojiTargetId === msg.id}
+                  onLongPress={() => handleLongPressOrRightClick(msg.id)}
+                  onRightClick={() => handleLongPressOrRightClick(msg.id)}
+                  onSelectEmoji={(emoji) => handleSelectEmoji(msg.id, emoji ?? '')}
+                  selectedEmoji={Array.isArray(msg.emoji) ? msg.emoji[0] : msg.emoji}
+                  onCloseEmoji={() => setEmojiTargetId(null)}
+                />
+              )}
+            </div>
+          );
+        })}
 
-          {/* 📌 교환 완료 유도 메시지 */}
-          <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm max-w-[90%] mx-auto mb-4">
-            <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
-            <p className="text-xs mt-1 text-light-text-muted">
-              거래가 완료되었다면 리뷰를 남겨주세요.
-            </p>
-            <button
-              onClick={() =>
-                navigate(`/chat/${numericRoomId}/review`, {
-                  state: {
-                    chatSummary: {
-                      partnerName: partnerInfo?.name ?? '로딩중...',
-                      partnerProfileImage: partnerInfo?.profileImage ?? '/default-profile.png',
-                      bookShyScore: partnerInfo?.bookShyScore ?? 0,
-                      myBookId,
-                      myBookName,
-                      otherBookId,
-                      otherBookName,
-                    },
+        {/* 📌 교환 완료 유도 메시지 */}
+        <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm max-w-[90%] mx-auto">
+          <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
+          <p className="text-xs mt-1 text-light-text-muted">
+            거래가 완료되었다면 리뷰를 남겨주세요.
+          </p>
+          <button
+            onClick={() =>
+              navigate(`/chat/${numericRoomId}/review`, {
+                state: {
+                  chatSummary: {
+                    partnerName: partnerInfo?.name ?? '로딩중...',
+                    partnerProfileImage: partnerInfo?.profileImage ?? '/default-profile.png',
+                    bookShyScore: partnerInfo?.bookShyScore ?? 0,
+                    myBookId,
+                    myBookName,
+                    otherBookId,
+                    otherBookName,
                   },
-                })
-              }
-              className="mt-3 inline-block bg-primary text-white text-xs font-medium px-4 py-2 rounded-full"
-            >
-              거래 완료
-            </button>
-          </div>
+                },
+              })
+            }
+            className="mt-3 inline-block bg-primary text-white text-xs font-medium px-4 py-2 rounded-full"
+          >
+            거래 완료
+          </button>
         </div>
 
         <div ref={messagesEndRef} className="h-4" />
@@ -404,7 +389,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
         <div
           className="fixed inset-x-0 flex justify-center z-30 transition-all duration-300"
           style={{
-            bottom: showOptions ? 'calc(35vh + env(safe-area-inset-bottom))' : 'calc(64px + env(safe-area-inset-bottom))',
+            bottom: showOptions ? `calc(25vh + 72px)` : `72px`, // 옵션 열렸을 때는 옵션+인풋+여유, 아니면 인풋+여유
           }}
         >
           <button
@@ -419,11 +404,10 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
       )}
 
       {/* 인풋창 - 항상 하단 고정 */}
-      <div className="fixed left-0 right-0 bottom-0 z-20">
+      <div className="fixed left-0 right-0 bottom-0 z-20 bg-white border-t border-light-border px-4">
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
-          onFocus={handleInputFocus}
           onToggleOptions={() => {
             const container = messagesEndRef.current?.parentElement;
             const wasAtBottom = container
@@ -432,12 +416,13 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
 
             setShowOptions((prev) => !prev);
 
+            // 확장된 후 DOM이 완전히 반영된 다음 스크롤 (조금 delay)
             if (wasAtBottom) {
               setTimeout(() => {
                 requestAnimationFrame(() => {
-                  scrollToBottom(true);
+                  scrollToBottom(true); // smooth 스크롤
                 });
-              }, 250);
+              }, 250); // 약간 더 넉넉한 시간
             }
           }}
           onScheduleClick={() => setShowScheduleModal(true)}
