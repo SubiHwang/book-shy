@@ -1,6 +1,7 @@
 // src/components/mylibrary/BookShelf/BannerCards/ExchangeBanner.tsx
 import React from 'react';
 import { ExchangeBannerData } from '@/types/mylibrary/components';
+import BannerCard from './BannerCard';
 
 interface ExchangeBannerProps {
   data: ExchangeBannerData;
@@ -40,8 +41,8 @@ const ExchangeBanner: React.FC<ExchangeBannerProps> = ({ data }) => {
       return '첫 교환을 시작해보세요!';
     } else {
       return peopleCount > 0
-        ? `지금까지 ${peopleCount}명과 ${bookCount}권의 책을 교환했어요`
-        : `지금까지 ${bookCount}권의 책을 교환했어요`;
+        ? `지금까지 ${peopleCount}명과 ${bookCount}권 교환했어요!`
+        : `지금까지 ${bookCount}권의 책을 교환했어요!`;
     }
   };
 
@@ -49,28 +50,17 @@ const ExchangeBanner: React.FC<ExchangeBannerProps> = ({ data }) => {
   const statisticsMessage = getStatisticsMessage();
 
   return (
-    <div className="bg-card-bg-blue rounded-xl p-4 shadow transition-all duration-200 h-32 flex items-center relative overflow-visible">
-      <div className="flex items-center w-full">
-        <div className="flex-1 min-w-0 flex flex-col justify-center m-1 ml-3">
-          {/* 호칭 줄 - 굵게 처리 (이모지 제외) */}
-          <p className="text-gray-800 font-semibold text-base mb-1">
-            당신은 <span className="text-blue-600">{title}</span>!
-          </p>
-
-          {/* 통계 정보 줄 - 이모지 포함 */}
-          <p className="text-gray-600 text-sm">
-            {emoji} {statisticsMessage}
-          </p>
-        </div>
-        <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center mr-2">
-          <img
-            src="/icons/exchangeimage.svg"
-            alt="교환 통계"
-            className="max-w-full max-h-full object-contain"
-          />
-        </div>
-      </div>
-    </div>
+    <BannerCard
+      backgroundColor="bg-card-bg-blue"
+      accentColor="text-blue-600"
+      highlightedText={title}
+      description={statisticsMessage}
+      descriptionPrefix={emoji}
+      iconSrc="/icons/exchangeimage.svg"
+      iconAlt="교환 통계"
+      preText="당신은 "
+      postText="!"
+    />
   );
 };
 
