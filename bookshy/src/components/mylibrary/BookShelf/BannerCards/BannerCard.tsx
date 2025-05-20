@@ -45,7 +45,7 @@ const BannerCard: React.FC<BannerCardProps> = ({
             </p>
           )}
         </div>
-        <div className=" flex-shrink-0 w-14 h-14 flex items-center justify-center mr-3">
+        <div className=" flex-shrink-0 w-14 h-14 flex items-center justify-center mr-2">
           <img src={iconSrc} alt={iconAlt} className="max-w-full max-h-full object-contain" />
         </div>
       </div>
