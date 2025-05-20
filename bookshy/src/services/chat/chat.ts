@@ -39,7 +39,7 @@ export async function fetchScheduleByRoomId(roomId: number): Promise<ChatCalenda
 
 // ✅ 채팅방 참여자 ID 조회
 export async function fetchChatRoomUserIds(chatRoomId: number): Promise<ChatRoomUserIds> {
-  return await authAxiosInstance.get(`/chats/users?chatRoomId=${chatRoomId}`);
+  return await authAxiosInstance.get(`/chats/${chatRoomId}/participants`);
 }
 
 // ✅ 현재 로그인 사용자가 대여 중인 모든 도서 목록 조회

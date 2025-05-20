@@ -302,14 +302,18 @@ function ChatRoom({
   };
 
   const registerScheduleAndNotify = async (_message: string, payload: RegisterSchedulePayload) => {
+    console.log('🚀 registerScheduleAndNotify 함수 호출됨');
+    console.log('📦 받은 payload:', payload);
+
     try {
       // 채팅방 사용자 ID 조회
       const { userAId, userBId } = await fetchChatRoomUserIds(numericRoomId);
+      console.log('👥 채팅방 사용자 ID:', { userAId, userBId });
 
       // 일정 등록을 위한 페이로드 구성
       const schedulePayload: RegisterSchedulePayload = {
         roomId: numericRoomId,
-        type: payload.type,
+        type: payload.type, // 대문자 유지
         userIds: [userAId, userBId],
         bookAId: myBookId[0],
         bookBId: otherBookId[0],
@@ -320,6 +324,17 @@ function ChatRoom({
           : { startDate: payload.startDate, endDate: payload.endDate }),
       };
 
+      // 요청 데이터 로깅
+      console.log('📅 일정 등록 요청 데이터:', {
+        ...schedulePayload,
+        userIds: `[${userAId}, ${userBId}]`,
+        type: schedulePayload.type,
+        dates:
+          payload.type === 'EXCHANGE'
+            ? `eventDate: ${payload.eventDate}`
+            : `startDate: ${payload.startDate}, endDate: ${payload.endDate}`,
+      });
+
       // 일정 등록
       await registerSchedule(schedulePayload);
 
@@ -329,12 +344,20 @@ function ChatRoom({
         start: payload.type === 'EXCHANGE' ? payload.eventDate : payload.startDate,
         end: payload.type === 'EXCHANGE' ? payload.eventDate : payload.endDate,
         description: schedulePayload.description,
-        type: payload.type,
+        type: schedulePayload.type,
         roomId: numericRoomId,
         userIds: [userAId, userBId],
         bookAId: myBookId[0],
         bookBId: otherBookId[0],
       };
+
+      // 캘린더 이벤트 데이터 로깅
+      console.log('📅 캘린더 이벤트 생성 데이터:', {
+        ...eventData,
+        userIds: `[${userAId}, ${userBId}]`,
+        type: eventData.type,
+        dates: `start: ${eventData.start}, end: ${eventData.end}`,
+      });
 
       await createCalendarEvent(eventData);
     } catch (e) {
