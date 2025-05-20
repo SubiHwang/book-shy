@@ -47,3 +47,23 @@ export async function fetchRentalBooksInUse(): Promise<Book[]> {
   const { data } = await authAxiosInstance.get(`/chats/rental-books`);
   return data;
 }
+
+// ✅ 채팅 이미지 업로드
+export async function uploadChatImage(
+  chatRoomId: number,
+  file: File,
+): Promise<{ imageUrl: string }> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const { data } = await authAxiosInstance.post<{ imageUrl: string }>(
+    `/messages/image?chatRoomId=${chatRoomId}`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  );
+  return data;
+}

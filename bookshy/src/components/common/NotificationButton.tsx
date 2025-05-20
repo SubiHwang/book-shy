@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Bell } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NotificationData } from '@/components/common/NotificationInitializer';
+import '@/styles/common/notificationButtonAnimation.css';
 
 const NotificationButton = () => {
   const [hasNotifications, setHasNotifications] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const bellRef = useRef<HTMLDivElement>(null);
 
   // 컴포넌트 마운트 시 로컬 스토리지에서 알림 상태 확인
   useEffect(() => {
@@ -46,6 +49,7 @@ const NotificationButton = () => {
     const handleNewNotification = (event: CustomEvent<NotificationData>) => {
       if (event.detail) {
         setHasNotifications(true);
+        animateBell();
       }
     };
 
@@ -68,13 +72,24 @@ const NotificationButton = () => {
     navigate(`/notifications?from=${encodeURIComponent(location.pathname)}`);
   };
 
+  const animateBell = () => {
+    setIsAnimating(true);
+
+    // 애니메이션 종료 후 상태 리셋
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 1000); // 애니메이션 지속 시간 (1초)
+  };
+
   return (
     <button
       className="p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors relative"
       onClick={goToNotifications}
       aria-label="알림 보기"
     >
-      <Bell size={24} />
+      <div ref={bellRef} className={`${isAnimating ? 'animate-bell' : ''}`}>
+        <Bell size={24} />
+      </div>
       {hasNotifications && (
         <span className="absolute top-1 right-2 bg-red-500 border border-light-bg rounded-full w-2 h-2"></span>
       )}

@@ -1,5 +1,5 @@
 import { useState, FC, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import BookSearchItem from '@/components/mylibrary/BookAdd/BookSearchItem';
 import { searchBooksByKeyword, addBookFromSearch } from '@/services/mylibrary/bookSearchService';
@@ -11,22 +11,35 @@ import SearchBar from '@/components/common/SearchBar';
 const AddBySearchPage: FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   // URL에서 searchQuery 파라미터 가져오기
   const urlSearchParams = new URLSearchParams(location.search);
   const queryParam = urlSearchParams.get('q') || '';
+  const searchTerm = searchParams.get('searchTerm') || '';
 
-  const [searchQuery, setSearchQuery] = useState<string>(queryParam);
+  const [searchQuery, setSearchQuery] = useState<string>(queryParam || searchTerm);
+  const [displayedQuery, setDisplayedQuery] = useState<string>(queryParam || searchTerm); // 검색 결과에 표시할 쿼리
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [books, setBooks] = useState<BookItemType[]>([]);
   const [totalResults, setTotalResults] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState<boolean>(false);
-  const [hasSearched, setHasSearched] = useState<boolean>(!!queryParam); // URL에 쿼리가 있으면 검색된 상태로 시작
+  const [hasSearched, setHasSearched] = useState<boolean>(!!queryParam || !!searchTerm); // URL에 쿼리가 있으면 검색된 상태로 시작
 
-  // URL에 검색어가 있을 경우, 페이지 로드 시 자동으로 검색 실행
+  // URL에 searchTerm이 있을 경우, 페이지 로드 시 자동으로 검색 실행
+  useEffect(() => {
+    if (searchTerm && !queryParam) {
+      setSearchQuery(searchTerm);
+      setDisplayedQuery(searchTerm);
+      searchBooks(searchTerm);
+    }
+  }, [searchTerm, queryParam]);
+
+  // URL에 queryParam이 있을 경우, 페이지 로드 시 자동으로 검색 실행
   useEffect(() => {
     if (queryParam) {
+      setDisplayedQuery(queryParam);
       searchBooks(queryParam);
     }
   }, [queryParam]);
@@ -49,6 +62,8 @@ const AddBySearchPage: FC = () => {
       setBooks(response.books);
       setTotalResults(response.total);
       setHasSearched(true);
+      // 검색이 성공하면 displayedQuery 업데이트
+      setDisplayedQuery(query);
 
       console.log(`검색 결과: ${response.total}개의 책 중 ${response.books.length}개 표시`);
     } catch (err) {
@@ -64,6 +79,7 @@ const AddBySearchPage: FC = () => {
   // 검색어 변경 핸들러 - 수정됨
   const handleSearchChange = (value: string): void => {
     setSearchQuery(value);
+    // 여기서는 displayedQuery를 업데이트하지 않음
   };
 
   // 검색 실행 함수 - URL 업데이트 추가
@@ -74,6 +90,7 @@ const AddBySearchPage: FC = () => {
         replace: true,
       });
       searchBooks(searchQuery.trim());
+      // 검색 실행 시 displayedQuery 업데이트 -> searchBooks 내부에서 처리됨
     }
   };
 
@@ -168,11 +185,14 @@ const AddBySearchPage: FC = () => {
         {/* 검색 결과 헤더 */}
         {hasSearched && !error && !isSearching && (
           <div className="flex flex-col text-light-text px-8 py-4">
-            <div className="flex gap-2 justify-between items-center mb-1">
-              <p className="text-lg font-medium">
-                <span className="font-semibold text-primary-dark">{searchQuery}</span> 의 검색 결과
+            <div className="flex items-center mb-1">
+              <p className="text-lg font-medium flex items-center flex-1 min-w-0">
+                <span className="font-semibold text-primary-dark truncate max-w-[70%] inline-block">
+                  {displayedQuery}
+                </span>
+                <span className="ml-1 whitespace-nowrap">의 검색 결과</span>
               </p>
-              <p className="font-light">검색 결과 수: {totalResults}</p>
+              <p className="font-light whitespace-nowrap ml-2">총 {totalResults} 권</p>
             </div>
           </div>
         )}

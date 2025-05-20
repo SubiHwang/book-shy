@@ -379,8 +379,7 @@ function ChatRoom({
 
       {/* 메시지 영역 */}
       <div
-        ref={messageAreaRef}
-        className={`flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
+        className={`flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
           showOptions
             ? 'pb-[35vh]' // 확장 기능 보이면 큰 여백
             : 'pb-20' // 기본 여백
@@ -499,6 +498,7 @@ function ChatRoom({
             }
           }}
           onScheduleClick={() => setShowScheduleModal(true)}
+          chatRoomId={numericRoomId}
         />
       </div>
 

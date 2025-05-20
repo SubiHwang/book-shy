@@ -89,12 +89,12 @@ const NotificationPage = () => {
     history.replaceState(null, '', previousPath);
 
     // 4. 새 페이지로 navigate 사용하여 이동
-    navigate(notification.url);
+    navigate(notification.url, { replace: true });
   };
 
   // 뒤로 가기
   const goBack = () => {
-    navigate(previousPath);
+    window.history.back();
   };
 
   return (

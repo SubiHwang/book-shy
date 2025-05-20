@@ -99,7 +99,8 @@ const BookTripPage: React.FC = () => {
         />
 
         {/* 📚 책의여정 지도 */}
-        <div className="fixed bottom-32 right-6 z-50">
+
+        <div className="fixed bottom-32 left-6 z-50">
           <button
             onClick={() => navigate('/booknotes/trip-map')}
             className="w-14 h-14 rounded-full bg-cyan-500/20 backdrop-blur-md shadow-xl shadow-cyan-400/40 
