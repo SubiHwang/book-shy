@@ -434,6 +434,7 @@ function ChatRoom({
             }
           }}
           onScheduleClick={() => setShowScheduleModal(true)}
+          chatRoomId={numericRoomId}
         />
       </div>
 
