@@ -237,15 +237,20 @@ public class ChatMessageService {
             throw new ChatException(ChatErrorCode.INVALID_IMAGE_TYPE);
         }
 
+        // 2️⃣ 파일 확장자 유효성 검사
         String uuid = UUID.randomUUID().toString();
         String ext = FilenameUtils.getExtension(imageFile.getOriginalFilename());
 
-        // 2️⃣ 확장자 유효성 검사 (선택적으로 허용 확장자 제한 가능)
-        if (ext == null || ext.isBlank() || !(ext.equalsIgnoreCase("jpg") || ext.equalsIgnoreCase("jpeg") || ext.equalsIgnoreCase("png"))) {
+        String originalFileName = imageFile.getOriginalFilename();
+        log.info("📷 업로드된 파일명: {}, 확장자: {}", originalFileName, ext);
+
+
+        if (ext == null || ext.isBlank()
+                || !(ext.equalsIgnoreCase("jpg") || ext.equalsIgnoreCase("jpeg") || ext.equalsIgnoreCase("png"))) {
             throw new ChatException(ChatErrorCode.UNSUPPORTED_FILE_EXTENSION);
         }
 
-        // 3️⃣ 경로 및 URL 설정
+        // 3️⃣ 저장 경로 및 URL 설정
         String fileName = uuid + "." + ext;
         String thumbFileName = uuid + "_thumb." + ext;
 
@@ -255,10 +260,11 @@ public class ChatMessageService {
         String imageUrl = ImageUrlConstants.CHAT_IMAGE_BASE_URL + fileName;
         String thumbnailUrl = ImageUrlConstants.CHAT_IMAGE_BASE_URL + "thumb/" + thumbFileName;
 
+        // 4️⃣ 원본 이미지 저장
         FileUploadUtil.saveFile(imageFile, imageDir, fileName);
 
         try {
-            // 5️⃣ 썸네일 디렉토리 생성 및 저장
+            // 5️⃣ 썸네일 생성
             Path thumbPath = Paths.get(thumbDir);
             if (!Files.exists(thumbPath)) Files.createDirectories(thumbPath);
 
@@ -272,11 +278,11 @@ public class ChatMessageService {
             throw new ChatException(ChatErrorCode.THUMBNAIL_CREATE_FAILED);
         }
 
-        // 6️⃣ 채팅방 유효성 확인
+        // 6️⃣ 채팅방 존재 확인
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new ChatException(ChatErrorCode.CHATROOM_NOT_FOUND));
 
-        // 7️⃣ 채팅 메시지 엔티티 생성 및 저장
+        // 7️⃣ 채팅 메시지 저장
         ChatMessage message = ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .senderId(senderId)
@@ -290,8 +296,8 @@ public class ChatMessageService {
         chatMessageRepository.save(message);
         chatRoom.updateLastMessage("[이미지]", message.getTimestamp());
 
+        // 8️⃣ WebSocket 브로드캐스트
         try {
-            // 8️⃣ WebSocket 메시지 전송
             String nickname = userService.getNicknameById(senderId);
             ChatMessageResponseDto responseDto = ChatMessageResponseDto.from(message, nickname);
             messagingTemplate.convertAndSend("/topic/chat/" + chatRoomId, responseDto);
@@ -302,6 +308,7 @@ public class ChatMessageService {
 
         return imageUrl;
     }
+
 
 
 }
