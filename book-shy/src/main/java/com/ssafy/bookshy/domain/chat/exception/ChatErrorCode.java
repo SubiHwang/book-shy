@@ -31,6 +31,10 @@ public enum ChatErrorCode implements ErrorCode {
     // 🔹 이미지
     INVALID_IMAGE_TYPE(400, "❌ 유효하지 않은 이미지입니다."),
     IMAGE_UPLOAD_FAILED(500, "❌ 채팅 이미지 업로드 중 오류가 발생했습니다."),
+    UNSUPPORTED_FILE_EXTENSION(400, "❌ 지원하지 않는 이미지 확장자입니다."),
+    IMAGE_SAVE_FAILED(500, "❌ 원본 이미지 저장 중 오류가 발생했습니다."),
+    THUMBNAIL_CREATE_FAILED(500, "❌ 썸네일 생성 중 오류가 발생했습니다."),
+    MESSAGE_BROADCAST_FAILED(500, "❌ 메시지 전송 중 오류가 발생했습니다."),
 
     // 🔹 기타
     BOOK_NOT_FOUND(404, "📕 도서를 찾을 수 없습니다."),

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -231,27 +232,33 @@ public class ChatMessageService {
      */
     @Transactional
     public String uploadChatImage(Long chatRoomId, Long senderId, MultipartFile imageFile) {
+        // 1️⃣ 유효성 검사: 이미지가 존재하지 않거나 비어있는 경우
         if (imageFile == null || imageFile.isEmpty()) {
             throw new ChatException(ChatErrorCode.INVALID_IMAGE_TYPE);
         }
 
+        String uuid = UUID.randomUUID().toString();
+        String ext = FilenameUtils.getExtension(imageFile.getOriginalFilename());
+
+        // 2️⃣ 확장자 유효성 검사 (선택적으로 허용 확장자 제한 가능)
+        if (ext == null || ext.isBlank() || !(ext.equalsIgnoreCase("jpg") || ext.equalsIgnoreCase("jpeg") || ext.equalsIgnoreCase("png"))) {
+            throw new ChatException(ChatErrorCode.UNSUPPORTED_FILE_EXTENSION);
+        }
+
+        // 3️⃣ 경로 및 URL 설정
+        String fileName = uuid + "." + ext;
+        String thumbFileName = uuid + "_thumb." + ext;
+
+        String imageDir = "/home/ubuntu/bookshy/images/chat";
+        String thumbDir = imageDir + "/thumb";
+
+        String imageUrl = ImageUrlConstants.CHAT_IMAGE_BASE_URL + fileName;
+        String thumbnailUrl = ImageUrlConstants.CHAT_IMAGE_BASE_URL + "thumb/" + thumbFileName;
+
+        FileUploadUtil.saveFile(imageFile, imageDir, fileName);
+
         try {
-            // 1️⃣ 파일명 및 경로 설정
-            String uuid = UUID.randomUUID().toString();
-            String ext = FilenameUtils.getExtension(imageFile.getOriginalFilename());
-            String fileName = uuid + "." + ext;
-            String thumbFileName = uuid + "_thumb." + ext;
-
-            String imageDir = "/home/ubuntu/bookshy/images/chat";
-            String thumbDir = imageDir + "/thumb";
-
-            String imageUrl = ImageUrlConstants.CHAT_IMAGE_BASE_URL + fileName;
-            String thumbnailUrl = ImageUrlConstants.CHAT_IMAGE_BASE_URL + "thumb/" + thumbFileName;
-
-            // 2️⃣ 원본 이미지 저장
-            FileUploadUtil.saveFile(imageFile, imageDir, fileName);
-
-            // 3️⃣ 썸네일 저장
+            // 5️⃣ 썸네일 디렉토리 생성 및 저장
             Path thumbPath = Paths.get(thumbDir);
             if (!Files.exists(thumbPath)) Files.createDirectories(thumbPath);
 
@@ -260,37 +267,41 @@ public class ChatMessageService {
                     .outputQuality(0.8)
                     .toFile(thumbPath.resolve(thumbFileName).toFile());
 
-            // 4️⃣ 채팅방 유효성 확인
-            ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                    .orElseThrow(() -> new ChatException(ChatErrorCode.CHATROOM_NOT_FOUND));
+        } catch (IOException e) {
+            log.error("❌ 썸네일 생성 실패: {}", e.getMessage(), e);
+            throw new ChatException(ChatErrorCode.THUMBNAIL_CREATE_FAILED);
+        }
 
-            // 5️⃣ 메시지 저장
-            ChatMessage message = ChatMessage.builder()
-                    .chatRoom(chatRoom)
-                    .senderId(senderId)
-                    .content(null)
-                    .imageUrl(imageUrl)
-                    .thumbnailUrl(thumbnailUrl) // ✅ 썸네일 포함
-                    .type("image")
-                    .timestamp(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
-                    .build();
+        // 6️⃣ 채팅방 유효성 확인
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new ChatException(ChatErrorCode.CHATROOM_NOT_FOUND));
 
-            chatMessageRepository.save(message);
+        // 7️⃣ 채팅 메시지 엔티티 생성 및 저장
+        ChatMessage message = ChatMessage.builder()
+                .chatRoom(chatRoom)
+                .senderId(senderId)
+                .content(null)
+                .imageUrl(imageUrl)
+                .thumbnailUrl(thumbnailUrl)
+                .type("image")
+                .timestamp(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
+                .build();
 
-            // 6️⃣ 채팅방 최신 메시지 갱신
-            chatRoom.updateLastMessage("[이미지]", message.getTimestamp());
+        chatMessageRepository.save(message);
+        chatRoom.updateLastMessage("[이미지]", message.getTimestamp());
 
-            // 7️⃣ WebSocket 메시지 전송
+        try {
+            // 8️⃣ WebSocket 메시지 전송
             String nickname = userService.getNicknameById(senderId);
             ChatMessageResponseDto responseDto = ChatMessageResponseDto.from(message, nickname);
-
             messagingTemplate.convertAndSend("/topic/chat/" + chatRoomId, responseDto);
-
-            return imageUrl;
-
         } catch (Exception e) {
-            throw new ChatException(ChatErrorCode.IMAGE_UPLOAD_FAILED);
+            log.error("❌ WebSocket 메시지 전송 실패: {}", e.getMessage(), e);
+            throw new ChatException(ChatErrorCode.MESSAGE_BROADCAST_FAILED);
         }
+
+        return imageUrl;
     }
+
 
 }
