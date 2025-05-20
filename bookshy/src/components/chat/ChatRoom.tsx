@@ -151,7 +151,11 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
         Array.isArray(prev)
           ? prev.map((room: any) =>
               room.id === newMessage.chatRoomId
-                ? { ...room, lastMessage: newMessage.content, lastMessageTime: newMessage.sentAt }
+                ? {
+                    ...room,
+                    lastMessage: newMessage.content,
+                    lastMessageTime: newMessage.timestamp,
+                  }
                 : room,
             )
           : prev,
@@ -187,8 +191,8 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
         senderId: 0,
         content: `📌 일정 등록됨: ${formattedDate}`,
         type: 'info',
-        sentAt: new Date().toISOString(),
-        read: false,
+        timestamp: new Date().toISOString(),
+        isRead: false,
         emoji: '',
       };
 
@@ -255,7 +259,10 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
         description: payload.description,
         ...(payload.type === 'EXCHANGE'
           ? { exchangeDate: payload.exchangeDate }
-          : { rentalStartDate: payload.rentalStartDate, rentalEndDate: payload.rentalEndDate }),
+          : {
+              startDate: payload.startDate,
+              endDate: payload.endDate,
+            }),
       };
 
       // 요청 데이터 로깅
@@ -266,7 +273,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
         dates:
           payload.type === 'EXCHANGE'
             ? `exchangeDate: ${payload.exchangeDate}`
-            : `rentalStartDate: ${payload.rentalStartDate}, rentalEndDate: ${payload.rentalEndDate}`,
+            : `startDate: ${payload.startDate}, endDate: ${payload.endDate}`,
       });
 
       // 일정 등록
@@ -276,33 +283,21 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
     }
   };
 
-  const handleSelectEmoji = async (messageId: string, emoji: string) => {
-    setEmojiTargetId(null);
-
-    const targetMessage = messages.find((m) => m.id === messageId);
-    if (!targetMessage) return;
-
-    const currentEmoji = Array.isArray(targetMessage.emoji)
-      ? targetMessage.emoji[0]
-      : targetMessage.emoji;
-
-    if (currentEmoji === emoji) {
-      try {
-        await deleteEmoji(Number(messageId));
-      } catch (e) {
-        console.error('❌ 이모지 삭제 실패:', e);
+  const handleSelectEmoji = async (messageId: number, emoji: string) => {
+    try {
+      if (emoji) {
+        await sendEmoji(messageId, emoji);
+      } else {
+        await deleteEmoji(messageId);
       }
-    } else {
-      try {
-        await sendEmoji(Number(messageId), emoji);
-      } catch (e) {
-        console.error('❌ 이모지 추가 실패:', e);
-      }
+      setEmojiTargetId(null);
+    } catch (error) {
+      console.error('이모지 처리 실패:', error);
     }
   };
 
-  const handleLongPressOrRightClick = (messageId: string) => {
-    setEmojiTargetId((prev) => (prev === messageId ? null : messageId));
+  const handleLongPressOrRightClick = (messageId: number) => {
+    setEmojiTargetId((prev) => (prev === messageId.toString() ? null : messageId.toString()));
   };
 
   const formatDateLabel = (iso: string) => {
@@ -323,8 +318,6 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
       ? ''
       : d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
   };
-
-  let lastDateLabel = '';
 
   // 캘린더 일정 조회
   const { data: calendarEvent } = useQuery({
@@ -393,15 +386,17 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
         className={`overflow-y-auto transition-all duration-300 ${showOptions ? 'pb-[35vh]' : ''}`}
         style={{ paddingTop: 56, paddingBottom: showOptions ? '35vh' : 64, height: '100vh' }}
       >
-        {messages.map((msg, idx) => {
-          const dateLabel = formatDateLabel(msg.sentAt);
-          const showDate = dateLabel !== lastDateLabel;
-          lastDateLabel = dateLabel;
+        {messages.map((msg, index) => {
+          const dateLabel = formatDateLabel(msg.timestamp ?? msg.sentAt ?? '');
+          const showDateLabel =
+            index === 0 ||
+            dateLabel !==
+              formatDateLabel(messages[index - 1].timestamp ?? messages[index - 1].sentAt ?? '');
 
           const isSystem = ['info', 'notice', 'warning'].includes(msg.type ?? '');
           return (
-            <div key={`${msg.id}-${idx}`}>
-              {showDate && (
+            <div key={`${msg.id}-${index}`}>
+              {showDateLabel && (
                 <div className="flex items-center gap-2 text-[11px] sm:text-xs text-light-text-muted my-4">
                   <div className="flex-grow border-t border-light-bg-shade" />
                   <span className="px-2 whitespace-nowrap">{dateLabel}</span>
@@ -418,19 +413,23 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
                           ? '약속이 등록되었습니다!'
                           : '알림'
                     }
-                    content={msg.content}
+                    content={msg.content ?? ''}
                     variant={msg.type as 'notice' | 'info' | 'warning'}
                   />
                 </div>
               ) : (
                 <ChatMessageItem
-                  message={{ ...msg, sentAt: formatTime(msg.sentAt), read: msg.read }}
+                  message={{
+                    ...msg,
+                    timestamp: formatTime(msg.timestamp ?? msg.sentAt ?? ''),
+                    isRead: msg.isRead ?? msg.read ?? false,
+                  }}
                   isMyMessage={msg.senderId === myUserId}
-                  showEmojiSelector={emojiTargetId === msg.id}
+                  showEmojiSelector={emojiTargetId === msg.id.toString()}
                   onLongPress={() => handleLongPressOrRightClick(msg.id)}
                   onRightClick={() => handleLongPressOrRightClick(msg.id)}
                   onSelectEmoji={(emoji) => handleSelectEmoji(msg.id, emoji ?? '')}
-                  selectedEmoji={Array.isArray(msg.emoji) ? msg.emoji[0] : msg.emoji}
+                  selectedEmoji={msg.emoji}
                   onCloseEmoji={() => setEmojiTargetId(null)}
                 />
               )}

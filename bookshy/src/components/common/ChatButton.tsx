@@ -8,7 +8,7 @@ interface ChatButtonProps {
 }
 
 const ChatButton: FC<ChatButtonProps> = ({ isActive, onClick }) => {
-  const countChat = 2;
+  const countChat = 0;
   const navigate = useNavigate();
 
   useEffect(() => {

@@ -13,14 +13,17 @@ export interface ChatRoomSummary {
 }
 
 export interface ChatMessage {
-  id: string;
-  chatRoomId?: number;
+  id: number;
+  chatRoomId: number;
   senderId: number;
-  senderNickname?: string;
-  content: string;
-  sentAt: string;
-  type?: 'notice' | 'info' | 'warning' | 'text';
+  content: string | null;
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  type: 'text' | 'image' | 'notice' | 'info';
+  timestamp: string;
+  isRead: boolean;
   emoji?: string;
+  sentAt?: string;
   read?: boolean;
 }
 
@@ -33,8 +36,8 @@ export interface RegisterSchedulePayload {
   title: string;
   description?: string;
   exchangeDate?: string;
-  rentalStartDate?: string;
-  rentalEndDate?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 interface ReadPayload {
