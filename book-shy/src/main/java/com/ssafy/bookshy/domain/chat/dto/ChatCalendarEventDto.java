@@ -24,6 +24,8 @@ public class ChatCalendarEventDto {
     private LocalDateTime rentalStartDate;
     private LocalDateTime rentalEndDate;
 
+    private String type; // 🔹 추가: "EXCHANGE" or "RENTAL"
+
     public static ChatCalendarEventDto from(ChatCalendar entity) {
         return ChatCalendarEventDto.builder()
                 .calendarId(entity.getCalendarId())
@@ -34,6 +36,17 @@ public class ChatCalendarEventDto {
                 .rentalEndDate(entity.getRentalEndDate())
                 .roomId(entity.getChatRoom().getId())
                 .requestId(entity.getRequestId())
+                .type(determineType(entity)) // 🔹 type 필드 설정
                 .build();
+    }
+
+    private static String determineType(ChatCalendar entity) {
+        if (entity.getExchangeDate() != null) {
+            return "EXCHANGE";
+        } else if (entity.getRentalStartDate() != null && entity.getRentalEndDate() != null) {
+            return "RENTAL";
+        } else {
+            return "UNKNOWN";
+        }
     }
 }
