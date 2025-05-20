@@ -319,17 +319,19 @@ function ChatRoom({
                 </div>
               )}
               {isSystem ? (
-                <SystemMessage
-                  title={
-                    msg.type === 'notice'
-                      ? '거래 시 주의해주세요!'
-                      : msg.type === 'info'
-                        ? '약속이 등록되었습니다!'
-                        : '알림'
-                  }
-                  content={msg.content}
-                  variant={msg.type as 'notice' | 'info' | 'warning'}
-                />
+                <div className="max-w-[90%] mx-auto">
+                  <SystemMessage
+                    title={
+                      msg.type === 'notice'
+                        ? '거래 시 주의해주세요!'
+                        : msg.type === 'info'
+                          ? '약속이 등록되었습니다!'
+                          : '알림'
+                    }
+                    content={msg.content}
+                    variant={msg.type as 'notice' | 'info' | 'warning'}
+                  />
+                </div>
               ) : (
                 <ChatMessageItem
                   message={{ ...msg, sentAt: formatTime(msg.sentAt), read: msg.read }}
@@ -347,7 +349,7 @@ function ChatRoom({
         })}
 
         {/* 📌 교환 완료 유도 메시지 */}
-        <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm">
+        <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm max-w-[90%] mx-auto">
           <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
           <p className="text-xs mt-1 text-light-text-muted">
             거래가 완료되었다면 리뷰를 남겨주세요.
