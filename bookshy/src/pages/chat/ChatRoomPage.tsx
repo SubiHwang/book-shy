@@ -8,10 +8,6 @@ function ChatRoomPage() {
   const { state } = useLocation();
   const [initialMessages] = useState<ChatMessage[]>([]);
 
-  const partnerName = state?.partnerName || '상대방';
-  const partnerProfileImage =
-    state?.partnerProfileImage || 'https://cdn.bookshy.com/profile/user5.jpg';
-  const bookShyScore = state?.bookShyScore || 100.0;
   const myBookId = state?.myBookId || [];
   const myBookName = state?.myBookName || [];
   const otherBookId = state?.otherBookId || [];
@@ -21,10 +17,7 @@ function ChatRoomPage() {
 
   return (
     <ChatRoom
-      partnerName={partnerName}
-      partnerProfileImage={partnerProfileImage}
       initialMessages={initialMessages}
-      bookShyScore={bookShyScore}
       myBookId={myBookId}
       myBookName={myBookName}
       otherBookId={otherBookId}
