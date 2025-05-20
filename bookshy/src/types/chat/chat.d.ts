@@ -32,9 +32,9 @@ export interface RegisterSchedulePayload {
   bookBId: number;
   title: string;
   description?: string;
-  eventDate?: string;
-  startDate?: string;
-  endDate?: string;
+  exchangeDate?: string;
+  rentalStartDate?: string;
+  rentalEndDate?: string;
 }
 
 interface ReadPayload {

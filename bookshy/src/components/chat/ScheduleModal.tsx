@@ -118,10 +118,10 @@ const ScheduleModal: FC<Props> = ({
       bookBId: 0,
       title: msg,
       ...(tab === '교환'
-        ? { eventDate: toISOString(startDate!, borrowTime) }
+        ? { exchangeDate: toISOString(startDate!, borrowTime) }
         : {
-            startDate: toISOString(startDate!, borrowTime),
-            endDate: toISOString(endDate!, returnTime),
+            rentalStartDate: toISOString(startDate!, borrowTime),
+            rentalEndDate: toISOString(endDate!, returnTime),
           }),
     };
 

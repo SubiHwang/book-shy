@@ -254,8 +254,8 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
         title: payload.title,
         description: payload.description,
         ...(payload.type === 'EXCHANGE'
-          ? { eventDate: payload.eventDate }
-          : { startDate: payload.startDate, endDate: payload.endDate }),
+          ? { exchangeDate: payload.exchangeDate }
+          : { rentalStartDate: payload.rentalStartDate, rentalEndDate: payload.rentalEndDate }),
       };
 
       // 요청 데이터 로깅
@@ -265,8 +265,8 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
         type: schedulePayload.type,
         dates:
           payload.type === 'EXCHANGE'
-            ? `eventDate: ${payload.eventDate}`
-            : `startDate: ${payload.startDate}, endDate: ${payload.endDate}`,
+            ? `exchangeDate: ${payload.exchangeDate}`
+            : `rentalStartDate: ${payload.rentalStartDate}, rentalEndDate: ${payload.rentalEndDate}`,
       });
 
       // 일정 등록
