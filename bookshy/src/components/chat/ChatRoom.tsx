@@ -401,16 +401,40 @@ function ChatRoom({
 
   // 당일 일정 여부 확인
   const isTodayEvent = useCallback(() => {
-    if (!calendarEvent) return false;
+    if (!calendarEvent) {
+      console.log('❌ 캘린더 이벤트 없음');
+      return false;
+    }
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const eventDate =
-      calendarEvent.type === 'EXCHANGE'
-        ? new Date(calendarEvent.eventDate!)
-        : new Date(calendarEvent.startDate!);
+    let eventDate: Date;
+    if (calendarEvent.type === 'EXCHANGE' && calendarEvent.exchangeDate) {
+      eventDate = new Date(calendarEvent.exchangeDate);
+      console.log('📅 교환 일정:', {
+        type: calendarEvent.type,
+        exchangeDate: calendarEvent.exchangeDate,
+        parsedDate: eventDate.toISOString(),
+      });
+    } else if (calendarEvent.type === 'RENTAL' && calendarEvent.rentalEndDate) {
+      eventDate = new Date(calendarEvent.rentalEndDate);
+      console.log('📅 대여 일정:', {
+        type: calendarEvent.type,
+        rentalEndDate: calendarEvent.rentalEndDate,
+        parsedDate: eventDate.toISOString(),
+      });
+    } else {
+      console.log('❌ 유효하지 않은 일정 데이터:', calendarEvent);
+      return false;
+    }
     eventDate.setHours(0, 0, 0, 0);
+
+    console.log('📊 날짜 비교:', {
+      today: today.toISOString(),
+      eventDate: eventDate.toISOString(),
+      isMatch: today.getTime() === eventDate.getTime(),
+    });
 
     return today.getTime() === eventDate.getTime();
   }, [calendarEvent]);
