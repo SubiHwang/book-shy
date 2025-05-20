@@ -70,18 +70,20 @@ public class NotificationService {
         ));
     }
 
-    public void sendTransactionDayBeforeNotification(Long receiverId, String partnerName) {
+    public void sendTransactionDayBeforeNotification(Long receiverId, String partnerName, String date) {
         sendFcm(receiverId, FcmNotificationType.TRANSACTION_DATE, Map.of(
                 "subtype", "day_before",
                 "targetName", partnerName,
+                "date", date,
                 "url", "/mypage"
         ));
     }
 
-    public void sendTransactionTodayNotification(Long receiverId, String partnerName) {
+    public void sendTransactionTodayNotification(Long receiverId, String partnerName, String date) {
         sendFcm(receiverId, FcmNotificationType.TRANSACTION_DATE, Map.of(
                 "subtype", "today",
                 "targetName", partnerName,
+                "date", date,
                 "url", "/mypage"
         ));
     }
@@ -94,7 +96,7 @@ public class NotificationService {
         ));
     }
 
-    private void sendFcm(Long userId, FcmNotificationType type, Map<String, String> data) {
+    public void sendFcm(Long userId, FcmNotificationType type, Map<String, String> data) {
         String targetToken = userRepository.findById(userId)
                 .map(Users::getFcmToken)
                 .orElseThrow(() -> new NotificationException(NotificationErrorCode.USER_NOT_FOUND));

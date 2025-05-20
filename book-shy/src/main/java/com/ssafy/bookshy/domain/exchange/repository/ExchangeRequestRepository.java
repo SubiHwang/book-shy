@@ -76,4 +76,7 @@ public interface ExchangeRequestRepository extends JpaRepository<ExchangeRequest
     WHERE r.reviewerId = :userId
 """)
     int countReviewedBooksByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT r FROM ExchangeRequest r WHERE r.requestedAt > CURRENT_TIMESTAMP AND r.status = 'ACCEPTED'")
+    List<ExchangeRequest> findAllWithFutureSchedule();
 }
