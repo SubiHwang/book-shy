@@ -26,8 +26,10 @@ export interface ChatMessage {
 
 export interface RegisterSchedulePayload {
   roomId: number;
-  requestId: number;
   type: 'EXCHANGE' | 'RENTAL';
+  userIds: number[];
+  bookAId: number;
+  bookBId: number;
   title: string;
   description?: string;
   eventDate?: string;

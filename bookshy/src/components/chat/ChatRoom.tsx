@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback, useLayoutEffect } from 'react';
-import { ChatMessage, RegisterSchedulePayload } from '@/types/chat/chat.ts';
+import { ChatMessage, RegisterSchedulePayload, ChatCalendarEventDto } from '@/types/chat/chat.ts';
 import ChatMessageItem from './ChatMessageItem.tsx';
 import ChatInput from './ChatInput.tsx';
 import ChatRoomHeader from './ChatRoomHeader.tsx';
@@ -13,10 +13,13 @@ import {
   markMessagesAsRead,
   registerSchedule,
   sendEmoji,
+  fetchChatRoomUserIds,
+  fetchScheduleByRoomId,
 } from '@/services/chat/chat.ts';
 import { useStomp } from '@/hooks/chat/useStomp.ts';
 import { useWebSocket } from '@/contexts/WebSocketProvider';
 import { getUserIdFromToken } from '@/utils/jwt.ts';
+import { createCalendarEvent } from '@/services/chat/calendar.ts';
 
 interface Props {
   partnerName: string;
@@ -300,7 +303,40 @@ function ChatRoom({
 
   const registerScheduleAndNotify = async (_message: string, payload: RegisterSchedulePayload) => {
     try {
-      await registerSchedule(payload);
+      // 채팅방 사용자 ID 조회
+      const { userAId, userBId } = await fetchChatRoomUserIds(numericRoomId);
+
+      // 일정 등록을 위한 페이로드 구성
+      const schedulePayload: RegisterSchedulePayload = {
+        roomId: numericRoomId,
+        type: payload.type,
+        userIds: [userAId, userBId],
+        bookAId: myBookId[0],
+        bookBId: otherBookId[0],
+        title: payload.type === 'EXCHANGE' ? '도서 교환' : '도서 대여',
+        description: `파트너: ${partnerName}`,
+        ...(payload.type === 'EXCHANGE'
+          ? { eventDate: payload.eventDate }
+          : { startDate: payload.startDate, endDate: payload.endDate }),
+      };
+
+      // 일정 등록
+      await registerSchedule(schedulePayload);
+
+      // 캘린더 이벤트 생성
+      const eventData = {
+        title: schedulePayload.title,
+        start: payload.type === 'EXCHANGE' ? payload.eventDate : payload.startDate,
+        end: payload.type === 'EXCHANGE' ? payload.eventDate : payload.endDate,
+        description: schedulePayload.description,
+        type: payload.type,
+        roomId: numericRoomId,
+        userIds: [userAId, userBId],
+        bookAId: myBookId[0],
+        bookBId: otherBookId[0],
+      };
+
+      await createCalendarEvent(eventData);
     } catch (e) {
       console.error('❌ 일정 등록 실패:', e);
     }
@@ -355,6 +391,29 @@ function ChatRoom({
   };
 
   let lastDateLabel = '';
+
+  // 캘린더 일정 조회
+  const { data: calendarEvent } = useQuery({
+    queryKey: ['chatCalendar', numericRoomId],
+    queryFn: () => fetchScheduleByRoomId(numericRoomId),
+    enabled: !isNaN(numericRoomId),
+  });
+
+  // 당일 일정 여부 확인
+  const isTodayEvent = useCallback(() => {
+    if (!calendarEvent) return false;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const eventDate =
+      calendarEvent.type === 'EXCHANGE'
+        ? new Date(calendarEvent.eventDate!)
+        : new Date(calendarEvent.startDate!);
+    eventDate.setHours(0, 0, 0, 0);
+
+    return today.getTime() === eventDate.getTime();
+  }, [calendarEvent]);
 
   return (
     <div
@@ -430,33 +489,35 @@ function ChatRoom({
           );
         })}
 
-        {/* 📌 교환 완료 유도 메시지 */}
-        <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm">
-          <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
-          <p className="text-xs mt-1 text-light-text-muted">
-            거래가 완료되었다면 리뷰를 남겨주세요.
-          </p>
-          <button
-            onClick={() =>
-              navigate(`/chat/${numericRoomId}/review`, {
-                state: {
-                  chatSummary: {
-                    partnerName,
-                    partnerProfileImage,
-                    bookShyScore,
-                    myBookId,
-                    myBookName,
-                    otherBookId,
-                    otherBookName,
+        {/* 📌 교환 완료 유도 메시지 - 당일 일정인 경우에만 표시 */}
+        {isTodayEvent() && (
+          <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm">
+            <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
+            <p className="text-xs mt-1 text-light-text-muted">
+              거래가 완료되었다면 리뷰를 남겨주세요.
+            </p>
+            <button
+              onClick={() =>
+                navigate(`/chat/${numericRoomId}/review`, {
+                  state: {
+                    chatSummary: {
+                      partnerName,
+                      partnerProfileImage,
+                      bookShyScore,
+                      myBookId,
+                      myBookName,
+                      otherBookId,
+                      otherBookName,
+                    },
                   },
-                },
-              })
-            }
-            className="mt-3 inline-block bg-primary text-white text-xs font-medium px-4 py-2 rounded-full"
-          >
-            거래 완료
-          </button>
-        </div>
+                })
+              }
+              className="mt-3 inline-block bg-primary text-white text-xs font-medium px-4 py-2 rounded-full"
+            >
+              거래 완료
+            </button>
+          </div>
+        )}
 
         <div ref={messagesEndRef} className="h-4" />
       </div>
