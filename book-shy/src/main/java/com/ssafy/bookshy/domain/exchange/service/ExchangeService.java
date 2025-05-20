@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -82,7 +81,7 @@ public class ExchangeService {
         Users responder = userRepository.findById(dto.getResponderId())
                 .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.USER_NOT_FOUND));
 
-        notificationService.sendTransactionNowNotification(
+        notificationService.sendTransactionReminder(
                 responder.getUserId(),
                 requester.getNickname(),
                 dto.getExchangeDate().substring(0, 10)
@@ -130,7 +129,7 @@ public class ExchangeService {
         Users responder = userRepository.findById(dto.getResponderId())
                 .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.USER_NOT_FOUND));
 
-        notificationService.sendTransactionNowNotification(
+        notificationService.sendTransactionReminder(
                 responder.getUserId(),
                 requester.getNickname(),
                 dto.getExchangeDate().substring(0, 10)

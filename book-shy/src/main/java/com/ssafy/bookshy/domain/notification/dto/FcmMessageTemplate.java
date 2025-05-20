@@ -38,11 +38,11 @@ public class FcmMessageTemplate {
                             break;
                         case "day_before":
                             title = "내일은 " + typeName + " 약속이 있어요";
-                            body = String.format("내일 %s님과의 %s이 예정되어 있습니다.", targetName, typeName);
+                            body = String.format("내일 %s님과의 %s이(가) 예정되어 있습니다.", targetName, typeName);
                             break;
                         case "today":
                             title = "오늘 " + typeName + " 약속이 있어요";
-                            body = String.format("오늘 %s님과의 %s이 예정되어 있습니다.", targetName, typeName);
+                            body = String.format("오늘 %s님과의 %s이(가) 예정되어 있습니다.", targetName, typeName);
                             break;
                         default:
                             title = "알림 유형 오류";

@@ -61,7 +61,7 @@ public class NotificationService {
         ));
     }
 
-    public void sendTransactionNowNotification(Long receiverId, String partnerName, String date) {
+    public void sendTransactionReminder(Long receiverId, String partnerName, String date) {
         sendFcm(receiverId, FcmNotificationType.TRANSACTION_DATE, Map.of(
                 "subtype", "now",
                 "targetName", partnerName,
