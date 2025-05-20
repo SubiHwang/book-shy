@@ -313,12 +313,12 @@ function ChatRoom({
       // 일정 등록을 위한 페이로드 구성
       const schedulePayload: RegisterSchedulePayload = {
         roomId: numericRoomId,
-        type: payload.type, // 대문자 유지
+        type: payload.type,
         userIds: [userAId, userBId],
         bookAId: myBookId[0],
         bookBId: otherBookId[0],
-        title: payload.type === 'EXCHANGE' ? '도서 교환' : '도서 대여',
-        description: `파트너: ${partnerName}`,
+        title: payload.title,
+        description: payload.description,
         ...(payload.type === 'EXCHANGE'
           ? { eventDate: payload.eventDate }
           : { startDate: payload.startDate, endDate: payload.endDate }),
@@ -327,7 +327,7 @@ function ChatRoom({
       // 요청 데이터 로깅
       console.log('📅 일정 등록 요청 데이터:', {
         ...schedulePayload,
-        userIds: `[${userAId}, ${userBId}]`,
+        userIds: [userAId, userBId],
         type: schedulePayload.type,
         dates:
           payload.type === 'EXCHANGE'
