@@ -62,7 +62,10 @@ management:
       show-details: always  # 헬스체크 상세 정보 응답 포함
 
 file:
-  upload-dir: /home/ubuntu/bookshy/images/coverImage
+  upload:
+    profile-dir: /home/ubuntu/bookshy/images/profile
+    cover-dir: /home/ubuntu/bookshy/images/coverImage
+    chat-dir: /home/ubuntu/bookshy/images/chat
 
 elasticsearch:
   url: ${ELK_URL}
