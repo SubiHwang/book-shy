@@ -88,7 +88,7 @@ public class FcmMessageTemplate {
                 String targetName = data.get("targetName");
 
                 title = "🎉 거래가 완료되었어요!";
-                body = String.format("%s님과의 %s이 성공적으로 완료되었습니다.", targetName, type.equals("EXCHANGE") ? "교환" : "대여");
+                body = String.format("%s님과의 %s이(가) 성공적으로 완료되었습니다.", targetName, type.equals("EXCHANGE") ? "교환" : "대여");
                 url = "/mypage/history";
             }
         }
