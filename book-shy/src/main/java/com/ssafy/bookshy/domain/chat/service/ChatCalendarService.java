@@ -54,7 +54,7 @@ public class ChatCalendarService {
         }
 
         // 2️⃣ 날짜 유효성 검사
-        if ("EXCHANGE".equalsIgnoreCase(type) && dto.getEventDate() == null) {
+        if ("EXCHANGE".equalsIgnoreCase(type) && dto.getExchangeDate() == null) {
             throw new ChatException(ChatErrorCode.MISSING_EXCHANGE_DATE);
         }
         if ("RENTAL".equalsIgnoreCase(type) &&
@@ -95,7 +95,7 @@ public class ChatCalendarService {
         ChatCalendar calendar = ChatCalendar.builder()
                 .title(dto.getTitle())
                 .description(dto.getDescription())
-                .exchangeDate(parseDateTimeOrNull(dto.getEventDate()))
+                .exchangeDate(parseDateTimeOrNull(dto.getExchangeDate()))
                 .rentalStartDate(parseDateTimeOrNull(dto.getStartDate()))
                 .rentalEndDate(parseDateTimeOrNull(dto.getEndDate()))
                 .chatRoom(ChatRoom.builder().id(dto.getRoomId()).build())
