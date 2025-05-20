@@ -1,7 +1,6 @@
 import { useLocation, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { ChatMessage } from '@/types/chat/chat';
-import ChatRoomLayout from '@/components/chat/ChatRoomLayout';
 import ChatRoom from '@/components/chat/ChatRoom';
 
 function ChatRoomPage() {
