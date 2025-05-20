@@ -9,10 +9,9 @@ interface Props {
   onToggleOptions: () => void;
   onScheduleClick: () => void;
   chatRoomId: number;
-  onFocus?: () => void;
 }
 
-function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chatRoomId, onFocus }: Props) {
+function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chatRoomId }: Props) {
   const [content, setContent] = useState('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -61,7 +60,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
   };
 
   return (
-    <div className="w-full bg-light-bg-secondary border-t">
+    <div className="fixed bottom-0 inset-x-0 z-50 w-full bg-light-bg-secondary border-t pb-[env(safe-area-inset-bottom)]">
       {/* 입력창 */}
       <form
         onSubmit={handleSubmit}
@@ -84,7 +83,6 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
           className="w-full max-w-full px-4 py-2 bg-primary-light text-white placeholder-white rounded-full focus:outline-none box-border"
           style={{ WebkitOverflowScrolling: 'touch' }}
           disabled={isUploading}
-          onFocus={onFocus}
         />
 
         <div
@@ -105,7 +103,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
 
       {/* 확장 기능 옵션 */}
       <div
-        className={`transition-all duration-300 overflow-hidden bg-white ${
+        className={`transition-all duration-300 overflow-hidden ${
           showOptions ? 'h-[25vh]' : 'h-0'
         }`}
       >
@@ -157,9 +155,6 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
         className="hidden"
         disabled={isUploading}
       />
-      
-      {/* Safe Area Bottom Padding */}
-      <div className="h-[env(safe-area-inset-bottom)]" />
     </div>
   );
 }
