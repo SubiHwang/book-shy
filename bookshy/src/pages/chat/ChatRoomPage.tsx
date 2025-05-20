@@ -2,6 +2,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { ChatMessage } from '@/types/chat/chat';
 import ChatRoomLayout from '@/components/chat/ChatRoomLayout';
+import ChatRoom from '@/components/chat/ChatRoom';
 
 function ChatRoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
@@ -20,8 +21,7 @@ function ChatRoomPage() {
   if (!roomId) return <div className="p-4 text-center text-gray-500">잘못된 접근입니다.</div>;
 
   return (
-    <ChatRoomLayout
-      roomId={roomId}
+    <ChatRoom
       partnerName={partnerName}
       partnerProfileImage={partnerProfileImage}
       initialMessages={initialMessages}
