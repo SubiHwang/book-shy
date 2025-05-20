@@ -1,15 +1,19 @@
 // 거래 약속 카드용
 export interface TradePromise {
   tradeId: number;
-  bookTitle: string;
+  type: 'EXCHANGE' | 'RENTAL';
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COMPLETED';
+  scheduledTime: string;
+  requestedAt: string;
+  myBookId: number;
+  myBookTitle: string;
+  partnerBookId: number;
+  partnerBookTitle: string;
   counterpart: {
     userId: number;
     nickname: string;
     profileImageUrl: string;
   };
-  scheduledTime: string;
-  place?: string;
-  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CONFIRMED';
   timeLeft: {
     days: number;
     hours: number;
