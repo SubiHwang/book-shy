@@ -49,19 +49,40 @@ export async function fetchRentalBooksInUse(): Promise<Book[]> {
 }
 
 // ✅ 채팅 이미지 업로드
-export async function uploadChatImage(
-  chatRoomId: number,
-  file: File,
-): Promise<{ imageUrl: string }> {
+export const uploadChatImage = async (chatRoomId: number, file: File) => {
+  // 파일 크기 제한 (5MB)
+  const MAX_FILE_SIZE = 5 * 1024 * 1024;
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error('파일 크기는 5MB를 초과할 수 없습니다.');
+  }
+
+  // 허용된 이미지 타입
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error('지원하지 않는 이미지 형식입니다. (JPEG, PNG, GIF만 가능)');
+  }
+
   const formData = new FormData();
   formData.append('file', file);
 
-  return await authAxiosInstance.post(`/messages/image?chatRoomId=${chatRoomId}`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-}
+  try {
+    const response = await authAxiosInstance.post(
+      `/messages/image?chatRoomId=${chatRoomId}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        maxBodyLength: MAX_FILE_SIZE,
+        maxContentLength: MAX_FILE_SIZE,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('이미지 업로드 실패:', error);
+    throw error;
+  }
+};
 
 export async function fetchPartnerInfo(
   roomId: number,
