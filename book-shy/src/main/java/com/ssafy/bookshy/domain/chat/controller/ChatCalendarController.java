@@ -56,26 +56,31 @@ public class ChatCalendarController {
     @Operation(
             summary = "📆 거래 일정 및 요청 등록",
             description = """
-            📦 채팅방 내 도서 교환(EXCHANGE) 또는 대여(RENTAL) 일정을 등록합니다.<br>
-            📌 동시에 `exchange_requests` 테이블에 거래 요청도 함께 저장됩니다.<br>
-            ⚠️ myBookId / otherBookId / 참여자 정보는 캘린더에서 요청을 생성하기 위해 필요합니다.
-            """,
-            requestBody = @RequestBody(
-                    description = "📑 등록할 거래 일정 정보",
+        📦 채팅방 내 도서 교환(EXCHANGE) 또는 대여(RENTAL) 일정을 등록합니다.<br>
+        📌 동시에 `exchange_requests` 테이블에 거래 요청도 함께 저장됩니다.<br><br>
+
+        ✅ `type`이 EXCHANGE인 경우 `eventDate` 필수<br>
+        ✅ `type`이 RENTAL인 경우 `startDate`, `endDate` 필수<br>
+        ⚠️ `userIds`에는 요청자와 응답자 ID가 정확히 2개 포함되어야 합니다.
+        """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
+                    description = "📑 등록할 거래 일정 정보",
                     content = @Content(schema = @Schema(implementation = ChatCalendarCreateRequestDto.class))
             ),
             responses = {
-                    @ApiResponse(responseCode = "200", description = "✅ 거래 요청 및 일정 등록 성공", content = @Content(schema = @Schema(implementation = ChatCalendarCreateResponseDto.class))),
-                    @ApiResponse(responseCode = "400", description = "❌ 입력값 오류 또는 날짜 누락"),
-                    @ApiResponse(responseCode = "404", description = "❌ 존재하지 않는 채팅방 또는 사용자"),
+                    @ApiResponse(responseCode = "200", description = "✅ 거래 요청 및 일정 등록 성공",
+                            content = @Content(schema = @Schema(implementation = ChatCalendarCreateResponseDto.class))),
+                    @ApiResponse(responseCode = "400", description = "❌ 잘못된 입력 (날짜/유형/ID 누락 등)"),
+                    @ApiResponse(responseCode = "404", description = "❌ 채팅방 또는 사용자/도서 미존재"),
                     @ApiResponse(responseCode = "500", description = "💥 서버 내부 오류")
             }
     )
     @PostMapping
     public CommonResponse<ChatCalendarCreateResponseDto> createCalendarWithExchange(
-            @org.springframework.web.bind.annotation.RequestBody ChatCalendarCreateRequestDto dto,
+            @RequestBody ChatCalendarCreateRequestDto dto,
             @AuthenticationPrincipal Users user) {
         return CommonResponse.success(chatCalendarService.createCalendarWithRequest(dto));
     }
+
 }
