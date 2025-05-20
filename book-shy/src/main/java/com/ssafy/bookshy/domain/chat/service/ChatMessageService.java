@@ -271,7 +271,7 @@ public class ChatMessageService {
                     .content(null)
                     .imageUrl(imageUrl)
                     .thumbnailUrl(thumbnailUrl) // ✅ 썸네일 포함
-                    .type("IMAGE")
+                    .type("image")
                     .timestamp(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
                     .build();
 
