@@ -78,10 +78,11 @@ public class ExchangeController {
     @Operation(
             summary = "📜 나의 교환 이력 조회",
             description = """
-                    ✅ <b>로그인 사용자의 인증 정보를 기반으로</b> 완료된 도서 교환 이력을 조회합니다.<br>
-                    - 상대방 정보와 교환한 도서(받은 책/준 책)의 정보가 함께 제공됩니다.<br>
-                    - 연도-월 단위로 그룹화되어 반환됩니다.
-                    """,
+                로그인한 사용자의 완료된 도서 교환 이력을 조회합니다.
+
+                ✅ 상대방 정보와 교환한 도서(받은 책 / 준 책)의 정보가 함께 제공됩니다.  
+                ✅ 거래 완료일 기준으로 `yyyy.MM` 단위로 그룹화되어 반환됩니다.
+                """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "조회 성공"),
                     @ApiResponse(responseCode = "401", description = "인증 실패"),
