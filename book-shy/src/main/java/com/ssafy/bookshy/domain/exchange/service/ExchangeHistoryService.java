@@ -4,6 +4,7 @@ import com.ssafy.bookshy.domain.book.repository.BookRepository;
 import com.ssafy.bookshy.domain.exchange.dto.ExchangeHistoryDto;
 import com.ssafy.bookshy.domain.exchange.dto.ExchangeHistoryDto.BookSummary;
 import com.ssafy.bookshy.domain.exchange.dto.ExchangeHistoryGroupDto;
+import com.ssafy.bookshy.domain.exchange.dto.ExchangeSummaryDto;
 import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequest;
 import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequest.RequestStatus;
 import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequestReview;
@@ -127,4 +128,26 @@ public class ExchangeHistoryService {
                         .build())
                 .orElse(null);
     }
+
+    @Transactional
+    public ExchangeSummaryDto getExchangeSummary(Long userId) {
+        // 교환 완료된 요청 목록
+        List<ExchangeRequest> completedRequests =
+                exchangeRequestRepository.findByUserAndStatus(userId, RequestStatus.COMPLETED, Pageable.unpaged());
+
+        // 교환한 사람 수 (상대방 userId 중복 제거)
+        int peopleCount = (int) completedRequests.stream()
+                .map(req -> req.getRequesterId().equals(userId) ? req.getResponderId() : req.getRequesterId())
+                .distinct()
+                .count();
+
+        // 교환한 책 수 (exchange_reviews_books 테이블 기준)
+        int bookCount = exchangeRequestRepository.countReviewedBooksByUserId(userId);
+
+        return ExchangeSummaryDto.builder()
+                .peopleCount(peopleCount)
+                .bookCount(bookCount)
+                .build();
+    }
+
 }
