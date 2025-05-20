@@ -57,13 +57,6 @@ const NeighborBookshelfPage = () => {
               </span>
               <span className="text-light-text text-md ml-1">님의 서재</span>
             </div>
-            <div className="flex justify-end items-center px-4 mb-8">
-              <span className="text-light-text-muted text-sm font-light">공개 서재: </span>
-              <span className="text-light-text-muted text-sm font-light">
-                {userBookList.length}
-              </span>
-              <span className="text-light-text-muted text-sm font-light">권</span>
-            </div>
             <div className="bookshelf-container mt-4 pb-4 px-3">
               {bookRows.map((row, index) => (
                 <BookshelfRow key={index} books={row} userId={userId} />

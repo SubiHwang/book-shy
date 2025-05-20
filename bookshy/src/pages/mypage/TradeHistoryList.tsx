@@ -6,7 +6,7 @@ import TradeHistoryCard from '@/components/mypage/trade/TradeHistoryCard';
 import Loading from '@/components/common/Loading';
 
 const TradeHistoryList: FC = () => {
-  const { data, isLoading, error } = useQuery<TradeHistoryGroup[], Error>({
+  const { data, isLoading, error } = useQuery<TradeHistoryGroup[]>({
     queryKey: ['trade-history'],
     queryFn: fetchTradeHistory,
   });
@@ -28,20 +28,16 @@ const TradeHistoryList: FC = () => {
       {data.map(({ yearMonth, trades }) => (
         <div key={yearMonth} className="space-y-3">
           <h2 className="text-lg font-semibold text-gray-800">{yearMonth}</h2>
-          {trades.map((item) => (
+          {trades.map((trade) => (
             <TradeHistoryCard
-              key={item.tradeId}
-              tradeId={item.tradeId}
-              completedAt={item.completedAt}
-              counterpartNickname={item.counterpartNickname}
-              counterpartProfileImageUrl={item.counterpartProfileImageUrl}
-              receivedBookTitle={item.receivedBookTitle}
-              receivedBookAuthor={item.receivedBookAuthor}
-              receivedBookCoverUrl={item.receivedBookCoverUrl}
-              givenBookTitle={item.givenBookTitle}
-              givenBookAuthor={item.givenBookAuthor}
-              givenBookCoverUrl={item.givenBookCoverUrl}
-              tradeType={item.tradeType}
+              key={trade.tradeId}
+              tradeId={trade.tradeId}
+              completedAt={trade.completedAt}
+              counterpartNickname={trade.counterpartNickname}
+              counterpartProfileImageUrl={trade.counterpartProfileImageUrl}
+              receivedBooks={trade.receivedBooks}
+              givenBooks={trade.givenBooks}
+              tradeType={trade.tradeType}
             />
           ))}
         </div>

@@ -1,17 +1,13 @@
-import ChatRoom from '@/components/chat/ChatRoom';
 import { useLocation, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { ChatMessage } from '@/types/chat/chat';
+import ChatRoom from '@/components/chat/ChatRoom';
 
 function ChatRoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
   const { state } = useLocation();
   const [initialMessages] = useState<ChatMessage[]>([]);
 
-  const partnerName = state?.partnerName || '상대방';
-  const partnerProfileImage =
-    state?.partnerProfileImage || 'https://cdn.bookshy.com/profile/user5.jpg';
-  const bookShyScore = state?.bookShyScore || 100.0;
   const myBookId = state?.myBookId || [];
   const myBookName = state?.myBookName || [];
   const otherBookId = state?.otherBookId || [];
@@ -21,10 +17,7 @@ function ChatRoomPage() {
 
   return (
     <ChatRoom
-      partnerName={partnerName}
-      partnerProfileImage={partnerProfileImage}
       initialMessages={initialMessages}
-      bookShyScore={bookShyScore}
       myBookId={myBookId}
       myBookName={myBookName}
       otherBookId={otherBookId}

@@ -13,16 +13,16 @@ import {
   markMessagesAsRead,
   registerSchedule,
   sendEmoji,
+  fetchChatRoomUserIds,
+  fetchScheduleByRoomId,
+  fetchPartnerInfo,
 } from '@/services/chat/chat.ts';
 import { useStomp } from '@/hooks/chat/useStomp.ts';
 import { useWebSocket } from '@/contexts/WebSocketProvider';
 import { getUserIdFromToken } from '@/utils/jwt.ts';
 
 interface Props {
-  partnerName: string;
-  partnerProfileImage: string;
   initialMessages?: ChatMessage[];
-  bookShyScore: number;
   myBookId: number[];
   myBookName: string[];
   otherBookId: number[];
@@ -36,20 +36,17 @@ interface EmojiUpdatePayload {
   updatedBy: number;
 }
 
-function ChatRoom({
-  partnerName,
-  partnerProfileImage,
-  bookShyScore,
-  myBookId,
-  myBookName,
-  otherBookId,
-  otherBookName,
-}: Props) {
+interface PartnerInfo {
+  name: string;
+  profileImage: string;
+  bookShyScore: number;
+}
+
+function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   const { roomId } = useParams();
   const numericRoomId = Number(roomId);
   const myUserId = getUserIdFromToken();
-  if (myUserId === null) return null;
-  const userId = Number(myUserId);
+  const userId = myUserId ? Number(myUserId) : 0;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showOptions, setShowOptions] = useState(false);
@@ -57,21 +54,6 @@ function ChatRoom({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
-
-  useEffect(() => {
-    const updateHeight = () => {
-      const visual = window.visualViewport;
-      const height = visual
-        ? visual.height + visual.offsetTop // 정확한 visible 영역
-        : window.innerHeight;
-      setViewportHeight(height);
-    };
-
-    updateHeight();
-    window.visualViewport?.addEventListener('resize', updateHeight);
-    return () => window.visualViewport?.removeEventListener('resize', updateHeight);
-  }, []);
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -86,6 +68,9 @@ function ChatRoom({
 
   const prevMessageCountRef = useRef(messages.length);
   const isInitialLoadRef = useRef(true);
+
+  // 상대방 정보 상태
+  const [partnerInfo, setPartnerInfo] = useState<PartnerInfo | null>(null);
 
   useLayoutEffect(() => {
     const prevCount = prevMessageCountRef.current;
@@ -135,6 +120,12 @@ function ChatRoom({
     if (!isSuccess) return;
     setMessages(initialMessages);
   }, [initialMessages, isSuccess]);
+
+  useEffect(() => {
+    if (!isNaN(numericRoomId)) {
+      fetchPartnerInfo(numericRoomId).then(setPartnerInfo);
+    }
+  }, [numericRoomId]);
 
   const onRead = useCallback(
     (payload: { readerId: number; messageIds: number[] }) => {
@@ -240,13 +231,46 @@ function ChatRoom({
   };
 
   const handleSendMessage = (content: string) => {
-    if (isNaN(numericRoomId)) return;
+    if (isNaN(numericRoomId) || !myUserId) return;
     sendMessage(numericRoomId, myUserId, content, 'chat');
   };
 
   const registerScheduleAndNotify = async (_message: string, payload: RegisterSchedulePayload) => {
+    console.log('🚀 registerScheduleAndNotify 함수 호출됨');
+    console.log('📦 받은 payload:', payload);
+
     try {
-      await registerSchedule(payload);
+      // 채팅방 사용자 ID 조회
+      const { userAId, userBId } = await fetchChatRoomUserIds(numericRoomId);
+      console.log('👥 채팅방 사용자 ID:', { userAId, userBId });
+
+      // 일정 등록을 위한 페이로드 구성
+      const schedulePayload: RegisterSchedulePayload = {
+        roomId: numericRoomId,
+        type: payload.type,
+        userIds: [userAId, userBId],
+        bookAId: myBookId[0],
+        bookBId: otherBookId[0],
+        title: payload.title,
+        description: payload.description,
+        ...(payload.type === 'EXCHANGE'
+          ? { exchangeDate: payload.exchangeDate }
+          : { rentalStartDate: payload.rentalStartDate, rentalEndDate: payload.rentalEndDate }),
+      };
+
+      // 요청 데이터 로깅
+      console.log('📅 일정 등록 요청 데이터:', {
+        ...schedulePayload,
+        userIds: [userAId, userBId],
+        type: schedulePayload.type,
+        dates:
+          payload.type === 'EXCHANGE'
+            ? `exchangeDate: ${payload.exchangeDate}`
+            : `rentalStartDate: ${payload.rentalStartDate}, rentalEndDate: ${payload.rentalEndDate}`,
+      });
+
+      // 일정 등록
+      await registerSchedule(schedulePayload);
     } catch (e) {
       console.error('❌ 일정 등록 실패:', e);
     }
@@ -302,24 +326,72 @@ function ChatRoom({
 
   let lastDateLabel = '';
 
+  // 캘린더 일정 조회
+  const { data: calendarEvent } = useQuery({
+    queryKey: ['chatCalendar', numericRoomId],
+    queryFn: () => fetchScheduleByRoomId(numericRoomId),
+    enabled: !isNaN(numericRoomId),
+  });
+
+  // 당일 일정 여부 확인
+  const isTodayEvent = useCallback(() => {
+    if (!calendarEvent) {
+      console.log('❌ 캘린더 이벤트 없음');
+      return false;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let eventDate: Date;
+    if (calendarEvent.type === 'EXCHANGE' && calendarEvent.exchangeDate) {
+      eventDate = new Date(calendarEvent.exchangeDate);
+      console.log('📅 교환 일정:', {
+        type: calendarEvent.type,
+        exchangeDate: calendarEvent.exchangeDate,
+        parsedDate: eventDate.toISOString(),
+      });
+    } else if (calendarEvent.type === 'RENTAL' && calendarEvent.rentalEndDate) {
+      eventDate = new Date(calendarEvent.rentalEndDate);
+      console.log('📅 대여 일정:', {
+        type: calendarEvent.type,
+        rentalEndDate: calendarEvent.rentalEndDate,
+        parsedDate: eventDate.toISOString(),
+      });
+    } else {
+      console.log('❌ 유효하지 않은 일정 데이터:', calendarEvent);
+      return false;
+    }
+    eventDate.setHours(0, 0, 0, 0);
+
+    console.log('📊 날짜 비교:', {
+      today: today.toISOString(),
+      eventDate: eventDate.toISOString(),
+      isMatch: today.getTime() === eventDate.getTime(),
+    });
+
+    return today.getTime() === eventDate.getTime();
+  }, [calendarEvent]);
+
+  if (!myUserId) {
+    return null;
+  }
+
   return (
-    <div style={{ height: viewportHeight }} className="flex flex-col bg-white pb-safe">
-      {/* 헤더 */}
-      <div className="shrink-0 z-10">
+    <div className="relative h-full min-h-0 bg-white pb-safe">
+      {/* 헤더 - 항상 상단 고정 */}
+      <div className="fixed top-0 left-0 right-0 z-10">
         <ChatRoomHeader
-          partnerName={partnerName}
-          partnerProfileImage={partnerProfileImage}
-          bookShyScore={bookShyScore}
+          partnerName={partnerInfo?.name ?? '로딩중...'}
+          partnerProfileImage={partnerInfo?.profileImage ?? '/default-profile.png'}
+          bookShyScore={partnerInfo?.bookShyScore ?? 0}
         />
       </div>
 
-      {/* 메시지 영역 */}
+      {/* 메시지 영역 - 내부 스크롤, 헤더/인풋 높이만큼 패딩 */}
       <div
-        className={`flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
-          showOptions
-            ? 'pb-[35vh]' // 확장 기능 보이면 큰 여백
-            : 'pb-20' // 기본 여백
-        }`}
+        className={`overflow-y-auto transition-all duration-300 ${showOptions ? 'pb-[35vh]' : ''}`}
+        style={{ paddingTop: 56, paddingBottom: showOptions ? '35vh' : 64, height: '100vh' }}
       >
         {messages.map((msg, idx) => {
           const dateLabel = formatDateLabel(msg.sentAt);
@@ -337,17 +409,19 @@ function ChatRoom({
                 </div>
               )}
               {isSystem ? (
-                <SystemMessage
-                  title={
-                    msg.type === 'notice'
-                      ? '거래 시 주의해주세요!'
-                      : msg.type === 'info'
-                        ? '약속이 등록되었습니다!'
-                        : '알림'
-                  }
-                  content={msg.content}
-                  variant={msg.type as 'notice' | 'info' | 'warning'}
-                />
+                <div className="max-w-[90%] mx-auto">
+                  <SystemMessage
+                    title={
+                      msg.type === 'notice'
+                        ? '거래 시 주의해주세요!'
+                        : msg.type === 'info'
+                          ? '약속이 등록되었습니다!'
+                          : '알림'
+                    }
+                    content={msg.content}
+                    variant={msg.type as 'notice' | 'info' | 'warning'}
+                  />
+                </div>
               ) : (
                 <ChatMessageItem
                   message={{ ...msg, sentAt: formatTime(msg.sentAt), read: msg.read }}
@@ -364,33 +438,35 @@ function ChatRoom({
           );
         })}
 
-        {/* 📌 교환 완료 유도 메시지 */}
-        <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm">
-          <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
-          <p className="text-xs mt-1 text-light-text-muted">
-            거래가 완료되었다면 리뷰를 남겨주세요.
-          </p>
-          <button
-            onClick={() =>
-              navigate(`/chat/${numericRoomId}/review`, {
-                state: {
-                  chatSummary: {
-                    partnerName,
-                    partnerProfileImage,
-                    bookShyScore,
-                    myBookId,
-                    myBookName,
-                    otherBookId,
-                    otherBookName,
+        {/* 📌 교환 완료 유도 메시지 - 당일 일정인 경우에만 표시 */}
+        {isTodayEvent() && (
+          <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm">
+            <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
+            <p className="text-xs mt-1 text-light-text-muted">
+              거래가 완료되었다면 리뷰를 남겨주세요.
+            </p>
+            <button
+              onClick={() =>
+                navigate(`/chat/${numericRoomId}/review`, {
+                  state: {
+                    chatSummary: {
+                      partnerName: partnerInfo?.name ?? '',
+                      partnerProfileImage: partnerInfo?.profileImage ?? '',
+                      bookShyScore: partnerInfo?.bookShyScore ?? 0,
+                      myBookId: myBookId[0],
+                      myBookName: myBookName[0],
+                      otherBookId: otherBookId[0],
+                      otherBookName: otherBookName[0],
+                    },
                   },
-                },
-              })
-            }
-            className="mt-3 inline-block bg-primary text-white text-xs font-medium px-4 py-2 rounded-full"
-          >
-            거래 완료
-          </button>
-        </div>
+                })
+              }
+              className="mt-3 inline-block bg-primary text-white text-xs font-medium px-4 py-2 rounded-full"
+            >
+              거래 완료
+            </button>
+          </div>
+        )}
 
         <div ref={messagesEndRef} className="h-4" />
       </div>
@@ -398,12 +474,14 @@ function ChatRoom({
       {/* ↓ 아래로 버튼 */}
       {showScrollToBottom && (
         <div
-          className={`absolute inset-x-0 flex justify-center z-30 transition-all duration-300
-      ${showOptions ? 'bottom-[32vh]' : 'bottom-[88px]'}
-    `}
+          className="fixed inset-x-0 flex justify-center z-30 transition-all duration-300"
+          style={{
+            bottom: showOptions ? `calc(25vh + 72px)` : `72px`, // 옵션 열렸을 때는 옵션+인풋+여유, 아니면 인풋+여유
+          }}
         >
           <button
-            className="bg-black/60 hover:bg-black/80 text-white text-lg sm:text-xl px-3 py-1.5 rounded-full shadow-md"
+            className="bg-black/70 hover:bg-black/85 text-white text-base sm:text-lg px-3 py-1.5 rounded-full shadow-md border border-black/10"
+            style={{ minWidth: 44 }}
             onClick={() => scrollToBottom(true)}
             aria-label="맨 아래로 스크롤"
           >
@@ -412,7 +490,8 @@ function ChatRoom({
         </div>
       )}
 
-      <div className="shrink-0 z-20 bg-white border-t border-light-border px-4">
+      {/* 인풋창 - 항상 하단 고정 */}
+      <div className="fixed left-0 right-0 bottom-0 z-20 bg-white border-t border-light-border px-4">
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
@@ -441,10 +520,9 @@ function ChatRoom({
       {/* 일정 모달 */}
       {showScheduleModal && (
         <ScheduleModal
-          partnerName={partnerName}
-          partnerProfileImage={partnerProfileImage}
+          partnerName={partnerInfo?.name ?? '로딩중...'}
+          partnerProfileImage={partnerInfo?.profileImage ?? '/default-profile.png'}
           roomId={numericRoomId}
-          requestId={0}
           onClose={() => setShowScheduleModal(false)}
           onConfirm={registerScheduleAndNotify}
         />

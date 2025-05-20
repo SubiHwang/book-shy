@@ -39,7 +39,7 @@ export async function fetchScheduleByRoomId(roomId: number): Promise<ChatCalenda
 
 // ✅ 채팅방 참여자 ID 조회
 export async function fetchChatRoomUserIds(chatRoomId: number): Promise<ChatRoomUserIds> {
-  return await authAxiosInstance.get(`/chats/users?chatRoomId=${chatRoomId}`);
+  return await authAxiosInstance.get(`/chats/${chatRoomId}/participants`);
 }
 
 // ✅ 현재 로그인 사용자가 대여 중인 모든 도서 목록 조회
@@ -56,14 +56,21 @@ export async function uploadChatImage(
   const formData = new FormData();
   formData.append('file', file);
 
-  const { data } = await authAxiosInstance.post<{ imageUrl: string }>(
-    `/messages/image?chatRoomId=${chatRoomId}`,
-    formData,
-    {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+  return await authAxiosInstance.post(`/messages/image?chatRoomId=${chatRoomId}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
     },
-  );
-  return data;
+  });
+}
+
+export async function fetchPartnerInfo(
+  roomId: number,
+): Promise<{ name: string; profileImage: string; bookShyScore: number }> {
+  const res = await authAxiosInstance.get(`/chats/${roomId}/opponent`);
+  const data = res.data ? res.data : res; // data가 있으면 data, 없으면 res 자체
+  return {
+    name: data.nickname,
+    profileImage: data.profileImageUrl,
+    bookShyScore: data.temperature,
+  };
 }

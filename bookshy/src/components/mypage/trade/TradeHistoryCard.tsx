@@ -1,16 +1,13 @@
 import { FC } from 'react';
+import { TradeBook } from '@/types/trade';
 
 interface TradeHistoryCardProps {
   tradeId: number;
   completedAt: string;
   counterpartNickname: string;
   counterpartProfileImageUrl: string;
-  receivedBookTitle: string;
-  receivedBookAuthor: string;
-  receivedBookCoverUrl: string;
-  givenBookTitle: string;
-  givenBookAuthor: string;
-  givenBookCoverUrl: string;
+  receivedBooks: TradeBook[];
+  givenBooks: TradeBook[];
   tradeType: 'EXCHANGE' | 'RENTAL';
 }
 
@@ -19,10 +16,8 @@ const TradeHistoryCard: FC<TradeHistoryCardProps> = ({
   completedAt,
   counterpartNickname,
   counterpartProfileImageUrl,
-  receivedBookTitle,
-  receivedBookCoverUrl,
-  givenBookTitle,
-  givenBookCoverUrl,
+  receivedBooks,
+  givenBooks,
   tradeType,
 }) => {
   const tradeTypeLabel = tradeType === 'EXCHANGE' ? '🔁 교환' : '📦 대여 / 반납';
@@ -58,26 +53,42 @@ const TradeHistoryCard: FC<TradeHistoryCardProps> = ({
         {/* 2. 유저 닉네임 + 책 정보 */}
         <div className="flex-1 space-y-1 text-sm text-gray-700">
           <div className="font-semibold text-base">{counterpartNickname} 님</div>
-          <p>
-            📗 <b>받은 책:</b> {receivedBookTitle}
-          </p>
-          <p className="mt-2">
-            📘 <b>준 책:</b> {givenBookTitle}
-          </p>
+          <div>
+            <p className="font-medium mb-1">📗 받은 책:</p>
+            {receivedBooks.map((book) => (
+              <p key={book.bookId} className="ml-2 text-sm">
+                {book.title} ({book.author})
+              </p>
+            ))}
+          </div>
+          <div className="mt-2">
+            <p className="font-medium mb-1">📘 준 책:</p>
+            {givenBooks.map((book) => (
+              <p key={book.bookId} className="ml-2 text-sm">
+                {book.title} ({book.author})
+              </p>
+            ))}
+          </div>
         </div>
 
         {/* 3. 책 이미지들 - 가로 배치 */}
         <div className="flex gap-2">
-          <img
-            src={receivedBookCoverUrl}
-            alt="받은 책"
-            className="w-14 h-20 rounded-md shadow object-cover border border-gray-200"
-          />
-          <img
-            src={givenBookCoverUrl}
-            alt="준 책"
-            className="w-14 h-20 rounded-md shadow object-cover border border-gray-200"
-          />
+          {receivedBooks.map((book) => (
+            <img
+              key={book.bookId}
+              src={book.coverUrl}
+              alt={book.title}
+              className="w-14 h-20 rounded-md shadow object-cover border border-gray-200"
+            />
+          ))}
+          {givenBooks.map((book) => (
+            <img
+              key={book.bookId}
+              src={book.coverUrl}
+              alt={book.title}
+              className="w-14 h-20 rounded-md shadow object-cover border border-gray-200"
+            />
+          ))}
         </div>
       </div>
     </div>
