@@ -99,8 +99,8 @@ const MatchingRecommend: FC = () => {
     }
   };
 
-  // 매칭이 충분한지 확인하는 상수 (3개 이하면 적다고 판단)
-  const MIN_SUFFICIENT_MATCHES = 3;
+  // 매칭이 충분한지 확인하는 상수 (5개 이하면 적다고 판단)
+  const MIN_SUFFICIENT_MATCHES = 5;
   const hasSufficientMatches = totalItems > MIN_SUFFICIENT_MATCHES;
   const hasFewMatches = totalItems > 0 && totalItems <= MIN_SUFFICIENT_MATCHES;
 
