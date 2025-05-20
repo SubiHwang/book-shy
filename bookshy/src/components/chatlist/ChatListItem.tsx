@@ -12,9 +12,6 @@ function ChatListItem({ room }: Props) {
   const handleClick = () => {
     navigate(`/chat/${room.id}`, {
       state: {
-        partnerName: room.partnerName,
-        partnerProfileImage: room.partnerProfileImage,
-        bookShyScore: room.bookshyScore,
         myBookId: room.myBookId,
         myBookName: room.myBookName,
         otherBookId: room.otherBookId,
