@@ -7,7 +7,7 @@ interface ChatBodyProps {
   myUserId?: number | string | null;
 }
 
-const ChatBody: FC<ChatBodyProps> = ({ roomId, initialMessages, myUserId }) => {
+const ChatBody: FC<ChatBodyProps> = ({ initialMessages, myUserId }) => {
   return (
     <div className="flex flex-col px-4 py-3">
       {/* 메시지 map 등 실제 구현은 기존 ChatRoom 코드 참조 */}
