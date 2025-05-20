@@ -19,10 +19,12 @@ export interface ChatMessage {
   content: string | null;
   imageUrl?: string;
   thumbnailUrl?: string;
-  type: 'text' | 'image' | 'notice';
+  type: 'text' | 'image' | 'notice' | 'info';
   timestamp: string;
   isRead: boolean;
   emoji?: string;
+  sentAt?: string;
+  read?: boolean;
 }
 
 export interface RegisterSchedulePayload {

@@ -31,14 +31,16 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setIsUploading(true);
     try {
       const result = await uploadChatImage(chatRoomId, file);
       console.log('✅ 이미지 업로드 성공:', result);
+      toast.success('이미지가 업로드되었습니다.');
     } catch (error: any) {
       console.error('❌ 이미지 업로드 실패:', error);
       toast.error(error.message || '이미지 업로드에 실패했습니다.');
     } finally {
-      // 파일 입력 초기화
+      setIsUploading(false);
       e.target.value = '';
     }
   };

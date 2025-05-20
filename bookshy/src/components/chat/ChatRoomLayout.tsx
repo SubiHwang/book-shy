@@ -88,17 +88,15 @@ export default function ChatRoomLayout(props: ChatRoomLayoutProps) {
     // 1. 실시간 채팅 메시지
     const chatSub = subscribeRoom(roomIdNum, (frame) => {
       const msg = JSON.parse(frame.body);
-      setMessages((prev) =>
-        prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]
-      );
+      setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
     });
 
     // 2. 읽음 처리
     const readSub = subscribeReadTopic(roomIdNum, (payload) => {
       setMessages((prev) =>
         prev.map((msg) =>
-          payload.messageIds.includes(Number(msg.id)) ? { ...msg, read: true } : msg
-        )
+          payload.messageIds.includes(Number(msg.id)) ? { ...msg, read: true } : msg,
+        ),
       );
     });
 
@@ -121,8 +119,8 @@ export default function ChatRoomLayout(props: ChatRoomLayoutProps) {
         senderId: 0,
         content: `📌 일정 등록됨: ${formattedDate}`,
         type: 'info',
-        sentAt: new Date().toISOString(),
-        read: false,
+        timestamp: new Date().toISOString(),
+        isRead: false,
         emoji: '',
       };
       setMessages((prev) => [...prev, sysMsg]);
@@ -132,8 +130,8 @@ export default function ChatRoomLayout(props: ChatRoomLayoutProps) {
     const emojiSub = subscribeEmojiTopic(roomIdNum, ({ messageId, emoji, type }) => {
       setMessages((prev) =>
         prev.map((msg) =>
-          Number(msg.id) === messageId ? { ...msg, emoji: type === 'ADD' ? emoji : '' } : msg
-        )
+          Number(msg.id) === messageId ? { ...msg, emoji: type === 'ADD' ? emoji : '' } : msg,
+        ),
       );
     });
 
@@ -144,7 +142,15 @@ export default function ChatRoomLayout(props: ChatRoomLayoutProps) {
       unsubscribe(calendarSub);
       unsubscribe(emojiSub);
     };
-  }, [isConnected, props.roomId, subscribeRoom, subscribeReadTopic, subscribeCalendarTopic, subscribeEmojiTopic, unsubscribe]);
+  }, [
+    isConnected,
+    props.roomId,
+    subscribeRoom,
+    subscribeReadTopic,
+    subscribeCalendarTopic,
+    subscribeEmojiTopic,
+    unsubscribe,
+  ]);
 
   // 스크롤이 위에 있을 때 아래로 내려가는 버튼 표시
   useEffect(() => {
