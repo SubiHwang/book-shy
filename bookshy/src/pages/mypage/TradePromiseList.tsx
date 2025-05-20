@@ -34,7 +34,9 @@ const TradePromiseList: FC = () => {
           userName={item.counterpart.nickname}
           userProfileUrl={item.counterpart.profileImageUrl}
           myBookTitle={item.myBookTitle}
+          myBookCoverUrl={item.myBookCoverUrl}
           partnerBookTitle={item.partnerBookTitle}
+          partnerBookCoverUrl={item.partnerBookCoverUrl}
           statusText={item.timeLeft.display}
           meetTime={new Date(item.scheduledTime).toLocaleString('ko-KR', {
             year: 'numeric',

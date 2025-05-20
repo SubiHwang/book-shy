@@ -7,8 +7,10 @@ export interface TradePromise {
   requestedAt: string;
   myBookId: number;
   myBookTitle: string;
+  myBookCoverUrl: string;
   partnerBookId: number;
   partnerBookTitle: string;
+  partnerBookCoverUrl: string;
   counterpart: {
     userId: number;
     nickname: string;
