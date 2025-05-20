@@ -337,29 +337,6 @@ function ChatRoom({
 
       // 일정 등록
       await registerSchedule(schedulePayload);
-
-      // 캘린더 이벤트 생성
-      const eventData = {
-        title: schedulePayload.title,
-        start: payload.type === 'EXCHANGE' ? payload.eventDate : payload.startDate,
-        end: payload.type === 'EXCHANGE' ? payload.eventDate : payload.endDate,
-        description: schedulePayload.description,
-        type: schedulePayload.type,
-        roomId: numericRoomId,
-        userIds: [userAId, userBId],
-        bookAId: myBookId[0],
-        bookBId: otherBookId[0],
-      };
-
-      // 캘린더 이벤트 데이터 로깅
-      console.log('📅 캘린더 이벤트 생성 데이터:', {
-        ...eventData,
-        userIds: `[${userAId}, ${userBId}]`,
-        type: eventData.type,
-        dates: `start: ${eventData.start}, end: ${eventData.end}`,
-      });
-
-      await createCalendarEvent(eventData);
     } catch (e) {
       console.error('❌ 일정 등록 실패:', e);
     }
