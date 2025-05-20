@@ -293,9 +293,9 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   let lastDateLabel = '';
 
   return (
-    <div className="relative h-full min-h-0 bg-white pb-safe">
-      {/* 헤더 - 항상 상단 고정 */}
-      <div className="fixed top-0 left-0 right-0 z-10">
+    <div className="flex flex-col h-full bg-white">
+      {/* Header - Fixed at top */}
+      <div className="flex-none">
         <ChatRoomHeader
           partnerName={partnerInfo?.name ?? '로딩중...'}
           partnerProfileImage={partnerInfo?.profileImage ?? '/default-profile.png'}
@@ -303,108 +303,88 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
         />
       </div>
 
-      {/* 메시지 영역 - 내부 스크롤, 헤더/인풋 높이만큼 패딩 */}
-      <div
-        className={`overflow-y-auto transition-all duration-300 ${showOptions ? 'pb-[35vh]' : ''}`}
-        style={{ paddingTop: 56, paddingBottom: showOptions ? '35vh' : 64, height: '100vh' }}
-      >
-        {messages.map((msg, idx) => {
-          const dateLabel = formatDateLabel(msg.sentAt);
-          const showDate = dateLabel !== lastDateLabel;
-          lastDateLabel = dateLabel;
+      {/* Messages Container - Scrollable */}
+      <div className="flex-1 overflow-y-auto relative px-4 pb-16">
+        <div className="pb-4">
+          {messages.map((msg, idx) => {
+            const dateLabel = formatDateLabel(msg.sentAt);
+            const showDate = dateLabel !== lastDateLabel;
+            lastDateLabel = dateLabel;
 
-          const isSystem = ['info', 'notice', 'warning'].includes(msg.type ?? '');
-          return (
-            <div key={`${msg.id}-${idx}`}>
-              {showDate && (
-                <div className="flex items-center gap-2 text-[11px] sm:text-xs text-light-text-muted my-4">
-                  <div className="flex-grow border-t border-light-bg-shade" />
-                  <span className="px-2 whitespace-nowrap">{dateLabel}</span>
-                  <div className="flex-grow border-t border-light-bg-shade" />
-                </div>
-              )}
-              {isSystem ? (
-                <div className="max-w-[90%] mx-auto">
-                  <SystemMessage
-                    title={
-                      msg.type === 'notice'
-                        ? '거래 시 주의해주세요!'
-                        : msg.type === 'info'
-                          ? '약속이 등록되었습니다!'
-                          : '알림'
-                    }
-                    content={msg.content}
-                    variant={msg.type as 'notice' | 'info' | 'warning'}
+            const isSystem = ['info', 'notice', 'warning'].includes(msg.type ?? '');
+            return (
+              <div key={`${msg.id}-${idx}`}>
+                {showDate && (
+                  <div className="flex items-center gap-2 text-[11px] sm:text-xs text-light-text-muted my-4">
+                    <div className="flex-grow border-t border-light-bg-shade" />
+                    <span className="px-2 whitespace-nowrap">{dateLabel}</span>
+                    <div className="flex-grow border-t border-light-bg-shade" />
+                  </div>
+                )}
+                {isSystem ? (
+                  <div className="max-w-[90%] mx-auto">
+                    <SystemMessage
+                      title={
+                        msg.type === 'notice'
+                          ? '거래 시 주의해주세요!'
+                          : msg.type === 'info'
+                            ? '약속이 등록되었습니다!'
+                            : '알림'
+                      }
+                      content={msg.content}
+                      variant={msg.type as 'notice' | 'info' | 'warning'}
+                    />
+                  </div>
+                ) : (
+                  <ChatMessageItem
+                    message={{ ...msg, sentAt: formatTime(msg.sentAt), read: msg.read }}
+                    isMyMessage={msg.senderId === myUserId}
+                    showEmojiSelector={emojiTargetId === msg.id}
+                    onLongPress={() => handleLongPressOrRightClick(msg.id)}
+                    onRightClick={() => handleLongPressOrRightClick(msg.id)}
+                    onSelectEmoji={(emoji) => handleSelectEmoji(msg.id, emoji ?? '')}
+                    selectedEmoji={Array.isArray(msg.emoji) ? msg.emoji[0] : msg.emoji}
+                    onCloseEmoji={() => setEmojiTargetId(null)}
                   />
-                </div>
-              ) : (
-                <ChatMessageItem
-                  message={{ ...msg, sentAt: formatTime(msg.sentAt), read: msg.read }}
-                  isMyMessage={msg.senderId === myUserId}
-                  showEmojiSelector={emojiTargetId === msg.id}
-                  onLongPress={() => handleLongPressOrRightClick(msg.id)}
-                  onRightClick={() => handleLongPressOrRightClick(msg.id)}
-                  onSelectEmoji={(emoji) => handleSelectEmoji(msg.id, emoji ?? '')}
-                  selectedEmoji={Array.isArray(msg.emoji) ? msg.emoji[0] : msg.emoji}
-                  onCloseEmoji={() => setEmojiTargetId(null)}
-                />
-              )}
-            </div>
-          );
-        })}
+                )}
+              </div>
+            );
+          })}
 
-        {/* 📌 교환 완료 유도 메시지 */}
-        <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm max-w-[90%] mx-auto">
-          <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
-          <p className="text-xs mt-1 text-light-text-muted">
-            거래가 완료되었다면 리뷰를 남겨주세요.
-          </p>
-          <button
-            onClick={() =>
-              navigate(`/chat/${numericRoomId}/review`, {
-                state: {
-                  chatSummary: {
-                    partnerName: partnerInfo?.name ?? '로딩중...',
-                    partnerProfileImage: partnerInfo?.profileImage ?? '/default-profile.png',
-                    bookShyScore: partnerInfo?.bookShyScore ?? 0,
-                    myBookId,
-                    myBookName,
-                    otherBookId,
-                    otherBookName,
+          {/* 📌 교환 완료 유도 메시지 */}
+          <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm max-w-[90%] mx-auto">
+            <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
+            <p className="text-xs mt-1 text-light-text-muted">
+              거래가 완료되었다면 리뷰를 남겨주세요.
+            </p>
+            <button
+              onClick={() =>
+                navigate(`/chat/${numericRoomId}/review`, {
+                  state: {
+                    chatSummary: {
+                      partnerName: partnerInfo?.name ?? '로딩중...',
+                      partnerProfileImage: partnerInfo?.profileImage ?? '/default-profile.png',
+                      bookShyScore: partnerInfo?.bookShyScore ?? 0,
+                      myBookId,
+                      myBookName,
+                      otherBookId,
+                      otherBookName,
+                    },
                   },
-                },
-              })
-            }
-            className="mt-3 inline-block bg-primary text-white text-xs font-medium px-4 py-2 rounded-full"
-          >
-            거래 완료
-          </button>
-        </div>
+                })
+              }
+              className="mt-3 inline-block bg-primary text-white text-xs font-medium px-4 py-2 rounded-full"
+            >
+              거래 완료
+            </button>
+          </div>
 
-        <div ref={messagesEndRef} className="h-4" />
+          <div ref={messagesEndRef} className="h-4" />
+        </div>
       </div>
 
-      {/* ↓ 아래로 버튼 */}
-      {showScrollToBottom && (
-        <div
-          className="fixed inset-x-0 flex justify-center z-30 transition-all duration-300"
-          style={{
-            bottom: showOptions ? `calc(25vh + 72px)` : `72px`, // 옵션 열렸을 때는 옵션+인풋+여유, 아니면 인풋+여유
-          }}
-        >
-          <button
-            className="bg-black/70 hover:bg-black/85 text-white text-base sm:text-lg px-3 py-1.5 rounded-full shadow-md border border-black/10"
-            style={{ minWidth: 44 }}
-            onClick={() => scrollToBottom(true)}
-            aria-label="맨 아래로 스크롤"
-          >
-            ↓
-          </button>
-        </div>
-      )}
-
-      {/* 인풋창 - 항상 하단 고정 */}
-      <div className="fixed left-0 right-0 bottom-0 z-20 bg-white border-t border-light-border px-4">
+      {/* Input Container - Fixed at bottom */}
+      <div className="flex-none fixed left-0 right-0 bottom-0 z-20 bg-white">
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
@@ -416,13 +396,12 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
 
             setShowOptions((prev) => !prev);
 
-            // 확장된 후 DOM이 완전히 반영된 다음 스크롤 (조금 delay)
             if (wasAtBottom) {
               setTimeout(() => {
                 requestAnimationFrame(() => {
-                  scrollToBottom(true); // smooth 스크롤
+                  scrollToBottom(true);
                 });
-              }, 250); // 약간 더 넉넉한 시간
+              }, 250);
             }
           }}
           onScheduleClick={() => setShowScheduleModal(true)}
@@ -430,7 +409,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
         />
       </div>
 
-      {/* 일정 모달 */}
+      {/* Schedule Modal */}
       {showScheduleModal && (
         <ScheduleModal
           partnerName={partnerInfo?.name ?? '로딩중...'}
