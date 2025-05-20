@@ -57,37 +57,20 @@ function ChatRoom({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const [viewportHeight, setViewportHeight] = useState(
-    window.visualViewport?.height ?? window.innerHeight,
-  );
-  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
 
   useEffect(() => {
-    const handleResize = () => {
-      setViewportHeight(window.visualViewport?.height ?? window.innerHeight);
+    const updateHeight = () => {
+      const visual = window.visualViewport;
+      const height = visual
+        ? visual.height + visual.offsetTop // 정확한 visible 영역
+        : window.innerHeight;
+      setViewportHeight(height);
     };
 
-    if (typeof window.visualViewport !== 'undefined' && window.visualViewport !== null) {
-      window.visualViewport.addEventListener('resize', handleResize);
-      return () => {
-        window.visualViewport?.removeEventListener('resize', handleResize);
-      };
-    } else {
-      window.addEventListener('resize', handleResize);
-      return () => {
-        window.removeEventListener('resize', handleResize);
-      };
-    }
-  }, []);
-
-  useEffect(() => {
-    const resizeListener = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    };
-    resizeListener();
-    window.addEventListener('resize', resizeListener);
-    return () => window.removeEventListener('resize', resizeListener);
+    updateHeight();
+    window.visualViewport?.addEventListener('resize', updateHeight);
+    return () => window.visualViewport?.removeEventListener('resize', updateHeight);
   }, []);
 
   const queryClient = useQueryClient();
@@ -320,15 +303,9 @@ function ChatRoom({
   let lastDateLabel = '';
 
   return (
-    <div
-      className="relative flex flex-col bg-white"
-      style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
-    >
-      {/* 헤더: fixed top-0 */}
-      <div
-        className="fixed top-0 left-0 right-0 z-40 bg-white border-b border-light-border"
-        style={{ height: 56 }}
-      >
+    <div style={{ height: viewportHeight }} className="flex flex-col bg-white pb-safe">
+      {/* 헤더 */}
+      <div className="shrink-0 z-10">
         <ChatRoomHeader
           partnerName={partnerName}
           partnerProfileImage={partnerProfileImage}
@@ -336,16 +313,13 @@ function ChatRoom({
         />
       </div>
 
-      {/* 메시지 영역: 헤더 높이만큼 padding-top, 인풋 높이만큼 padding-bottom */}
+      {/* 메시지 영역 */}
       <div
-        className="overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300"
-        style={{
-          paddingTop: 56,
-          paddingBottom: showOptions ? '35vh' : 88,
-          height: viewportHeight,
-          boxSizing: 'border-box',
-        }}
-        ref={messagesContainerRef}
+        className={`flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
+          showOptions
+            ? 'pb-[35vh]' // 확장 기능 보이면 큰 여백
+            : 'pb-20' // 기본 여백
+        }`}
       >
         {messages.map((msg, idx) => {
           const dateLabel = formatDateLabel(msg.sentAt);
@@ -425,8 +399,8 @@ function ChatRoom({
       {showScrollToBottom && (
         <div
           className={`absolute inset-x-0 flex justify-center z-30 transition-all duration-300
-        ${showOptions ? 'bottom-[32vh]' : 'bottom-[88px]'}
-      `}
+      ${showOptions ? 'bottom-[32vh]' : 'bottom-[88px]'}
+    `}
         >
           <button
             className="bg-black/60 hover:bg-black/80 text-white text-lg sm:text-xl px-3 py-1.5 rounded-full shadow-md"
@@ -438,28 +412,25 @@ function ChatRoom({
         </div>
       )}
 
-      {/* 입력창: fixed bottom-0 */}
-      <div
-        className="sticky bottom-0 left-0 right-0 z-40 bg-white border-t border-light-border px-4"
-        style={{ height: 56 }}
-      >
+      <div className="shrink-0 z-20 bg-white border-t border-light-border px-4">
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
           onToggleOptions={() => {
-            const container = messagesContainerRef.current;
+            const container = messagesEndRef.current?.parentElement;
             const wasAtBottom = container
               ? container.scrollHeight - container.scrollTop - container.clientHeight < 50
               : false;
 
             setShowOptions((prev) => !prev);
 
+            // 확장된 후 DOM이 완전히 반영된 다음 스크롤 (조금 delay)
             if (wasAtBottom) {
               setTimeout(() => {
                 requestAnimationFrame(() => {
-                  scrollToBottom(true);
+                  scrollToBottom(true); // smooth 스크롤
                 });
-              }, 250);
+              }, 250); // 약간 더 넉넉한 시간
             }
           }}
           onScheduleClick={() => setShowScheduleModal(true)}
