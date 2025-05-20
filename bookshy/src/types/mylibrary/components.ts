@@ -6,11 +6,9 @@ export interface BooksBannerData {
   achievement?: string;
 }
 
-// 교환 배너 데이터
 export interface ExchangeBannerData {
-  exchangeCount: number; // 교환 횟수
-  peopleCount: number; // 교환한 사람 수
-  lastExchangeDate?: string; // 마지막 교환 날짜
+  peopleCount: number;
+  bookCount: number;
 }
 
 export interface GenreBannerData {
