@@ -15,16 +15,16 @@ const ExchangeBanner: React.FC<ExchangeBannerProps> = ({ data }) => {
     let emoji = '';
     let title = '';
 
-    if (bookCount <= 0) {
+    if (peopleCount <= 0) {
       emoji = '🤝';
       title = '교환을 기다리는 독서인';
-    } else if (bookCount < 5) {
+    } else if (peopleCount < 5) {
       emoji = '📚';
       title = '교환을 시작한 독서인';
-    } else if (bookCount < 10) {
+    } else if (peopleCount < 10) {
       emoji = '🔄';
       title = '활발한 교환 독서인';
-    } else if (bookCount < 20) {
+    } else if (peopleCount < 20) {
       emoji = '🌟';
       title = '열정적인 교환 애호가';
     } else {
@@ -37,7 +37,7 @@ const ExchangeBanner: React.FC<ExchangeBannerProps> = ({ data }) => {
 
   // 통계 메시지 생성
   const getStatisticsMessage = (): string => {
-    if (bookCount <= 0) {
+    if (peopleCount <= 0) {
       return '첫 교환을 시작해보세요!';
     } else {
       return peopleCount > 0
