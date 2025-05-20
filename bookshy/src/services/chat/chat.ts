@@ -56,16 +56,11 @@ export async function uploadChatImage(
   const formData = new FormData();
   formData.append('file', file);
 
-  const { data } = await authAxiosInstance.post<{ imageUrl: string }>(
-    `/messages/image?chatRoomId=${chatRoomId}`,
-    formData,
-    {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+  return await authAxiosInstance.post(`/messages/image?chatRoomId=${chatRoomId}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
     },
-  );
-  return data;
+  });
 }
 
 export async function fetchPartnerInfo(

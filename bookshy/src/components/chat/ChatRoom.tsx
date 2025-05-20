@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback, useLayoutEffect } from 'react';
-import { ChatMessage, RegisterSchedulePayload, ChatCalendarEventDto } from '@/types/chat/chat.ts';
+import { ChatMessage, RegisterSchedulePayload } from '@/types/chat/chat.ts';
 import ChatMessageItem from './ChatMessageItem.tsx';
 import ChatInput from './ChatInput.tsx';
 import ChatRoomHeader from './ChatRoomHeader.tsx';

@@ -30,7 +30,6 @@ const TradePromiseCard: FC<TradeCardProps> = ({
   myBookCoverUrl,
   partnerBookTitle,
   partnerBookCoverUrl,
-  statusText,
   meetTime,
   timeLeft,
 }) => {

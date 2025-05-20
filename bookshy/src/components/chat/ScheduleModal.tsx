@@ -112,23 +112,20 @@ const ScheduleModal: FC<Props> = ({
     };
 
     const msg = `${formatFullDate(startDate)} ${borrowTime}`;
-    const payload: RegisterSchedulePayload =
-      tab === '교환'
-        ? {
-            roomId,
-            requestId,
-            type: 'EXCHANGE',
-            title: msg,
-            eventDate: toISOString(startDate, borrowTime),
-          }
+    const payload: RegisterSchedulePayload = {
+      roomId,
+      type: tab === '교환' ? 'EXCHANGE' : 'RENTAL',
+      userIds: [],
+      bookAId: 0,
+      bookBId: 0,
+      title: msg,
+      ...(tab === '교환'
+        ? { eventDate: toISOString(startDate!, borrowTime) }
         : {
-            roomId,
-            requestId,
-            type: 'RENTAL',
-            title: msg,
-            startDate: toISOString(startDate, borrowTime),
-            endDate: toISOString(endDate!, returnTime!),
-          };
+            startDate: toISOString(startDate!, borrowTime),
+            endDate: toISOString(endDate!, returnTime),
+          }),
+    };
 
     onConfirm(msg, payload);
     onClose();
