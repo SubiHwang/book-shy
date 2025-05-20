@@ -445,21 +445,34 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
               거래가 완료되었다면 리뷰를 남겨주세요.
             </p>
             <button
-              onClick={() =>
-                navigate(`/chat/${numericRoomId}/review`, {
-                  state: {
-                    chatSummary: {
-                      partnerName: partnerInfo?.name ?? '',
-                      partnerProfileImage: partnerInfo?.profileImage ?? '',
-                      bookShyScore: partnerInfo?.bookShyScore ?? 0,
-                      myBookId: myBookId[0],
-                      myBookName: myBookName[0],
-                      otherBookId: otherBookId[0],
-                      otherBookName: otherBookName[0],
-                    },
+              onClick={() => {
+                if (!calendarEvent) {
+                  console.error('❌ 캘린더 이벤트 없음');
+                  return;
+                }
+
+                const isExchange = calendarEvent.type === 'EXCHANGE';
+                console.log('📅 캘린더 이벤트:', calendarEvent);
+                console.log('👥 파트너 정보:', partnerInfo);
+                console.log('📚 내 책 정보:', { id: myBookId[0], name: myBookName[0] });
+                console.log('📚 상대방 책 정보:', { id: otherBookId[0], name: otherBookName[0] });
+
+                const reviewData = {
+                  chatSummary: {
+                    roomId: numericRoomId,
+                    partnerName: partnerInfo?.name ?? '',
+                    partnerProfileImage: partnerInfo?.profileImage ?? '',
+                    bookShyScore: partnerInfo?.bookShyScore ?? 0,
+                    myBookId: isExchange ? [myBookId[0]] : [otherBookId[0]],
+                    myBookName: isExchange ? [myBookName[0]] : [otherBookName[0]],
+                    otherBookId: isExchange ? [otherBookId[0]] : [myBookId[0]],
+                    otherBookName: isExchange ? [otherBookName[0]] : [myBookName[0]],
                   },
-                })
-              }
+                };
+                console.log('📤 리뷰 페이지로 전달할 데이터:', reviewData);
+
+                navigate(`/chat/${numericRoomId}/review`, { state: reviewData });
+              }}
               className="mt-3 inline-block bg-primary text-white text-xs font-medium px-4 py-2 rounded-full"
             >
               거래 완료

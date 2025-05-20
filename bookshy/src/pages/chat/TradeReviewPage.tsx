@@ -157,7 +157,6 @@ const TradeReviewPage = () => {
       rating: (ratings.condition + ratings.punctuality + ratings.manner) / 3,
       ratings,
       books: selectedReviewedBooks,
-      tradeType: calendar.type,
     };
 
     try {
