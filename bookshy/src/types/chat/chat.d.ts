@@ -36,8 +36,8 @@ export interface RegisterSchedulePayload {
   title: string;
   description?: string;
   exchangeDate?: string;
-  rentalStartDate?: string;
-  rentalEndDate?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 interface ReadPayload {

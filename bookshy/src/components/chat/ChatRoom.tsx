@@ -259,7 +259,10 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
         description: payload.description,
         ...(payload.type === 'EXCHANGE'
           ? { exchangeDate: payload.exchangeDate }
-          : { rentalStartDate: payload.rentalStartDate, rentalEndDate: payload.rentalEndDate }),
+          : {
+              startDate: payload.startDate,
+              endDate: payload.endDate,
+            }),
       };
 
       // 요청 데이터 로깅
@@ -270,7 +273,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
         dates:
           payload.type === 'EXCHANGE'
             ? `exchangeDate: ${payload.exchangeDate}`
-            : `rentalStartDate: ${payload.rentalStartDate}, rentalEndDate: ${payload.rentalEndDate}`,
+            : `startDate: ${payload.startDate}, endDate: ${payload.endDate}`,
       });
 
       // 일정 등록
