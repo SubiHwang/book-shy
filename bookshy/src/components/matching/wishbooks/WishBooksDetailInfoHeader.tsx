@@ -80,9 +80,7 @@ const WishBooksDetailInfoHeader: FC<BookDetailPageProps> = ({
       const response = await createSimpleChatRoom(userId);
       navigate(`/chat/${response.chatRoomId}`, {
         state: {
-          partnerName: response.nickname,
-          partnerProfileImage: response.profileImageUrl,
-          bookShyScore: response.temperature,
+          // 필요시 책 정보만 넘기고, 상대방 정보는 넘기지 않음
         },
       });
     } catch (error) {

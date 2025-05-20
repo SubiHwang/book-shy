@@ -13,16 +13,14 @@ import {
   markMessagesAsRead,
   registerSchedule,
   sendEmoji,
+  fetchPartnerInfo,
 } from '@/services/chat/chat.ts';
 import { useStomp } from '@/hooks/chat/useStomp.ts';
 import { useWebSocket } from '@/contexts/WebSocketProvider';
 import { getUserIdFromToken } from '@/utils/jwt.ts';
 
 interface Props {
-  partnerName: string;
-  partnerProfileImage: string;
   initialMessages?: ChatMessage[];
-  bookShyScore: number;
   myBookId: number[];
   myBookName: string[];
   otherBookId: number[];
@@ -36,15 +34,13 @@ interface EmojiUpdatePayload {
   updatedBy: number;
 }
 
-function ChatRoom({
-  partnerName,
-  partnerProfileImage,
-  bookShyScore,
-  myBookId,
-  myBookName,
-  otherBookId,
-  otherBookName,
-}: Props) {
+interface PartnerInfo {
+  name: string;
+  profileImage: string;
+  bookShyScore: number;
+}
+
+function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   const { roomId } = useParams();
   const numericRoomId = Number(roomId);
   const myUserId = getUserIdFromToken();
@@ -71,6 +67,9 @@ function ChatRoom({
 
   const prevMessageCountRef = useRef(messages.length);
   const isInitialLoadRef = useRef(true);
+
+  // 상대방 정보 상태
+  const [partnerInfo, setPartnerInfo] = useState<PartnerInfo | null>(null);
 
   useLayoutEffect(() => {
     const prevCount = prevMessageCountRef.current;
@@ -120,6 +119,12 @@ function ChatRoom({
     if (!isSuccess) return;
     setMessages(initialMessages);
   }, [initialMessages, isSuccess]);
+
+  useEffect(() => {
+    if (!isNaN(numericRoomId)) {
+      fetchPartnerInfo(numericRoomId).then(setPartnerInfo);
+    }
+  }, [numericRoomId]);
 
   const onRead = useCallback(
     (payload: { readerId: number; messageIds: number[] }) => {
@@ -288,13 +293,13 @@ function ChatRoom({
   let lastDateLabel = '';
 
   return (
-    <div className="relative h-full min-h-0 bg-white">
+    <div className="relative h-full min-h-0 bg-white pb-safe">
       {/* 헤더 - 항상 상단 고정 */}
       <div className="fixed top-0 left-0 right-0 z-10">
         <ChatRoomHeader
-          partnerName={partnerName}
-          partnerProfileImage={partnerProfileImage}
-          bookShyScore={bookShyScore}
+          partnerName={partnerInfo?.name ?? '로딩중...'}
+          partnerProfileImage={partnerInfo?.profileImage ?? '/default-profile.png'}
+          bookShyScore={partnerInfo?.bookShyScore ?? 0}
         />
       </div>
 
@@ -359,9 +364,9 @@ function ChatRoom({
               navigate(`/chat/${numericRoomId}/review`, {
                 state: {
                   chatSummary: {
-                    partnerName,
-                    partnerProfileImage,
-                    bookShyScore,
+                    partnerName: partnerInfo?.name ?? '로딩중...',
+                    partnerProfileImage: partnerInfo?.profileImage ?? '/default-profile.png',
+                    bookShyScore: partnerInfo?.bookShyScore ?? 0,
                     myBookId,
                     myBookName,
                     otherBookId,
@@ -428,8 +433,8 @@ function ChatRoom({
       {/* 일정 모달 */}
       {showScheduleModal && (
         <ScheduleModal
-          partnerName={partnerName}
-          partnerProfileImage={partnerProfileImage}
+          partnerName={partnerInfo?.name ?? '로딩중...'}
+          partnerProfileImage={partnerInfo?.profileImage ?? '/default-profile.png'}
           roomId={numericRoomId}
           requestId={0}
           onClose={() => setShowScheduleModal(false)}

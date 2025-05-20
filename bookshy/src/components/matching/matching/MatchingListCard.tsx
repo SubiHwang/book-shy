@@ -31,13 +31,10 @@ const MatchingListCard: FC<MatchingCardProps> = ({ matching }) => {
       if (response.chatRoomId) {
         navigate(`/chat/${response.chatRoomId}`, {
           state: {
-            partnerName: matching.nickname,
-            partnerProfileImage: matching.profileImageUrl,
-            bookShyScore: matching.temperature,
-            myBookId: matching.myBookId, // 상대가 관심 있어한 내 책 ID
-            myBookName: matching.myBookName, // 상대가 관심 있어한 내 책 이름
-            otherBookId: matching.otherBookId, // 내가 관심 있어한 상대 책 ID
-            otherBookName: matching.otherBookName, // 내가 관심 있어한 상대 책 이름
+            myBookId: matching.myBookId,
+            myBookName: matching.myBookName,
+            otherBookId: matching.otherBookId,
+            otherBookName: matching.otherBookName,
           },
         });
       } else {
