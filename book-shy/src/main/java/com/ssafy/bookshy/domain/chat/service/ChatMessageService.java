@@ -225,22 +225,27 @@ public class ChatMessageService {
      */
     public String uploadChatImage(MultipartFile imageFile) {
         if (imageFile == null || imageFile.isEmpty()) {
-            throw new IllegalArgumentException("이미지가 업로드되지 않았습니다.");
+            throw new ChatException(ChatErrorCode.INVALID_IMAGE_TYPE);
         }
 
-        // 파일명 생성 (uuid + 확장자)
-        String uuid = UUID.randomUUID().toString();
-        String ext = FilenameUtils.getExtension(imageFile.getOriginalFilename());
-        String fileName = uuid + "." + ext;
+        try {
+            // 파일명 생성 (uuid + 확장자)
+            String uuid = UUID.randomUUID().toString();
+            String ext = FilenameUtils.getExtension(imageFile.getOriginalFilename());
+            String fileName = uuid + "." + ext;
 
-        // 저장 경로 및 접근 URL
-        String uploadDir = "/home/ubuntu/bookshy/images/chat";
-        String imageUrl = ImageUrlConstants.CHAT_IMAGE_BASE_URL + fileName;
+            // 저장 경로 및 접근 URL
+            String uploadDir = "/home/ubuntu/bookshy/images/chat";
+            String imageUrl = ImageUrlConstants.CHAT_IMAGE_BASE_URL + fileName;
 
-        // 실제 저장
-        FileUploadUtil.saveFile(imageFile, uploadDir, fileName);
+            // 실제 저장
+            FileUploadUtil.saveFile(imageFile, uploadDir, fileName);
 
-        return imageUrl;
+            return imageUrl;
+
+        } catch (Exception e) {
+            throw new ChatException(ChatErrorCode.IMAGE_UPLOAD_FAILED);
+        }
     }
 
 
