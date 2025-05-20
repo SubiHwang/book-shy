@@ -67,10 +67,9 @@ function ChatMessageItem({
   ];
 
   // 이미지 메시지 처리
-  const isImageMessage = message.content.startsWith('[이미지](') && message.content.endsWith(')');
-  const imageUrl = isImageMessage
-    ? message.content.slice(8, -1) // '[이미지](' 와 ')' 제거
-    : null;
+  const isImage = message.type === 'image';
+  const imageUrl = message.imageUrl;
+  const thumbnailUrl = message.thumbnailUrl;
 
   return (
     <div
@@ -83,24 +82,30 @@ function ChatMessageItem({
       <div className={`flex items-end gap-1 ${isMyMessage ? 'flex-row-reverse' : 'flex-row'}`}>
         <div
           className={`max-w-[85%] sm:max-w-[70%] px-4 py-2 rounded-2xl text-sm sm:text-base whitespace-pre-wrap break-words ${
-            isMyMessage ? 'bg-primary-light text-white' : 'bg-light-bg-secondary text-gray-900'
+            message.type === 'notice'
+              ? 'bg-gray-100 text-gray-600 text-center mx-auto'
+              : isMyMessage
+                ? 'bg-primary-light text-white'
+                : 'bg-light-bg-secondary text-gray-900'
           } select-none`}
         >
-          {isImageMessage ? (
+          {isImage ? (
             <img
-              src={imageUrl ?? ''}
+              src={thumbnailUrl ?? imageUrl ?? ''}
               alt="채팅 이미지"
               className="max-w-full rounded-lg cursor-pointer hover:opacity-90 transition"
               onClick={() => window.open(imageUrl ?? '', '_blank')}
             />
           ) : (
-            message.content
+            (message.content ?? '')
           )}
         </div>
-        <div className="flex flex-col gap-[2px] text-right text-[10px] text-light-text-muted pb-[1px]">
-          {isMyMessage && !message.read && <span className="text-primary text-[10px]">1</span>}
-          <span>{message.sentAt}</span>
-        </div>
+        {message.type !== 'notice' && (
+          <div className="flex flex-col gap-[2px] text-right text-[10px] text-light-text-muted pb-[1px]">
+            {isMyMessage && !message.isRead && <span className="text-primary text-[10px]">1</span>}
+            <span>{message.timestamp}</span>
+          </div>
+        )}
       </div>
 
       {/* 이모지 - 말풍선 아래에 따로 */}

@@ -13,15 +13,16 @@ export interface ChatRoomSummary {
 }
 
 export interface ChatMessage {
-  id: string;
-  chatRoomId?: number;
+  id: number;
+  chatRoomId: number;
   senderId: number;
-  senderNickname?: string;
-  content: string;
-  sentAt: string;
-  type?: 'notice' | 'info' | 'warning' | 'text';
+  content: string | null;
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  type: 'text' | 'image' | 'notice';
+  timestamp: string;
+  isRead: boolean;
   emoji?: string;
-  read?: boolean;
 }
 
 export interface RegisterSchedulePayload {
