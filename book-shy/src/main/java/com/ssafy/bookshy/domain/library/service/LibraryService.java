@@ -1,5 +1,7 @@
 package com.ssafy.bookshy.domain.library.service;
 
+import com.ssafy.bookshy.common.constants.ImageUrlConstants;
+import com.ssafy.bookshy.common.file.FileUploadUtil;
 import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
 import com.ssafy.bookshy.domain.book.entity.Book;
 import com.ssafy.bookshy.domain.book.repository.BookRepository;
@@ -181,22 +183,23 @@ public class LibraryService {
         Users user = userService.getUserById(dto.getUserId());
         if (user == null) throw new LibraryException(LibraryErrorCode.USER_NOT_FOUND);
 
+
+        // 1️⃣ 파일 이름 및 저장 경로
         String fileName = UUID.randomUUID() + "_" + dto.getCoverImage().getOriginalFilename();
-        String savePath = uploadPath + "/" + fileName;
+        String uploadDir = "/home/ubuntu/bookshy/images/coverImage";  // 또는 @Value 주입
+        String imageUrl = ImageUrlConstants.COVER_IMAGE_BASE_URL + fileName;
 
-        try {
-            dto.getCoverImage().transferTo(new File(savePath));
-        } catch (IOException e) {
-            throw new LibraryException(LibraryErrorCode.IMAGE_UPLOAD_FAILED);
-        }
+        // 2️⃣ 공통 유틸로 이미지 저장
+        FileUploadUtil.saveFile(dto.getCoverImage(), uploadDir, fileName);
 
+        // 3️⃣ Book 생성
         Book book = Book.builder()
                 .isbn("SELF_" + UUID.randomUUID())
                 .title(dto.getTitle())
                 .author(dto.getAuthor())
                 .publisher(dto.getPublisher())
                 .description(dto.getDescription())
-                .coverImageUrl(COVER_IMAGE_BASE_URL + fileName)
+                .coverImageUrl(imageUrl)
                 .status(Book.Status.AVAILABLE)
                 .exchangeCount(0)
                 .createdAt(LocalDateTime.now())
@@ -206,6 +209,7 @@ public class LibraryService {
         bookRepository.save(book);
         wishRepository.deleteByUserAndBook(user, book);
 
+        // 4️⃣ Library 등록
         Library library = Library.builder()
                 .user(user)
                 .book(book)
@@ -282,6 +286,13 @@ public class LibraryService {
         }
     }
 
+    /**
+     * 📘✏️ 사용자의 서재 중 아직 독후감이 작성되지 않은 도서 목록을 반환합니다.
+     * <p>
+     * - 모든 서재 항목을 조회
+     * - 각 항목의 bookId가 book_reviews 테이블(BookNote)에 존재하지 않는 경우만 필터링
+     * - 책의 상세 정보(title, author, cover 등)와 함께 DTO로 반환
+     */
     @Transactional(readOnly = true)
     public List<LibraryResponseDto> findUnwrittenNotesByUserId(Long userId) {
         Users user = userService.getUserById(userId);

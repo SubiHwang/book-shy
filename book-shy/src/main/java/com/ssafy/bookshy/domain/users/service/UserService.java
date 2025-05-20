@@ -1,5 +1,7 @@
 package com.ssafy.bookshy.domain.users.service;
 
+import com.ssafy.bookshy.common.constants.ImageUrlConstants;
+import com.ssafy.bookshy.common.file.FileUploadUtil;
 import com.ssafy.bookshy.common.jwt.JwtProvider;
 import com.ssafy.bookshy.domain.users.dto.JwtTokenDto;
 import com.ssafy.bookshy.domain.users.dto.UserProfileResponseDto;
@@ -153,13 +155,16 @@ public class UserService {
 
         Users user = getUserById(userId);
 
+        // 1️⃣ 저장할 파일명 생성 (UUID 기반)
         String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
-        String imageUrl = PROFILE_IMAGE_BASE_URL + fileName;
 
-        // 💾 실제 이미지 업로드 수행 (서버 디렉토리 또는 S3)
-        uploadImageToServer(imageFile, fileName);
+        // 2️⃣ 이미지 URL 구성 (클라이언트에서 접근할 URL)
+        String imageUrl = ImageUrlConstants.PROFILE_IMAGE_BASE_URL + fileName;
 
-        // 🔄 사용자 엔티티에 새 이미지 URL 반영
+        // 3️⃣ 서버 디렉토리에 이미지 저장 (공통 유틸 사용)
+        FileUploadUtil.saveFile(imageFile, "/home/ubuntu/bookshy/images/profile", fileName);
+
+        // 4️⃣ 사용자 프로필 정보 업데이트
         user.updateProfileImageUrl(imageUrl);
 
         return imageUrl;

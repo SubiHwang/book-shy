@@ -28,6 +28,10 @@ public enum ChatErrorCode implements ErrorCode {
     UNAUTHORIZED_EMOJI_ACTION(403, "🚫 해당 이모지 변경 권한이 없습니다."),
     EMOJI_UPDATE_FAILED(400, "⚠️ 이모지 처리 중 오류가 발생했습니다."),
 
+    // 🔹 이미지
+    INVALID_IMAGE_TYPE(400, "❌ 유효하지 않은 이미지입니다."),
+    IMAGE_UPLOAD_FAILED(500, "❌ 채팅 이미지 업로드 중 오류가 발생했습니다."),
+
     // 🔹 기타
     BOOK_NOT_FOUND(404, "📕 도서를 찾을 수 없습니다."),
     EXCHANGE_REQUEST_NOT_FOUND(404, "📄 거래 요청을 찾을 수 없습니다.");
