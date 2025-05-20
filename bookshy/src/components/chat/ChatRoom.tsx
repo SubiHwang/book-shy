@@ -57,21 +57,6 @@ function ChatRoom({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
-
-  useEffect(() => {
-    const updateHeight = () => {
-      const visual = window.visualViewport;
-      const height = visual
-        ? visual.height + visual.offsetTop // 정확한 visible 영역
-        : window.innerHeight;
-      setViewportHeight(height);
-    };
-
-    updateHeight();
-    window.visualViewport?.addEventListener('resize', updateHeight);
-    return () => window.visualViewport?.removeEventListener('resize', updateHeight);
-  }, []);
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -303,7 +288,7 @@ function ChatRoom({
   let lastDateLabel = '';
 
   return (
-    <div style={{ height: viewportHeight }} className="flex flex-col bg-white">
+    <div className="flex flex-col bg-white h-screen">
       {/* 헤더 */}
       <div className="shrink-0 z-10">
         <ChatRoomHeader
