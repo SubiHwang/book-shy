@@ -68,4 +68,12 @@ public interface ExchangeRequestRepository extends JpaRepository<ExchangeRequest
     ORDER BY e.requestedAt DESC
 """)
     List<ExchangeRequest> findByUserAndStatus(@Param("userId") Long userId, @Param("status") ExchangeRequest.RequestStatus status, Pageable pageable);
+
+    @Query("""
+    SELECT COUNT(DISTINCT erb.id)
+    FROM ExchangeReviewBook erb
+    JOIN erb.review r
+    WHERE r.reviewerId = :userId
+""")
+    int countReviewedBooksByUserId(@Param("userId") Long userId);
 }
