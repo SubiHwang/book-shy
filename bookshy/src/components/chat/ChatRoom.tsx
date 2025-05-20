@@ -311,12 +311,14 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
 
       {/* 메시지 영역 - 내부 스크롤, 헤더/인풋 높이만큼 패딩 */}
       <div
-        className={`flex flex-col h-full overflow-y-auto transition-all duration-300 ${showOptions ? 'pb-[35vh]' : ''}`}
-        style={{ 
-          paddingTop: 56, 
-          paddingBottom: showOptions ? '35vh' : 64, 
-          height: '100vh',
-          minHeight: '-webkit-fill-available'
+        className={`flex flex-col overflow-y-auto transition-all duration-300 ${
+          showOptions ? 'pb-[35vh]' : ''
+        }`}
+        style={{
+          paddingTop: 56,
+          paddingBottom: showOptions ? '35vh' : 64,
+          height: '100dvh',
+          maxHeight: '-webkit-fill-available'
         }}
       >
         <div className="flex-grow-0">
@@ -366,7 +368,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
           })}
 
           {/* 📌 교환 완료 유도 메시지 */}
-          <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm max-w-[90%] mx-auto">
+          <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm max-w-[90%] mx-auto mb-4">
             <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
             <p className="text-xs mt-1 text-light-text-muted">
               거래가 완료되었다면 리뷰를 남겨주세요.
@@ -402,7 +404,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
         <div
           className="fixed inset-x-0 flex justify-center z-30 transition-all duration-300"
           style={{
-            bottom: showOptions ? `calc(25vh + 72px)` : `72px`, // 옵션 열렸을 때는 옵션+인풋+여유, 아니면 인풋+여유
+            bottom: showOptions ? 'calc(35vh + env(safe-area-inset-bottom))' : 'calc(64px + env(safe-area-inset-bottom))',
           }}
         >
           <button
@@ -417,7 +419,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
       )}
 
       {/* 인풋창 - 항상 하단 고정 */}
-      <div className="fixed left-0 right-0 bottom-0 z-20 bg-white border-t border-light-border px-4">
+      <div className="fixed left-0 right-0 bottom-0 z-20">
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
@@ -430,7 +432,6 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
 
             setShowOptions((prev) => !prev);
 
-            // 확장된 후 DOM이 완전히 반영된 다음 스크롤 (조금 delay)
             if (wasAtBottom) {
               setTimeout(() => {
                 requestAnimationFrame(() => {

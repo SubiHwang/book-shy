@@ -61,7 +61,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
   };
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 w-full bg-light-bg-secondary border-t pb-[env(safe-area-inset-bottom)]">
+    <div className="w-full bg-light-bg-secondary border-t">
       {/* 입력창 */}
       <form
         onSubmit={handleSubmit}
@@ -105,7 +105,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
 
       {/* 확장 기능 옵션 */}
       <div
-        className={`transition-all duration-300 overflow-hidden ${
+        className={`transition-all duration-300 overflow-hidden bg-white ${
           showOptions ? 'h-[25vh]' : 'h-0'
         }`}
       >
@@ -157,6 +157,9 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
         className="hidden"
         disabled={isUploading}
       />
+      
+      {/* Safe Area Bottom Padding */}
+      <div className="h-[env(safe-area-inset-bottom)]" />
     </div>
   );
 }
