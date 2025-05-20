@@ -59,7 +59,8 @@ function ChatRoom({
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
   const messageAreaRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef(null);
+  // inputRef에 타입 지정
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const handleFocus = () => {
