@@ -13,6 +13,12 @@ export interface TradeCardProps {
   partnerBookCoverUrl: string;
   statusText: string;
   meetTime: string;
+  timeLeft: {
+    days: number;
+    hours: number;
+    minutes: number;
+    display: string;
+  };
 }
 
 const TradePromiseCard: FC<TradeCardProps> = ({
@@ -26,6 +32,7 @@ const TradePromiseCard: FC<TradeCardProps> = ({
   partnerBookCoverUrl,
   statusText,
   meetTime,
+  timeLeft,
 }) => {
   const navigate = useNavigate();
 
@@ -35,6 +42,22 @@ const TradePromiseCard: FC<TradeCardProps> = ({
 
   const handleLibraryClick = () => {
     // TODO: 상대방 서재로 이동하는 기능 구현
+  };
+
+  const renderTimeLeft = () => {
+    const { days, hours, minutes } = timeLeft;
+    const parts = [];
+
+    if (days > 0) parts.push(`${days}일`);
+    if (hours > 0) parts.push(`${hours}시간`);
+    if (minutes > 0) parts.push(`${minutes}분`);
+
+    return (
+      <div className="px-3 py-1.5 rounded-full bg-gradient-to-r from-pink-100 to-pink-50 text-pink-600 text-sm font-medium shadow-sm">
+        <span className="font-bold">{parts.join(' ')}</span>
+        <span className="text-pink-400 ml-1">남음</span>
+      </div>
+    );
   };
 
   return (
@@ -66,9 +89,7 @@ const TradePromiseCard: FC<TradeCardProps> = ({
               <p className="text-sm text-gray-500">{meetTime}</p>
             </div>
           </div>
-          <div className="px-3 py-1 rounded-full bg-pink-100 text-pink-600 text-sm font-medium">
-            {statusText}
-          </div>
+          <div className="flex flex-col items-end">{renderTimeLeft()}</div>
         </div>
       </div>
 

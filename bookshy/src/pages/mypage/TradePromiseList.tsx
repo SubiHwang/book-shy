@@ -46,6 +46,7 @@ const TradePromiseList: FC = () => {
             hour: '2-digit',
             minute: '2-digit',
           })}
+          timeLeft={item.timeLeft}
         />
       ))}
     </div>
