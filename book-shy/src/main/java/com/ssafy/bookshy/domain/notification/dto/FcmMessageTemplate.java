@@ -11,24 +11,46 @@ public class FcmMessageTemplate {
 
         switch (type) {
             case TRANSACTION_DATE -> {
-                String subtype = data.get("subtype");       // now, day_before, today
+                String subtype = data.get("subtype");
                 String targetName = data.get("targetName");
                 String date = data.get("date");
+                String rawType = data.getOrDefault("type", "EXCHANGE");
 
-                switch (subtype) {
-                    case "now" -> {
-                        title = "교환 날짜가 등록되었어요";
-                        body = String.format("%s님과의 교환 날짜가 %s로 확정되었습니다. 잊지 마세요!", targetName, date);
+                if (subtype == null || targetName == null || date == null) {
+                    title = "📆 약속 알림 오류";
+                    body = "알림 생성에 필요한 정보가 누락되었습니다.";
+                } else {
+                    String typeName;
+                    switch (rawType.toUpperCase()) {
+                        case "RENTAL":
+                            typeName = "대여";
+                            break;
+                        case "EXCHANGE":
+                        default:
+                            typeName = "교환";
+                            break;
                     }
-                    case "day_before" -> {
-                        title = "내일은 교환 약속이 있어요";
-                        body = String.format("내일 %s님과의 교환이 예정되어 있습니다. 준비 되셨나요?", targetName);
-                    }
-                    case "today" -> {
-                        title = "오늘 교환 약속이 있어요";
-                        body = String.format("오늘 %s님과의 교환이 예정되어 있습니다. 잊지 않으셨죠?", targetName);
+
+                    switch (subtype) {
+                        case "now":
+                            title = typeName + " 날짜가 등록되었어요";
+                            body = String.format("%s님과의 %s 날짜가 %s로 확정되었습니다.", targetName, typeName, date);
+                            break;
+                        case "day_before":
+                            title = "내일은 " + typeName + " 약속이 있어요";
+                            body = String.format("내일 %s님과의 %s이 예정되어 있습니다.", targetName, typeName);
+                            break;
+                        case "today":
+                            title = "오늘 " + typeName + " 약속이 있어요";
+                            body = String.format("오늘 %s님과의 %s이 예정되어 있습니다.", targetName, typeName);
+                            break;
+                        default:
+                            title = "알림 유형 오류";
+                            body = "지원하지 않는 subtype입니다.";
+                            break;
                     }
                 }
+
                 url = data.getOrDefault("url", "/mypage");
             }
 

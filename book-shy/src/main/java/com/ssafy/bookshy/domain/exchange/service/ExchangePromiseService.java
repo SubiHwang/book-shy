@@ -17,7 +17,9 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.ssafy.bookshy.domain.exchange.dto.ExchangePromiseDto.CounterpartDto;
 
@@ -119,5 +121,19 @@ public class ExchangePromiseService {
                 .minutes(mins)
                 .display(display.toString().trim())
                 .build();
+    }
+
+    public List<Users> getAllActiveUsersWithUpcomingPromise() {
+        List<ExchangeRequest> requests = exchangeRequestRepository.findAllWithFutureSchedule();
+
+        // 요청자와 응답자 ID를 모두 수집
+        Set<Long> userIds = new HashSet<>();
+        for (ExchangeRequest req : requests) {
+            userIds.add(req.getRequesterId());
+            userIds.add(req.getResponderId());
+        }
+
+        // 사용자 엔티티 전체 조회
+        return userRepository.findAllById(userIds);
     }
 }

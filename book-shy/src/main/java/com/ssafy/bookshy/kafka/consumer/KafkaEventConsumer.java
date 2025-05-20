@@ -29,11 +29,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
-/**
- * 📡 Kafka 이벤트를 수신하고 후속 처리를 담당하는 Consumer 서비스입니다.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -52,30 +48,20 @@ public class KafkaEventConsumer {
     @Value("${spring.profiles.active}")
     private String activeProfile;
 
-    /**
-     * 📘 책 등록 이벤트 수신 처리
-     * - 토픽: {developerId}-book.created
-     * - 도서 등록 관련 이벤트를 수신하고 처리하는 자리입니다.
-     */
+    // 책 등록 이벤트 수신 처리
     @KafkaListener(topics = "#{@kafkaTopicResolver.getBookCreatedTopic()}", containerFactory = "bookListenerFactory")
     public void listenBookCreated(ConsumerRecord<String, BookCreatedDto> record, Acknowledgment ack) {
         try {
             BookCreatedDto event = record.value();
             log.info("📘 Book Created Event received: {}", event);
 
-            // TODO: 책 등록 후처리 로직 작성 필요
-
-            ack.acknowledge(); // ✅ 수동 커밋
+            ack.acknowledge();
         } catch (Exception e) {
             log.error("❌ Error processing book.created event: {}", record.value(), e);
         }
     }
 
-    /**
-     * 🤝 매칭 성공 이벤트 수신 처리
-     * - 토픽: {developerId}-match.success
-     * - 책 교환 매칭이 성사되었을 때 후처리를 위한 Consumer입니다.
-     */
+    // 매칭 성공 이벤트 수신 처리
     @KafkaListener(topics = "#{@kafkaTopicResolver.getMatchSuccessTopic()}", containerFactory = "matchListenerFactory")
     public void listenMatchSuccess(ConsumerRecord<String, MatchSuccessDto> record, Acknowledgment ack) {
         try {
@@ -108,18 +94,12 @@ public class KafkaEventConsumer {
     }
 
 
-    /**
-     * 📦 교환 완료 이벤트 수신 처리
-     * - 토픽: {developerId}-trade.success
-     * - 실제 책 교환이 완료되었을 때 발생하는 이벤트 처리
-     */
+    // 교환 완료 이벤트 수신 처리
     @KafkaListener(topics = "#{@kafkaTopicResolver.getTradeSuccessTopic()}", containerFactory = "recommendListenerFactory")
     public void listenTradeSuccess(ConsumerRecord<String, TradeSuccessDto> record, Acknowledgment ack) {
         try {
             TradeSuccessDto event = record.value();
             log.info("📦 Trade Success Event received: {}", event);
-
-            // TODO: 교환 완료 후처리 로직 작성 필요
 
             ack.acknowledge();
         } catch (Exception e) {
@@ -127,35 +107,30 @@ public class KafkaEventConsumer {
         }
     }
 
-    /**
-     * 💬 실시간 채팅 메시지 수신 처리
-     * - 토픽: {developerId}-chat.message
-     * - Kafka를 통해 전달된 채팅 메시지를 DB에 저장하고,
-     * 해당 채팅방 구독자들에게 WebSocket으로 전달합니다.
-     */
+    // 실시간 채팅 메시지 수신 처리
     @KafkaListener(topics = "#{@kafkaTopicResolver.getChatMessageTopic()}", containerFactory = "chatListenerFactory")
     public void listenChatMessage(ConsumerRecord<String, ChatMessageKafkaDto> record, Acknowledgment ack) {
         try {
             ChatMessageKafkaDto dto = record.value();
             log.info("📥 [KafkaConsumer] Received ChatMessageKafkaDto from topic '{}': {}", record.topic(), dto);
 
-            // 💾 메시지를 DB에 저장
+            // 메시지를 DB에 저장
             ChatMessageResponseDto saved = chatMessageService.saveMessageFromKafka(dto);
             log.info("💾 [KafkaConsumer] ChatMessage saved to DB: {}", saved);
 
-            // 📢 해당 채팅방 구독자에게 메시지 전송
+            // 해당 채팅방 구독자에게 메시지 전송
             String destination = "/topic/chat/" + dto.getChatRoomId();
             messagingTemplate.convertAndSend(destination, saved);
             log.info("📢 [KafkaConsumer] ChatMessage sent to WebSocket destination '{}'", destination);
 
-            // 🔥 채팅 목록 갱신용 브로드캐스트
+            // 채팅 목록 갱신용 브로드캐스트
             ChatRoomUserIds userIds = chatRoomService.getUserIdsByChatRoomId(dto.getChatRoomId());
             Long senderId = dto.getSenderId();
             Long receiverId = userIds.getUserAId().equals(senderId)
                     ? userIds.getUserBId()
                     : userIds.getUserAId();
 
-            // 👥 각 사용자에게 채팅 목록 갱신 WebSocket 전송
+            // 각 사용자에게 채팅 목록 갱신 WebSocket 전송
             ChatRoomDto chatRoomDto = chatRoomService.getChatRoomDtoByKafkaEvent(dto);
 
             messagingTemplate.convertAndSend("/topic/chat/user/" + senderId, chatRoomDto);
@@ -183,18 +158,14 @@ public class KafkaEventConsumer {
                 );
             }
 
-            ack.acknowledge(); // ✅ 커밋
+            ack.acknowledge();
             log.info("✅ [KafkaConsumer] Offset committed for topic '{}'", record.topic());
         } catch (Exception e) {
             log.error("❌ [KafkaConsumer] Error while processing chat.message", e);
         }
     }
 
-    /**
-     * 💬 실시간 로깅 메시지 수신 처리
-     * - 프로덕션 환경(prod)이거나 developerId가 비어있으면 "recommend.event" 토픽을 사용
-     * 그렇지 않으면 "{developerId}-recommend.event" 형식으로 토픽 이름 생성
-     */
+    // 실시간 로깅 메시지 수신 처리
     @KafkaListener(topics = "#{@kafkaTopicResolver.getRecommendEventTopic()}", containerFactory = "recommendListenerFactory")
     public void listenRecommendEvent(ConsumerRecord<String, RecommendMessageKafkaDto> record, Acknowledgment ack) {
         try {

@@ -15,7 +15,9 @@ import com.ssafy.bookshy.domain.exchange.repository.ExchangeRequestRepository;
 import com.ssafy.bookshy.domain.exchange.repository.ExchangeRequestReviewRepository;
 import com.ssafy.bookshy.domain.library.entity.Library;
 import com.ssafy.bookshy.domain.library.repository.LibraryRepository;
+import com.ssafy.bookshy.domain.notification.service.NotificationService;
 import com.ssafy.bookshy.domain.users.entity.Users;
+import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,8 @@ public class ExchangeService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatCalendarRepository chatCalendarRepository;
     private final LibraryRepository libraryRepository;
+    private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     /**
      * 📩 도서 교환 요청 처리
@@ -71,6 +75,18 @@ public class ExchangeService {
                 .requestId(request.getRequestId())
                 .build();
         chatCalendarRepository.save(calendar);
+
+        // 알림 전송
+        Users requester = userRepository.findById(dto.getRequesterId())
+                .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.USER_NOT_FOUND));
+        Users responder = userRepository.findById(dto.getResponderId())
+                .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.USER_NOT_FOUND));
+
+        notificationService.sendTransactionNowNotification(
+                responder.getUserId(),
+                requester.getNickname(),
+                dto.getExchangeDate().substring(0, 10)
+        );
     }
 
     /**
@@ -107,6 +123,18 @@ public class ExchangeService {
                 .requestId(request.getRequestId())
                 .build();
         chatCalendarRepository.save(calendar);
+
+        // 알림 전송
+        Users requester = userRepository.findById(dto.getRequesterId())
+                .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.USER_NOT_FOUND));
+        Users responder = userRepository.findById(dto.getResponderId())
+                .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.USER_NOT_FOUND));
+
+        notificationService.sendTransactionNowNotification(
+                responder.getUserId(),
+                requester.getNickname(),
+                dto.getExchangeDate().substring(0, 10)
+        );
     }
 
 
