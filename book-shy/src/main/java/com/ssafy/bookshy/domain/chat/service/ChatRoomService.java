@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -152,7 +153,7 @@ public class ChatRoomService {
         chatRoom = chatRoomRepository.save(chatRoom);
 
         // 📝 4. 안내 메시지 저장
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         String systemMessage = "채팅방이 생성되었습니다.";
 
         ChatMessage noticeMessage = ChatMessage.builder()
@@ -194,7 +195,7 @@ public class ChatRoomService {
         chatRoom = chatRoomRepository.save(chatRoom);
 
         // 📝 2. 시스템 메시지 저장
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         String systemMessage = "채팅방이 생성되었습니다.";
 
         ChatMessage noticeMessage = ChatMessage.builder()

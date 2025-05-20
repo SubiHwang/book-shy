@@ -79,7 +79,7 @@ public class ChatRoomController {
         📬 채팅방 ID를 기준으로, 현재 로그인 사용자가 아닌 **상대방의 프로필 정보**를 조회합니다.
         
         - 상대방 userId
-        - 북끄지수 (bookkkeScore)
+        - 북끄지수
         - 프로필 이미지 URL
         - 닉네임
 
