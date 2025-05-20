@@ -180,6 +180,7 @@ public class MatchingService {
 
         return others.stream()
                 .filter(u -> u.getLatitude() != null && u.getLongitude() != null)
+                .filter(u -> libraryRepository.countByUserAndIsPublicTrue(u) > 0)
                 .map(u -> new AbstractMap.SimpleEntry<>(u,
                         MatchingScoreCalculator.calculateDistance(me.getLatitude(), me.getLongitude(),
                                 u.getLatitude(), u.getLongitude())))
