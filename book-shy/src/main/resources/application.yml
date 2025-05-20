@@ -37,8 +37,16 @@ spring:
     listener:
       ack-mode: manual_immediate  # 🎯 수동 커밋, 메시지 중복 처리 방지
 
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
 server:
   port: 8080  # 🌐 기본 포트 (profile별로 override 가능)
+  tomcat:
+    max-http-form-post-size: 20MB
+    max-swallow-size: 20MB
 
 logging:
   level:
