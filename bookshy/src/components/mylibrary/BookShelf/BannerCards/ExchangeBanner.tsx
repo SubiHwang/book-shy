@@ -37,7 +37,7 @@ const ExchangeBanner: React.FC<ExchangeBannerProps> = ({ data }) => {
 
   // 통계 메시지 생성
   const getStatisticsMessage = (): string => {
-    if (bookCount <= 0) {
+    if (peopleCount <= 0) {
       return '첫 교환을 시작해보세요!';
     } else {
       return peopleCount > 0
