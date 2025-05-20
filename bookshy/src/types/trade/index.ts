@@ -33,26 +33,23 @@ export interface TradePromiseListResponse {
 }
 
 // 거래 내역 도서 정보
-export interface ReceivedBook {
+export interface TradeBook {
+  bookId: number;
   title: string;
   author: string;
-  coverImageUrl: string;
+  coverUrl: string;
 }
 
 // 거래 완료 내역
 export interface TradeHistory {
   tradeId: number;
+  completedAt: string;
+  place: string;
+  tradeType: 'EXCHANGE' | 'RENTAL';
   counterpartNickname: string;
   counterpartProfileImageUrl: string;
-  place: string;
-  completedAt: string;
-  receivedBookTitle: string;
-  receivedBookAuthor: string;
-  receivedBookCoverUrl: string;
-  givenBookTitle: string;
-  givenBookAuthor: string;
-  givenBookCoverUrl: string;
-  tradeType: 'EXCHANGE' | 'RENTAL';
+  receivedBooks: TradeBook[];
+  givenBooks: TradeBook[];
 }
 
 // 거래 완료 내역 그룹 (월별)
@@ -62,9 +59,4 @@ export interface TradeHistoryGroup {
 }
 
 // 거래 내역 전체 응답
-export interface TradeHistoryListResponse {
-  content: TradeHistoryGroup[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-}
+export type TradeHistoryListResponse = TradeHistoryGroup[];
