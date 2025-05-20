@@ -46,11 +46,11 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
   };
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 w-full bg-light-bg-secondary border-t pb-[env(safe-area-inset-bottom)]">
+    <div className="w-full bg-white border-t border-light-border">
       {/* 입력창 */}
       <form
         onSubmit={handleSubmit}
-        className="w-full flex items-center gap-2 px-4 pt-2 pb-2 box-border"
+        className="w-full flex items-center gap-2 px-4 py-3 box-border min-h-[64px]"
       >
         <div
           role="button"
