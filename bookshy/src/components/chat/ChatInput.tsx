@@ -1,16 +1,20 @@
 import React, { useState, useRef } from 'react';
 import { SendHorizonal, Plus, Minus, Camera, Image, CalendarDays, Phone } from 'lucide-react';
+import { uploadChatImage } from '@/services/chat/chat';
+import { toast } from 'react-toastify';
 
 interface Props {
   onSend: (content: string) => void;
   showOptions: boolean;
   onToggleOptions: () => void;
   onScheduleClick: () => void;
+  chatRoomId: number;
 }
 
-function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Props) {
+function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chatRoomId }: Props) {
   const [content, setContent] = useState('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,11 +27,36 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    console.log('[📷 업로드됨]', file);
-    // TODO: 이미지 업로드 처리
+
+    // 파일 크기 체크 (5MB 제한)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('이미지 크기는 5MB를 초과할 수 없습니다.');
+      return;
+    }
+
+    // 이미지 파일 타입 체크
+    if (!file.type.startsWith('image/')) {
+      toast.error('이미지 파일만 업로드 가능합니다.');
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const { imageUrl } = await uploadChatImage(chatRoomId, file);
+      onSend(`[이미지](${imageUrl})`);
+    } catch (error) {
+      console.error('❌ 이미지 업로드 실패:', error);
+      toast.error('이미지 업로드에 실패했습니다.');
+    } finally {
+      setIsUploading(false);
+      // 파일 입력 초기화
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
   };
 
   return (
@@ -53,6 +82,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
           onChange={(e) => setContent(e.target.value)}
           className="w-full max-w-full px-4 py-2 bg-primary-light text-white placeholder-white rounded-full focus:outline-none box-border"
           style={{ WebkitOverflowScrolling: 'touch' }}
+          disabled={isUploading}
         />
 
         <div
@@ -65,6 +95,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
             }
           }}
           className="p-2 rounded-full transition shrink-0 select-none touch-manipulation"
+          aria-disabled={isUploading}
         >
           <SendHorizonal size={18} />
         </div>
@@ -87,6 +118,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
               }
               handleFileSelect();
             }}
+            disabled={isUploading}
           />
           <OptionButton
             icon={<Image size={28} strokeWidth={1.5} />}
@@ -98,16 +130,19 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
               }
               handleFileSelect();
             }}
+            disabled={isUploading}
           />
           <OptionButton
             icon={<CalendarDays size={28} strokeWidth={1.5} />}
             label="약속"
             onClick={onScheduleClick}
+            disabled={isUploading}
           />
           <OptionButton
             icon={<Phone size={28} strokeWidth={1.5} />}
             label="전화"
             onClick={() => {}}
+            disabled={isUploading}
           />
         </div>
       </div>
@@ -118,6 +153,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick }: Pr
         accept="image/*"
         onChange={handleFileChange}
         className="hidden"
+        disabled={isUploading}
       />
     </div>
   );
@@ -127,17 +163,21 @@ function OptionButton({
   icon,
   label,
   onClick,
+  disabled,
 }: {
   icon: React.ReactNode;
   label: string;
   onClick?: () => void;
+  disabled?: boolean;
 }) {
   return (
     <div
       role="button"
       tabIndex={0}
-      onClick={onClick}
-      className="flex flex-col items-center text-primary hover:opacity-80 transition select-none touch-manipulation"
+      onClick={disabled ? undefined : onClick}
+      className={`flex flex-col items-center text-primary hover:opacity-80 transition select-none touch-manipulation ${
+        disabled ? 'opacity-50 cursor-not-allowed' : ''
+      }`}
     >
       <div className="w-14 h-14 rounded-full border-2 border-primary flex items-center justify-center mb-2">
         {icon}

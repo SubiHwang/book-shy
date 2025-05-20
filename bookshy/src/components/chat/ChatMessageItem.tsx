@@ -66,6 +66,12 @@ function ChatMessageItem({
     { icon: <HelpCircle size={18} />, label: '❓' },
   ];
 
+  // 이미지 메시지 처리
+  const isImageMessage = message.content.startsWith('[이미지](') && message.content.endsWith(')');
+  const imageUrl = isImageMessage
+    ? message.content.slice(8, -1) // '[이미지](' 와 ')' 제거
+    : null;
+
   return (
     <div
       className={`relative flex flex-col px-3 py-1 mb-2 ${isMyMessage ? 'items-end' : 'items-start'}`}
@@ -80,7 +86,16 @@ function ChatMessageItem({
             isMyMessage ? 'bg-primary-light text-white' : 'bg-light-bg-secondary text-gray-900'
           } select-none`}
         >
-          {message.content}
+          {isImageMessage ? (
+            <img
+              src={imageUrl ?? ''}
+              alt="채팅 이미지"
+              className="max-w-full rounded-lg cursor-pointer hover:opacity-90 transition"
+              onClick={() => window.open(imageUrl ?? '', '_blank')}
+            />
+          ) : (
+            message.content
+          )}
         </div>
         <div className="flex flex-col gap-[2px] text-right text-[10px] text-light-text-muted pb-[1px]">
           {isMyMessage && !message.read && <span className="text-primary text-[10px]">1</span>}
