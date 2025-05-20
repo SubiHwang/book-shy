@@ -53,7 +53,7 @@ public class LibraryService {
     private final BookTripRepository bookTripRepository;
     private final LibraryReadLogRepository libraryReadLogRepository;
 
-    @Value("${file.upload-dir}")
+    @Value("${file.upload.cover-dir}")
     private String uploadPath;
 
     @Transactional
