@@ -38,6 +38,7 @@ services:
     volumes:
       - /home/ubuntu/bookshy/images/coverImage:/home/ubuntu/bookshy/images/coverImage
       - /home/ubuntu/bookshy/images/profile:/home/ubuntu/bookshy/images/profile
+      - /home/ubuntu/bookshy/images/chat:/home/ubuntu/bookshy/images/chat
       - /home/ubuntu/secrets/firebase-service-account.json:/app/secret/firebase-service-account.json:ro
 
     restart: always
