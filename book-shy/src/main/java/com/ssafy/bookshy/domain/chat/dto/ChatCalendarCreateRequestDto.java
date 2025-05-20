@@ -25,7 +25,7 @@ public class ChatCalendarCreateRequestDto {
     private String description;
 
     @Schema(description = "📆 교환일 (EXCHANGE 타입일 경우 필수)", example = "2025-05-30T14:00:00")
-    private String eventDate;
+    private String exchangeDate;
 
     @Schema(description = "🔐 대여 시작일 (RENTAL 타입일 경우 필수)", example = "2025-06-01T00:00:00")
     private String startDate;

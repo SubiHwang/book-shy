@@ -15,15 +15,20 @@ import lombok.NoArgsConstructor;
 public class ExchangePromiseDto {
 
     private Long tradeId;
+    private String type; // EXCHANGE or RENTAL
+    private String status;  // PENDING, ACCEPTED, REJECTED, COMPLETED
+    private String scheduledTime;
+    private String requestedAt;
 
-    private String bookTitle;
+    // 나의 도서 정보
+    private Long myBookId;
+    private String myBookTitle;
+
+    // 상대방 도서 정보
+    private Long partnerBookId;
+    private String partnerBookTitle;
 
     private CounterpartDto counterpart;
-
-    private String scheduledTime;
-
-    private String status; // SCHEDULED, CONFIRMED 등
-
     private TimeLeftDto timeLeft;
 
     /**
