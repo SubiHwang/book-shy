@@ -376,6 +376,7 @@ function ChatRoom({
           partnerProfileImage={partnerProfileImage}
           bookShyScore={bookShyScore}
         />
+        <p>채팅 테스트 1</p>
       </div>
 
       {/* 메시지 영역 */}
