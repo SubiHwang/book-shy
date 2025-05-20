@@ -288,9 +288,9 @@ function ChatRoom({
   let lastDateLabel = '';
 
   return (
-    <div className="flex flex-col h-full min-h-0 bg-white">
-      {/* 헤더 */}
-      <div className="shrink-0 z-10">
+    <div className="relative h-full min-h-0 bg-white">
+      {/* 헤더 - 항상 상단 고정 */}
+      <div className="fixed top-0 left-0 right-0 z-10">
         <ChatRoomHeader
           partnerName={partnerName}
           partnerProfileImage={partnerProfileImage}
@@ -298,13 +298,10 @@ function ChatRoom({
         />
       </div>
 
-      {/* 메시지 영역 */}
+      {/* 메시지 영역 - 내부 스크롤, 헤더/인풋 높이만큼 패딩 */}
       <div
-        className={`flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
-          showOptions
-            ? 'pb-[35vh]' // 확장 기능 보이면 큰 여백
-            : 'pb-20' // 기본 여백
-        }`}
+        className={`overflow-y-auto transition-all duration-300 ${showOptions ? 'pb-[35vh]' : ''}`}
+        style={{ paddingTop: 56, paddingBottom: showOptions ? '35vh' : 64, height: '100vh' }}
       >
         {messages.map((msg, idx) => {
           const dateLabel = formatDateLabel(msg.sentAt);
@@ -383,12 +380,14 @@ function ChatRoom({
       {/* ↓ 아래로 버튼 */}
       {showScrollToBottom && (
         <div
-          className={`absolute inset-x-0 flex justify-center z-30 transition-all duration-300
-      ${showOptions ? 'bottom-[32vh]' : 'bottom-[88px]'}
-    `}
+          className="fixed inset-x-0 flex justify-center z-30 transition-all duration-300"
+          style={{
+            bottom: showOptions ? `calc(25vh + 72px)` : `72px`, // 옵션 열렸을 때는 옵션+인풋+여유, 아니면 인풋+여유
+          }}
         >
           <button
-            className="bg-black/60 hover:bg-black/80 text-white text-lg sm:text-xl px-3 py-1.5 rounded-full shadow-md"
+            className="bg-black/70 hover:bg-black/85 text-white text-base sm:text-lg px-3 py-1.5 rounded-full shadow-md border border-black/10"
+            style={{ minWidth: 44 }}
             onClick={() => scrollToBottom(true)}
             aria-label="맨 아래로 스크롤"
           >
@@ -397,7 +396,8 @@ function ChatRoom({
         </div>
       )}
 
-      <div className="shrink-0 z-20 bg-white border-t border-light-border px-4">
+      {/* 인풋창 - 항상 하단 고정 */}
+      <div className="fixed left-0 right-0 bottom-0 z-20 bg-white border-t border-light-border px-4">
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
