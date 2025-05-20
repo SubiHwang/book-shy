@@ -1,5 +1,7 @@
 package com.ssafy.bookshy.domain.library.service;
 
+import com.ssafy.bookshy.common.constants.ImageUrlConstants;
+import com.ssafy.bookshy.common.file.FileUploadUtil;
 import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
 import com.ssafy.bookshy.domain.book.entity.Book;
 import com.ssafy.bookshy.domain.book.repository.BookRepository;
@@ -252,25 +254,22 @@ public class LibraryService {
     public LibraryResponseDto addSelfBook(LibrarySelfAddRequestDto dto) {
         Users user = userService.getUserById(dto.getUserId());
 
-        // 1. 이미지 파일 저장
+        // 1️⃣ 파일 이름 및 저장 경로
         String fileName = UUID.randomUUID() + "_" + dto.getCoverImage().getOriginalFilename();
-        String savePath = uploadPath + "/" + fileName;
-        File dest = new File(savePath);
+        String uploadDir = "/home/ubuntu/bookshy/images/coverImage";  // 또는 @Value 주입
+        String imageUrl = ImageUrlConstants.COVER_IMAGE_BASE_URL + fileName;
 
-        try {
-            dto.getCoverImage().transferTo(dest);
-        } catch (IOException e) {
-            throw new RuntimeException("표지 이미지 저장 실패: " + e.getMessage());
-        }
+        // 2️⃣ 공통 유틸로 이미지 저장
+        FileUploadUtil.saveFile(dto.getCoverImage(), uploadDir, fileName);
 
-        // 2. Book 엔티티 생성
+        // 3️⃣ Book 생성
         Book book = Book.builder()
-                .isbn("SELF_" + UUID.randomUUID())  // 자체 등록 도서는 ISBN 대신 UUID 사용
+                .isbn("SELF_" + UUID.randomUUID())
                 .title(dto.getTitle())
                 .author(dto.getAuthor())
                 .publisher(dto.getPublisher())
                 .description(dto.getDescription())
-                .coverImageUrl(COVER_IMAGE_BASE_URL + fileName)
+                .coverImageUrl(imageUrl)
                 .status(Book.Status.AVAILABLE)
                 .exchangeCount(0)
                 .createdAt(LocalDateTime.now())
@@ -278,10 +277,9 @@ public class LibraryService {
                 .build();
 
         bookRepository.save(book);
-
         wishRepository.deleteByUserAndBook(user, book);
 
-        // 3. Library 등록
+        // 4️⃣ Library 등록
         Library library = Library.builder()
                 .user(user)
                 .book(book)
@@ -293,6 +291,7 @@ public class LibraryService {
 
         return LibraryResponseDto.from(library);
     }
+
 
     /**
      * 📘✏️ 사용자의 서재 중 아직 독후감이 작성되지 않은 도서 목록을 반환합니다.

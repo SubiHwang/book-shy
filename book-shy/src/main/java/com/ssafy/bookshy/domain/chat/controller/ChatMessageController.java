@@ -2,15 +2,22 @@ package com.ssafy.bookshy.domain.chat.controller;
 
 import com.ssafy.bookshy.common.response.CommonResponse;
 import com.ssafy.bookshy.domain.chat.dto.AddEmojiRequestDto;
+import com.ssafy.bookshy.domain.chat.dto.ChatImageUploadResponse;
 import com.ssafy.bookshy.domain.chat.dto.ChatMessageResponseDto;
 import com.ssafy.bookshy.domain.chat.service.ChatMessageService;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -74,4 +81,41 @@ public class ChatMessageController {
         chatMessageService.markMessagesAsRead(chatRoomId, user.getUserId());
         return CommonResponse.success();
     }
+
+    @Operation(
+            summary = "🖼️ 채팅 이미지 업로드",
+            description = """
+        사용자가 채팅 중 이미지를 업로드하면 서버에 저장하고, 해당 이미지의 접근 가능한 URL을 반환합니다.
+        
+        🔁 반환된 `imageUrl`은 WebSocket 메시지에 포함되어 전송됩니다.
+        
+        ✅ 이미지 크기 제한, 확장자 검사 등의 검증은 서버 내에서 처리됩니다.
+        """,
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "✅ 이미지 업로드 성공",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = ChatImageUploadResponse.class),
+                                    examples = @ExampleObject(value = """
+                    {
+                      "imageUrl": "https://k12d204.p.ssafy.io/images/chat/abc123.jpg"
+                    }
+                    """)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "400", description = "❌ 유효하지 않은 이미지"),
+                    @ApiResponse(responseCode = "500", description = "❌ 서버 오류 (파일 저장 실패 등)")
+            }
+    )
+    @PostMapping("/image")
+    public ResponseEntity<ChatImageUploadResponse> uploadChatImage(
+            @Parameter(description = "업로드할 이미지 파일 (JPEG, PNG 등)", required = true)
+            @RequestPart MultipartFile file
+    ) {
+        String imageUrl = chatMessageService.uploadChatImage(file);
+        return ResponseEntity.ok(new ChatImageUploadResponse(imageUrl));
+    }
+
 }

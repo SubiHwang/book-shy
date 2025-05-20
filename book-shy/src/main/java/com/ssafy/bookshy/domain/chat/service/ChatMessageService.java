@@ -1,5 +1,7 @@
 package com.ssafy.bookshy.domain.chat.service;
 
+import com.ssafy.bookshy.common.constants.ImageUrlConstants;
+import com.ssafy.bookshy.common.file.FileUploadUtil;
 import com.ssafy.bookshy.domain.chat.dto.ChatMessageRequestDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatMessageResponseDto;
 import com.ssafy.bookshy.domain.chat.dto.EmojiUpdatePayload;
@@ -14,13 +16,20 @@ import com.ssafy.bookshy.domain.users.service.UserService;
 import com.ssafy.bookshy.kafka.dto.ChatMessageKafkaDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -206,4 +215,33 @@ public class ChatMessageService {
         ReadReceiptPayload payload = new ReadReceiptPayload(readMessageIds, userId);
         messagingTemplate.convertAndSend("/topic/read/" + chatRoomId, payload);
     }
+
+    /**
+     * 🖼️ 채팅 이미지 파일을 서버에 저장하고 URL을 반환합니다.
+     * 저장 경로: /home/ubuntu/bookshy/images/chat/
+     *
+     * @param imageFile 업로드된 이미지 파일
+     * @return 업로드된 이미지의 URL
+     */
+    public String uploadChatImage(MultipartFile imageFile) {
+        if (imageFile == null || imageFile.isEmpty()) {
+            throw new IllegalArgumentException("이미지가 업로드되지 않았습니다.");
+        }
+
+        // 파일명 생성 (uuid + 확장자)
+        String uuid = UUID.randomUUID().toString();
+        String ext = FilenameUtils.getExtension(imageFile.getOriginalFilename());
+        String fileName = uuid + "." + ext;
+
+        // 저장 경로 및 접근 URL
+        String uploadDir = "/home/ubuntu/bookshy/images/chat";
+        String imageUrl = ImageUrlConstants.CHAT_IMAGE_BASE_URL + fileName;
+
+        // 실제 저장
+        FileUploadUtil.saveFile(imageFile, uploadDir, fileName);
+
+        return imageUrl;
+    }
+
+
 }
