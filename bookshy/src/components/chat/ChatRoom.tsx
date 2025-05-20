@@ -58,6 +58,21 @@ function ChatRoom({
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+  const messageAreaRef = useRef<HTMLDivElement>(null);
+  // inputRef에 타입 지정
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      // 입력란 포커스 시 타임아웃을 통해 키보드가 완전히 올라온 후 스크롤 조정
+      setTimeout(() => {
+        inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    };
+
+    inputRef.current?.addEventListener('focus', handleFocus);
+    return () => inputRef.current?.removeEventListener('focus', handleFocus);
+  }, []);
 
   useEffect(() => {
     const updateHeight = () => {
@@ -71,6 +86,45 @@ function ChatRoom({
     updateHeight();
     window.visualViewport?.addEventListener('resize', updateHeight);
     return () => window.visualViewport?.removeEventListener('resize', updateHeight);
+  }, []);
+
+  // ChatRoom 컴포넌트 내부에 다음 useEffect 수정
+  useEffect(() => {
+    const handleVisualViewPortResize = () => {
+      const currentVisualViewport = window.visualViewport?.height || window.innerHeight;
+
+      if (messageAreaRef.current) {
+        // 안드로이드에서 더 안정적인 높이 계산
+        const inputHeight = 60; // 채팅 입력창 높이 예상값 (실제 값으로 조정)
+        const headerHeight = 60; // 헤더 높이 예상값 (실제 값으로 조정)
+        const safeArea = 10; // 추가 여백
+
+        messageAreaRef.current.style.height = `${currentVisualViewport - (headerHeight + inputHeight + safeArea)}px`;
+
+        // 키보드가 올라올 때 스크롤 위치 조정
+        const isKeyboardVisible = window.innerHeight > currentVisualViewport;
+        if (isKeyboardVisible) {
+          // 활성 요소(인풋)을 화면에 보이게 함
+          setTimeout(() => {
+            const activeElement = document.activeElement;
+            if (activeElement instanceof HTMLElement) {
+              activeElement.scrollIntoView({ block: 'center' });
+            } else {
+              scrollToBottom(false);
+            }
+          }, 100);
+        }
+      }
+    };
+
+    handleVisualViewPortResize();
+    window.visualViewport?.addEventListener('resize', handleVisualViewPortResize);
+    window.addEventListener('resize', handleVisualViewPortResize);
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', handleVisualViewPortResize);
+      window.removeEventListener('resize', handleVisualViewPortResize);
+    };
   }, []);
 
   const queryClient = useQueryClient();
@@ -303,7 +357,18 @@ function ChatRoom({
   let lastDateLabel = '';
 
   return (
-    <div style={{ height: viewportHeight }} className="flex flex-col bg-white pb-safe">
+    <div
+      style={{
+        height: viewportHeight,
+        position: 'fixed', // 고정 위치 확보
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        overflow: 'hidden', // 전체 스크롤 방지
+      }}
+      className="flex flex-col bg-white"
+    >
       {/* 헤더 */}
       <div className="shrink-0 z-10">
         <ChatRoomHeader
@@ -311,6 +376,7 @@ function ChatRoom({
           partnerProfileImage={partnerProfileImage}
           bookShyScore={bookShyScore}
         />
+        <p>채팅 테스트 1</p>
       </div>
 
       {/* 메시지 영역 */}
