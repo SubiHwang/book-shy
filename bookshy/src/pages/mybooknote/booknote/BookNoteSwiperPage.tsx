@@ -26,7 +26,8 @@ const BookNoteSwiperPage: React.FC<BookNoteSwiperPageProps> = ({ bookNotes }) =>
   ];
 
   const filteredNotes = bookNotes.filter((book) => {
-    const hasReview = !!book.reviewId && book.content.trim() !== '';
+    const hasReview =
+      (!!book.reviewId && book.content.trim() !== '') || book.quoteContent?.trim() !== '';
     if (selectedFilter === 'all') return true;
     if (selectedFilter === 'has') return hasReview;
     if (selectedFilter === 'none') return !hasReview;
