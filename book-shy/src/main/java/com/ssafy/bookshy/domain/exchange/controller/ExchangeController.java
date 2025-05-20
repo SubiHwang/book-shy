@@ -1,10 +1,7 @@
 package com.ssafy.bookshy.domain.exchange.controller;
 
 import com.ssafy.bookshy.common.response.CommonResponse;
-import com.ssafy.bookshy.domain.exchange.dto.ExchangeHistoryGroupDto;
-import com.ssafy.bookshy.domain.exchange.dto.ExchangePromiseDto;
-import com.ssafy.bookshy.domain.exchange.dto.ExchangeRequestDto;
-import com.ssafy.bookshy.domain.exchange.dto.ReviewSubmitRequest;
+import com.ssafy.bookshy.domain.exchange.dto.*;
 import com.ssafy.bookshy.domain.exchange.service.ExchangeHistoryService;
 import com.ssafy.bookshy.domain.exchange.service.ExchangePromiseService;
 import com.ssafy.bookshy.domain.exchange.service.ExchangeService;
@@ -121,5 +118,14 @@ public class ExchangeController {
                 "message", "리뷰가 성공적으로 제출되었습니다.",
                 "isTradeCompleted", isCompleted
         ));
+    }
+
+    @Operation(summary = "📊 나의 교환 통계", description = "사용자가 몇명의 사람과 몇권의 도서를 교환했는지 조회")
+    @GetMapping("/summary")
+    public CommonResponse<ExchangeSummaryDto> getExchangeSummary(
+            @AuthenticationPrincipal Users user
+    ) {
+        ExchangeSummaryDto summary = exchangeHistoryService.getExchangeSummary(user.getUserId());
+        return CommonResponse.success(summary);
     }
 }
