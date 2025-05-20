@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.chat.controller;
 
 import com.ssafy.bookshy.common.response.CommonResponse;
+import com.ssafy.bookshy.domain.chat.dto.ChatOpponentResponseDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomUserIdsResponseDto;
 import com.ssafy.bookshy.domain.chat.service.ChatRoomService;
@@ -70,5 +71,30 @@ public class ChatRoomController {
             @AuthenticationPrincipal Users user
     ) {
         return CommonResponse.success(chatRoomService.getRentalBooksInUse(user.getUserId()));
+    }
+
+    @Operation(
+            summary = "👤 채팅 상대방 정보 조회",
+            description = """
+        📬 채팅방 ID를 기준으로, 현재 로그인 사용자가 아닌 **상대방의 프로필 정보**를 조회합니다.
+        
+        - 상대방 userId
+        - 북끄지수 (bookkkeScore)
+        - 프로필 이미지 URL
+        - 닉네임
+
+        ✅ 채팅방 입장 시 상대 사용자 정보를 표시하는 데 사용됩니다.
+        """
+    )
+    @ApiResponse(responseCode = "200", description = "상대방 정보 조회 성공")
+    @GetMapping("/{chatRoomId}/opponent")
+    public CommonResponse<ChatOpponentResponseDto> getChatOpponentInfo(
+            @Parameter(description = "채팅방 ID", example = "89")
+            @PathVariable Long chatRoomId,
+            @AuthenticationPrincipal Users user
+    ) {
+        return CommonResponse.success(
+                chatRoomService.getOpponentInfo(chatRoomId, user.getUserId())
+        );
     }
 }
