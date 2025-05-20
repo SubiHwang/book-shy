@@ -36,11 +36,20 @@ public class ChatMessage extends TimeStampEntity {
     @Column(length = 10) // 이모지는 한 글자이므로 충분한 길이
     private String emoji; // ✅ 단일 이모지만 저장
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @Column(name = "thumbnail_url")
+    private String thumbnailUrl;
+
     @Builder
-    public ChatMessage(ChatRoom chatRoom, Long senderId, String content, LocalDateTime timestamp, String type) {
+    public ChatMessage(ChatRoom chatRoom, Long senderId, String content,
+                       String imageUrl, String thumbnailUrl,LocalDateTime timestamp, String type) {
         this.chatRoom = chatRoom;
         this.senderId = senderId;
         this.content = content;
+        this.imageUrl = imageUrl;
+        this.thumbnailUrl = thumbnailUrl;
         this.timestamp = timestamp != null ? timestamp : LocalDateTime.now();
         this.type = type;
         this.isRead = false;

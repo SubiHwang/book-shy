@@ -83,26 +83,36 @@ public class ChatMessageController {
     }
 
     @Operation(
-            summary = "🖼️ 채팅 이미지 업로드",
+            summary = "🖼️ 채팅 이미지 업로드 및 전송",
             description = """
-        사용자가 채팅 중 이미지를 업로드하면 서버에 저장하고, 해당 이미지의 접근 가능한 URL을 반환합니다.
+        사용자가 채팅 중 이미지를 업로드하면 서버에 저장하고,  
+        해당 이미지의 URL을 반환함과 동시에 WebSocket 메시지를 전송합니다.
         
-        🔁 반환된 `imageUrl`은 WebSocket 메시지에 포함되어 전송됩니다.
+        ✅ 업로드된 이미지는 DB에 채팅 메시지로 저장되며,  
+        채팅방 구독자에게 실시간으로 전달됩니다.
         
-        ✅ 이미지 크기 제한, 확장자 검사 등의 검증은 서버 내에서 처리됩니다.
+        ⚠️ 이미지 크기 제한 및 확장자 검사는 서버 내에서 처리됩니다.
         """,
+            parameters = {
+                    @Parameter(name = "chatRoomId", description = "💬 채팅방 ID", required = true, example = "1"),
+                    @Parameter(name = "file", description = "🖼️ 업로드할 이미지 파일 (JPEG, PNG 등)", required = true)
+            },
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "✅ 이미지 업로드 성공",
+                            description = "✅ 이미지 업로드 및 WebSocket 메시지 전송 성공",
                             content = @Content(
                                     mediaType = "application/json",
                                     schema = @Schema(implementation = ChatImageUploadResponse.class),
                                     examples = @ExampleObject(value = """
-                    {
-                      "imageUrl": "https://k12d204.p.ssafy.io/images/chat/abc123.jpg"
-                    }
-                    """)
+                {
+                  "status": "SUCCESS",
+                  "message": "요청이 성공했습니다.",
+                  "data": {
+                    "imageUrl": "https://k12d204.p.ssafy.io/images/chat/abc123.jpg"
+                  }
+                }
+                """)
                             )
                     ),
                     @ApiResponse(responseCode = "400", description = "❌ 유효하지 않은 이미지"),
@@ -110,12 +120,15 @@ public class ChatMessageController {
             }
     )
     @PostMapping("/image")
-    public ResponseEntity<ChatImageUploadResponse> uploadChatImage(
-            @Parameter(description = "업로드할 이미지 파일 (JPEG, PNG 등)", required = true)
-            @RequestPart MultipartFile file
+    public CommonResponse<ChatImageUploadResponse> uploadChatImage(
+            @RequestParam Long chatRoomId,
+            @RequestPart MultipartFile file,
+            @AuthenticationPrincipal Users user
     ) {
-        String imageUrl = chatMessageService.uploadChatImage(file);
-        return ResponseEntity.ok(new ChatImageUploadResponse(imageUrl));
+        String imageUrl = chatMessageService.uploadChatImage(chatRoomId, user.getUserId(), file);
+        return CommonResponse.success(new ChatImageUploadResponse(imageUrl));
     }
+
+
 
 }

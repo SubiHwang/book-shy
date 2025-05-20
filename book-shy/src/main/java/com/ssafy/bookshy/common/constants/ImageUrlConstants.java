@@ -10,6 +10,8 @@ public class ImageUrlConstants {
 
     // 채팅방 사진 업로드
     public static final String CHAT_IMAGE_BASE_URL = "https://k12d204.p.ssafy.io/images/chat/";
+    public static final String CHAT_IMAGE_THUMB_BASE_URL = "https://k12d204.p.ssafy.io/images/chat/thumb/";
+
 
 
     private ImageUrlConstants() {

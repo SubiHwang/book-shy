@@ -16,6 +16,7 @@ import com.ssafy.bookshy.domain.users.service.UserService;
 import com.ssafy.bookshy.kafka.dto.ChatMessageKafkaDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -217,29 +218,72 @@ public class ChatMessageService {
     }
 
     /**
-     * 🖼️ 채팅 이미지 파일을 서버에 저장하고 URL을 반환합니다.
-     * 저장 경로: /home/ubuntu/bookshy/images/chat/
+     * 🖼️ 채팅 이미지 파일을 서버에 저장하고, 해당 채팅방에 WebSocket 메시지를 전송합니다.
      *
+     * 1. MultipartFile을 로컬 디렉토리에 저장
+     * 2. DB에 ChatMessage 엔티티 저장 (타입: IMAGE)
+     * 3. SimpMessagingTemplate을 통해 채팅방 구독자에게 실시간 메시지 전송
+     *
+     * @param chatRoomId 채팅방 ID
+     * @param senderId 보낸 사용자 ID
      * @param imageFile 업로드된 이미지 파일
      * @return 업로드된 이미지의 URL
      */
-    public String uploadChatImage(MultipartFile imageFile) {
+    public String uploadChatImage(Long chatRoomId, Long senderId, MultipartFile imageFile) {
         if (imageFile == null || imageFile.isEmpty()) {
             throw new ChatException(ChatErrorCode.INVALID_IMAGE_TYPE);
         }
 
         try {
-            // 파일명 생성 (uuid + 확장자)
+            // 1️⃣ 파일명 및 경로 설정
             String uuid = UUID.randomUUID().toString();
             String ext = FilenameUtils.getExtension(imageFile.getOriginalFilename());
             String fileName = uuid + "." + ext;
+            String thumbFileName = uuid + "_thumb." + ext;
 
-            // 저장 경로 및 접근 URL
-            String uploadDir = "/home/ubuntu/bookshy/images/chat";
+            String imageDir = "/home/ubuntu/bookshy/images/chat";
+            String thumbDir = imageDir + "/thumb";
+
             String imageUrl = ImageUrlConstants.CHAT_IMAGE_BASE_URL + fileName;
+            String thumbnailUrl = ImageUrlConstants.CHAT_IMAGE_BASE_URL + "thumb/" + thumbFileName;
 
-            // 실제 저장
-            FileUploadUtil.saveFile(imageFile, uploadDir, fileName);
+            // 2️⃣ 원본 이미지 저장
+            FileUploadUtil.saveFile(imageFile, imageDir, fileName);
+
+            // 3️⃣ 썸네일 저장
+            Path thumbPath = Paths.get(thumbDir);
+            if (!Files.exists(thumbPath)) Files.createDirectories(thumbPath);
+
+            Thumbnails.of(imageFile.getInputStream())
+                    .size(240, 240)
+                    .outputQuality(0.8)
+                    .toFile(thumbPath.resolve(thumbFileName).toFile());
+
+            // 4️⃣ 채팅방 유효성 확인
+            ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                    .orElseThrow(() -> new ChatException(ChatErrorCode.CHATROOM_NOT_FOUND));
+
+            // 5️⃣ 메시지 저장
+            ChatMessage message = ChatMessage.builder()
+                    .chatRoom(chatRoom)
+                    .senderId(senderId)
+                    .content(null)
+                    .imageUrl(imageUrl)
+                    .thumbnailUrl(thumbnailUrl) // ✅ 썸네일 포함
+                    .type("IMAGE")
+                    .timestamp(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
+                    .build();
+
+            chatMessageRepository.save(message);
+
+            // 6️⃣ 채팅방 최신 메시지 갱신
+            chatRoom.updateLastMessage("[이미지]", message.getTimestamp());
+
+            // 7️⃣ WebSocket 메시지 전송
+            String nickname = userService.getNicknameById(senderId);
+            ChatMessageResponseDto responseDto = ChatMessageResponseDto.from(message, nickname);
+
+            messagingTemplate.convertAndSend("/topic/chat/" + chatRoomId, responseDto);
 
             return imageUrl;
 
@@ -247,6 +291,5 @@ public class ChatMessageService {
             throw new ChatException(ChatErrorCode.IMAGE_UPLOAD_FAILED);
         }
     }
-
 
 }
