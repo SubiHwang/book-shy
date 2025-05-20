@@ -35,28 +35,19 @@ const MyBookNotePage = () => {
       setLoading(true);
       try {
         const results = await Promise.all(
-          notes.map(async (note) => {
-            const library = libraries.find((lib) => lib.bookId === note.bookId);
-            const quote = quotes.find((q) => q.bookId === note.bookId);
-
-            let bookDetail: Book | undefined;
-            if (!library) {
-              try {
-                bookDetail = await fetchBookDetailByBookId(note.bookId);
-              } catch (e) {
-                console.warn('book detail fetch 실패:', note.bookId);
-              }
-            }
+          libraries.map(async (library) => {
+            const note = notes.find((n) => n.bookId === library.bookId);
+            const quote = quotes.find((q) => q.bookId === library.bookId);
 
             return {
-              libraryId: library?.libraryId ?? -1,
-              bookId: note.bookId,
-              title: library?.title ?? bookDetail?.title ?? '제목 없음',
-              author: library?.author ?? bookDetail?.author ?? '',
-              coverUrl: library?.coverImageUrl ?? bookDetail?.coverImageUrl ?? '',
-              reviewId: note.reviewId,
-              content: note.content || '',
-              createdAt: note.createdAt,
+              libraryId: library.libraryId,
+              bookId: library.bookId,
+              title: library.title,
+              author: library.author,
+              coverUrl: library.coverImageUrl,
+              reviewId: note?.reviewId,
+              content: note?.content || '',
+              createdAt: note?.createdAt,
               quoteContent: quote?.content || '',
               fromRental: false,
             };
@@ -98,7 +89,7 @@ const MyBookNotePage = () => {
       }
     };
 
-    if (notes.length > 0) {
+    if (libraries.length > 0) {
       enrich();
     } else {
       setLoading(false);
