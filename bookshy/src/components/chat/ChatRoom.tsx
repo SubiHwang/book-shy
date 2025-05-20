@@ -303,7 +303,7 @@ function ChatRoom({
   let lastDateLabel = '';
 
   return (
-    <div style={{ height: viewportHeight }} className="flex flex-col bg-white pb-safe">
+    <div style={{ height: viewportHeight }} className="flex flex-col bg-white">
       {/* 헤더 */}
       <div className="shrink-0 z-10">
         <ChatRoomHeader
