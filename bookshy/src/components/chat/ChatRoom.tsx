@@ -288,7 +288,7 @@ function ChatRoom({
   let lastDateLabel = '';
 
   return (
-    <div className="flex flex-col bg-white h-screen">
+    <div className="flex flex-col h-full min-h-0 bg-white">
       {/* 헤더 */}
       <div className="shrink-0 z-10">
         <ChatRoomHeader
@@ -300,7 +300,7 @@ function ChatRoom({
 
       {/* 메시지 영역 */}
       <div
-        className={`flex-1 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
+        className={`flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-3 transition-all duration-300 ${
           showOptions
             ? 'pb-[35vh]' // 확장 기능 보이면 큰 여백
             : 'pb-20' // 기본 여백
