@@ -23,7 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -232,25 +234,22 @@ public class ChatMessageService {
      */
     @Transactional
     public String uploadChatImage(Long chatRoomId, Long senderId, MultipartFile imageFile) {
-        // 1️⃣ 유효성 검사: 이미지가 존재하지 않거나 비어있는 경우
+        // 1️⃣ 유효성 검사: 이미지가 null이거나 비어 있으면 예외 발생
         if (imageFile == null || imageFile.isEmpty()) {
             throw new ChatException(ChatErrorCode.INVALID_IMAGE_TYPE);
         }
 
-        // 2️⃣ 파일 확장자 유효성 검사
-        String uuid = UUID.randomUUID().toString();
-        String ext = FilenameUtils.getExtension(imageFile.getOriginalFilename());
-
+        // 2️⃣ 파일 확장자 검사 및 로깅
         String originalFileName = imageFile.getOriginalFilename();
+        String ext = FilenameUtils.getExtension(originalFileName);
         log.info("📷 업로드된 파일명: {}, 확장자: {}", originalFileName, ext);
 
-
-        if (ext == null || ext.isBlank()
-                || !(ext.equalsIgnoreCase("jpg") || ext.equalsIgnoreCase("jpeg") || ext.equalsIgnoreCase("png"))) {
+        if (ext == null || ext.isBlank() || !(ext.equalsIgnoreCase("jpg") || ext.equalsIgnoreCase("jpeg") || ext.equalsIgnoreCase("png"))) {
             throw new ChatException(ChatErrorCode.UNSUPPORTED_FILE_EXTENSION);
         }
 
         // 3️⃣ 저장 경로 및 URL 설정
+        String uuid = UUID.randomUUID().toString();
         String fileName = uuid + "." + ext;
         String thumbFileName = uuid + "_thumb." + ext;
 
@@ -260,29 +259,36 @@ public class ChatMessageService {
         String imageUrl = ImageUrlConstants.CHAT_IMAGE_BASE_URL + fileName;
         String thumbnailUrl = ImageUrlConstants.CHAT_IMAGE_BASE_URL + "thumb/" + thumbFileName;
 
-        // 4️⃣ 원본 이미지 저장
-        FileUploadUtil.saveFile(imageFile, imageDir, fileName);
-
         try {
-            // 5️⃣ 썸네일 생성
+            // 4️⃣ 이미지 파일 바이트 배열로 변환하여 재사용 가능한 InputStream 생성
+            byte[] imageBytes = imageFile.getBytes();
+
+            // 5️⃣ 원본 이미지 저장
+            try (InputStream originalIs = new ByteArrayInputStream(imageBytes)) {
+                FileUploadUtil.saveFile(originalIs, imageDir, fileName);
+            }
+
+            // 6️⃣ 썸네일 저장
             Path thumbPath = Paths.get(thumbDir);
             if (!Files.exists(thumbPath)) Files.createDirectories(thumbPath);
 
-            Thumbnails.of(imageFile.getInputStream())
-                    .size(240, 240)
-                    .outputQuality(0.8)
-                    .toFile(thumbPath.resolve(thumbFileName).toFile());
+            try (InputStream thumbIs = new ByteArrayInputStream(imageBytes)) {
+                Thumbnails.of(thumbIs)
+                        .size(240, 240)
+                        .outputQuality(0.8)
+                        .toFile(thumbPath.resolve(thumbFileName).toFile());
+            }
 
         } catch (IOException e) {
-            log.error("❌ 썸네일 생성 실패: {}", e.getMessage(), e);
+            log.error("❌ 이미지 저장 또는 썸네일 생성 실패: {}", e.getMessage(), e);
             throw new ChatException(ChatErrorCode.THUMBNAIL_CREATE_FAILED);
         }
 
-        // 6️⃣ 채팅방 존재 확인
+        // 7️⃣ 채팅방 존재 확인
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new ChatException(ChatErrorCode.CHATROOM_NOT_FOUND));
 
-        // 7️⃣ 채팅 메시지 저장
+        // 8️⃣ 채팅 메시지 저장
         ChatMessage message = ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .senderId(senderId)
@@ -296,7 +302,7 @@ public class ChatMessageService {
         chatMessageRepository.save(message);
         chatRoom.updateLastMessage("[이미지]", message.getTimestamp());
 
-        // 8️⃣ WebSocket 브로드캐스트
+        // 9️⃣ WebSocket 전송
         try {
             String nickname = userService.getNicknameById(senderId);
             ChatMessageResponseDto responseDto = ChatMessageResponseDto.from(message, nickname);
@@ -308,6 +314,7 @@ public class ChatMessageService {
 
         return imageUrl;
     }
+
 
 
 
