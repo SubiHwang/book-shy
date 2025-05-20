@@ -3,11 +3,9 @@ import { useEffect, useState } from 'react';
 import { fetchBookNoteList } from '@/services/mybooknote/booknote/booknote';
 import { fetchBookQuoteList } from '@/services/mybooknote/booknote/bookquote';
 import { fetchUserAllLibrary } from '@/services/mylibrary/libraryApi';
-import { fetchBookDetailByBookId } from '@/services/book/search';
 import { fetchRentalBooksInUse } from '@/services/chat/chat';
 import BookNoteSwiperPage from './BookNoteSwiperPage';
 import LibraryBookListPage from './LibraryBookListPage';
-import type { Book } from '@/types/book/book';
 import Loading from '@/components/common/Loading';
 
 const MyBookNotePage = () => {
