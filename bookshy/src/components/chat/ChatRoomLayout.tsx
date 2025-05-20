@@ -5,6 +5,8 @@ import ScrollToBottomButton from './ScrollToBottomButton';
 import { Camera, Image, CalendarDays, Phone } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { ChatMessage } from '@/types/chat/chat';
+import { getUserIdFromToken } from '@/utils/jwt';
+import { fetchMessages } from '@/services/chat/chat';
 
 const HEADER_HEIGHT = 56;
 const FOOTER_HEIGHT = 64;
@@ -40,22 +42,25 @@ function OptionButton({ icon, label, onClick }: { icon: React.ReactNode; label: 
 export default function ChatRoomLayout(props: ChatRoomLayoutProps) {
   const [showOptions, setShowOptions] = useState(false);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const chatBodyRef = useRef<HTMLDivElement>(null);
+  const myUserId = getUserIdFromToken();
 
-  // 더미 메시지 30개
-  const dummyMessages: ChatMessage[] = Array.from({ length: 30 }).map((_, i) => ({
-    id: String(i + 1),
-    chatRoomId: 1,
-    senderId: i % 2 === 0 ? 1 : 2,
-    content: `테스트 메시지 ${i + 1}`,
-    type: 'text',
-    sentAt: new Date().toISOString(),
-    read: true,
-    emoji: '',
-  }));
-
-  // 실제 메시지와 더미 합치기
-  const messages = [...(props.initialMessages || []), ...dummyMessages];
+  // 채팅 메시지 불러오기
+  useEffect(() => {
+    const fetch = async () => {
+      if (!props.roomId) return;
+      const msgs = await fetchMessages(Number(props.roomId));
+      setMessages(msgs);
+      // 진입 시 마지막 메시지로 이동 (auto)
+      setTimeout(() => {
+        if (chatBodyRef.current) {
+          chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+        }
+      }, 0);
+    };
+    fetch();
+  }, [props.roomId]);
 
   // 스크롤이 위에 있을 때 아래로 내려가는 버튼 표시
   useEffect(() => {
@@ -90,6 +95,7 @@ export default function ChatRoomLayout(props: ChatRoomLayoutProps) {
         <ChatBody
           roomId={props.roomId}
           initialMessages={messages}
+          myUserId={myUserId}
         />
       </div>
 
@@ -98,7 +104,9 @@ export default function ChatRoomLayout(props: ChatRoomLayoutProps) {
         <ScrollToBottomButton
           bottom={FOOTER_HEIGHT + (showOptions ? OPTION_HEIGHT : 0)}
           onClick={() => {
-            chatBodyRef.current?.scrollTo({ top: chatBodyRef.current.scrollHeight, behavior: 'smooth' });
+            if (chatBodyRef.current) {
+              chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+            }
           }}
         />
       )}
