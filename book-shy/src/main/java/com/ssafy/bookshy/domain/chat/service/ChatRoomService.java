@@ -3,6 +3,7 @@ package com.ssafy.bookshy.domain.chat.service;
 import com.ssafy.bookshy.domain.book.dto.BookResponseDto;
 import com.ssafy.bookshy.domain.book.entity.Book;
 import com.ssafy.bookshy.domain.book.repository.BookRepository;
+import com.ssafy.bookshy.domain.chat.dto.ChatOpponentResponseDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatRoomUserIds;
 import com.ssafy.bookshy.domain.chat.entity.ChatCalendar;
@@ -19,6 +20,9 @@ import com.ssafy.bookshy.domain.exchange.repository.ExchangeRequestRepository;
 import com.ssafy.bookshy.domain.matching.dto.MatchChatRequestDto;
 import com.ssafy.bookshy.domain.matching.entity.Matching;
 import com.ssafy.bookshy.domain.users.entity.Users;
+import com.ssafy.bookshy.domain.users.exception.UserErrorCode;
+import com.ssafy.bookshy.domain.users.exception.UserException;
+import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import com.ssafy.bookshy.domain.users.service.UserService;
 import com.ssafy.bookshy.kafka.dto.ChatMessageKafkaDto;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +54,7 @@ public class ChatRoomService {
     private final ExchangeRequestRepository exchangeRequestRepository;
     private final BookRepository bookRepository;
     private final ChatCalendarRepository chatCalendarRepository;
+    private final UserRepository userRepository;
 
     /**
      * 📋 특정 사용자의 채팅방 목록을 조회합니다.
@@ -327,5 +332,20 @@ public class ChatRoomService {
         }
 
         return results;
+    }
+
+    public ChatOpponentResponseDto getOpponentInfo(Long chatRoomId, Long myUserId) {
+        ChatRoomUserIds ids = getUserIdsByChatRoomId(chatRoomId);
+        Long opponentId = ids.getUserAId().equals(myUserId) ? ids.getUserBId() : ids.getUserAId();
+
+        Users opponent = userRepository.findById(opponentId)
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+
+        return ChatOpponentResponseDto.builder()
+                .userId(opponent.getUserId())
+                .nickname(opponent.getNickname())
+                .profileImageUrl(opponent.getProfileImageUrl())
+                .temperature(opponent.getTemperature())
+                .build();
     }
 }
