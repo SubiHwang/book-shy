@@ -72,7 +72,6 @@ export async function fetchPartnerInfo(
   roomId: number,
 ): Promise<{ name: string; profileImage: string; bookShyScore: number }> {
   const res = await authAxiosInstance.get(`/chats/${roomId}/opponent`);
-  console.log(res);
   const data = res.data ? res.data : res; // data가 있으면 data, 없으면 res 자체
   return {
     name: data.nickname,
