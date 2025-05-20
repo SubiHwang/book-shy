@@ -96,6 +96,14 @@ public class NotificationService {
         ));
     }
 
+    public void sendTradeCompletedNotification(Long userId, String targetName, String type) {
+        sendFcm(userId, FcmNotificationType.TRADE_COMPLETE, Map.of(
+                "targetName", targetName,
+                "type", type,
+                "url", "/mypage/history"
+        ));
+    }
+
     public void sendFcm(Long userId, FcmNotificationType type, Map<String, String> data) {
         String targetToken = userRepository.findById(userId)
                 .map(Users::getFcmToken)

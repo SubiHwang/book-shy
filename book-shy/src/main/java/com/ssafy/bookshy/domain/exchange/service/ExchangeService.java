@@ -171,18 +171,15 @@ public class ExchangeService {
      */
     @Transactional
     public boolean submitReview(Long reviewerId, ReviewSubmitRequest request) {
-        // 1️⃣ 상대방 ID 확인
         Long revieweeId = request.getUserIds().stream()
                 .filter(id -> !id.equals(reviewerId))
                 .findFirst()
                 .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.UNAUTHORIZED_REVIEW_SUBMITTER));
 
-        // 2️⃣ 중복 리뷰 방지
         if (reviewRepository.existsByRequestIdAndReviewerId(request.getRequestId(), reviewerId)) {
             throw new ExchangeException(ExchangeErrorCode.REVIEW_ALREADY_SUBMITTED);
         }
 
-        // 3️⃣ 리뷰 저장
         ExchangeRequestReview review = ExchangeRequestReview.builder()
                 .requestId(request.getRequestId())
                 .reviewerId(reviewerId)
@@ -194,19 +191,24 @@ public class ExchangeService {
                 .build();
         reviewRepository.save(review);
 
-        // 4️⃣ 리뷰 수 체크
         List<ExchangeRequestReview> reviews = reviewRepository.findByRequestId(request.getRequestId());
         if (reviews.size() < 2) return false;
 
-        // 5️⃣ 거래 상태 변경
         ExchangeRequest exchangeRequest = exchangeRequestRepository.findById(request.getRequestId())
                 .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.EXCHANGE_REQUEST_NOT_FOUND));
         exchangeRequest.complete();
 
-        // 6️⃣ 소유권 이전 (EXCHANGE만)
-        if ("EXCHANGE".equalsIgnoreCase(request.getTradeType())) {
-            Users reviewee = Users.builder().userId(revieweeId).build();
+        String type = exchangeRequest.getType().name();
 
+        Users reviewer = userRepository.findById(reviewerId)
+                .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.USER_NOT_FOUND));
+        Users reviewee = userRepository.findById(revieweeId)
+                .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.USER_NOT_FOUND));
+
+        notificationService.sendTradeCompletedNotification(reviewerId, reviewee.getNickname(), type);
+        notificationService.sendTradeCompletedNotification(revieweeId, reviewer.getNickname(), type);
+
+        if ("EXCHANGE".equalsIgnoreCase(exchangeRequest.getType().name())) {
             for (ReviewSubmitRequest.ReviewedBook book : request.getBooks()) {
                 Library lib = libraryRepository.findById(book.getLibraryId())
                         .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.BOOK_NOT_FOUND));
@@ -218,6 +220,4 @@ public class ExchangeService {
 
         return true;
     }
-
-
 }

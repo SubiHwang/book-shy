@@ -83,6 +83,14 @@ public class FcmMessageTemplate {
                     url = "/matching/books/" + itemId + "?from=wish-book-card";
                 }
             }
+
+            case TRADE_COMPLETE -> {
+                String targetName = data.get("targetName");
+
+                title = "🎉 거래가 완료되었어요!";
+                body = String.format("%s님과의 %s이 성공적으로 완료되었습니다.", targetName, type.equals("EXCHANGE") ? "교환" : "대여");
+                url = "/mypage/history";
+            }
         }
 
         return new FcmMessage(title, body, url);
