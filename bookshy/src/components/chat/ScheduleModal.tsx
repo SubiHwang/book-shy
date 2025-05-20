@@ -8,7 +8,6 @@ interface Props {
   partnerName: string;
   partnerProfileImage: string;
   roomId: number;
-  requestId: number;
   onClose: () => void;
   onConfirm: (message: string, payload: RegisterSchedulePayload) => void;
 }
@@ -19,7 +18,6 @@ const ScheduleModal: FC<Props> = ({
   onClose,
   onConfirm,
   roomId,
-  requestId,
 }) => {
   const today = new Date();
   const [tab, setTab] = useState<'대여' | '교환'>('교환');

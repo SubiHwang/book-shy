@@ -46,8 +46,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   const { roomId } = useParams();
   const numericRoomId = Number(roomId);
   const myUserId = getUserIdFromToken();
-  if (myUserId === null) return null;
-  const userId = Number(myUserId);
+  const userId = myUserId ? Number(myUserId) : 0;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showOptions, setShowOptions] = useState(false);
@@ -232,7 +231,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   };
 
   const handleSendMessage = (content: string) => {
-    if (isNaN(numericRoomId)) return;
+    if (isNaN(numericRoomId) || !myUserId) return;
     sendMessage(numericRoomId, myUserId, content, 'chat');
   };
 
@@ -373,6 +372,10 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
 
     return today.getTime() === eventDate.getTime();
   }, [calendarEvent]);
+
+  if (!myUserId) {
+    return null;
+  }
 
   return (
     <div className="relative h-full min-h-0 bg-white pb-safe">
@@ -520,7 +523,6 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
           partnerName={partnerInfo?.name ?? '로딩중...'}
           partnerProfileImage={partnerInfo?.profileImage ?? '/default-profile.png'}
           roomId={numericRoomId}
-          requestId={0}
           onClose={() => setShowScheduleModal(false)}
           onConfirm={registerScheduleAndNotify}
         />
