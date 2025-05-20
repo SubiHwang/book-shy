@@ -229,6 +229,7 @@ public class ChatMessageService {
      * @param imageFile 업로드된 이미지 파일
      * @return 업로드된 이미지의 URL
      */
+    @Transactional
     public String uploadChatImage(Long chatRoomId, Long senderId, MultipartFile imageFile) {
         if (imageFile == null || imageFile.isEmpty()) {
             throw new ChatException(ChatErrorCode.INVALID_IMAGE_TYPE);
