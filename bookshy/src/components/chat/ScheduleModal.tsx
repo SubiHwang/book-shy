@@ -1,7 +1,7 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import TimePickerModal from './TimePickerModal';
-import { RegisterSchedulePayload } from '@/types/chat/chat';
+import { RegisterSchedulePayload, ChatCalendarEventDto } from '@/types/chat/chat';
 import { toast } from 'react-toastify';
 
 interface Props {
@@ -10,6 +10,8 @@ interface Props {
   roomId: number;
   onClose: () => void;
   onConfirm: (message: string, payload: RegisterSchedulePayload) => void;
+  isEditMode?: boolean;
+  existingSchedule?: ChatCalendarEventDto;
 }
 
 const ScheduleModal: FC<Props> = ({
@@ -18,9 +20,13 @@ const ScheduleModal: FC<Props> = ({
   onClose,
   onConfirm,
   roomId,
+  isEditMode = false,
+  existingSchedule,
 }) => {
   const today = new Date();
-  const [tab, setTab] = useState<'대여' | '교환'>('교환');
+  const [tab, setTab] = useState<'대여' | '교환'>(
+    existingSchedule?.type === 'RENTAL' ? '대여' : '교환',
+  );
   const [startDate, setStartDate] = useState<string | null>(null);
   const [endDate, setEndDate] = useState<string | null>(null);
   const [showTimePickerFor, setShowTimePickerFor] = useState<'대여' | '반납' | null>(null);
@@ -28,6 +34,42 @@ const ScheduleModal: FC<Props> = ({
   const [returnTime, setReturnTime] = useState('');
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
+
+  // 기존 일정이 있으면 초기값 설정
+  useEffect(() => {
+    if (existingSchedule) {
+      if (existingSchedule.type === 'EXCHANGE' && existingSchedule.exchangeDate) {
+        const date = new Date(existingSchedule.exchangeDate);
+        setYear(date.getFullYear());
+        setMonth(date.getMonth());
+        setStartDate(String(date.getDate()));
+        setBorrowTime(
+          date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true }),
+        );
+      } else if (
+        existingSchedule.type === 'RENTAL' &&
+        existingSchedule.rentalStartDate &&
+        existingSchedule.rentalEndDate
+      ) {
+        const startDate = new Date(existingSchedule.rentalStartDate);
+        const endDate = new Date(existingSchedule.rentalEndDate);
+        setYear(startDate.getFullYear());
+        setMonth(startDate.getMonth());
+        setStartDate(String(startDate.getDate()));
+        setEndDate(String(endDate.getDate()));
+        setBorrowTime(
+          startDate.toLocaleTimeString('ko-KR', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+          }),
+        );
+        setReturnTime(
+          endDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true }),
+        );
+      }
+    }
+  }, [existingSchedule]);
 
   const startDay = new Date(year, month, 1).getDay();
   const lastDate = new Date(year, month + 1, 0).getDate();
@@ -133,7 +175,7 @@ const ScheduleModal: FC<Props> = ({
     !startDate || !borrowTime || (tab === '대여' && (!returnTime || !endDate));
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-light-bg rounded-2xl p-4 w-[90%] max-w-md shadow-md">
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-4">
@@ -147,7 +189,46 @@ const ScheduleModal: FC<Props> = ({
             <X size={20} />
           </button>
         </div>
-
+        {/* 안내문구 아래 기존 일정 안내 */}
+        {isEditMode && existingSchedule && (
+          <div className="mb-2 text-sm font-medium text-primary">
+            기존 등록된 일정:
+            {existingSchedule.type === 'EXCHANGE' && existingSchedule.exchangeDate && (
+              <>
+                {' '}
+                {new Date(existingSchedule.exchangeDate).toLocaleString('ko-KR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </>
+            )}
+            {existingSchedule.type === 'RENTAL' &&
+              existingSchedule.rentalStartDate &&
+              existingSchedule.rentalEndDate && (
+                <>
+                  {' '}
+                  {new Date(existingSchedule.rentalStartDate).toLocaleString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                  {' ~ '}
+                  {new Date(existingSchedule.rentalEndDate).toLocaleString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </>
+              )}
+          </div>
+        )}
         {/* 탭 */}
         <div className="flex mb-3 border-b border-light-bg-shade">
           {['책 교환 하기', '책 대여 하기'].map((label, idx) => (
