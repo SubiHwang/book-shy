@@ -3,10 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { fetchUserPublicLibrary } from '@/services/mylibrary/libraryApi';
 import { fetchBookDetailByBookId } from '@/services/book/search';
 import { fetchScheduleByRoomId, fetchChatRoomUserIds } from '@/services/chat/chat';
-import { submitTradeReview } from '@/services/chat/trade';
+import { submitTradeReview, checkReviewStatus } from '@/services/chat/trade';
+import { getUserIdFromToken } from '@/utils/jwt';
 
 import type { Library } from '@/types/mylibrary/library';
 import type { ChatCalendarEventDto } from '@/types/chat/chat';
+import type { ReviewStatusResponse } from '@/types/chat/trade';
 
 import StarRating from '@/components/chat/tradereview/StarRating';
 import BookSelector from '@/components/chat/tradereview/BookSelector';
@@ -36,6 +38,10 @@ const TradeReviewPage = () => {
   const [defaultBooks, setDefaultBooks] = useState<Library[]>([]);
   const [showMyLibrary, setShowMyLibrary] = useState(false);
   const [activeBook, setActiveBook] = useState<Library | null>(null);
+  const [hasSubmittedReview, setHasSubmittedReview] = useState(false);
+  const [reviewStatus, setReviewStatus] = useState<ReviewStatusResponse['reviewStatus'] | null>(
+    null,
+  );
 
   const {
     roomId,
@@ -45,6 +51,13 @@ const TradeReviewPage = () => {
     myBookName = [],
   } = state?.chatSummary || {};
 
+  // 매칭 당시 책들을 제외한 서재 책들
+  const defaultBookIds = defaultBooks.map((book) => book.bookId);
+  const filteredMyLibraryBooks = myLibraryBooks.filter(
+    (book) => !defaultBookIds.includes(book.bookId),
+  );
+
+  // 캘린더 일정 불러오기
   useEffect(() => {
     if (!roomId) {
       toast.error('유효하지 않은 접근입니다.');
@@ -57,13 +70,57 @@ const TradeReviewPage = () => {
 
     // 캘린더 일정 불러오기
     fetchScheduleByRoomId(roomId)
-      .then(setCalendar)
+      .then((calendarData) => {
+        console.log('캘린더 데이터 로드:', calendarData);
+        setCalendar(calendarData);
+      })
       .catch((err) => {
         console.error(err);
         toast.error('거래 일정을 불러올 수 없습니다.');
         navigate(-1);
       });
   }, [roomId]);
+
+  // calendar가 로드된 후에 리뷰 상태 확인
+  useEffect(() => {
+    if (!calendar?.requestId || !roomId) {
+      console.log('calendar 또는 requestId가 없음:', calendar);
+      return;
+    }
+
+    const checkUserReviewStatus = async () => {
+      try {
+        console.log('리뷰 상태 확인 시작:', { roomId, requestId: calendar.requestId });
+        const response = await checkReviewStatus(roomId, calendar.requestId);
+        console.log('리뷰 상태 확인 결과:', response);
+
+        if (!response) {
+          console.error('리뷰 상태 응답이 없음');
+          return;
+        }
+
+        const { hasReviewed, reviewStatus } = response;
+        console.log('리뷰 상태 파싱:', { hasReviewed, reviewStatus });
+
+        setHasSubmittedReview(hasReviewed);
+        setReviewStatus(reviewStatus);
+
+        if (hasReviewed) {
+          // 이미 리뷰를 작성한 경우, 상대방 리뷰 상태에 따라 다른 메시지 표시
+          const partnerHasSubmitted = reviewStatus.partnerReview.hasSubmitted;
+          if (partnerHasSubmitted) {
+            toast.info('양측 모두 리뷰를 작성했습니다. 거래가 곧 완료됩니다.');
+          } else {
+            toast.info('상대방이 아직 리뷰를 작성하지 않았습니다.');
+          }
+        }
+      } catch (e) {
+        console.error('리뷰 상태 확인 실패:', e);
+      }
+    };
+
+    checkUserReviewStatus();
+  }, [calendar, roomId]);
 
   useEffect(() => {
     // 매칭 당시 책 정보를 불러오기
@@ -130,7 +187,7 @@ const TradeReviewPage = () => {
     }
 
     // 책 정보 구성
-    const allBooks = [...defaultBooks, ...myLibraryBooks];
+    const allBooks = [...defaultBooks, ...filteredMyLibraryBooks];
     const selectedReviewedBooks = allBooks
       .filter((book) => selectedBooks.includes(book.title))
       .map((book) => ({
@@ -192,6 +249,27 @@ const TradeReviewPage = () => {
     );
   }
 
+  if (hasSubmittedReview) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-center text-gray-500 px-4">
+        <div>
+          <p className="text-lg font-semibold mb-2">이미 리뷰를 작성하셨습니다.</p>
+          <p className="text-sm mb-4">
+            {reviewStatus?.partnerReview?.hasSubmitted
+              ? '양측 모두 리뷰를 작성했습니다. 거래가 곧 완료됩니다.'
+              : '상대방이 아직 리뷰를 작성하지 않았습니다.'}
+          </p>
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-primary text-white px-4 py-2 rounded-lg text-sm"
+          >
+            채팅방으로 돌아가기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-light-bg pb-8 relative">
       {/* 프로필 영역 */}
@@ -219,7 +297,7 @@ const TradeReviewPage = () => {
           toggleBook={toggleBook}
           showMyLibrary={showMyLibrary}
           setShowMyLibrary={setShowMyLibrary}
-          myLibraryBooks={myLibraryBooks}
+          myLibraryBooks={filteredMyLibraryBooks}
           onViewDetail={setActiveBook}
           defaultBooks={defaultBooks}
         />
