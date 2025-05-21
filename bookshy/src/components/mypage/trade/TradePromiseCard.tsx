@@ -4,7 +4,7 @@ import { BookMarked, MessageCircle } from 'lucide-react';
 
 export interface TradeCardProps {
   userId: number;
-  chatId: number;
+  roomId: number;
   tradeId: number;
   type: 'EXCHANGE' | 'RENTAL';
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COMPLETED';
@@ -26,7 +26,7 @@ export interface TradeCardProps {
 
 const TradePromiseCard: FC<TradeCardProps> = ({
   userId,
-  chatId,
+  roomId,
   type,
   userName,
   userProfileUrl,
@@ -35,8 +35,8 @@ const TradePromiseCard: FC<TradeCardProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const handleChatClick = (chatId: number) => {
-    navigate(`/chat/${chatId}`);
+  const handleChatClick = (roomId: number) => {
+    navigate(`/chat/${roomId}`);
   };
 
   const handleClickNeighborsBookshelf = (userId: number) => {
@@ -104,7 +104,7 @@ const TradePromiseCard: FC<TradeCardProps> = ({
           </button>
           <button
             onClick={() => {
-              handleChatClick(chatId);
+              handleChatClick(roomId);
             }}
             className="flex-1 flex items-center justify-center gap-2 px-2 py-2 bg-primary-light text-white rounded-xl text-sm font-medium shadow-sm hover:shadow-md"
           >

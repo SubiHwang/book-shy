@@ -29,7 +29,7 @@ const TradePromiseList: FC = () => {
         <TradePromiseCard
           key={item.tradeId}
           tradeId={item.tradeId}
-          chatId={item.chatId}
+          roomId={item.roomId}
           userId={item.userId}
           type={item.type}
           status={item.status}
