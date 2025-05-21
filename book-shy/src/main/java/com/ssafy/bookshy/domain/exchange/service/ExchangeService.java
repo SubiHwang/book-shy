@@ -259,7 +259,7 @@ public class ExchangeService {
         log.info("🎉 거래 완료 처리 성공 - requestId: {}", request.getRequestId());
         return true;
     }
-    
+
     /**
      * 🔍 리뷰 작성 여부 확인 서비스
      *
