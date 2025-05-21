@@ -5,7 +5,7 @@ import SplashScreen from '@components/splash/SplashScreen';
 import bookAnimation from '@assets/lottie/bookshy-splash.json';
 import { BrowserRouter } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
-import UpdatePrompt from '@/components/common/UpdatePrompt';
+// import UpdatePrompt from '@/components/common/UpdatePrompt';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { FirebaseProvider } from '@/contexts/FirebaseContext';
 import NotificationInitializer from './components/common/NotificationInitializer';
@@ -34,7 +34,7 @@ const App: FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // PWA 업데이트 관리
-  const { needRefresh, updateServiceWorker } = useRegisterSW({
+  useRegisterSW({
     onRegistered(registration: ServiceWorkerRegistration | undefined): void {
       console.log('SW 등록됨', registration);
     },
@@ -77,7 +77,7 @@ const App: FC = () => {
             <NotificationInitializer />
             {/* 알림 초기화 컴포넌트 */}
             <AppLayout />
-            <UpdatePrompt needRefresh={needRefresh} updateServiceWorker={updateServiceWorker} />
+            {/* <UpdatePrompt needRefresh={needRefresh} updateServiceWorker={updateServiceWorker} /> */}
           </BrowserRouter>
         </AuthProvider>
       </FirebaseProvider>
