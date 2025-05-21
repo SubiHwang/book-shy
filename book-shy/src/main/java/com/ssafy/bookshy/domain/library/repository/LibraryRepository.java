@@ -4,6 +4,7 @@ import com.ssafy.bookshy.domain.book.entity.Book;
 import com.ssafy.bookshy.domain.library.entity.Library;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -51,4 +52,8 @@ public interface LibraryRepository extends JpaRepository<Library, Long> {
     List<Library> findMyLibrariesMatchingTheirWishes(@Param("myUserId") Long myUserId, @Param("otherUserId") Long otherUserId);
 
     boolean existsByUserUserIdAndBookItemId(Long userId, Long itemId);
+
+    @Modifying
+    @Query("UPDATE Library l SET l.user.userId = :newUserId WHERE l.id = :libraryId")
+    void updateLibraryOwner(@Param("libraryId") Long libraryId, @Param("newUserId") Long newUserId);
 }

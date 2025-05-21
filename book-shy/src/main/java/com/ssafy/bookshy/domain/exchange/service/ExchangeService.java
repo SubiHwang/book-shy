@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.exchange.service;
 
 import com.ssafy.bookshy.domain.book.entity.Book;
+import com.ssafy.bookshy.domain.book.repository.BookRepository;
 import com.ssafy.bookshy.domain.chat.entity.ChatCalendar;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatCalendarRepository;
@@ -41,6 +42,7 @@ public class ExchangeService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final ExchangeReviewBookRepository reviewBookRepository;
+    private final BookRepository bookRepository;
 
     /**
      * 📩 도서 교환 요청 처리
@@ -204,7 +206,7 @@ public class ExchangeService {
         reviewRepository.save(review);
         log.info("✅ 리뷰 저장 완료 - reviewerId: {}, rating: {}", reviewerId, review.getRating());
 
-        // 4️⃣ 책 임시 저장 (ExchangeReviewBook 테이블)
+        // 4️⃣ 리뷰에 도서 정보 임시 저장
         for (ReviewSubmitRequest.ReviewedBook dto : request.getBooks()) {
             ExchangeReviewBook reviewBook = ExchangeReviewBook.builder()
                     .review(review)
@@ -227,30 +229,34 @@ public class ExchangeService {
             return false;
         }
 
-        // 6️⃣ 거래 상태 변경
+        // 6️⃣ 거래 상태 COMPLETED 로 변경
         ExchangeRequest exchangeRequest = exchangeRequestRepository.findById(request.getRequestId())
                 .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.EXCHANGE_REQUEST_NOT_FOUND));
         exchangeRequest.complete();
-        log.info("🔁 거래 상태 변경 완료 - COMPLETED (requestId: {})", exchangeRequest.getRequestId());
+        log.info("🔁 거래 상태 변경 완료 - COMPLETED (requestId: {})", request.getRequestId());
+        log.info("🔁 거래 타입 :  (type: {})", request.getTradeType());
 
-        // 7️⃣ 교환일 경우 도서 소유권 교차 이전
+        // 7️⃣ EXCHANGE일 경우 소유권 교환 처리
         if ("EXCHANGE".equalsIgnoreCase(request.getTradeType())) {
             List<ExchangeReviewBook> allBooks = reviewBookRepository.findByRequestId(request.getRequestId());
             for (ExchangeReviewBook book : allBooks) {
-                // 교환 대상자 설정
-                Long newOwnerId = book.getOwnerId().equals(reviewerId) ? revieweeId : reviewerId;
-                Users newOwner = Users.builder().userId(newOwnerId).build();
+                Long oldOwnerId = book.getOwnerId();
+                Long newOwnerId = oldOwnerId.equals(reviewerId) ? revieweeId : reviewerId;
 
-                // 소유권 이전
-                Library lib = libraryRepository.findById(book.getLibraryId())
-                        .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.BOOK_NOT_FOUND));
-                lib.transferTo(newOwner);
-                log.info("📚 서재 소유권 이전 - libraryId: {}, newOwnerId: {}", lib.getId(), newOwnerId);
+                // Library 소유권 이전
+                try {
+                    libraryRepository.updateLibraryOwner(book.getLibraryId(), newOwnerId);
+                    log.info("📚 서재 소유권 이전 - libraryId: {}, newOwnerId: {}", book.getLibraryId(), newOwnerId);
+                } catch (Exception e) {
+                    throw new ExchangeException(ExchangeErrorCode.BOOK_NOT_FOUND);
+                }
 
-                Book entity = lib.getBook();
-                if (entity != null) {
-                    entity.transferTo(newOwner);
-                    log.info("📘 도서 소유권 이전 - bookId: {}, newOwnerId: {}", entity.getId(), newOwnerId);
+                // Book 소유권 이전
+                try {
+                    bookRepository.updateBookOwner(book.getBookId(), newOwnerId);
+                    log.info("📘 도서 소유권 이전 - bookId: {}, newOwnerId: {}", book.getBookId(), newOwnerId);
+                } catch (Exception e) {
+                    throw new ExchangeException(ExchangeErrorCode.BOOK_NOT_FOUND);
                 }
             }
             log.info("✅ 모든 도서에 대한 소유권 이전 완료");
