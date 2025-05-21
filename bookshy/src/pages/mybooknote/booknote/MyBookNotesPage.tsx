@@ -55,6 +55,7 @@ const MyBookNotePage = () => {
         // 렌탈 도서도 추가
         try {
           const rentalBooks = await fetchRentalBooksInUse();
+          console.log('불러온 렌탈 도서:', rentalBooks);
           if (Array.isArray(rentalBooks) && rentalBooks.length > 0) {
             rentalBooks.forEach((book) => {
               if (book && book.bookId) {
