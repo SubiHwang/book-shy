@@ -349,7 +349,6 @@ const TradeReviewPage = () => {
           showMyLibrary={showMyLibrary}
           setShowMyLibrary={setShowMyLibrary}
           myLibraryBooks={filteredMyLibraryBooks}
-          onViewDetail={setActiveBook}
           defaultBooks={defaultBooks}
         />
 
