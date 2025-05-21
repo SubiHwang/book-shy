@@ -66,7 +66,7 @@ public class NotificationService {
                 "subtype", "now",
                 "targetName", partnerName,
                 "date", date,
-                "url", "/mypage/promises"
+                "url", "/mypage"
         ));
     }
 
