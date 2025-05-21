@@ -44,6 +44,25 @@ const TradePromiseCard: FC<TradeCardProps> = ({
     navigate(`/matching/neigbors-bookshelf/${userId}`);
   };
 
+  // 날짜와 시간을 분리하는 함수
+  const formatMeetTime = (meetTimeStr: string) => {
+    try {
+      // "2025년 5월 21일 수 오후 11:15" 형식의 문자열을 파싱
+      const dateTimeParts = meetTimeStr.split(' ');
+
+      // 날짜 부분 (년, 월, 일, 요일)
+      const datePart = dateTimeParts.slice(0, 4).join(' ');
+
+      // 시간 부분 (오전/오후, 시:분)
+      const timePart = dateTimeParts.slice(4).join(' ');
+
+      return { datePart, timePart };
+    } catch (error) {
+      // 파싱에 실패할 경우 원본 문자열 반환
+      return { datePart: meetTimeStr, timePart: '' };
+    }
+  };
+
   const renderTimeLeft = () => {
     const { days, hours, minutes } = timeLeft;
     const parts = [];
@@ -54,10 +73,13 @@ const TradePromiseCard: FC<TradeCardProps> = ({
 
     return (
       <div className="px-2 py-1.5 rounded-full bg-gradient-to-r from-pink-100 to-pink-50 text-primary text-sm font-medium shadow-sm">
-        <span className="font-bold">D-{parts.join(' ')}</span>
+        <span className="font-bold">{parts.join(' ')} 남음</span>
       </div>
     );
   };
+
+  // 날짜와 시간 분리
+  const { datePart, timePart } = formatMeetTime(meetTime);
 
   return (
     <div className="card bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 m-4 w-full max-w-md mx-auto">
@@ -85,7 +107,10 @@ const TradePromiseCard: FC<TradeCardProps> = ({
                   {type === 'EXCHANGE' ? '교환' : '대여'}
                 </span>
               </div>
-              <p className="text-sm text-light-text">{meetTime}</p>
+              <div className="text-sm text-light-text">
+                <p>{datePart}</p>
+                <p>{timePart}</p>
+              </div>
             </div>
           </div>
           <div className="flex flex-col items-end">{renderTimeLeft()}</div>
