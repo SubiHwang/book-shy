@@ -97,4 +97,5 @@ public class ChatRoomController {
                 chatRoomService.getOpponentInfo(chatRoomId, user.getUserId())
         );
     }
+
 }
