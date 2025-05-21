@@ -2,6 +2,8 @@ package com.ssafy.bookshy.domain.exchange.service;
 
 import com.ssafy.bookshy.domain.book.entity.Book;
 import com.ssafy.bookshy.domain.book.repository.BookRepository;
+import com.ssafy.bookshy.domain.chat.entity.ChatCalendar;
+import com.ssafy.bookshy.domain.chat.repository.ChatCalendarRepository;
 import com.ssafy.bookshy.domain.exchange.dto.ExchangePromiseDto;
 import com.ssafy.bookshy.domain.exchange.dto.TimeLeftDto;
 import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequest;
@@ -35,49 +37,61 @@ public class ExchangePromiseService {
     private final ExchangeRequestRepository exchangeRequestRepository;
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
+    private final ChatCalendarRepository chatCalendarRepository;
 
     /**
-     * ✅ 로그인 사용자가 참여 중인 거래 요청을 기반으로 거래 약속 목록을 조회합니다.
-     * - 사용자가 요청자 또는 응답자인 경우를 포함해 모든 거래 요청을 조회합니다.
-     * - 각 거래에 대해 상대방 정보, 나의 책/상대방 책, 남은 시간 등을 포함해 응답합니다.
+     * ✅ 로그인 사용자가 참여한 거래 요청에 연결된 거래 일정 정보를 기반으로 거래 약속 목록을 조회합니다.
+     * - 사용자 ID로 ChatCalendar를 먼저 조회
+     * - 각 일정에 연결된 ExchangeRequest 요청 정보를 가져옴
+     * - 그 요청에 대한 상대방, 책 정보, 일정 시간 등을 종합하여 응답
      *
      * @param user 로그인 사용자
-     * @return 예정된 거래 약속 정보 리스트
+     * @return 예정된 거래 약속 리스트
      */
     public List<ExchangePromiseDto> getPromiseList(Users user) {
         Long userId = user.getUserId();
 
-        // 1️⃣ 사용자와 관련된 예정된 거래 요청 전체 조회
-        List<ExchangeRequest> requests = exchangeRequestRepository.findPromiseByUserId(userId, Pageable.unpaged());
+        // 1️⃣ 사용자와 관련된 모든 거래 일정 조회
+        List<ChatCalendar> calendars = chatCalendarRepository.findAllByUserId(userId);
 
-        // 2️⃣ 각 요청을 응답 DTO로 변환
-        return requests.stream().map(request -> {
+        // 2️⃣ 일정마다 연결된 거래 요청 기반으로 응답 구성
+        return calendars.stream().map(calendar -> {
+            Long requestId = calendar.getRequestId();
+            ExchangeRequest request = exchangeRequestRepository.findById(requestId)
+                    .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.EXCHANGE_REQUEST_NOT_FOUND));
+
             boolean isRequester = request.getRequesterId().equals(userId);
 
-            // 2-1. 상대방 정보 조회
+            // 👤 상대방 정보 조회
             Long counterpartId = isRequester ? request.getResponderId() : request.getRequesterId();
             Users counterpart = userRepository.findById(counterpartId)
-                    .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.UNAUTHORIZED_REVIEW_SUBMITTER));
+                    .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.USER_NOT_FOUND));
 
-            // 2-2. 나의 도서 / 상대방 도서 ID 조회
+            // 📚 책 정보 조회
             Long myBookId = isRequester ? request.getBookAId() : request.getBookBId();
             Long partnerBookId = isRequester ? request.getBookBId() : request.getBookAId();
 
-            // 2-3. 도서 정보 조회
             Book myBook = bookRepository.findById(myBookId)
                     .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.BOOK_NOT_FOUND));
             Book partnerBook = bookRepository.findById(partnerBookId)
                     .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.BOOK_NOT_FOUND));
 
-            // 2-4. 남은 시간 계산
-            TimeLeftDto timeLeft = calculateTimeLeft(request.getRequestedAt());
+            // ⏳ 남은 시간 계산
+            LocalDateTime scheduledDateTime =
+                    request.getType() == ExchangeRequest.RequestType.EXCHANGE
+                            ? calendar.getExchangeDate()
+                            : calendar.getRentalStartDate();
 
-            // 2-5. 응답 DTO 구성
+            TimeLeftDto timeLeft = calculateTimeLeft(scheduledDateTime);
+
+            // 📦 응답 DTO 구성
             return ExchangePromiseDto.builder()
-                    .tradeId(request.getRequestId())
+                    .tradeId(requestId)
                     .type(request.getType().name())
                     .status(request.getStatus().name())
-                    .scheduledTime(request.getRequestedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                    .scheduledTime(scheduledDateTime != null
+                            ? scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                            : null)
                     .requestedAt(request.getRequestedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                     .myBookId(myBook.getId())
                     .myBookTitle(myBook.getTitle())
@@ -85,7 +99,7 @@ public class ExchangePromiseService {
                     .partnerBookId(partnerBook.getId())
                     .partnerBookTitle(partnerBook.getTitle())
                     .partnerBookCoverUrl(partnerBook.getCoverImageUrl())
-                    .counterpart(CounterpartDto.builder()
+                    .counterpart(ExchangePromiseDto.CounterpartDto.builder()
                             .userId(counterpart.getUserId())
                             .nickname(counterpart.getNickname())
                             .profileImageUrl(counterpart.getProfileImageUrl())
@@ -94,6 +108,7 @@ public class ExchangePromiseService {
                     .build();
         }).toList();
     }
+
 
     /**
      * ⏳ 예정 시각까지 남은 시간을 계산하여 사용자 친화적인 텍스트와 함께 반환합니다.
