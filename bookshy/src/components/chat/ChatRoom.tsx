@@ -512,7 +512,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
 
         {/* 📌 교환 완료 유도 메시지 - 당일 일정인 경우에만 표시 */}
         {isTodayEvent() && (
-          <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm">
+          <div className="mx-4 bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm">
             <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
             <p className="text-xs mt-1 text-light-text-muted">
               거래가 완료되었다면 리뷰를 남겨주세요.
@@ -576,7 +576,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
       )}
 
       {/* 인풋창 - 항상 하단 고정 */}
-      <div className="fixed left-0 right-0 bottom-0 z-20 bg-white border-t border-light-border px-4">
+      <div className="fixed left-0 right-0 bottom-0 z-20 bg-white border-t border-light-border">
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
