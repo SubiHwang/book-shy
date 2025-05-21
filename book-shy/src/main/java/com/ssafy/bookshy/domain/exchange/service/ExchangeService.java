@@ -5,8 +5,7 @@ import com.ssafy.bookshy.domain.chat.entity.ChatCalendar;
 import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import com.ssafy.bookshy.domain.chat.repository.ChatCalendarRepository;
 import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
-import com.ssafy.bookshy.domain.exchange.dto.ExchangeRequestDto;
-import com.ssafy.bookshy.domain.exchange.dto.ReviewSubmitRequest;
+import com.ssafy.bookshy.domain.exchange.dto.*;
 import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequest;
 import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequestReview;
 import com.ssafy.bookshy.domain.exchange.exception.ExchangeErrorCode;
@@ -219,5 +218,44 @@ public class ExchangeService {
         return true;
     }
 
+    /**
+     * 🔍 리뷰 작성 여부 확인 서비스
+     *
+     * 1️⃣ 채팅방 존재 확인
+     * 2️⃣ 거래 요청 존재 및 참여자 확인
+     * 3️⃣ 사용자의 리뷰 작성 여부 및 리뷰 정보 반환
+     * 4️⃣ 상대방 리뷰 작성 여부 반환
+     */
+    @Transactional
+    public ReviewStatusResponse getReviewStatus(Long userId, Long roomId, Long requestId) {
 
+        // 1️⃣ 채팅방 존재 확인
+        chatRoomRepository.findById(roomId).orElseThrow(
+                () -> new ExchangeException(ExchangeErrorCode.CHATROOM_NOT_FOUND));
+
+        // 2️⃣ 거래 요청 존재 및 참여자 확인
+        ExchangeRequest request = exchangeRequestRepository.findById(requestId)
+                .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.EXCHANGE_REQUEST_NOT_FOUND));
+
+        if (!request.getRequesterId().equals(userId) && !request.getResponderId().equals(userId)) {
+            throw new ExchangeException(ExchangeErrorCode.REVIEW_FORBIDDEN);
+        }
+
+        // 3️⃣ 사용자 리뷰 확인
+        ExchangeRequestReview myReview = reviewRepository
+                .findByRequestIdAndReviewerId(requestId, userId).orElse(null);
+
+        // 4️⃣ 상대방 리뷰 확인
+        Long partnerId = request.getRequesterId().equals(userId) ? request.getResponderId() : request.getRequesterId();
+        ExchangeRequestReview partnerReview = reviewRepository
+                .findByRequestIdAndReviewerId(requestId, partnerId).orElse(null);
+
+        return ReviewStatusResponse.builder()
+                .hasReviewed(myReview != null)
+                .reviewStatus(ReviewStatusResponse.ReviewStatus.builder()
+                        .myReview(myReview != null ? new MyReview(myReview) : null)
+                        .partnerReview(new PartnerReview(partnerReview != null, partnerReview != null ? partnerReview.getCreatedAt() : null))
+                        .build())
+                .build();
+    }
 }
