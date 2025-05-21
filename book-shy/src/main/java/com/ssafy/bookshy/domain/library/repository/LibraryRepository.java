@@ -58,5 +58,9 @@ public interface LibraryRepository extends JpaRepository<Library, Long> {
     @Query("UPDATE Library l SET l.user.userId = :newUserId WHERE l.id = :libraryId")
     void updateLibraryOwner(@Param("libraryId") Long libraryId, @Param("newUserId") Long newUserId);
 
+    @Modifying
+    @Query("UPDATE Library l SET l.user.userId = :newOwnerId, l.isPublic = false WHERE l.id = :libraryId")
+    void updateLibraryOwnerAndSetPrivate(@Param("libraryId") Long libraryId, @Param("newOwnerId") Long newOwnerId);
+
     Optional<Library> findByUserAndBook_Id(Users user, Long bookId);
 }

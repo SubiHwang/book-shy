@@ -245,8 +245,8 @@ public class ExchangeService {
 
                 // Library 소유권 이전
                 try {
-                    libraryRepository.updateLibraryOwner(book.getLibraryId(), newOwnerId);
-                    log.info("📚 서재 소유권 이전 - libraryId: {}, newOwnerId: {}", book.getLibraryId(), newOwnerId);
+                    libraryRepository.updateLibraryOwnerAndSetPrivate(book.getLibraryId(), newOwnerId);
+                    log.info("📚 서재 소유권 이전 및 비공개 처리 - libraryId: {}, newOwnerId: {}", book.getLibraryId(), newOwnerId);
                 } catch (Exception e) {
                     throw new ExchangeException(ExchangeErrorCode.BOOK_NOT_FOUND);
                 }
