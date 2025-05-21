@@ -3,6 +3,9 @@ package com.ssafy.bookshy.domain.book.repository;
 import com.ssafy.bookshy.domain.book.entity.Book;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
@@ -27,4 +30,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Optional<Book> findFirstByItemId(Long itemId);
 
     Optional<Book> findByIsbn(String isbn13);
+
+    @Modifying
+    @Query("UPDATE Book b SET b.user.userId = :newUserId WHERE b.id = :bookId")
+    void updateBookOwner(@Param("bookId") Long bookId, @Param("newUserId") Long newUserId);
 }
