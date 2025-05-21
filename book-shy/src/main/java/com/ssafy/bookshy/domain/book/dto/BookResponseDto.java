@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class BookResponseDto {
 
+    private Long bookId;
     private Long itemId;
     private String title;
     private String author;
@@ -77,6 +78,7 @@ public class BookResponseDto {
 
     public static BookResponseDto from(Book book, boolean isPublic) {
         return BookResponseDto.builder()
+                .bookId(book.getId())
                 .itemId(book.getItemId())
                 .title(book.getTitle())
                 .author(book.getAuthor())
@@ -92,6 +94,7 @@ public class BookResponseDto {
 
     public static BookResponseDto from(Book book, boolean isPublic, boolean isLiked) {
         return BookResponseDto.builder()
+                .bookId(book.getId())
                 .itemId(book.getItemId())
                 .title(book.getTitle())
                 .author(book.getAuthor())
