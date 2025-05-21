@@ -4,6 +4,7 @@ import com.ssafy.bookshy.common.response.CommonResponse;
 import com.ssafy.bookshy.domain.chat.dto.ChatCalendarCreateRequestDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatCalendarCreateResponseDto;
 import com.ssafy.bookshy.domain.chat.dto.ChatCalendarEventDto;
+import com.ssafy.bookshy.domain.chat.dto.ChatCalendarUpdateRequestDto;
 import com.ssafy.bookshy.domain.chat.service.ChatCalendarService;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import io.swagger.v3.oas.annotations.Operation;
