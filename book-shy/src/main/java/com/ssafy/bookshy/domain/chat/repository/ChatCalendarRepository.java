@@ -28,4 +28,6 @@ public interface ChatCalendarRepository extends JpaRepository<ChatCalendar, Long
                                            @Param("date") LocalDate date);
 
     Optional<ChatCalendar> findByChatRoomId(Long roomId);
+
+    Optional<ChatCalendar> findByRequestId(Long requestId);
 }
