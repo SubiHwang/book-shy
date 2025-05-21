@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { SendHorizonal, Plus, Minus, Camera, Image, CalendarDays, Phone } from 'lucide-react';
+import { SendHorizonal, Plus, Minus, Camera, Image, CalendarDays } from 'lucide-react';
 import { uploadChatImage } from '@/services/chat/chat';
 import { toast } from 'react-toastify';
 
@@ -50,7 +50,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
       {/* 입력창 */}
       <form
         onSubmit={handleSubmit}
-        className="w-full flex items-center gap-2 px-4 py-3 box-border min-h-[64px]"
+        className="w-full flex items-center gap-2 px-2 py-3 box-border min-h-[64px]"
       >
         <div
           role="button"
@@ -122,12 +122,6 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
             icon={<CalendarDays size={28} strokeWidth={1.5} />}
             label="약속"
             onClick={onScheduleClick}
-            disabled={isUploading}
-          />
-          <OptionButton
-            icon={<Phone size={28} strokeWidth={1.5} />}
-            label="전화"
-            onClick={() => {}}
             disabled={isUploading}
           />
         </div>

@@ -55,6 +55,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -395,6 +396,33 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
     }
   }, [messages, isKeyboardVisible]);
 
+  // 키보드 대응: 안드로이드에서 window.innerHeight로 동적 높이 조정
+  useEffect(() => {
+    const updateHeight = () => {
+      if (containerRef.current) {
+        containerRef.current.style.height = `${window.innerHeight - 56}px`;
+      }
+    };
+    window.addEventListener('resize', updateHeight);
+
+    // input blur 시에도 강제로 높이 재조정 (딜레이 후)
+    const inputElement = document.querySelector('input[type="text"]');
+    let blurHandler: (() => void) | null = null;
+    if (inputElement) {
+      blurHandler = () => setTimeout(updateHeight, 100);
+      inputElement.addEventListener('blur', blurHandler);
+    }
+
+    updateHeight();
+
+    return () => {
+      window.removeEventListener('resize', updateHeight);
+      if (inputElement && blurHandler) {
+        inputElement.removeEventListener('blur', blurHandler);
+      }
+    };
+  }, []);
+
   if (!myUserId) {
     return null;
   }
@@ -410,69 +438,81 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
         />
       </div>
 
-      {/* 메시지 영역 - 내부 스크롤, 헤더/인풋 높이만큼 패딩 */}
+      {/* 메시지 영역 - 내부 스크롤, 헤더/인풋 높이만큼 패딩, flexbox로 하단 정렬 */}
       <div
-        className={`overflow-y-auto transition-all duration-300 ${showOptions ? 'pb-[35vh]' : ''} ${isKeyboardVisible ? 'pb-[200px]' : ''}`}
+        ref={containerRef}
+        className={`overflow-y-auto transition-all duration-300 flex flex-col`}
         style={{
           paddingTop: 56,
-          paddingBottom: showOptions ? '35vh' : isKeyboardVisible ? 200 : 64,
-          height: '100vh',
+          paddingBottom: showOptions ? '35vh' : 64,
+          minHeight: 0,
         }}
       >
-        {messages.map((msg, index) => {
-          const dateLabel = formatDateLabel(msg.timestamp ?? msg.sentAt ?? '');
-          const showDateLabel =
-            index === 0 ||
-            dateLabel !==
-              formatDateLabel(messages[index - 1].timestamp ?? messages[index - 1].sentAt ?? '');
+        <div
+          style={{
+            marginTop: isKeyboardVisible
+              ? 0
+              : messages.length < 4
+                ? `calc(100dvh - ${messages.length * 60}px - 56px - 64px)`
+                : 0,
+            transition: 'margin-top 0.2s',
+          }}
+        >
+          {messages.map((msg, index) => {
+            const dateLabel = formatDateLabel(msg.timestamp ?? msg.sentAt ?? '');
+            const showDateLabel =
+              index === 0 ||
+              dateLabel !==
+                formatDateLabel(messages[index - 1].timestamp ?? messages[index - 1].sentAt ?? '');
 
-          const isSystem = ['info', 'notice', 'warning'].includes(msg.type ?? '');
-          return (
-            <div key={`${msg.id}-${index}`}>
-              {showDateLabel && (
-                <div className="flex items-center gap-2 text-[11px] sm:text-xs text-light-text-muted my-4">
-                  <div className="flex-grow border-t border-light-bg-shade" />
-                  <span className="px-2 whitespace-nowrap">{dateLabel}</span>
-                  <div className="flex-grow border-t border-light-bg-shade" />
-                </div>
-              )}
-              {isSystem ? (
-                <div className="max-w-[90%] mx-auto">
-                  <SystemMessage
-                    title={
-                      msg.type === 'notice'
-                        ? '거래 시 주의해주세요!'
-                        : msg.type === 'info'
-                          ? '약속이 등록되었습니다!'
-                          : '알림'
-                    }
-                    content={msg.content ?? ''}
-                    variant={msg.type as 'notice' | 'info' | 'warning'}
+            const isSystem = ['info', 'notice', 'warning'].includes(msg.type ?? '');
+            return (
+              <div key={`${msg.id}-${index}`}>
+                {showDateLabel && (
+                  <div className="flex items-center gap-2 text-[11px] sm:text-xs text-light-text-muted my-4">
+                    <div className="flex-grow border-t border-light-bg-shade" />
+                    <span className="px-2 whitespace-nowrap">{dateLabel}</span>
+                    <div className="flex-grow border-t border-light-bg-shade" />
+                  </div>
+                )}
+                {isSystem ? (
+                  <div className="max-w-[90%] mx-auto">
+                    <SystemMessage
+                      title={
+                        msg.type === 'notice'
+                          ? '거래 시 주의해주세요!'
+                          : msg.type === 'info'
+                            ? '약속이 등록되었습니다!'
+                            : '알림'
+                      }
+                      content={msg.content ?? ''}
+                      variant={msg.type as 'notice' | 'info' | 'warning'}
+                    />
+                  </div>
+                ) : (
+                  <ChatMessageItem
+                    message={{
+                      ...msg,
+                      timestamp: formatTime(msg.timestamp ?? msg.sentAt ?? ''),
+                      isRead: msg.isRead ?? msg.read ?? false,
+                    }}
+                    isMyMessage={msg.senderId === myUserId}
+                    showEmojiSelector={emojiTargetId === msg.id.toString()}
+                    onLongPress={() => handleLongPressOrRightClick(msg.id)}
+                    onRightClick={() => handleLongPressOrRightClick(msg.id)}
+                    onSelectEmoji={(emoji) => handleSelectEmoji(msg.id, emoji ?? '')}
+                    selectedEmoji={msg.emoji}
+                    onCloseEmoji={() => setEmojiTargetId(null)}
                   />
-                </div>
-              ) : (
-                <ChatMessageItem
-                  message={{
-                    ...msg,
-                    timestamp: formatTime(msg.timestamp ?? msg.sentAt ?? ''),
-                    isRead: msg.isRead ?? msg.read ?? false,
-                  }}
-                  isMyMessage={msg.senderId === myUserId}
-                  showEmojiSelector={emojiTargetId === msg.id.toString()}
-                  onLongPress={() => handleLongPressOrRightClick(msg.id)}
-                  onRightClick={() => handleLongPressOrRightClick(msg.id)}
-                  onSelectEmoji={(emoji) => handleSelectEmoji(msg.id, emoji ?? '')}
-                  selectedEmoji={msg.emoji}
-                  onCloseEmoji={() => setEmojiTargetId(null)}
-                />
-              )}
-            </div>
-          );
-        })}
+                )}
+              </div>
+            );
+          })}
+        </div>
 
         {/* 📌 교환 완료 유도 메시지 - 당일 일정인 경우에만 표시 */}
         {isTodayEvent() && (
-          <div className="bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm">
+          <div className="mx-4 bg-[#FFEFEF] border border-primary text-primary rounded-lg p-4 mt-4 text-center shadow-sm">
             <p className="font-semibold text-sm">📚 도서를 교환하셨나요?</p>
             <p className="text-xs mt-1 text-light-text-muted">
               거래가 완료되었다면 리뷰를 남겨주세요.
@@ -536,7 +576,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
       )}
 
       {/* 인풋창 - 항상 하단 고정 */}
-      <div className="fixed left-0 right-0 bottom-0 z-20 bg-white border-t border-light-border px-4">
+      <div className="fixed left-0 right-0 bottom-0 z-20 bg-white border-t border-light-border">
         <ChatInput
           onSend={handleSendMessage}
           showOptions={showOptions}
