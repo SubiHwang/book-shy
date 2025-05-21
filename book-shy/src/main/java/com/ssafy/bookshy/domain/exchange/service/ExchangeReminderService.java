@@ -65,7 +65,7 @@ public class ExchangeReminderService {
             data.put("targetName", promise.getCounterpart().getNickname());
             data.put("date", date);
             data.put("type", type);
-            data.put("url", "/mypage");
+            data.put("url", "/mypage/promises");
 
             notificationService.sendFcm(
                     user.getUserId(),
