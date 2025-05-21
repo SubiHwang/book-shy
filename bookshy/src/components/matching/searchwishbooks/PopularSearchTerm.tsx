@@ -63,7 +63,7 @@ const PopularSearchTerm = () => {
       <div className="popular-search-term flex justify-between items-center px-4">
         <div className="flex text-white items-center gap-1 w-32">
           <TrendingUp strokeWidth={1} />
-          <p className="font-medium text-sm whitespace-nowrap">실시간 인기 검색어</p>
+          <p className="font-medium text-sm whitespace-nowrap">인기 검색어</p>
         </div>
         {!isOpen && (
           <div className="flex items-center flex-1 text-white ml-2 mr-1">
