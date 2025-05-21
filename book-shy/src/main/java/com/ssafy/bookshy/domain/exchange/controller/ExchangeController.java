@@ -8,6 +8,7 @@ import com.ssafy.bookshy.domain.exchange.service.ExchangeService;
 import com.ssafy.bookshy.domain.users.entity.Users;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -119,6 +120,35 @@ public class ExchangeController {
                 "message", "리뷰가 성공적으로 제출되었습니다.",
                 "isTradeCompleted", isCompleted
         ));
+    }
+
+    @Operation(
+            summary = "🕵️ 리뷰 작성 여부 확인",
+            description = """
+                📌 로그인 사용자가 특정 거래에 대해 리뷰를 작성했는지 확인합니다.<br>
+                - 작성한 경우: 내 리뷰 정보와 상대방 리뷰 제출 여부를 함께 반환합니다.<br>
+                - 작성하지 않은 경우: hasReviewed = false로 응답됩니다.
+                """,
+            parameters = {
+                    @Parameter(name = "roomId", description = "채팅방 ID", required = true),
+                    @Parameter(name = "requestId", description = "거래 요청 ID", required = true)
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "✅ 리뷰 작성 여부 확인 완료"),
+                    @ApiResponse(responseCode = "400", description = "🚫 필수 파라미터 누락", content = @Content),
+                    @ApiResponse(responseCode = "401", description = "🔒 인증 실패", content = @Content),
+                    @ApiResponse(responseCode = "403", description = "⛔ 거래 참여자 아님", content = @Content),
+                    @ApiResponse(responseCode = "404", description = "❌ 거래 정보 없음", content = @Content),
+                    @ApiResponse(responseCode = "500", description = "💥 서버 오류", content = @Content)
+            }
+    )
+    @GetMapping("/reviews/status")
+    public CommonResponse<ReviewStatusResponse> getReviewStatus(
+            @AuthenticationPrincipal Users user,
+            @RequestParam Long roomId,
+            @RequestParam Long requestId
+    ) {
+        return CommonResponse.success(exchangeService.getReviewStatus(user.getUserId(), roomId, requestId));
     }
 
     @Operation(summary = "📊 나의 교환 통계", description = "사용자가 몇명의 사람과 몇권의 도서를 교환했는지 조회")
