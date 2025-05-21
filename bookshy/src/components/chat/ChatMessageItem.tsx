@@ -11,6 +11,7 @@ interface Props {
   showEmojiSelector?: boolean;
   selectedEmoji?: string;
   onCloseEmoji?: () => void;
+  onImageClick?: () => void;
 }
 
 function ChatMessageItem({
@@ -22,6 +23,7 @@ function ChatMessageItem({
   showEmojiSelector,
   selectedEmoji,
   onCloseEmoji,
+  onImageClick,
 }: Props) {
   const touchTimer = useRef<NodeJS.Timeout | null>(null);
   const selectorRef = useRef<HTMLDivElement | null>(null);
@@ -84,9 +86,11 @@ function ChatMessageItem({
           className={`max-w-[85%] sm:max-w-[70%] px-4 py-2 rounded-2xl text-sm sm:text-base whitespace-pre-wrap break-words ${
             message.type === 'notice'
               ? 'bg-gray-100 text-gray-600 text-center mx-auto'
-              : isMyMessage
-                ? 'bg-primary-light text-white'
-                : 'bg-light-bg-secondary text-gray-900'
+              : isImage
+                ? ''
+                : isMyMessage
+                  ? 'bg-primary-light text-white'
+                  : 'bg-light-bg-secondary text-gray-900'
           } select-none`}
         >
           {isImage ? (
@@ -94,7 +98,7 @@ function ChatMessageItem({
               src={thumbnailUrl ?? imageUrl ?? ''}
               alt="채팅 이미지"
               className="max-w-full rounded-lg cursor-pointer hover:opacity-90 transition"
-              onClick={() => window.open(imageUrl ?? '', '_blank')}
+              onClick={onImageClick}
             />
           ) : (
             (message.content ?? '')
