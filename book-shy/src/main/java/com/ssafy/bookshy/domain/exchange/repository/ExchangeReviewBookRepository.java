@@ -37,4 +37,12 @@ public interface ExchangeReviewBookRepository extends JpaRepository<ExchangeRevi
      * @param review 리뷰 엔티티
      */
     void deleteByReview(ExchangeRequestReview review);
+
+    /**
+     * 🔍 거래 요청 ID(requestId)로 연결된 모든 리뷰 도서를 조회합니다.
+     *
+     * @param requestId 거래 요청 ID
+     * @return 해당 요청에 포함된 모든 도서 리뷰 정보
+     */
+    List<ExchangeReviewBook> findByRequestId(Long requestId);
 }
