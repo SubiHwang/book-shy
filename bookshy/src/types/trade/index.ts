@@ -2,7 +2,7 @@
 export interface TradePromise {
   tradeId: number;
   userId: number;
-  chatId: number;
+  roomId: number;
   type: 'EXCHANGE' | 'RENTAL';
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COMPLETED';
   scheduledTime: string;
