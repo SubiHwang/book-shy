@@ -83,4 +83,24 @@ public class ChatCalendarController {
         return CommonResponse.success(chatCalendarService.createCalendarWithRequest(dto));
     }
 
+    @Operation(
+            summary = "🗑️ 교환/대여 일정 삭제",
+            description = "🔐 채팅방 ID(`roomId`)를 기반으로 등록된 일정 1건을 삭제합니다.\n\n" +
+                    "- 해당 채팅방에 일정이 존재하지 않으면 예외를 반환합니다.\n" +
+                    "- 주로 거래 약속 취소 또는 변경 시 사용됩니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "✅ 일정 삭제 성공"),
+                    @ApiResponse(responseCode = "400", description = "❌ 잘못된 요청 또는 roomId 누락"),
+                    @ApiResponse(responseCode = "404", description = "❌ 해당 채팅방에 일정이 존재하지 않음")
+            }
+    )
+    @DeleteMapping
+    public CommonResponse<Void> deleteCalendarByRoomId(
+            @Parameter(description = "채팅방 ID", example = "42")
+            @RequestParam Long roomId,
+            @AuthenticationPrincipal Users user
+    ) {
+        chatCalendarService.deleteCalendarByRoomId(roomId);
+        return CommonResponse.success();
+    }
 }

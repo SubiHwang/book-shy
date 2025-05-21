@@ -12,7 +12,7 @@ public enum ChatErrorCode implements ErrorCode {
     MISSING_EXCHANGE_DATE(400, "📛 EXCHANGE 일정에는 eventDate가 필수입니다."),
     MISSING_RENTAL_DATES(400, "📛 RENTAL 일정에는 startDate와 endDate가 필요합니다."),
     INVALID_CALENDAR_TYPE(400, "❌ 거래 유형은 EXCHANGE 또는 RENTAL만 가능합니다."),
-    CALENDAR_NOT_FOUND(404, "❌ 해당 채팅방의 거래 일정이 존재하지 않습니다."),
+    NO_CALENDAR_FOUND(404, "❌ 해당 채팅방의 거래 일정이 존재하지 않습니다."),
 
     // 🔹 거래 생성 관련 추가
     INVALID_USER_IDS(400, "👥 거래 요청에는 정확히 두 명의 사용자 ID가 필요합니다."),

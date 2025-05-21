@@ -137,4 +137,26 @@ public class ChatCalendarService {
     private LocalDateTime parseDateTimeOrNull(String dateTimeStr) {
         return dateTimeStr == null ? null : LocalDateTime.parse(dateTimeStr);
     }
+
+    /**
+     * ❌ 특정 채팅방에 등록된 거래 일정을 삭제합니다.
+     *
+     * 📌 주요 동작:
+     * - 채팅방 ID(roomId)를 기준으로 거래 일정을 조회합니다.
+     * - 해당 일정이 존재하지 않으면 404 예외 발생
+     * - 존재 시 삭제 수행
+     *
+     * 🔐 주로 일정 수정/삭제 또는 거래 취소 시 사용됩니다.
+     *
+     * @param roomId 삭제할 거래 일정의 채팅방 ID
+     * @throws ChatException 일정이 존재하지 않는 경우
+     */
+    @Transactional
+    public void deleteCalendarByRoomId(Long roomId) {
+        ChatCalendar calendar = chatCalendarRepository.findByChatRoomId(roomId)
+                .orElseThrow(() -> new ChatException(ChatErrorCode.NO_CALENDAR_FOUND));
+
+        chatCalendarRepository.delete(calendar);
+    }
+
 }
