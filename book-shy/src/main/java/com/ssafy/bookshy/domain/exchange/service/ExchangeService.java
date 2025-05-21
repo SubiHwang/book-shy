@@ -19,12 +19,14 @@ import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ExchangeService {
@@ -170,15 +172,22 @@ public class ExchangeService {
      */
     @Transactional
     public boolean submitReview(Long reviewerId, ReviewSubmitRequest request) {
+        log.info("📥 리뷰 제출 요청 도착 - reviewerId: {}, requestId: {}", reviewerId, request.getRequestId());
+
+        // 1️⃣ 상대방 ID 확인
         Long revieweeId = request.getUserIds().stream()
                 .filter(id -> !id.equals(reviewerId))
                 .findFirst()
                 .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.UNAUTHORIZED_REVIEW_SUBMITTER));
+        log.info("👤 상대방 ID 확인 완료 - revieweeId: {}", revieweeId);
 
+        // 2️⃣ 중복 리뷰 방지
         if (reviewRepository.existsByRequestIdAndReviewerId(request.getRequestId(), reviewerId)) {
+            log.warn("⚠️ 이미 리뷰를 제출한 사용자입니다. reviewerId: {}, requestId: {}", reviewerId, request.getRequestId());
             throw new ExchangeException(ExchangeErrorCode.REVIEW_ALREADY_SUBMITTED);
         }
 
+        // 3️⃣ 리뷰 저장
         ExchangeRequestReview review = ExchangeRequestReview.builder()
                 .requestId(request.getRequestId())
                 .reviewerId(reviewerId)
@@ -189,34 +198,43 @@ public class ExchangeService {
                 .manner(request.getRatings().getManner())
                 .build();
         reviewRepository.save(review);
+        log.info("✅ 리뷰 저장 완료 - reviewerId: {}, rating: {}", reviewerId, review.getRating());
 
+        // 4️⃣ 리뷰 수 체크
         List<ExchangeRequestReview> reviews = reviewRepository.findByRequestId(request.getRequestId());
-        if (reviews.size() < 2) return false;
+        log.info("📊 현재까지 리뷰 개수: {}", reviews.size());
+        if (reviews.size() < 2) {
+            log.info("⏳ 상대방 리뷰 미작성 - 거래 완료 대기 중");
+            return false;
+        }
 
+        // 5️⃣ 거래 상태 변경
         ExchangeRequest exchangeRequest = exchangeRequestRepository.findById(request.getRequestId())
                 .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.EXCHANGE_REQUEST_NOT_FOUND));
         exchangeRequest.complete();
+        log.info("🔁 거래 상태 변경 완료 - COMPLETED (requestId: {})", exchangeRequest.getRequestId());
 
-        String type = exchangeRequest.getType().name();
+        // 6️⃣ 소유권 이전 (EXCHANGE만)
+        if ("EXCHANGE".equalsIgnoreCase(request.getTradeType())) {
+            Users reviewee = Users.builder().userId(revieweeId).build();
+            log.info("📦 교환 방식 확인됨 - 도서 소유권 이전 시작");
 
-        Users reviewer = userRepository.findById(reviewerId)
-                .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.USER_NOT_FOUND));
-        Users reviewee = userRepository.findById(revieweeId)
-                .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.USER_NOT_FOUND));
-
-        notificationService.sendTradeCompletedNotification(reviewerId, reviewee.getNickname(), type);
-        notificationService.sendTradeCompletedNotification(revieweeId, reviewer.getNickname(), type);
-
-        if ("EXCHANGE".equalsIgnoreCase(exchangeRequest.getType().name())) {
             for (ReviewSubmitRequest.ReviewedBook book : request.getBooks()) {
                 Library lib = libraryRepository.findById(book.getLibraryId())
                         .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.BOOK_NOT_FOUND));
                 lib.transferTo(reviewee);
+                log.info("📚 서재 소유권 이전 - libraryId: {}, newOwnerId: {}", lib.getId(), revieweeId);
+
                 Book entity = lib.getBook();
-                if (entity != null) entity.transferTo(reviewee);
+                if (entity != null) {
+                    entity.transferTo(reviewee);
+                    log.info("📘 도서 소유권 이전 - bookId: {}, newOwnerId: {}", entity.getId(), revieweeId);
+                }
             }
+            log.info("✅ 모든 도서에 대한 소유권 이전 완료");
         }
 
+        log.info("🎉 거래 완료 처리 성공 - requestId: {}", request.getRequestId());
         return true;
     }
 
