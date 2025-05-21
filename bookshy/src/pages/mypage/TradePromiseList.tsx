@@ -4,7 +4,6 @@ import { fetchTradePromises } from '@/services/mypage/trade';
 import TradePromiseCard from '@/components/mypage/trade/TradePromiseCard';
 import type { TradePromise } from '@/types/trade';
 import Loading from '@/components/common/Loading';
-import { it } from 'node:test';
 
 const TradePromiseList: FC = () => {
   const { data, isLoading, error } = useQuery<TradePromise[], Error>({
