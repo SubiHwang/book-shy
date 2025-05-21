@@ -33,7 +33,7 @@ const MyTripEditor = ({ profileImageUrl }: Props) => {
   const { mutate: submitTrip, isPending } = useMutation({
     mutationFn: (trip: CreateBookTripRequest) => createBookTrip(trip),
     onSuccess: () => {
-      toast.success('✅ 책의 여정이 등록되었습니다!');
+      toast.success('책의 여정이 등록되었습니다!');
       setContent(''); // 성공 후 입력 필드 초기화
 
       // 캐시 무효화
@@ -41,13 +41,13 @@ const MyTripEditor = ({ profileImageUrl }: Props) => {
       queryClient.invalidateQueries({ queryKey: ['bookTrips', bookId] });
     },
     onError: () => {
-      toast.error('❌ 책의 여정 등록에 실패했습니다.');
+      toast.error('책의 여정 등록에 실패했습니다.');
     },
   });
 
   const handleSubmit = () => {
     if (!bookId) {
-      toast.error('❌ 유효한 도서 ID가 없습니다.');
+      toast.error('유효한 도서 ID가 없습니다.');
       return;
     }
 
