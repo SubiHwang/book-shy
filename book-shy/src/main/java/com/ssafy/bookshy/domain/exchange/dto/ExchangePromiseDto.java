@@ -1,5 +1,6 @@
 package com.ssafy.bookshy.domain.exchange.dto;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,6 +15,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonPropertyOrder({
+        "tradeId", "userId", "roomId",
+        "type", "status", "scheduledTime", "requestedAt",
+        "myBookId", "myBookTitle", "myBookCoverUrl",
+        "partnerBookId", "partnerBookTitle", "partnerBookCoverUrl",
+        "counterpart", "timeLeft"
+})
 public class ExchangePromiseDto {
 
     private Long tradeId;
@@ -37,6 +45,10 @@ public class ExchangePromiseDto {
 
     // ✅ 남은 시간 정보
     private TimeLeftDto timeLeft;
+
+    // ✅ 채팅방 ID 및 상대방 ID
+    private Long userId;
+    private Long roomId;
 
     /**
      * 거래 상대 정보 DTO

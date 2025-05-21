@@ -72,7 +72,6 @@ public class ExchangeController {
         return CommonResponse.success(exchangePromiseService.getPromiseList(user));
     }
 
-
     @Operation(
             summary = "📜 나의 교환 이력 조회",
             description = """

@@ -1,6 +1,7 @@
 package com.ssafy.bookshy.domain.exchange.entity;
 
 import com.ssafy.bookshy.common.entity.TimeStampEntity;
+import com.ssafy.bookshy.domain.chat.entity.ChatRoom;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;

@@ -56,4 +56,6 @@ public interface ChatCalendarRepository extends JpaRepository<ChatCalendar, Long
       )
 """)
     List<ChatCalendar> findUpcomingByUserId(@Param("userId") Long userId);
+
+
 }

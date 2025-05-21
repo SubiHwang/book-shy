@@ -14,7 +14,6 @@ import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +24,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static com.ssafy.bookshy.domain.exchange.dto.ExchangePromiseDto.CounterpartDto;
 
 /**
  * 📦 교환/대여 약속 조회 서비스
@@ -141,7 +138,6 @@ public class ExchangePromiseService {
         log.info("🎯 [{}] 사용자에 대한 거래 약속 총 {}건 반환 완료", userId, results.size());
         return results;
     }
-
 
 
     /**
