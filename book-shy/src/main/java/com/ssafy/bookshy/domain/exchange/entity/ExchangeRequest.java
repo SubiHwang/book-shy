@@ -70,6 +70,10 @@ public class ExchangeRequest extends TimeStampEntity {
         this.status = status;
     }
 
+    public void updateType(RequestType type) {
+        this.type = type;
+    }
+
     public void complete() {
         this.status = RequestStatus.COMPLETED;
     }

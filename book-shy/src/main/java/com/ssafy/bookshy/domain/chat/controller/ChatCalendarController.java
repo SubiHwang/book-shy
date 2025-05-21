@@ -54,7 +54,7 @@ public class ChatCalendarController {
 
 
     @Operation(
-            summary = "📆 거래 일정 및 요청 등록",
+            summary = "📆 교환/대여 일정 등록",
             description = """
         📦 채팅방 내 도서 교환(EXCHANGE) 또는 대여(RENTAL) 일정을 등록합니다.<br>
         📌 동시에 `exchange_requests` 테이블에 거래 요청도 함께 저장됩니다.<br><br>
@@ -102,5 +102,33 @@ public class ChatCalendarController {
     ) {
         chatCalendarService.deleteCalendarByRoomId(roomId);
         return CommonResponse.success();
+    }
+
+    @Operation(
+            summary = "✏️ 교환/대여 일정 수정",
+            description = """
+        📌 기존의 거래 일정(`calendarId`)과 거래 요청(`requestId`)을 수정합니다.\n
+        - 일정 제목, 설명, 날짜 정보만 수정됩니다.\n
+        ✅ `type`이 EXCHANGE인 경우 `eventDate` 필수\n
+        ✅ `type`이 RENTAL인 경우 `startDate`, `endDate` 필수
+        """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "📝 수정할 일정 정보",
+                    content = @Content(schema = @Schema(implementation = ChatCalendarUpdateRequestDto.class))
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "✅ 일정 수정 성공",
+                            content = @Content(schema = @Schema(implementation = ChatCalendarCreateResponseDto.class))),
+                    @ApiResponse(responseCode = "400", description = "❌ 잘못된 입력 (날짜/유형 누락 등)"),
+                    @ApiResponse(responseCode = "404", description = "❌ 일정 또는 요청 정보 없음")
+            }
+    )
+    @PutMapping
+    public CommonResponse<ChatCalendarCreateResponseDto> updateCalendar(
+            @org.springframework.web.bind.annotation.RequestBody ChatCalendarUpdateRequestDto dto,
+            @AuthenticationPrincipal Users user
+    ) {
+        return CommonResponse.success(chatCalendarService.updateCalendar(dto));
     }
 }

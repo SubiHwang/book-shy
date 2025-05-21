@@ -32,4 +32,15 @@ public class ChatCalendar extends TimeStampEntity {
 
     private Long requestId;
 
+    // ✏️ 일정 수정 메서드
+    public void update(String title, String description,
+                       LocalDateTime exchangeDate,
+                       LocalDateTime rentalStartDate,
+                       LocalDateTime rentalEndDate) {
+        this.title = title;
+        this.description = description;
+        this.exchangeDate = exchangeDate;
+        this.rentalStartDate = rentalStartDate;
+        this.rentalEndDate = rentalEndDate;
+    }
 }

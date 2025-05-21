@@ -159,4 +159,53 @@ public class ChatCalendarService {
         chatCalendarRepository.delete(calendar);
     }
 
+    // ChatCalendarService.java 내부
+    @Transactional
+    public ChatCalendarCreateResponseDto updateCalendar(ChatCalendarUpdateRequestDto dto) {
+        // 1️⃣ 거래 유형 확인
+        String type = dto.getType();
+        if (!"EXCHANGE".equalsIgnoreCase(type) && !"RENTAL".equalsIgnoreCase(type)) {
+            throw new ChatException(ChatErrorCode.INVALID_CALENDAR_TYPE);
+        }
+
+        // 2️⃣ 날짜 유효성 확인
+        if ("EXCHANGE".equalsIgnoreCase(type) && dto.getExchangeDate() == null) {
+            throw new ChatException(ChatErrorCode.MISSING_EXCHANGE_DATE);
+        }
+        if ("RENTAL".equalsIgnoreCase(type) &&
+                (dto.getStartDate() == null || dto.getEndDate() == null)) {
+            throw new ChatException(ChatErrorCode.MISSING_RENTAL_DATES);
+        }
+
+        // 3️⃣ 일정 조회 및 존재 여부 확인
+        ChatCalendar calendar = chatCalendarRepository.findById(dto.getCalendarId())
+                .orElseThrow(() -> new ChatException(ChatErrorCode.NO_CALENDAR_FOUND));
+
+        // 4️⃣ 거래 요청 조회 및 존재 여부 확인
+        ExchangeRequest request = exchangeRequestRepository.findById(dto.getRequestId())
+                .orElseThrow(() -> new ChatException(ChatErrorCode.EXCHANGE_REQUEST_NOT_FOUND));
+
+        // 5️⃣ 거래 요청 정보 업데이트 (책 ID는 수정 불가, 날짜 및 메모만)
+        request.updateType(ExchangeRequest.RequestType.valueOf(type));
+
+        // 6️⃣ 일정 정보 수정
+        calendar.update(
+                dto.getTitle(),
+                dto.getDescription(),
+                parseDateTimeOrNull(dto.getExchangeDate()),
+                parseDateTimeOrNull(dto.getStartDate()),
+                parseDateTimeOrNull(dto.getEndDate())
+        );
+
+        // 7️⃣ WebSocket 알림
+        ChatCalendarEventDto updatedDto = ChatCalendarEventDto.from(calendar);
+        messagingTemplate.convertAndSend("/topic/calendar/" + calendar.getChatRoom().getId(), updatedDto);
+
+        // 8️⃣ 응답 반환
+        return ChatCalendarCreateResponseDto.builder()
+                .eventId(calendar.getCalendarId())
+                .status("SUCCESS")
+                .message("일정과 거래 요청이 수정되었습니다.")
+                .build();
+    }
 }
