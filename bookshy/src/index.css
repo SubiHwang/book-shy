@@ -114,3 +114,16 @@ body,
 .Toastify__progress-bar {
   height: 3px !important; /* 진행 표시줄 높이 조정 */
 }
+
+/* scrollbar hide */
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
