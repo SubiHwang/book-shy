@@ -4,6 +4,7 @@ import { fetchUserPublicLibrary } from '@/services/mylibrary/libraryApi';
 import { fetchBookDetailByBookId } from '@/services/book/search';
 import { fetchScheduleByRoomId, fetchChatRoomUserIds } from '@/services/chat/chat';
 import { submitTradeReview } from '@/services/chat/trade';
+import { getUserIdFromToken } from '@/utils/jwt';
 
 import type { Library } from '@/types/mylibrary/library';
 import type { ChatCalendarEventDto } from '@/types/chat/chat';
@@ -36,6 +37,7 @@ const TradeReviewPage = () => {
   const [defaultBooks, setDefaultBooks] = useState<Library[]>([]);
   const [showMyLibrary, setShowMyLibrary] = useState(false);
   const [activeBook, setActiveBook] = useState<Library | null>(null);
+  const [hasSubmittedReview, setHasSubmittedReview] = useState(false);
 
   const {
     roomId,
@@ -63,6 +65,23 @@ const TradeReviewPage = () => {
         toast.error('거래 일정을 불러올 수 없습니다.');
         navigate(-1);
       });
+
+    // 이미 리뷰를 작성했는지 확인
+    const checkReviewStatus = async () => {
+      try {
+        await fetchChatRoomUserIds(roomId);
+        const myUserId = getUserIdFromToken();
+        if (!myUserId) return;
+
+        // TODO: 백엔드 API 구현 필요
+        // const hasReviewed = await checkUserReviewStatus(roomId, Number(myUserId));
+        // setHasSubmittedReview(hasReviewed);
+      } catch (e) {
+        console.error('리뷰 상태 확인 실패:', e);
+      }
+    };
+
+    checkReviewStatus();
   }, [roomId]);
 
   useEffect(() => {
@@ -186,6 +205,23 @@ const TradeReviewPage = () => {
             className="bg-primary text-white px-4 py-2 rounded-lg text-sm"
           >
             돌아가기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (hasSubmittedReview) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-center text-gray-500 px-4">
+        <div>
+          <p className="text-lg font-semibold mb-2">이미 리뷰를 작성하셨습니다.</p>
+          <p className="text-sm mb-4">상대방이 리뷰를 작성하면 거래가 완료됩니다.</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-primary text-white px-4 py-2 rounded-lg text-sm"
+          >
+            채팅방으로 돌아가기
           </button>
         </div>
       </div>
