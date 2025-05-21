@@ -95,3 +95,8 @@ export async function fetchPartnerInfo(
     bookShyScore: data.temperature,
   };
 }
+
+export const deleteScheduleByRoomId = async (roomId: number) => {
+  const { data } = await authAxiosInstance.delete(`/chat/calendar/${roomId}`);
+  return data;
+};
