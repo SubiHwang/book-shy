@@ -182,4 +182,20 @@ public class LibraryController {
         return CommonResponse.success(libraryService.findLibraryWithTripStatus(user.getUserId()));
     }
 
+    @Operation(
+            summary = "📘 내 서재에서 특정 도서 조회",
+            description = "로그인한 사용자의 서재에서 특정 `bookId`에 해당하는 도서를 조회합니다.\n\n👉 거래 리뷰 작성, 도서 상세 조회 등에 사용됩니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "✅ 도서 존재 여부 확인 완료 (있으면 도서 정보 반환, 없으면 null 또는 빈 배열)"),
+            @ApiResponse(responseCode = "401", description = "❌ 인증 실패"),
+            @ApiResponse(responseCode = "500", description = "💥 서버 오류")
+    })
+    @GetMapping(params = "bookId")
+    public CommonResponse<LibraryResponseDto> getLibraryByBookId(
+            @AuthenticationPrincipal Users user,
+            @RequestParam Long bookId
+    ) {
+        return CommonResponse.success(libraryService.findLibraryByBookId(user.getUserId(), bookId));
+    }
 }
