@@ -1,6 +1,8 @@
 // 거래 약속 카드용
 export interface TradePromise {
   tradeId: number;
+  userId: number;
+  chatId: number;
   type: 'EXCHANGE' | 'RENTAL';
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COMPLETED';
   scheduledTime: string;

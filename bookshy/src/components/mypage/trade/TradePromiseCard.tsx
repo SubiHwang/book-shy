@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { BookMarked, MessageCircle } from 'lucide-react';
 
 export interface TradeCardProps {
+  userId: number;
+  chatId: number;
   tradeId: number;
   type: 'EXCHANGE' | 'RENTAL';
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COMPLETED';
@@ -23,7 +25,8 @@ export interface TradeCardProps {
 }
 
 const TradePromiseCard: FC<TradeCardProps> = ({
-  tradeId,
+  userId,
+  chatId,
   type,
   userName,
   userProfileUrl,
@@ -32,13 +35,13 @@ const TradePromiseCard: FC<TradeCardProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const handleChatClick = () => {
-    navigate(`/chat/${tradeId}`);
+  const handleChatClick = (chatId: number) => {
+    navigate(`/chat/${chatId}`);
   };
 
   const handleClickNeighborsBookshelf = (userId: number) => {
     // TODO: 상대방 서재로 이동하는 기능 구현
-    navigate(`/bookshelf/${userId}`);
+    navigate(`/matching/neigbors-bookshelf/${userId}`);
   };
 
   const renderTimeLeft = () => {
@@ -72,20 +75,20 @@ const TradePromiseCard: FC<TradeCardProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-gray-800">{userName} 님</h3>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                  type === 'EXCHANGE'
-                    ? 'bg-blue-100 text-light-status-info'
-                    : 'bg-orange-100 text-light-status-warning'
-                }`}>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                    type === 'EXCHANGE'
+                      ? 'bg-blue-100 text-light-status-info'
+                      : 'bg-orange-100 text-light-status-warning'
+                  }`}
+                >
                   {type === 'EXCHANGE' ? '교환' : '대여'}
                 </span>
               </div>
               <p className="text-sm text-light-text">{meetTime}</p>
             </div>
           </div>
-          <div className="flex flex-col items-end">
-            {renderTimeLeft()}
-          </div>
+          <div className="flex flex-col items-end">{renderTimeLeft()}</div>
         </div>
       </div>
 
@@ -93,14 +96,16 @@ const TradePromiseCard: FC<TradeCardProps> = ({
       <div className="p-4 bg-light-bg-shade border-t border-gray-50">
         <div className="flex gap-3">
           <button
-            onClick={() => handleClickNeighborsBookshelf(tradeId)}
+            onClick={() => handleClickNeighborsBookshelf(userId)}
             className="flex-1 flex items-center justify-center gap-2 px-2 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200"
           >
             <BookMarked className="w-4 h-4" strokeWidth={1.5} />
             <span>서재 보기</span>
           </button>
           <button
-            onClick={handleChatClick}
+            onClick={() => {
+              handleChatClick(chatId);
+            }}
             className="flex-1 flex items-center justify-center gap-2 px-2 py-2 bg-primary-light text-white rounded-xl text-sm font-medium shadow-sm hover:shadow-md"
           >
             <MessageCircle className="w-4 h-4" strokeWidth={1.5} />
