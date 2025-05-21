@@ -1,6 +1,5 @@
 import { authAxiosInstance } from '@/services/axiosInstance';
 import type { TradeReviewRequest } from '@/types/chat/trade';
-import axios from 'axios';
 
 export async function submitTradeReview(
   payload: TradeReviewRequest,

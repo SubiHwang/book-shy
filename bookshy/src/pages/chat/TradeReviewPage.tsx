@@ -4,7 +4,6 @@ import { fetchUserPublicLibrary } from '@/services/mylibrary/libraryApi';
 import { fetchBookDetailByBookId } from '@/services/book/search';
 import { fetchScheduleByRoomId, fetchChatRoomUserIds } from '@/services/chat/chat';
 import { submitTradeReview, checkReviewStatus } from '@/services/chat/trade';
-import { getUserIdFromToken } from '@/utils/jwt';
 
 import type { Library } from '@/types/mylibrary/library';
 import type { ChatCalendarEventDto } from '@/types/chat/chat';
