@@ -156,10 +156,26 @@ const TradeReviewPage = () => {
         }),
       );
       setDefaultBooks(books);
+
+      // ✅ 음수 libraryId 책들 로그 출력
+      const negativeLibs = books.filter((book) => book.libraryId < 0);
+      if (negativeLibs.length > 0) {
+        console.log('음수 libraryId를 가진 매칭 당시 책:', negativeLibs);
+      }
     };
 
     fetchBooks();
   }, [myBookId, myBookName]);
+
+  // 매칭 외 서재도 확인
+  useEffect(() => {
+    if (myLibraryBooks.length > 0) {
+      const negativeLibs = myLibraryBooks.filter((book) => book.libraryId < 0);
+      if (negativeLibs.length > 0) {
+        console.log('음수 libraryId를 가진 매칭 외 서재 책:', negativeLibs);
+      }
+    }
+  }, [myLibraryBooks]);
 
   useEffect(() => {
     document.body.style.overflow = activeBook ? 'hidden' : 'auto';
@@ -193,9 +209,15 @@ const TradeReviewPage = () => {
         title: book.title,
         bookId: book.bookId,
         libraryId: book.libraryId,
-        aladinItemId: book.aladinItemId,
+        aladinItemId: book.aladinItemId ?? -1,
         fromMatching: defaultBooks.some((b) => b.title === book.title),
       }));
+
+    // ✅ 리뷰 제출 시 음수 libraryId 책 로그 출력
+    const negativeLibs = selectedReviewedBooks.filter((book) => book.libraryId < 0);
+    if (negativeLibs.length > 0) {
+      console.log('리뷰 제출 시 음수 libraryId 책:', negativeLibs);
+    }
 
     // 참여자 ID 가져오기
     let userIds: number[] = [];
