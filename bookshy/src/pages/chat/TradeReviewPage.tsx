@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { fetchUserPublicLibrary } from '@/services/mylibrary/libraryApi';
 import { fetchBookDetailByBookId } from '@/services/book/search';
 import { fetchScheduleByRoomId, fetchChatRoomUserIds } from '@/services/chat/chat';
-import { submitTradeReview } from '@/services/chat/trade';
+import { submitTradeReview, checkReviewStatus } from '@/services/chat/trade';
 import { getUserIdFromToken } from '@/utils/jwt';
 
 import type { Library } from '@/types/mylibrary/library';
@@ -67,22 +67,29 @@ const TradeReviewPage = () => {
       });
 
     // 이미 리뷰를 작성했는지 확인
-    const checkReviewStatus = async () => {
-      try {
-        await fetchChatRoomUserIds(roomId);
-        const myUserId = getUserIdFromToken();
-        if (!myUserId) return;
+    const checkUserReviewStatus = async () => {
+      if (!calendar?.requestId) return;
 
-        // TODO: 백엔드 API 구현 필요
-        // const hasReviewed = await checkUserReviewStatus(roomId, Number(myUserId));
-        // setHasSubmittedReview(hasReviewed);
+      try {
+        const { hasReviewed, reviewStatus } = await checkReviewStatus(roomId, calendar.requestId);
+        setHasSubmittedReview(hasReviewed);
+
+        if (hasReviewed) {
+          // 이미 리뷰를 작성한 경우, 상대방 리뷰 상태에 따라 다른 메시지 표시
+          const partnerHasSubmitted = reviewStatus.partnerReview.hasSubmitted;
+          if (partnerHasSubmitted) {
+            toast.info('양측 모두 리뷰를 작성했습니다. 거래가 곧 완료됩니다.');
+          } else {
+            toast.info('상대방이 아직 리뷰를 작성하지 않았습니다.');
+          }
+        }
       } catch (e) {
         console.error('리뷰 상태 확인 실패:', e);
       }
     };
 
-    checkReviewStatus();
-  }, [roomId]);
+    checkUserReviewStatus();
+  }, [roomId, calendar?.requestId]);
 
   useEffect(() => {
     // 매칭 당시 책 정보를 불러오기
