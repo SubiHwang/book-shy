@@ -28,6 +28,10 @@ export async function registerSchedule(payload: RegisterSchedulePayload): Promis
   await authAxiosInstance.post('/chats/calendar', payload);
 }
 
+export async function updateSchedule(payload: RegisterSchedulePayload): Promise<void> {
+  await authAxiosInstance.put('/chats/calendar', payload);
+}
+
 export async function deleteEmoji(messageId: number): Promise<void> {
   await authAxiosInstance.delete(`/messages/${messageId}/emoji`);
 }

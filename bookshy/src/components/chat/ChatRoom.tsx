@@ -12,6 +12,7 @@ import {
   fetchMessages,
   markMessagesAsRead,
   registerSchedule,
+  updateSchedule,
   sendEmoji,
   fetchChatRoomUserIds,
   fetchScheduleByRoomId,
@@ -52,6 +53,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   const [showOptions, setShowOptions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
@@ -279,10 +281,14 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
             : `startDate: ${payload.startDate}, endDate: ${payload.endDate}`,
       });
 
-      // 일정 등록
-      await registerSchedule(schedulePayload);
+      // 일정 등록 또는 수정
+      if (isEditMode) {
+        await updateSchedule(schedulePayload);
+      } else {
+        await registerSchedule(schedulePayload);
+      }
     } catch (e) {
-      console.error('❌ 일정 등록 실패:', e);
+      console.error('❌ 일정 등록/수정 실패:', e);
     }
   };
 
@@ -601,7 +607,14 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
               }, 250); // 약간 더 넉넉한 시간
             }
           }}
-          onScheduleClick={() => setShowScheduleModal(true)}
+          onScheduleClick={() => {
+            if (calendarEvent) {
+              setIsEditMode(true);
+            } else {
+              setIsEditMode(false);
+            }
+            setShowScheduleModal(true);
+          }}
           chatRoomId={numericRoomId}
         />
       </div>
@@ -612,8 +625,13 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
           partnerName={partnerInfo?.name ?? '로딩중...'}
           partnerProfileImage={partnerInfo?.profileImage ?? '/default-profile.png'}
           roomId={numericRoomId}
-          onClose={() => setShowScheduleModal(false)}
+          onClose={() => {
+            setShowScheduleModal(false);
+            setIsEditMode(false);
+          }}
           onConfirm={registerScheduleAndNotify}
+          isEditMode={isEditMode}
+          existingSchedule={calendarEvent}
         />
       )}
 
