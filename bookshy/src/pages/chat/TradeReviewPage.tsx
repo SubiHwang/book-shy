@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { fetchUserPublicLibrary } from '@/services/mylibrary/libraryApi';
+import { fetchUserPublicLibrary, fetchLibraryByBookId } from '@/services/mylibrary/libraryApi';
 import { fetchBookDetailByBookId } from '@/services/book/search';
 import { fetchScheduleByRoomId, fetchChatRoomUserIds } from '@/services/chat/chat';
 import { submitTradeReview, checkReviewStatus } from '@/services/chat/trade';
@@ -127,6 +127,12 @@ const TradeReviewPage = () => {
       const books: Library[] = await Promise.all(
         myBookId.map(async (id, idx) => {
           try {
+            // 내 서재에서 실제 library 정보 조회
+            const lib = await fetchLibraryByBookId(id);
+            if (lib) {
+              return lib;
+            }
+            // fallback: 기존 방식
             const detail = await fetchBookDetailByBookId(id);
             return {
               libraryId: -id,
@@ -140,7 +146,7 @@ const TradeReviewPage = () => {
               public: false,
             };
           } catch (e) {
-            console.log(e);
+            // fallback: 기존 방식
             return {
               libraryId: -id,
               bookId: id,
@@ -156,10 +162,26 @@ const TradeReviewPage = () => {
         }),
       );
       setDefaultBooks(books);
+
+      // ✅ 음수 libraryId 책들 로그 출력
+      const negativeLibs = books.filter((book) => book.libraryId < 0);
+      if (negativeLibs.length > 0) {
+        console.log('음수 libraryId를 가진 매칭 당시 책:', negativeLibs);
+      }
     };
 
     fetchBooks();
   }, [myBookId, myBookName]);
+
+  // 매칭 외 서재도 확인
+  useEffect(() => {
+    if (myLibraryBooks.length > 0) {
+      const negativeLibs = myLibraryBooks.filter((book) => book.libraryId < 0);
+      if (negativeLibs.length > 0) {
+        console.log('음수 libraryId를 가진 매칭 외 서재 책:', negativeLibs);
+      }
+    }
+  }, [myLibraryBooks]);
 
   useEffect(() => {
     document.body.style.overflow = activeBook ? 'hidden' : 'auto';
@@ -187,15 +209,34 @@ const TradeReviewPage = () => {
 
     // 책 정보 구성
     const allBooks = [...defaultBooks, ...filteredMyLibraryBooks];
-    const selectedReviewedBooks = allBooks
-      .filter((book) => selectedBooks.includes(book.title))
-      .map((book) => ({
-        title: book.title,
-        bookId: book.bookId,
-        libraryId: book.libraryId,
-        aladinItemId: book.aladinItemId,
-        fromMatching: defaultBooks.some((b) => b.title === book.title),
-      }));
+    const selectedReviewedBooks = await Promise.all(
+      allBooks
+        .filter((book) => selectedBooks.includes(book.title))
+        .map(async (book) => {
+          const lib = await fetchLibraryByBookId(book.bookId);
+          let aladinItemId: number = -1;
+          if (lib && 'itemId' in lib && typeof lib.itemId === 'number') {
+            aladinItemId = lib.itemId;
+          } else if (lib && 'aladinItemId' in lib && typeof lib.aladinItemId === 'number') {
+            aladinItemId = lib.aladinItemId;
+          } else if (typeof book.aladinItemId === 'number') {
+            aladinItemId = book.aladinItemId;
+          }
+          return {
+            title: book.title,
+            bookId: book.bookId,
+            libraryId: lib && 'libraryId' in lib ? lib.libraryId : book.libraryId,
+            aladinItemId,
+            fromMatching: defaultBooks.some((b) => b.title === book.title),
+          };
+        }),
+    );
+
+    // ✅ 리뷰 제출 시 음수 libraryId 책 로그 출력
+    const negativeLibs = selectedReviewedBooks.filter((book) => book.libraryId < 0);
+    if (negativeLibs.length > 0) {
+      console.log('리뷰 제출 시 음수 libraryId 책:', negativeLibs);
+    }
 
     // 참여자 ID 가져오기
     let userIds: number[] = [];
