@@ -326,4 +326,15 @@ public class LibraryService {
                 .map(lib -> LibraryWithTripResponseDto.from(lib, tripBookIds.contains(lib.getBook().getId())))
                 .toList();
     }
+
+    // BookId로 Library 정보 조회
+    @Transactional(readOnly = true)
+    public LibraryResponseDto findLibraryByBookId(Long userId, Long bookId) {
+        Users user = userService.getUserById(userId);
+        if (user == null) throw new LibraryException(LibraryErrorCode.USER_NOT_FOUND);
+
+        return libraryRepository.findByUserAndBook_Id(user, bookId)
+                .map(LibraryResponseDto::from)
+                .orElse(null); // 또는 Optional 처리
+    }
 }
