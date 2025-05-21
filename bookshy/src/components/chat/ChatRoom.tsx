@@ -73,6 +73,14 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   // 상대방 정보 상태
   const [partnerInfo, setPartnerInfo] = useState<PartnerInfo | null>(null);
 
+  // 뷰포트 높이 동적 계산 (키보드 대응)
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+  useEffect(() => {
+    const handleResize = () => setViewportHeight(window.innerHeight);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   useLayoutEffect(() => {
     const prevCount = prevMessageCountRef.current;
     const currentCount = messages.length;
@@ -412,11 +420,15 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
 
       {/* 메시지 영역 - 내부 스크롤, 헤더/인풋 높이만큼 패딩 */}
       <div
-        className={`overflow-y-auto transition-all duration-300 ${showOptions ? 'pb-[35vh]' : ''} ${isKeyboardVisible ? 'pb-[200px]' : ''}`}
+        className={`overflow-y-auto transition-all duration-300 ${showOptions ? 'pb-[35vh]' : ''} ${isKeyboardVisible ? 'pb-[200px]' : ''} pt-14`}
         style={{
-          paddingTop: 56,
           paddingBottom: showOptions ? '35vh' : isKeyboardVisible ? 200 : 64,
-          height: '100vh',
+          height: `${viewportHeight - 56 - 64}px`, // 헤더(56px) + 입력창(64px) 제외
+          position: 'absolute',
+          top: 56,
+          left: 0,
+          right: 0,
+          bottom: 0,
         }}
       >
         {messages.map((msg, index) => {
