@@ -50,7 +50,7 @@ function ChatInput({ onSend, showOptions, onToggleOptions, onScheduleClick, chat
       {/* 입력창 */}
       <form
         onSubmit={handleSubmit}
-        className="w-full flex items-center gap-2 px-4 py-3 box-border min-h-[64px]"
+        className="w-full flex items-center gap-2 px-2 py-3 box-border min-h-[64px]"
       >
         <div
           role="button"
