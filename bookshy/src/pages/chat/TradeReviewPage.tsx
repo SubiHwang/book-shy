@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { fetchUserPublicLibrary, fetchLibraryByBookId } from '@/services/mylibrary/libraryApi';
 import { fetchBookDetailByBookId } from '@/services/book/search';
-import { fetchScheduleByRoomId, fetchChatRoomUserIds } from '@/services/chat/chat';
+import {
+  fetchScheduleByRoomId,
+  fetchChatRoomUserIds,
+  deleteScheduleByRoomId,
+} from '@/services/chat/chat';
 import { submitTradeReview, checkReviewStatus } from '@/services/chat/trade';
 
 import type { Library } from '@/types/mylibrary/library';
@@ -261,8 +265,14 @@ const TradeReviewPage = () => {
       const { isTradeCompleted } = await submitTradeReview(payload);
       toast.success('리뷰가 성공적으로 제출되었습니다!');
 
-      // ✅ 거래가 최종 완료된 경우 → 완료 페이지로 이동
+      // ✅ 거래가 최종 완료된 경우 → 캘린더 삭제 후 완료 페이지로 이동
       if (isTradeCompleted) {
+        try {
+          await deleteScheduleByRoomId(roomId!);
+          console.log('캘린더 삭제 완료');
+        } catch (error) {
+          console.error('캘린더 삭제 실패:', error);
+        }
         navigate('/exchange/completed');
       } else {
         // 상대방 리뷰 대기 중
