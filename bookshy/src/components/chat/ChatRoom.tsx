@@ -54,6 +54,8 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [shouldAdjustPosition, setShouldAdjustPosition] = useState(false);
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -366,6 +368,48 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
     return today.getTime() === eventDate.getTime();
   }, [calendarEvent]);
 
+  // 키보드 이벤트 핸들러 수정
+  useEffect(() => {
+    const handleFocus = () => {
+      setIsKeyboardVisible(true);
+      const container = messagesEndRef.current?.parentElement;
+      if (container) {
+        // 컨테이너의 전체 높이가 뷰포트 높이보다 작으면 위치 조정 필요
+        const isScrollable = container.scrollHeight > window.innerHeight;
+        setShouldAdjustPosition(!isScrollable);
+        
+        if (!isScrollable) {
+          // 메시지가 적을 때는 컨테이너를 위로 올림
+          container.style.position = 'relative';
+          container.style.top = '-200px'; // 키보드 높이만큼 위로 올림
+        }
+      }
+    };
+
+    const handleBlur = () => {
+      setIsKeyboardVisible(false);
+      setShouldAdjustPosition(false);
+      const container = messagesEndRef.current?.parentElement;
+      if (container) {
+        container.style.position = '';
+        container.style.top = '';
+      }
+    };
+
+    const inputElement = document.querySelector('input[type="text"]');
+    if (inputElement) {
+      inputElement.addEventListener('focus', handleFocus);
+      inputElement.addEventListener('blur', handleBlur);
+    }
+
+    return () => {
+      if (inputElement) {
+        inputElement.removeEventListener('focus', handleFocus);
+        inputElement.removeEventListener('blur', handleBlur);
+      }
+    };
+  }, []);
+
   if (!myUserId) {
     return null;
   }
@@ -383,8 +427,14 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
 
       {/* 메시지 영역 - 내부 스크롤, 헤더/인풋 높이만큼 패딩 */}
       <div
-        className={`overflow-y-auto transition-all duration-300 ${showOptions ? 'pb-[35vh]' : ''}`}
-        style={{ paddingTop: 56, paddingBottom: showOptions ? '35vh' : 64, height: '100vh' }}
+        className={`overflow-y-auto transition-all duration-300 ${showOptions ? 'pb-[35vh]' : ''} ${
+          isKeyboardVisible && !shouldAdjustPosition ? 'pb-[200px]' : ''
+        }`}
+        style={{
+          paddingTop: 56,
+          paddingBottom: showOptions ? '35vh' : isKeyboardVisible && !shouldAdjustPosition ? 200 : 64,
+          height: '100vh',
+        }}
       >
         {messages.map((msg, index) => {
           const dateLabel = formatDateLabel(msg.timestamp ?? msg.sentAt ?? '');
