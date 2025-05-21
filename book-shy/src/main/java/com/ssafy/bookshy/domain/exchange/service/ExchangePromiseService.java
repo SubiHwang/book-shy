@@ -13,12 +13,15 @@ import com.ssafy.bookshy.domain.exchange.repository.ExchangeRequestRepository;
 import com.ssafy.bookshy.domain.users.entity.Users;
 import com.ssafy.bookshy.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +33,7 @@ import static com.ssafy.bookshy.domain.exchange.dto.ExchangePromiseDto.Counterpa
  * - 로그인한 사용자가 참여 중인 예정된 도서 거래(교환 또는 대여) 정보를 조회합니다.
  * - 상대방 정보, 나의 도서, 상대방 도서, 남은 시간 등 다양한 정보를 포함한 DTO로 반환합니다.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ExchangePromiseService {
@@ -48,50 +52,73 @@ public class ExchangePromiseService {
      * @param user 로그인 사용자
      * @return 예정된 거래 약속 리스트
      */
+    @Transactional(readOnly = true)
     public List<ExchangePromiseDto> getPromiseList(Users user) {
         Long userId = user.getUserId();
+        log.info("📌 [{}] 사용자 거래 약속 조회 시작", userId);
 
-        // 1️⃣ 사용자와 관련된 모든 거래 일정 조회
-        List<ChatCalendar> calendars = chatCalendarRepository.findAllByUserId(userId);
+        // 1️⃣ 오늘 이후의 일정만 필터링하여 조회
+        List<ChatCalendar> calendars = chatCalendarRepository.findUpcomingByUserId(userId);
+        log.info("🔍 [{}] 사용자의 거래 일정 수: {}", userId, calendars.size());
 
-        // 2️⃣ 일정마다 연결된 거래 요청 기반으로 응답 구성
-        return calendars.stream().map(calendar -> {
+        List<ExchangePromiseDto> results = new ArrayList<>();
+
+        for (ChatCalendar calendar : calendars) {
             Long requestId = calendar.getRequestId();
+            log.info("🧾 거래 요청 ID: {}", requestId);
+
+            // 2️⃣ 거래 요청 정보 조회
             ExchangeRequest request = exchangeRequestRepository.findById(requestId)
-                    .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.EXCHANGE_REQUEST_NOT_FOUND));
+                    .orElseThrow(() -> {
+                        log.warn("❌ 거래 요청 없음 - requestId: {}", requestId);
+                        return new ExchangeException(ExchangeErrorCode.EXCHANGE_REQUEST_NOT_FOUND);
+                    });
 
             boolean isRequester = request.getRequesterId().equals(userId);
-
-            // 👤 상대방 정보 조회
             Long counterpartId = isRequester ? request.getResponderId() : request.getRequesterId();
-            Users counterpart = userRepository.findById(counterpartId)
-                    .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.USER_NOT_FOUND));
 
-            // 📚 책 정보 조회
+            // 3️⃣ 상대방 정보 조회
+            Users counterpart = userRepository.findById(counterpartId)
+                    .orElseThrow(() -> {
+                        log.warn("❌ 상대방 사용자 없음 - userId: {}", counterpartId);
+                        return new ExchangeException(ExchangeErrorCode.USER_NOT_FOUND);
+                    });
+
+            // 4️⃣ 책 정보 조회
             Long myBookId = isRequester ? request.getBookAId() : request.getBookBId();
             Long partnerBookId = isRequester ? request.getBookBId() : request.getBookAId();
 
             Book myBook = bookRepository.findById(myBookId)
-                    .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.BOOK_NOT_FOUND));
-            Book partnerBook = bookRepository.findById(partnerBookId)
-                    .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.BOOK_NOT_FOUND));
+                    .orElseThrow(() -> {
+                        log.warn("❌ 내 도서 정보 없음 - bookId: {}", myBookId);
+                        return new ExchangeException(ExchangeErrorCode.BOOK_NOT_FOUND);
+                    });
 
-            // ⏳ 남은 시간 계산
+            Book partnerBook = bookRepository.findById(partnerBookId)
+                    .orElseThrow(() -> {
+                        log.warn("❌ 상대 도서 정보 없음 - bookId: {}", partnerBookId);
+                        return new ExchangeException(ExchangeErrorCode.BOOK_NOT_FOUND);
+                    });
+
+            // 5️⃣ 일정 시간 추출
             LocalDateTime scheduledDateTime =
                     request.getType() == ExchangeRequest.RequestType.EXCHANGE
                             ? calendar.getExchangeDate()
                             : calendar.getRentalStartDate();
 
+            if (scheduledDateTime == null) {
+                log.warn("⚠️ 캘린더에 유효한 일정이 없음 - calendarId: {}", calendar.getCalendarId());
+                continue; // 유효하지 않은 일정은 스킵
+            }
+
             TimeLeftDto timeLeft = calculateTimeLeft(scheduledDateTime);
 
-            // 📦 응답 DTO 구성
-            return ExchangePromiseDto.builder()
-                    .tradeId(requestId)
+            // 6️⃣ DTO 구성
+            ExchangePromiseDto dto = ExchangePromiseDto.builder()
+                    .tradeId(request.getRequestId())
                     .type(request.getType().name())
                     .status(request.getStatus().name())
-                    .scheduledTime(scheduledDateTime != null
-                            ? scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-                            : null)
+                    .scheduledTime(scheduledDateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                     .requestedAt(request.getRequestedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
                     .myBookId(myBook.getId())
                     .myBookTitle(myBook.getTitle())
@@ -106,8 +133,15 @@ public class ExchangePromiseService {
                             .build())
                     .timeLeft(timeLeft)
                     .build();
-        }).toList();
+
+            log.info("✅ 거래 약속 DTO 생성 완료 - tradeId: {}, 상대방: {}", requestId, counterpart.getNickname());
+            results.add(dto);
+        }
+
+        log.info("🎯 [{}] 사용자에 대한 거래 약속 총 {}건 반환 완료", userId, results.size());
+        return results;
     }
+
 
 
     /**
