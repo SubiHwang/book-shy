@@ -196,7 +196,10 @@ public class ChatRoomService {
 
         // 📝 2. 시스템 메시지 저장
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-        String systemMessage = "채팅방이 생성되었습니다.";
+        String systemMessage = "도서 교환은 공공장소에서 진행하고, 책 상태를 미리 확인하세요.\n" +
+                "과도한 개인정보 요청이나 외부 연락 유도는 주의하세요.\n" +
+                "도서 상호 대여 서비스 사용 시 반납 기한을 꼭 지켜주세요!\n" +
+                "안전하고 즐거운 독서 문화 함께 만들어가요!";
 
         ChatMessage noticeMessage = ChatMessage.builder()
                 .chatRoom(chatRoom)
