@@ -71,9 +71,9 @@ public class ExchangeHistoryService {
 
             // 📄 리뷰 조회 (내가 작성한 리뷰 기준)
             ExchangeRequestReview myReview = reviewRepository.findByRequestIdAndReviewerId(requestId, userId)
-                    .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.REVIEW_ALREADY_SUBMITTED));
+                    .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.REVIEW_NOT_FOUND));
             ExchangeRequestReview counterpartReview = reviewRepository.findByRequestIdAndReviewerId(requestId, counterpartId)
-                    .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.REVIEW_ALREADY_SUBMITTED));
+                    .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.REVIEW_NOT_FOUND));
 
             // 📘 받은 책들 = 상대방이 등록한 도서 목록
             List<BookSummary> receivedBooks = reviewBookRepository.findByReview(counterpartReview).stream()
@@ -113,6 +113,8 @@ public class ExchangeHistoryService {
                         .build())
                 .toList();
     }
+
+
     /**
      * 🔄 ExchangeReviewBook 엔티티를 BookSummary로 변환
      * @param reviewBook 리뷰 도서 엔티티

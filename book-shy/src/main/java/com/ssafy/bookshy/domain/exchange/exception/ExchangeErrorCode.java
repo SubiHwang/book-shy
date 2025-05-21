@@ -31,6 +31,7 @@ public enum ExchangeErrorCode implements ErrorCode {
     TRADE_ALREADY_COMPLETED(409, "✅ 해당 거래는 이미 완료 처리되었습니다."),
     REVIEW_FORBIDDEN(403, "🚫 해당 거래에 참여하지 않은 사용자는 리뷰를 조회할 수 없습니다."),
     MISSING_PARAMETERS(400, "📛 필수 파라미터(roomId 또는 requestId)가 누락되었습니다."),
+    REVIEW_NOT_FOUND(404, "❌ 리뷰 정보를 찾을 수 없습니다."),
 
     // 🔹 사용자 관련
     USER_NOT_FOUND(404, "❌ 사용자를 찾을 수 없습니다.");
