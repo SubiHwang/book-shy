@@ -93,11 +93,11 @@ const TradeHistoryCard: FC<TradeHistoryCardProps> = ({
               })}
             </span>
             <span
-              className={`text-xs font-bold px-3 py-1 rounded-full shadow border
+              className={`text-xs font-bold px-3 py-1 rounded-full border
               ${
                 tradeType === 'EXCHANGE'
-                  ? 'bg-primary/20 text-primary border-primary/40'
-                  : 'bg-pink-100 text-pink-500 border-pink-300'
+                  ? 'text-primary border-primary bg-transparent'
+                  : 'text-pink-500 border-pink-300 bg-transparent'
               }
             `}
             >
@@ -111,16 +111,29 @@ const TradeHistoryCard: FC<TradeHistoryCardProps> = ({
               className={`flex-1 rounded-2xl p-4 flex flex-col items-center shadow-sm transition bg-primary/5 ${showReceived ? 'ring-2 ring-primary/30 bg-primary/10' : ''}`}
             >
               <button
-                className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-semibold text-primary bg-white border border-primary/20 shadow-sm hover:bg-primary/10 focus:bg-primary/20 transition mb-2 outline-none`}
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-semibold border transition
+                  ${
+                    showReceived
+                      ? 'bg-primary/10 text-primary border-primary shadow'
+                      : 'bg-white text-primary border-primary/30 hover:bg-primary/5'
+                  }
+                `}
                 onClick={() => setShowReceived((prev) => !prev)}
                 aria-expanded={showReceived}
               >
-                <span className="inline-block text-xs font-bold tracking-wide">📗 받은 책</span>
-                {showReceived ? (
-                  <ChevronUp className="w-4 h-4 text-primary" />
-                ) : (
-                  <ChevronDown className="w-4 h-4 text-primary" />
-                )}
+                <span className="text-xs font-bold tracking-wide">📗 받은 책</span>
+                <span className="text-xs bg-primary/20 text-primary rounded-full px-2 py-0.5 ml-1">
+                  {receivedBooks.length}권
+                </span>
+                <span
+                  className={`ml-1 transition-transform duration-200 ${showReceived ? 'rotate-180' : ''}`}
+                >
+                  {showReceived ? (
+                    <ChevronUp className="w-4 h-4" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4" />
+                  )}
+                </span>
               </button>
               {showReceived && (
                 <>
@@ -149,16 +162,29 @@ const TradeHistoryCard: FC<TradeHistoryCardProps> = ({
               className={`flex-1 rounded-2xl p-4 flex flex-col items-center shadow-sm transition bg-pink-50/60 ${showGiven ? 'ring-2 ring-pink-200 bg-pink-100/60' : ''}`}
             >
               <button
-                className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-semibold text-pink-500 bg-white border border-pink-200 shadow-sm hover:bg-pink-100/60 focus:bg-pink-200/60 transition mb-2 outline-none`}
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-semibold border transition
+                  ${
+                    showGiven
+                      ? 'bg-pink-100/60 text-pink-500 border-pink-400 shadow'
+                      : 'bg-white text-pink-500 border-pink-200 hover:bg-pink-100/40'
+                  }
+                `}
                 onClick={() => setShowGiven((prev) => !prev)}
                 aria-expanded={showGiven}
               >
-                <span className="inline-block text-xs font-bold tracking-wide">📘 준 책</span>
-                {showGiven ? (
-                  <ChevronUp className="w-4 h-4 text-pink-500" />
-                ) : (
-                  <ChevronDown className="w-4 h-4 text-pink-500" />
-                )}
+                <span className="text-xs font-bold tracking-wide">📘 준 책</span>
+                <span className="text-xs bg-pink-100 text-pink-500 rounded-full px-2 py-0.5 ml-1">
+                  {givenBooks.length}권
+                </span>
+                <span
+                  className={`ml-1 transition-transform duration-200 ${showGiven ? 'rotate-180' : ''}`}
+                >
+                  {showGiven ? (
+                    <ChevronUp className="w-4 h-4" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4" />
+                  )}
+                </span>
               </button>
               {showGiven && (
                 <>
