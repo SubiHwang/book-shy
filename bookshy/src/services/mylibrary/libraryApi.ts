@@ -25,11 +25,12 @@ export const fetchUserPublicLibrary = async (): Promise<Library[]> => {
 // bookId로 내 서재에서 해당 도서 정보 조회
 export const fetchLibraryByBookId = async (bookId: number): Promise<Library | null> => {
   try {
-    const response = await authAxiosInstance.get<Library[]>(`/library`, {
+    const response = await authAxiosInstance.get(`/library`, {
       params: { bookId },
     });
-    if (Array.isArray(response) && response.length > 0) {
-      return response[0];
+    const lib = response as unknown as Library;
+    if (lib && typeof lib === 'object' && 'libraryId' in lib) {
+      return lib;
     }
     return null;
   } catch (error) {

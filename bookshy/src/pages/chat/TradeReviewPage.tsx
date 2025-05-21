@@ -127,6 +127,12 @@ const TradeReviewPage = () => {
       const books: Library[] = await Promise.all(
         myBookId.map(async (id, idx) => {
           try {
+            // 내 서재에서 실제 library 정보 조회
+            const lib = await fetchLibraryByBookId(id);
+            if (lib) {
+              return lib;
+            }
+            // fallback: 기존 방식
             const detail = await fetchBookDetailByBookId(id);
             return {
               libraryId: -id,
@@ -140,7 +146,7 @@ const TradeReviewPage = () => {
               public: false,
             };
           } catch (e) {
-            console.log(e);
+            // fallback: 기존 방식
             return {
               libraryId: -id,
               bookId: id,
@@ -207,13 +213,20 @@ const TradeReviewPage = () => {
       allBooks
         .filter((book) => selectedBooks.includes(book.title))
         .map(async (book) => {
-          // 항상 내 서재에서 libraryId, aladinItemId를 보정
           const lib = await fetchLibraryByBookId(book.bookId);
+          let aladinItemId: number = -1;
+          if (lib && 'itemId' in lib && typeof lib.itemId === 'number') {
+            aladinItemId = lib.itemId;
+          } else if (lib && 'aladinItemId' in lib && typeof lib.aladinItemId === 'number') {
+            aladinItemId = lib.aladinItemId;
+          } else if (typeof book.aladinItemId === 'number') {
+            aladinItemId = book.aladinItemId;
+          }
           return {
             title: book.title,
             bookId: book.bookId,
-            libraryId: lib?.libraryId ?? book.libraryId,
-            aladinItemId: lib?.aladinItemId ?? book.aladinItemId ?? -1,
+            libraryId: lib && 'libraryId' in lib ? lib.libraryId : book.libraryId,
+            aladinItemId,
             fromMatching: defaultBooks.some((b) => b.title === book.title),
           };
         }),
