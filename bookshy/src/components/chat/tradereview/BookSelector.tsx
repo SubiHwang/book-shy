@@ -7,8 +7,7 @@ interface Props {
   showMyLibrary: boolean;
   setShowMyLibrary: (v: boolean) => void;
   myLibraryBooks: Library[];
-  onViewDetail: (book: Library) => void;
-  defaultBooks: Library[]; // ✅ 추가된 props
+  defaultBooks: Library[];
 }
 
 const BookSelector = ({
@@ -17,7 +16,6 @@ const BookSelector = ({
   showMyLibrary,
   setShowMyLibrary,
   myLibraryBooks,
-  onViewDetail,
   defaultBooks,
 }: Props) => {
   return (
@@ -33,7 +31,6 @@ const BookSelector = ({
             book={book}
             selected={selectedBooks.includes(book.title)}
             onToggle={toggleBook}
-            onViewDetail={onViewDetail}
           />
         ))}
       </div>
@@ -63,7 +60,6 @@ const BookSelector = ({
                 book={book}
                 selected={selectedBooks.includes(book.title)}
                 onToggle={toggleBook}
-                onViewDetail={onViewDetail}
               />
             ))}
           </div>

@@ -56,6 +56,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [viewerImage, setViewerImage] = useState<string | null>(null);
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -503,6 +504,9 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
                     onSelectEmoji={(emoji) => handleSelectEmoji(msg.id, emoji ?? '')}
                     selectedEmoji={msg.emoji}
                     onCloseEmoji={() => setEmojiTargetId(null)}
+                    onImageClick={
+                      msg.type === 'image' ? () => setViewerImage(msg.imageUrl ?? '') : undefined
+                    }
                   />
                 )}
               </div>
@@ -611,6 +615,44 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
           onClose={() => setShowScheduleModal(false)}
           onConfirm={registerScheduleAndNotify}
         />
+      )}
+
+      {/* 이미지 뷰어 모달 */}
+      {viewerImage && (
+        <div
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+          onClick={() => setViewerImage(null)}
+        >
+          {/* X 버튼 */}
+          <button
+            className="absolute top-4 right-4 bg-transparent p-2 z-10 hover:text-white/80 transition"
+            onClick={(e) => {
+              e.stopPropagation();
+              setViewerImage(null);
+            }}
+            aria-label="닫기"
+          >
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+          <img
+            src={viewerImage}
+            alt="확대 이미지"
+            className="max-w-[90vw] max-h-[90vh] rounded-lg shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
       )}
     </div>
   );

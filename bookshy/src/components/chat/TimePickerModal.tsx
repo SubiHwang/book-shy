@@ -10,6 +10,7 @@ const TimePickerModal: FC<Props> = ({ onClose, onConfirm }) => {
   const [meridiem, setMeridiem] = useState<'오전' | '오후'>('오전');
   const [hour, setHour] = useState('01');
   const [minute, setMinute] = useState('00');
+  const [selectedQuickIdx, setSelectedQuickIdx] = useState<number | null>(null);
 
   const quickSelects = [
     { label: '오전 9시', value: ['오전', '09', '00'] },
@@ -80,16 +81,22 @@ const TimePickerModal: FC<Props> = ({ onClose, onConfirm }) => {
         </div>
 
         {/* 빠른 선택 */}
-        <div className="flex flex-wrap justify-center gap-2 mb-5 text-sm">
-          {quickSelects.map(({ label, value }) => (
+        <p className="text-xs text-light-text-muted mb-2">빠른 선택</p>
+        <div className="flex flex-wrap gap-2 mb-5 text-sm">
+          {quickSelects.map(({ label, value }, idx) => (
             <button
               key={label}
               onClick={() => {
                 setMeridiem(value[0] as '오전' | '오후');
                 setHour(value[1]);
                 setMinute(value[2]);
+                setSelectedQuickIdx(idx);
               }}
-              className="px-3 py-1 rounded-full border border-primary text-primary active:scale-95 transition"
+              className={
+                'px-4 py-1 rounded-full active:scale-95 transition border-none ' +
+                (selectedQuickIdx === idx ? 'bg-primary text-white' : 'bg-gray-100 text-gray-800')
+              }
+              style={{ minWidth: '80px' }}
             >
               {label}
             </button>
