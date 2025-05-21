@@ -55,6 +55,7 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -72,14 +73,6 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
 
   // 상대방 정보 상태
   const [partnerInfo, setPartnerInfo] = useState<PartnerInfo | null>(null);
-
-  // 뷰포트 높이 동적 계산 (키보드 대응)
-  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
-  useEffect(() => {
-    const handleResize = () => setViewportHeight(window.innerHeight);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useLayoutEffect(() => {
     const prevCount = prevMessageCountRef.current;
@@ -403,6 +396,19 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
     }
   }, [messages, isKeyboardVisible]);
 
+  // 키보드 대응: 안드로이드에서 window.innerHeight로 동적 높이 조정
+  useEffect(() => {
+    const updateHeight = () => {
+      if (containerRef.current) {
+        // 헤더 높이(56px)만큼 빼줌
+        containerRef.current.style.height = `${window.innerHeight - 56}px`;
+      }
+    };
+    window.addEventListener('resize', updateHeight);
+    updateHeight();
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
+
   if (!myUserId) {
     return null;
   }
@@ -418,19 +424,18 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
         />
       </div>
 
-      {/* 메시지 영역 - 내부 스크롤, 헤더/인풋 높이만큼 패딩 */}
+      {/* 메시지 영역 - 내부 스크롤, 헤더/인풋 높이만큼 패딩, flexbox로 하단 정렬 */}
       <div
-        className={`overflow-y-auto transition-all duration-300 ${showOptions ? 'pb-[35vh]' : ''} ${isKeyboardVisible ? 'pb-[200px]' : ''} pt-14`}
+        ref={containerRef}
+        className={`overflow-y-auto transition-all duration-300 flex flex-col`}
         style={{
+          paddingTop: 56,
           paddingBottom: showOptions ? '35vh' : isKeyboardVisible ? 200 : 64,
-          height: `${viewportHeight - 56 - 64}px`, // 헤더(56px) + 입력창(64px) 제외
-          position: 'absolute',
-          top: 56,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          minHeight: 0,
         }}
       >
+        {/* 빈 공간을 채우는 flex-grow div */}
+        <div style={{ flexGrow: 1 }} />
         {messages.map((msg, index) => {
           const dateLabel = formatDateLabel(msg.timestamp ?? msg.sentAt ?? '');
           const showDateLabel =
