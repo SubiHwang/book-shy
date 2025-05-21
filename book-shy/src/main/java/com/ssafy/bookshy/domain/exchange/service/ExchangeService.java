@@ -8,10 +8,12 @@ import com.ssafy.bookshy.domain.chat.repository.ChatRoomRepository;
 import com.ssafy.bookshy.domain.exchange.dto.*;
 import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequest;
 import com.ssafy.bookshy.domain.exchange.entity.ExchangeRequestReview;
+import com.ssafy.bookshy.domain.exchange.entity.ExchangeReviewBook;
 import com.ssafy.bookshy.domain.exchange.exception.ExchangeErrorCode;
 import com.ssafy.bookshy.domain.exchange.exception.ExchangeException;
 import com.ssafy.bookshy.domain.exchange.repository.ExchangeRequestRepository;
 import com.ssafy.bookshy.domain.exchange.repository.ExchangeRequestReviewRepository;
+import com.ssafy.bookshy.domain.exchange.repository.ExchangeReviewBookRepository;
 import com.ssafy.bookshy.domain.library.entity.Library;
 import com.ssafy.bookshy.domain.library.repository.LibraryRepository;
 import com.ssafy.bookshy.domain.notification.service.NotificationService;
@@ -38,6 +40,7 @@ public class ExchangeService {
     private final LibraryRepository libraryRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final ExchangeReviewBookRepository reviewBookRepository;
 
     /**
      * 📩 도서 교환 요청 처리
@@ -162,10 +165,11 @@ public class ExchangeService {
     /**
      * 💬 매너 평가 제출 및 거래 완료 처리
      *
-     * 1️⃣ 리뷰 정보 저장 (reviewerId → revieweeId 평점)
-     * 2️⃣ 해당 거래 요청의 리뷰 수가 2개인지 확인 (양쪽 모두 작성 여부)
-     * 3️⃣ 모두 완료 시 거래 상태 COMPLETED 로 변경
-     * 4️⃣ 내가 제출한 책들을 상대방에게 소유권 이전 (Library + Book 모두 이전)
+     * - 리뷰 저장 (리뷰어 → 리뷰이)
+     * - 거래 요청의 리뷰 수가 2명인지 확인
+     * - 모든 리뷰 완료 시 상태 COMPLETED로 변경
+     * - 교환인 경우 넘긴 책들의 소유권을 리뷰이에게 이전
+     *
      * @param reviewerId 리뷰 작성자 ID
      * @param request 리뷰 요청 정보
      * @return true: 거래 완료됨, false: 상대방 리뷰 미제출
@@ -174,7 +178,7 @@ public class ExchangeService {
     public boolean submitReview(Long reviewerId, ReviewSubmitRequest request) {
         log.info("📥 리뷰 제출 요청 도착 - reviewerId: {}, requestId: {}", reviewerId, request.getRequestId());
 
-        // 1️⃣ 상대방 ID 확인
+        // 1️⃣ 상대방 ID 추출
         Long revieweeId = request.getUserIds().stream()
                 .filter(id -> !id.equals(reviewerId))
                 .findFirst()
@@ -187,7 +191,7 @@ public class ExchangeService {
             throw new ExchangeException(ExchangeErrorCode.REVIEW_ALREADY_SUBMITTED);
         }
 
-        // 3️⃣ 리뷰 저장
+        // 3️⃣ 리뷰 정보 저장
         ExchangeRequestReview review = ExchangeRequestReview.builder()
                 .requestId(request.getRequestId())
                 .reviewerId(reviewerId)
@@ -200,7 +204,22 @@ public class ExchangeService {
         reviewRepository.save(review);
         log.info("✅ 리뷰 저장 완료 - reviewerId: {}, rating: {}", reviewerId, review.getRating());
 
-        // 4️⃣ 리뷰 수 체크
+        // 4️⃣ 책 임시 저장 (ExchangeReviewBook 테이블)
+        for (ReviewSubmitRequest.ReviewedBook dto : request.getBooks()) {
+            ExchangeReviewBook reviewBook = ExchangeReviewBook.builder()
+                    .review(review)
+                    .bookId(dto.getBookId())
+                    .libraryId(dto.getLibraryId())
+                    .aladinItemId(dto.getAladinItemId())
+                    .fromMatching(dto.isFromMatching())
+                    .ownerId(reviewerId)
+                    .requestId(request.getRequestId())
+                    .build();
+            reviewBookRepository.save(reviewBook);
+            log.info("📌 리뷰 도서 임시 저장 - bookId: {}, libraryId: {}, ownerId: {}", dto.getBookId(), dto.getLibraryId(), reviewerId);
+        }
+
+        // 5️⃣ 리뷰 수 체크
         List<ExchangeRequestReview> reviews = reviewRepository.findByRequestId(request.getRequestId());
         log.info("📊 현재까지 리뷰 개수: {}", reviews.size());
         if (reviews.size() < 2) {
@@ -208,27 +227,30 @@ public class ExchangeService {
             return false;
         }
 
-        // 5️⃣ 거래 상태 변경
+        // 6️⃣ 거래 상태 변경
         ExchangeRequest exchangeRequest = exchangeRequestRepository.findById(request.getRequestId())
                 .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.EXCHANGE_REQUEST_NOT_FOUND));
         exchangeRequest.complete();
         log.info("🔁 거래 상태 변경 완료 - COMPLETED (requestId: {})", exchangeRequest.getRequestId());
 
-        // 6️⃣ 소유권 이전 (EXCHANGE만)
+        // 7️⃣ 교환일 경우 도서 소유권 교차 이전
         if ("EXCHANGE".equalsIgnoreCase(request.getTradeType())) {
-            Users reviewee = Users.builder().userId(revieweeId).build();
-            log.info("📦 교환 방식 확인됨 - 도서 소유권 이전 시작");
+            List<ExchangeReviewBook> allBooks = reviewBookRepository.findByRequestId(request.getRequestId());
+            for (ExchangeReviewBook book : allBooks) {
+                // 교환 대상자 설정
+                Long newOwnerId = book.getOwnerId().equals(reviewerId) ? revieweeId : reviewerId;
+                Users newOwner = Users.builder().userId(newOwnerId).build();
 
-            for (ReviewSubmitRequest.ReviewedBook book : request.getBooks()) {
+                // 소유권 이전
                 Library lib = libraryRepository.findById(book.getLibraryId())
                         .orElseThrow(() -> new ExchangeException(ExchangeErrorCode.BOOK_NOT_FOUND));
-                lib.transferTo(reviewee);
-                log.info("📚 서재 소유권 이전 - libraryId: {}, newOwnerId: {}", lib.getId(), revieweeId);
+                lib.transferTo(newOwner);
+                log.info("📚 서재 소유권 이전 - libraryId: {}, newOwnerId: {}", lib.getId(), newOwnerId);
 
                 Book entity = lib.getBook();
                 if (entity != null) {
-                    entity.transferTo(reviewee);
-                    log.info("📘 도서 소유권 이전 - bookId: {}, newOwnerId: {}", entity.getId(), revieweeId);
+                    entity.transferTo(newOwner);
+                    log.info("📘 도서 소유권 이전 - bookId: {}, newOwnerId: {}", entity.getId(), newOwnerId);
                 }
             }
             log.info("✅ 모든 도서에 대한 소유권 이전 완료");
@@ -237,7 +259,6 @@ public class ExchangeService {
         log.info("🎉 거래 완료 처리 성공 - requestId: {}", request.getRequestId());
         return true;
     }
-
     
     /**
      * 🔍 리뷰 작성 여부 확인 서비스
