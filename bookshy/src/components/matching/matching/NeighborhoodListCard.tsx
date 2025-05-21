@@ -43,7 +43,7 @@ const NeighborhoodListCard: FC<NeighborhoodCardProps> = ({ neighborhood, isLoadi
                   </div>
 
                   <div className="badge bg-primary-light/30 px-2 py-0.5 rounded-full">
-                    <p className="text-primary text-xs sm:text-sm">
+                    <p className="text-primary text-xs sm:text-sm font-bold">
                       북끄지수 {neighborhood.temperature}
                     </p>
                   </div>
@@ -71,14 +71,14 @@ const NeighborhoodListCard: FC<NeighborhoodCardProps> = ({ neighborhood, isLoadi
           </div>
         ) : (
           <button
-            className="badge border border-primary-accent rounded-full flex items-center py-2 px-4 ml-auto"
+            className="badge border-2 border-primary-accent rounded-full flex items-center py-2 px-4 ml-auto"
             onClick={() => {
               navigate(`/matching/neigbors-bookshelf/${neighborhood.userId}`);
             }}
           >
-            <span className="flex items-center text-sm sm:text-base font-extralight text-primary-accent whitespace-nowrap">
+            <span className="flex items-center text-sm sm:text-base font-semibold text-primary-accent whitespace-nowrap">
               서재 보기
-              <ChevronRight strokeWidth={0.8} className="w-4 h-4 ml-1" />
+              <ChevronRight strokeWidth={2} className="w-4 h-4 ml-1" />
             </span>
           </button>
         )}
