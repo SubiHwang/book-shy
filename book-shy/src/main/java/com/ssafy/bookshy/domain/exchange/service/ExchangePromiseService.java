@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -147,7 +148,7 @@ public class ExchangePromiseService {
      * @return TimeLeftDto (일, 시간, 분, 표시 문자열 포함)
      */
     private TimeLeftDto calculateTimeLeft(LocalDateTime scheduledTime) {
-        Duration duration = Duration.between(LocalDateTime.now(), scheduledTime);
+        Duration duration = Duration.between(LocalDateTime.now(ZoneId.of("Asia/Seoul")), scheduledTime);
         long minutes = duration.toMinutes();
 
         int days = (int) (minutes / (60 * 24));
