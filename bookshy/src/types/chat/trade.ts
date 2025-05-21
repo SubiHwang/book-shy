@@ -11,6 +11,25 @@ export interface ReviewedBook {
   fromMatching: boolean;
 }
 
+export interface ReviewStatusResponse {
+  hasReviewed: boolean;
+  reviewStatus: {
+    myReview?: {
+      rating: number;
+      ratings: {
+        condition: number;
+        punctuality: number;
+        manner: number;
+      };
+      submittedAt: string;
+    };
+    partnerReview: {
+      hasSubmitted: boolean;
+      submittedAt: string | null;
+    };
+  };
+}
+
 export interface TradeReviewRequest {
   requestId: number;
   userIds: number[]; // reviewer + reviewee 둘 다 포함
@@ -20,6 +39,12 @@ export interface TradeReviewRequest {
     punctuality: number;
     manner: number;
   };
-  books: ReviewedBook[];
+  books: {
+    title: string;
+    bookId: number;
+    libraryId: number;
+    aladinItemId: number;
+    fromMatching: boolean;
+  }[];
   tradeType?: 'EXCHANGE' | 'RENTAL'; // ✅ 추가
 }
