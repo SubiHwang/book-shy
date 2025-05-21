@@ -47,6 +47,12 @@ const TradeReviewPage = () => {
     myBookName = [],
   } = state?.chatSummary || {};
 
+  // 매칭 당시 책들을 제외한 서재 책들
+  const defaultBookIds = defaultBooks.map((book) => book.bookId);
+  const filteredMyLibraryBooks = myLibraryBooks.filter(
+    (book) => !defaultBookIds.includes(book.bookId),
+  );
+
   useEffect(() => {
     if (!roomId) {
       toast.error('유효하지 않은 접근입니다.');
@@ -156,7 +162,7 @@ const TradeReviewPage = () => {
     }
 
     // 책 정보 구성
-    const allBooks = [...defaultBooks, ...myLibraryBooks];
+    const allBooks = [...defaultBooks, ...filteredMyLibraryBooks];
     const selectedReviewedBooks = allBooks
       .filter((book) => selectedBooks.includes(book.title))
       .map((book) => ({
@@ -262,7 +268,7 @@ const TradeReviewPage = () => {
           toggleBook={toggleBook}
           showMyLibrary={showMyLibrary}
           setShowMyLibrary={setShowMyLibrary}
-          myLibraryBooks={myLibraryBooks}
+          myLibraryBooks={filteredMyLibraryBooks}
           onViewDetail={setActiveBook}
           defaultBooks={defaultBooks}
         />
