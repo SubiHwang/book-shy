@@ -51,12 +51,11 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [showOptions, setShowOptions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const messageContainerRef = useRef<HTMLDivElement | null>(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [emojiTargetId, setEmojiTargetId] = useState<string | null>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
-  const [viewportHeight, setViewportHeight] = useState(typeof window !== 'undefined' ? window.innerHeight : 0);
+  const [shouldAdjustPosition, setShouldAdjustPosition] = useState(false);
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -222,32 +221,16 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
     return () => unsubscribe(sub);
   }, [numericRoomId, subscribeEmojiTopic, unsubscribe, isConnected]);
 
-  // 메시지 컨테이너가 맨 아래에 있는지 체크하는 함수
-  const isAtBottom = () => {
-    const container = messageContainerRef.current;
-    if (!container) return true;
-    return container.scrollHeight - container.scrollTop - container.clientHeight < 100;
-  };
-
-  // 스크롤 이벤트로 아래로 버튼 노출 여부 결정
   useEffect(() => {
-    const container = messageContainerRef.current;
+    const container = messagesEndRef.current?.parentElement;
     if (!container) return;
     const onScroll = () => {
-      setShowScrollToBottom(!isAtBottom());
+      const show = container.scrollHeight - container.scrollTop - container.clientHeight > 100;
+      setShowScrollToBottom(show);
     };
     container.addEventListener('scroll', onScroll);
     return () => container.removeEventListener('scroll', onScroll);
   }, []);
-
-  // messages, isKeyboardVisible이 바뀔 때: 맨 아래에 있으면 자동 스크롤, 아니면 버튼만
-  useEffect(() => {
-    if (isAtBottom() && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      setShowScrollToBottom(true);
-    }
-  }, [messages, isKeyboardVisible]);
 
   const scrollToBottom = (smooth = true) => {
     messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
@@ -385,41 +368,45 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
     return today.getTime() === eventDate.getTime();
   }, [calendarEvent]);
 
-  // 키보드 이벤트 핸들러 (position/top 조정 없이 padding만)
+  // 키보드 이벤트 핸들러 수정
   useEffect(() => {
     const handleFocus = () => {
       setIsKeyboardVisible(true);
+      const container = messagesEndRef.current?.parentElement;
+      if (container) {
+        // 컨테이너의 전체 높이가 뷰포트 높이보다 작으면 위치 조정 필요
+        const isScrollable = container.scrollHeight > window.innerHeight;
+        setShouldAdjustPosition(!isScrollable);
+        
+        if (!isScrollable) {
+          // 메시지가 적을 때는 컨테이너를 위로 올림
+          container.style.position = 'relative';
+          container.style.top = '-200px'; // 키보드 높이만큼 위로 올림
+        }
+      }
     };
+
     const handleBlur = () => {
       setIsKeyboardVisible(false);
+      setShouldAdjustPosition(false);
+      const container = messagesEndRef.current?.parentElement;
+      if (container) {
+        container.style.position = '';
+        container.style.top = '';
+      }
     };
+
     const inputElement = document.querySelector('input[type="text"]');
     if (inputElement) {
       inputElement.addEventListener('focus', handleFocus);
       inputElement.addEventListener('blur', handleBlur);
     }
+
     return () => {
       if (inputElement) {
         inputElement.removeEventListener('focus', handleFocus);
         inputElement.removeEventListener('blur', handleBlur);
       }
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.visualViewport) {
-        setViewportHeight(window.visualViewport.height);
-      } else {
-        setViewportHeight(window.innerHeight);
-      }
-    };
-    window.visualViewport?.addEventListener('resize', handleResize);
-    window.addEventListener('resize', handleResize);
-    handleResize();
-    return () => {
-      window.visualViewport?.removeEventListener('resize', handleResize);
-      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -440,12 +427,12 @@ function ChatRoom({ myBookId, myBookName, otherBookId, otherBookName }: Props) {
 
       {/* 메시지 영역 - 내부 스크롤, 헤더/인풋 높이만큼 패딩 */}
       <div
-        ref={messageContainerRef}
-        className={`overflow-y-auto transition-all duration-300 ${showOptions ? 'pb-[35vh]' : ''} ${isKeyboardVisible ? 'pb-[200px]' : ''}`}
+        className={`overflow-y-auto transition-all duration-300 ${showOptions ? 'pb-[35vh]' : ''} ${
+          isKeyboardVisible && !shouldAdjustPosition ? 'pb-[200px]' : ''
+        } pt-14`}
         style={{
-          paddingTop: 56,
-          paddingBottom: showOptions ? '35vh' : isKeyboardVisible ? 200 : 64,
-          height: viewportHeight - 56 - 64, // 헤더(56px) + 인풋(64px) 제외
+          paddingBottom: showOptions ? '35vh' : isKeyboardVisible && !shouldAdjustPosition ? 200 : 64,
+          height: '100vh',
         }}
       >
         {messages.map((msg, index) => {
