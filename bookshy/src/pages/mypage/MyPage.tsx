@@ -29,8 +29,8 @@ const MyPage = () => {
   const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
 
   const pages = [
-    { path: '/mypage', label: '거래 약속 보기' },
-    { path: '/mypage/history', label: '거래 기록' },
+    { path: '/mypage/promises', label: '거래 약속 보기' },
+    { path: '/mypage', label: '거래 기록' },
   ];
 
   if (isLoading) return <div className="p-4">불러오는 중...</div>;
