@@ -4,16 +4,12 @@ interface Props {
   book: Library;
   selected: boolean;
   onToggle: (title: string) => void;
-  onViewDetail: (book: Library) => void;
 }
 
-const BookChip = ({ book, selected, onToggle, onViewDetail }: Props) => (
+const BookChip = ({ book, selected, onToggle }: Props) => (
   <button
     key={book.libraryId ?? book.title}
-    onClick={() => {
-      onToggle(book.title);
-      onViewDetail(book);
-    }}
+    onClick={() => onToggle(book.title)}
     className={`w-[140px] flex items-center gap-2 px-2 py-1 rounded-full border text-sm truncate
       ${selected ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 border-gray-300'}`}
   >
