@@ -158,8 +158,8 @@ const AppLayout: FC = () => {
 
                   {/* ✅ 마이페이지 라우팅 (공통 레이아웃) */}
                   <Route path="/mypage" element={<MyPage />}>
-                    <Route index element={<TradePromiseList />} />
-                    <Route path="history" element={<TradeHistoryList />} />
+                    <Route index element={<TradeHistoryList />} />
+                    <Route path="promises" element={<TradePromiseList />} />
                   </Route>
 
                   {/* ✅ 독립적인 프로필 수정 페이지 (레이아웃 없음) */}
