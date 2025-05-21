@@ -311,7 +311,7 @@ const TradeReviewPage = () => {
               : '상대방이 아직 리뷰를 작성하지 않았습니다.'}
           </p>
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/bookshelf')}
             className="bg-primary text-white px-4 py-2 rounded-lg text-sm"
           >
             채팅방으로 돌아가기
