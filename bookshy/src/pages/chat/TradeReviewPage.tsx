@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { fetchUserPublicLibrary } from '@/services/mylibrary/libraryApi';
+import { fetchUserPublicLibrary, fetchLibraryByBookId } from '@/services/mylibrary/libraryApi';
 import { fetchBookDetailByBookId } from '@/services/book/search';
 import { fetchScheduleByRoomId, fetchChatRoomUserIds } from '@/services/chat/chat';
 import { submitTradeReview, checkReviewStatus } from '@/services/chat/trade';
@@ -203,15 +203,21 @@ const TradeReviewPage = () => {
 
     // 책 정보 구성
     const allBooks = [...defaultBooks, ...filteredMyLibraryBooks];
-    const selectedReviewedBooks = allBooks
-      .filter((book) => selectedBooks.includes(book.title))
-      .map((book) => ({
-        title: book.title,
-        bookId: book.bookId,
-        libraryId: book.libraryId,
-        aladinItemId: book.aladinItemId ?? -1,
-        fromMatching: defaultBooks.some((b) => b.title === book.title),
-      }));
+    const selectedReviewedBooks = await Promise.all(
+      allBooks
+        .filter((book) => selectedBooks.includes(book.title))
+        .map(async (book) => {
+          // 항상 내 서재에서 libraryId, aladinItemId를 보정
+          const lib = await fetchLibraryByBookId(book.bookId);
+          return {
+            title: book.title,
+            bookId: book.bookId,
+            libraryId: lib?.libraryId ?? book.libraryId,
+            aladinItemId: lib?.aladinItemId ?? book.aladinItemId ?? -1,
+            fromMatching: defaultBooks.some((b) => b.title === book.title),
+          };
+        }),
+    );
 
     // ✅ 리뷰 제출 시 음수 libraryId 책 로그 출력
     const negativeLibs = selectedReviewedBooks.filter((book) => book.libraryId < 0);

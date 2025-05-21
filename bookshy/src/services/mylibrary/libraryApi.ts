@@ -21,3 +21,19 @@ export const fetchUserPublicLibrary = async (): Promise<Library[]> => {
     throw error;
   }
 };
+
+// bookId로 내 서재에서 해당 도서 정보 조회
+export const fetchLibraryByBookId = async (bookId: number): Promise<Library | null> => {
+  try {
+    const response = await authAxiosInstance.get<Library[]>(`/library`, {
+      params: { bookId },
+    });
+    if (Array.isArray(response) && response.length > 0) {
+      return response[0];
+    }
+    return null;
+  } catch (error) {
+    console.error('bookId로 서재 도서 조회 오류:', error);
+    return null;
+  }
+};
