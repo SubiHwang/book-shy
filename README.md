@@ -6,7 +6,7 @@
 
 ![logo](/uploads/41b0638b42507423dc78c24f941a60a9/logo.gif)
 
-📽️ [시연 영상 바로가기]() 
+📽️ [시연 영상 바로가기](https://drive.google.com/file/d/1mJb7Dtvg7D853WkUg7NKR2r8eR2tngaM/view) 
 📝 [회의록 보기](https://evergreen-frost-592.notion.site/1d501e071b1b80908df8d696e7c0d1dd?pvs=4)
 
 <br>
