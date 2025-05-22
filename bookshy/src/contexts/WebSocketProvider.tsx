@@ -3,7 +3,7 @@ import SockJS from 'sockjs-client';
 import { CompatClient, IMessage, Stomp } from '@stomp/stompjs';
 import { ChatRoomSummary, EmojiUpdatePayload, ReadPayload } from '@/types/chat/chat';
 
-const SOCKET_URL = 'https://k12d204.p.ssafy.io/ws-chat';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
 
 interface WebSocketContextValue {
   subscribeRoom: (
