@@ -4,7 +4,7 @@
 
 > **중고 도서 거래 / 대여 및 추천 서비스**  
 
-![logo](/uploads/41b0638b42507423dc78c24f941a60a9/logo.gif)
+![logo](./images/00.logo.gif)
 
 📽️ [시연 영상 바로가기](https://drive.google.com/file/d/1mJb7Dtvg7D853WkUg7NKR2r8eR2tngaM/view) 
 📝 [회의록 보기]()
@@ -68,75 +68,107 @@
 #### ✅ 카카오 로그인
 카카오 로그인을 통해서 서비스에 접근할 수 있습니다. 
 
-<img src="/uploads/321a21091c6d9595a1aa5c40262ddf9f/KakaoTalk_20250519_110958856.jpg" width="200" height="150">
+<img src="./images/01.온보딩, 로그인.gif" width=200>
+
+#### ✅ GPS 위치 설정
+주변 이웃들과 매칭 될 수 있도도록 위치 정보를 저장합니다. GPS 기능을 사용해 현재 위치를 불러올 수 있습니다.
+
+<img src="./images/02.gps주소.gif" width=200>
 
 #### ✅ 책 등록
 ISBN, 알라딘 책 검색, 직접 등록을 통해서 책을 등록할 수 있습니다. 
 
-<img src="/uploads/cda2a0d163cc9356d6279df0a43e554b/KakaoTalk_20250519_110958856_02.jpg" width="200" height="150">
+<img src="./images/04.서재,책등록-isbn인식-공개서재등록.gif" width=200>
 
-<img src="/uploads/f17667cee071510951d799f155050bc4/KakaoTalk_20250519_110958856_04.jpg" width="200" height="150">
-
-<img src="/uploads/92aaa40d3d1b85f6c8cac5b7c8ddad17/KakaoTalk_20250519_110958856_05.jpg" width="200" height="150">
 
 #### ✅ 나의 서재
-등록한 서재를 내 전체 서재 탭을 통해 확인할 수 있습니다.
+등록한 도서들을 내 전체 서재 탭을 통해 확인할 수 있습니다. 등록한 도서 중 교환이 가능한 서재는 공개 처리 합니다. 공개된 책들은 내 공개 서재 탭을 통해 확인할 수 있습니다. 공개 서재는 다른 유저들이 볼 수 있습니다.
 <br>
-공개한 서재는 내 공개 서재 탭을 통해 확인할 수 있습니다.
-<br>
-공개 서재는 다른 유저들에게 보이게 됩니다.
 
-<img src="/uploads/5231112c182aa22be4fdba6ec048a4a9/KakaoTalk_20250519_110958856_01.jpg" width="200" height="150">
-
-<img src="/uploads/e30ce0e05ce820bd2fe671b37de86a50/KakaoTalk_20250519_110958856_06.jpg" width="200" height="150">
+<img src="./images/03.서재-도서공개비공개.gif" width=200>
+<img src="./images/03-1.서재-전체.jpg" width=200>
+<img src="./images/03-1.서재-공개.jpg" width=200>
 
 
 #### ✅ 매칭
-공개 서재를 기반으로 매칭률 순, 거리 순 필터를 통해 매칭된 이웃들을 둘러볼 수 있습니다.
+공개 서재를 기반으로 매칭률 순, 거리 순 정렬를 통해 매칭된 이웃들을 둘러볼 수 있습니다.
+이때, 매칭률은 **거래 후 상호 평가 점수(북끄 지수),거리,최근 활동성**을 종합하여 나타냅니다.
+
+정렬을 사용해 매칭 목록 보기
 <br>
-이때, 매칭률은 북끄지수,거리,최근 활동성을 종합하여 나타냅니다.
+
+<img src="./images/05-1.매칭-거리순.jpg" width=200>
+<img src="./images/05-2.매칭-매칭률순.jpg" width=200>
+
+<br>
+매칭된 상대나, 주변 이웃 서재 보기를 통해 다른 사람들의 공개 서재를 볼 수 있습니다.
 <br>
 
-<img src="/uploads/424296340d7df735c4d92921fe1b455e/KakaoTalk_20250519_110958856_07.jpg" width="200" height="150">
-<img src="/uploads/60e1737c331f47b6ebc7d32fc2335daf/KakaoTalk_20250519_110958856_08.jpg" width="200" height="150">
+<img src="./images/05.매칭-상대서재보기.gif" width=200>
 
-
-
-#### ✅ 추천
+#### ✅ 읽고 싶은 책 추천
 사용자의 위시리스트, 도서 검색 활동을 기반으로 맞춤형 도서 TOP5를 제공합니다.
+
+<img src="./images/06.매칭-추천.gif" width=200>
+
 <br>
 실시간 인기 검색어, 검색어 자동완성 또한 같이 볼 수 있습니다.
+<br>
+<img src="./images/07.매칭-읽고싶은책검색,자동완성,실검.gif" width=200>
 
-<img src="/uploads/2af8f6068732b9ba836c6313c6b19e83/KakaoTalk_20250519_110958856_09.jpg" width="200" height="150">
-<img src="/uploads/9f7d220c12a686d40f2e10d8a9776b43/KakaoTalk_20250519_110958856_10.jpg" width="200" height="150">
+<br>
+사용자 경험 개선을 위해서 검색 시 오탈자 자동 보정으로 스마트 검색 기능을 구현하였습니다.
+<br>
+<img src="./images/08.매칭-읽고싶은책검색어보정.gif" width=200>
 
 #### ✅ 채팅
-매칭된 이웃과 도서를 교환 또는 거래하고 싶은 경우 채팅을 통해 날짜를 정합니다.
-<br>
-책 교환하기를 선택하면 캘린더를 통해 교환할 당일날 약속을 잡을 수 있습니다.
-<br>
-책 대여하기를 선택하면 캘린더를 통해 대여할 시작일부터 반납일까지 약속을 잡을 수 있습니다.
-<br>
-거래 완료 후 매너 평가를 통해 북끄 지수가 산출됩니다.
+매칭된 이웃과 도서를 교환 또는 거래하고 싶은 경우 채팅을 통해 연락할 수 있습니니다. 채팅에서는 사진 보내기, 일정 등록하기, 이모지 반응하기 기능을 제공합니다.
+
+<img src="./images/11.채팅.gif" width=200>
+<img src="./images/12.채팅-이미지업로드.gif" width=200>
+<img src="./images/13.채팅-약속잡기.gif" width=200>
+<img src="./images/14.채팅-이모지반응.gif" width=200>
 
 
+<br>
+일정 등록 시 책 교환과 대여 모두 지원합니다. 일정 등록 모달에서 책 교환하기를 선택하면 캘린더를 통해 교환할 당일날 약속을 잡을 수 있습니다.책 대여하기를 선택하면 캘린더를 통해 대여할 시작일부터 반납일까지 약속을 잡을 수 있습니다.
+<br>
+
+<img src="./images/13-1.채팅-교환일정잡기.png" width=200>
+<img src="./images/13-1.채팅-대여일정잡기.png" width=200>
+
+<br>
+거래 완료 후 매너 평가를 통해 북끄 지수가 산출됩니다. 평가 시 거래 한 도서를 등록하면, 거래 도서가 내 서재에 자동 등록 됩니다.
+
+<img src="./images/15.채팅-거래완료후평가.gif" width=200>
 
 #### ✅ 독서 기록
-등록한 도서로 가장 인상적이였던 인용구와 독후감을 남길 수 있습니다.
+등록한 도서로 가장 인상적이였던 인용구와 독후감을 남길 수 있습니다. 인용구 별자리 탭에서는 인용구들이 별처럼 밤하늘에 펼쳐진 모습을 볼 수 있습니다.
+
+<img src="./images/16.독서기록-독서기록작성.gif" width=200>
+<img src="./images/17.독서기록-인용구별자리.gif" width=200>
 <br> 
-남긴 기록을 통해 책의 여정도 볼 수 있습니다.
+책의 여정 탭에서 짧게 독서 후기를 남기고, 다른 사람들과 책 후기를 나눌 수 있습니다. 책의 여정에서도 후기를 남긴 책의 여정들을 3D 시각화 하여 볼 수 있습니다.
+
+<img src="./images/18.독서기록-책의여정.gif" width=200>
+<img src="./images/19.독서기록-책의여정맵.gif" width=200>
+<img src="./images/19-1.책의여정-캡쳐.png" width=200>
+
 
 #### ✅ 거래 기록
 
-마이페이지에서 거래 약속 보기 탭을 통해 현재 거래 약속을 볼 수 있습니다.
-<br>
-또한, 거래 기록 탭을 통해 총 거래한 기록을 확인할 수 있습니다.
+마이페이지에서 거래 약속 보기 탭을 통해 현재 거래 약속을 볼 수 있습니다. 또한, 거래 기록 탭을 통해 총 거래한 기록을 확인할 수 있습니다.
+
+<img src="./images/20.마이페이지-거래기록보기.gif" width=200>
+<img src="./images/21.마이페이지-거래약속보기.jpg" width=200>
+
 
 #### ✅ 알림
 
 매칭된 이웃, 채팅, 거래 전 확인 알림 등 알림을 통해 정보를 확인할 수 있습니다.
 
-
+<img src="./images/22.알림-거래약속날짜알림.gif" width=200>
+<img src="./images/21.마이페이지-거래약속보기.jpg" width=200>
 
 <br>
 
@@ -175,15 +207,12 @@ ISBN, 알라딘 책 검색, 직접 등록을 통해서 책을 등록할 수 있�
 
 ### 🔍 시스템 아키텍처
 
-![image](/uploads/7e4a5b4ad04b7b02f038884dd4d75412/image.png){width=1276 height=520}
-
+<img src="./images/시스템-아키텍쳐.png" width=1276>
 <br>
 
 ### 💾 ERD Diagram
 
-![image](/uploads/4fd9e41d300f594753b5f952b6402ffc/image__14_.png
-){width=500 height=120}
-
+<img src="./images/erd.png" width=500>
 
 <br>
 
@@ -191,8 +220,7 @@ ISBN, 알라딘 책 검색, 직접 등록을 통해서 책을 등록할 수 있�
 
 버뮤다 삼각김밥 팀입니다!
 
-![image](/uploads/876e2b52203d81adf8c1e4b2e79a1605/KakaoTalk_20250519_125233859.png
-){width=300 height=120}
+<img src="./images/팀원소개.png" width=200>
 
 
 
