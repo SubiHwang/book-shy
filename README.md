@@ -220,7 +220,7 @@ ISBN, 알라딘 책 검색, 직접 등록을 통해서 책을 등록할 수 있�
 
 버뮤다 삼각김밥 팀입니다!
 
-<img src="./images/팀원소개.png" width=200>
+<img src="./images/팀원소개.png" width=350>
 
 
 
