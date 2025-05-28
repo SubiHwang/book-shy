@@ -1,0 +1,19 @@
+/* src/styles/animations.css */
+@keyframes bell-shake {
+  0% { transform: rotate(0); }
+  10% { transform: rotate(20deg); }
+  20% { transform: rotate(-20deg); }
+  30% { transform: rotate(15deg); }
+  40% { transform: rotate(-15deg); }
+  50% { transform: rotate(10deg); }
+  60% { transform: rotate(-10deg); }
+  70% { transform: rotate(5deg); }
+  80% { transform: rotate(-5deg); }
+  90% { transform: rotate(0); }
+  100% { transform: rotate(0); }
+}
+
+.animate-bell {
+  animation: bell-shake 1s ease-in-out;
+  transform-origin: top center;
+}

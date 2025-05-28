@@ -1,0 +1,116 @@
+@font-face {
+  font-family: 'Pretendard Variable';
+  src: url('/fonts/PretendardVariable.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-pretendard;
+  }
+}
+
+body,
+#root {
+  background-color: #fffdf8;
+  height: 100%;
+  width: 100%;
+}
+
+/* iOS 키보드 관련 스타일 */
+@supports (-webkit-touch-callout: none) {
+  body {
+    height: -webkit-fill-available;
+  }
+  
+  input, textarea {
+    font-size: 16px !important; /* iOS에서 자동 확대 방지 */
+  }
+}
+
+/* 스크롤바 커스텀 */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #a8a8a8;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.badge {
+  @apply flex justify-center items-center px-2 py-0.5 rounded-full font-light text-xs text-center;
+}
+
+/* Flip 효과를 위한 유틸리티 클래스 */
+.perspective {
+  perspective: 1000px;
+}
+
+.transform-style {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.rotate-y-0 {
+  transform: rotateY(0deg);
+}
+
+/* 개선된 React-Toastify 스타일 오버라이드 */
+/* 토스트 컨테이너 중앙 정렬 */
+.Toastify__toast-container {
+  padding: 0 !important;
+  width: 97% !important;
+  max-width: 480px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  right: auto !important;
+}
+
+.Toastify__toast {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2) !important;
+  margin-bottom: 10px !important; /* 토스트 사이 여백 증가 */
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+.Toastify__toast-body {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 진행 표시줄 숨기기 */
+.Toastify__progress-bar {
+  height: 3px !important; /* 진행 표시줄 높이 조정 */
+}

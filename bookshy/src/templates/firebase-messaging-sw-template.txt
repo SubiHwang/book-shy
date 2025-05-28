@@ -1,0 +1,43 @@
+// src/templates/firebase-messaging-sw-template.js
+/* eslint-disable */
+importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
+
+// 빌드 시 환경 변수에서 가져온 값으로 교체됨
+const firebaseConfig = {{FIREBASE_CONFIG}};
+
+firebase.initializeApp(firebaseConfig);
+const messaging = firebase.messaging();
+
+// FCM 백그라운드 메시지 처리
+messaging.onBackgroundMessage((payload) => {
+  console.log('백그라운드 메시지 수신:', payload);
+
+  const notificationTitle = payload.data?.title || '북끄북끄에서 알림이 도착했습니다!';
+  const notificationOptions = {
+    body: payload.data?.body || '',
+    icon: '/icons/pwa-192x192.png',
+    data: payload.data || {}
+  };
+
+  self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+// 알림 클릭 이벤트 처리
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  console.log(event.notification)
+  
+  const url = event.notification.data?.url || '/';
+  
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window' }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url === url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});
