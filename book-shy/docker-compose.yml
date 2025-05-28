@@ -1,0 +1,50 @@
+services:
+  backend:
+    image: subihwang/backend:latest
+    container_name: backend
+    ports:
+      - "8080:8080"
+    #    env_file:
+    #      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+      - ALADIN_TTB_KEY=${ALADIN_TTB_KEY}
+      - ALADIN_BASE_URL=${ALADIN_BASE_URL}
+      - NAVER_OCR_SECRET_KEY=${NAVER_OCR_SECRET_KEY}
+      - NAVER_OCR_URL=${NAVER_OCR_URL}
+      - KAKAO_USER_INFO_URI=${KAKAO_USER_INFO_URI}
+      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+      - KAKAO_REDIRECT_URI=${KAKAO_REDIRECT_URI}
+      - ELK_URL=${ELK_URL}
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/secret/firebase-service-account.json
+      - FIREBASE_PROJECT_ID=bookshy-b4c32
+
+
+      # JWT 설정 추가
+      - JWT_SECRET_KEY=${JWT_KEY}
+      - JWT_EXPIRATION_TIME=3600000
+      - ISSUER=bookshy-application
+
+      # 로깅 관련 환경 변수 추가
+      - LOGGING_LOGSTASH_HOST=logstash
+      - LOGGING_LOGSTASH_PORT=5000
+
+    volumes:
+      - /home/ubuntu/bookshy/images/coverImage:/home/ubuntu/bookshy/images/coverImage
+      - /home/ubuntu/bookshy/images/profile:/home/ubuntu/bookshy/images/profile
+      - /home/ubuntu/bookshy/images/chat:/home/ubuntu/bookshy/images/chat
+      - /home/ubuntu/secrets/firebase-service-account.json:/app/secret/firebase-service-account.json:ro
+
+    restart: always
+    networks:
+      - shy
+
+networks:
+  shy:
+    external: true

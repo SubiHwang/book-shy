@@ -1,0 +1,76 @@
+spring:
+  application:
+    name: book-shy  # 📛 서비스 이름 설정
+
+  profiles:
+    active: dev     # ✅ 현재 활성화할 profile 지정 (dev, prod 등)
+    include: key     # 🔐 보안 정보 포함한 외부 yml 파일 분리 (application-key.yml)
+
+  jackson:
+    time-zone: Asia/Seoul
+
+  data:
+    redis:
+      host: k12d204.p.ssafy.io
+      port: 6379
+      password: ${REDIS.PASSWORD}  # 🔐 외부 설정에서 불러오기
+
+  kafka:
+    bootstrap-servers: ${KAFKA.BOOTSTRAP-SERVERS}  # 🔗 Kafka 클러스터 주소
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        partitioner.class: org.apache.kafka.clients.producer.RoundRobinPartitioner  # 🔄 라운드 로빈 파티셔너
+        spring.json.add.type.headers: false  # ✅ 헤더 정보 생략
+        spring.json.trusted.packages: "*"  # ✅ DTO 역직렬화 허용 패키지
+
+    consumer:
+      group-id: ${KAFKA.CONSUMER.BOOK-GROUP-ID}  # 👥 Kafka 컨슈머 그룹 ID
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest  # 🕒 최초 시작 시 earliest부터 읽음
+      properties:
+        spring.json.trusted.packages: "*"  # ✅ DTO 역직렬화 허용 패키지
+
+    listener:
+      ack-mode: manual_immediate  # 🎯 수동 커밋, 메시지 중복 처리 방지
+
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+server:
+  port: 8080  # 🌐 기본 포트 (profile별로 override 가능)
+  tomcat:
+    max-http-form-post-size: 20MB
+    max-swallow-size: 20MB
+
+logging:
+  level:
+    root: INFO  # 📝 로깅 레벨 (DEBUG/INFO/WARN/ERROR)
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info  # ✅ 헬스체크 및 서비스 정보 노출
+  endpoint:
+    health:
+      show-details: always  # 헬스체크 상세 정보 응답 포함
+
+file:
+  upload:
+    profile-dir: /home/ubuntu/bookshy/images/profile
+    cover-dir: /home/ubuntu/bookshy/images/coverImage
+    chat-dir: /home/ubuntu/bookshy/images/chat
+
+elasticsearch:
+  url: ${ELK_URL}
+
+# 개발자 식별자 설정 추가
+app:
+  developer:
+    id: ${DEV_ID}

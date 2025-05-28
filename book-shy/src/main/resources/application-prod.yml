@@ -1,0 +1,54 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate  # ✅ 운영에서는 테이블 구조 변경을 금지하고 유효성만 검사
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false       # ✅ 운영에서는 SQL 로그 미출력
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Seoul
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      # ✅ 운영에서도 동일하게 각 역할별 그룹 ID 지정
+      book-group-id: book-consumer-group
+      match-group-id: match-consumer-group
+      trade-group-id: trade-consumer-group
+      chat-group-id: chat-consumer-group
+      recommend-group-id: recommend-consumer-group
+
+aladin:
+  api:
+    base-url: ${ALADIN_BASE_URL}
+  ttb:
+    key: ${ALADIN_TTB_KEY}
+
+naver:
+  ocr:
+    secretKey: ${NAVER_OCR_SECRET_KEY}
+    url: ${NAVER_OCR_URL}
+
+
+oauth:
+  kakao:
+    user-info-uri: ${KAKAO_USER_INFO_URI}
+    client-id: ${KAKAO_CLIENT_ID}
+    redirect-uri: ${KAKAO_REDIRECT_URI}
+
+server:
+  port: 8080  # ✅ 운영용 포트
+
+elasticsearch:
+  url: ${ELK_URL}
+
+app:
+  developer:
+    id: ""  # 비워둠

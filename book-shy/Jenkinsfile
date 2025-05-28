@@ -1,0 +1,294 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "backend"
+        DOCKER_IMAGE = "subihwang/backend"
+        DOCKER_TAG = "latest"
+
+        // SonarQube 관련 설정
+        SONAR_HOST_URL = "http://sonarqube:9000/sonarqube"
+        SONAR_PROJECT_KEY = "book-shy"
+        SONAR_TOKEN = credentials('sonarqube-token')  // Jenkins Credentials에 등록된 토큰
+
+        // 원격 서버 정보
+        REMOTE_USER = credentials('remote-server-credentials')  // 원격 서버 접속용 사용자 이름/비밀번호
+        DEV_SERVER = "k12d204.p.ssafy.io"
+
+        // DB 관련 환경 변수
+        DB_URL = credentials('DB_URL')
+        DB_USERNAME = credentials('DB_USERNAME')
+        DB_PASSWORD = credentials('DB_PASSWORD')
+
+        // Redis 환경 변수
+        REDIS_PASSWORD = credentials('REDIS_PASSWORD')
+
+        // Kafka
+        KAFKA_BOOTSTRAP_SERVERS = credentials('KAFKA_BOOTSTRAP_SERVERS')
+        ELK_URL = credentials('ELK_URL')
+
+        JWT_KEY = credentials('JWT_KEY')
+        ALADIN_TTB_KEY = credentials('ALADIN_TTB_KEY')
+        ALADIN_BASE_URL = credentials('ALADIN_BASE_URL')
+        NAVER_OCR_SECRET_KEY = credentials('NAVER_OCR_SECRET_KEY')
+        NAVER_OCR_URL = credentials('NAVER_OCR_URL')
+
+        KAKAO_USER_INFO_URI = credentials('KAKAO_USER_INFO_URI')
+        KAKAO_CLIENT_ID = credentials('KAKAO_CLIENT_ID')        // 추가
+        KAKAO_REDIRECT_URI = credentials('KAKAO_REDIRECT_URI')  // 추가
+
+        FIREBASE_PROJECT_ID = 'bookshy-b4c32'
+        GOOGLE_APPLICATION_CREDENTIALS = '/app/secret/firebase-service-account.json'
+    }
+
+    stages {
+        //gitLab 저장소에서 back 브랜치의 코드를 가져온 후 gitlab 자격 증명을 활용해 코드를 checkout
+        stage('Checkout Code') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: 'back']],
+                    userRemoteConfigs: [[
+                        url: 'https://lab.ssafy.com/s12-final/S12P31D204.git',
+                        credentialsId: 'lab-token'
+                    ]]
+                ])
+                sh 'echo "✅ 코드 체크아웃 완료"'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    try {
+                        echo '✅ 백엔드 빌드 시작'
+                        dir("${env.WORKSPACE}/book-shy") {
+                            sh '''
+                                # 에러나면 바로 정지시킴
+                                set -e
+
+                                # 인코딩 설정
+                                export JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF-8"
+
+                                # gradlew 실행 권한 부여
+                                chmod +x gradlew
+
+                                # 기존 빌드 디렉토리 삭제
+                                rm -rf build
+
+                                # 빌드 수행 (테스트 제외)
+                                ./gradlew clean build -x test
+
+                                # 빌드 결과물 확인
+                                echo "✅ 빌드된 파일 목록:"
+                                ls -l build/libs/
+                            '''
+                        }
+                        echo '✅ 백엔드 빌드 성공'
+                    } catch (Exception e) {
+                        echo '❌ 백엔드 빌드 실패'
+                        error "Build failed: ${e.message}"
+                    }
+                }
+            }
+        }
+
+        stage('Code Analysis'){
+            steps{
+                script{
+                    try{
+                        echo '✅ 코드 분석 시작'
+
+                        // 현재 디렉토리 확인
+                        sh 'echo "현재 디렉토리: $(pwd)"'
+                        sh 'echo "디렉토리 내용: $(ls -la)"'
+
+                        // SonarQube 환경 변수 확인
+                        sh 'echo "SonarQube URL: ${SONAR_HOST_URL}"'
+                        sh 'echo "SonarQube Project Key: ${SONAR_PROJECT_KEY}"'
+                        sh 'echo "Book-shy 디렉토리 확인: $(ls -la book-shy)"'
+
+                        //SonarQube 스캐너 설정으로 코드 분석 실행
+                        withSonarQubeEnv('SonarQube'){
+                            echo "✅ SonarQube 환경 설정 성공"
+
+                            dir("${env.WORKSPACE}/book-shy"){
+                                // 디렉토리 내용 확인
+                                sh 'echo "book-shy 디렉토리로 이동 성공"'
+                                sh 'echo "현재 위치: $(pwd)"'
+                                sh 'echo "디렉토리 내용: $(ls -la)"'
+
+                                // Gradle 설정 확인
+                                sh 'echo "Gradle 설정 파일 확인:"'
+                                sh 'cat build.gradle || echo "build.gradle not found"'
+
+                                // Gradle 권한 확인 및 부여
+                                sh 'echo "Gradle 권한 확인:"'
+                                sh 'ls -la gradlew || echo "gradlew not found"'
+                                sh 'chmod +x gradlew || echo "❌ 권한 부여 실패"'
+
+                                // 상세 로그와 함께 SonarQube 분석 실행 시도
+                                sh 'echo "✅ SonarQube 분석 시작"'
+                                sh '''
+                                    ./gradlew sonarqube \
+                                        -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                                        -Dsonar.projectName=backend \
+                                        -Dsonar.host.url=${SONAR_HOST_URL} \
+                                        -Dsonar.login=${SONAR_TOKEN} \
+                                        --stacktrace --info || echo "❌ Gradle SonarQube 실행 실패"
+                                '''
+                            }
+                        }
+                        echo '✅ 코드 분석 완료'
+                    } catch(Exception e){
+                        echo '❌ 코드 분석 실패'
+                        error "Code analysis failed: ${e.message}"
+                    }
+                }
+            }
+        }
+
+        //Dockerfile을 사용하여 애플리케이션과 그 의존성을 포함한 이미지 생성
+        stage('Build Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_HUB_PSW', usernameVariable: 'DOCKER_HUB_USR')]) {
+                    dir("${env.WORKSPACE}/book-shy") {
+                        sh """
+                        set -e
+                        echo "✅ Docker 이미지 빌드 시작"
+                        docker build -t ${DOCKER_HUB_USR}/${IMAGE_NAME}:latest .
+                        echo "✅ Docker 이미지 빌드 완료"
+                        """
+                    }
+                }
+            }
+        }
+
+        //빌드된 Docker 이미지를 Docker Hub에 업로드하는 단계
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_HUB_PSW', usernameVariable: 'DOCKER_HUB_USR')]) {
+                    sh 'echo $DOCKER_HUB_PSW | docker login -u $DOCKER_HUB_USR --password-stdin'
+                    sh 'docker push ${DOCKER_HUB_USR}/${IMAGE_NAME}:latest'
+                }
+            }
+        }
+
+        stage('Deploy'){
+            steps{
+                script{
+                    try{
+                        // 블루-그린 배포 방식으로 개발 환경에 배포
+                        sshagent(credentials: ['remote-server-credentials']) {
+                            dir("${env.WORKSPACE}/book-shy") {
+                                // 🔹 firebase-service-account.json 파일 준비
+                                withCredentials([file(credentialsId: 'firebase-service-account', variable: 'FIREBASE_CREDENTIAL_FILE')]) {
+                                    sh '''
+                                        mkdir -p secrets
+                                        cp $FIREBASE_CREDENTIAL_FILE secrets/firebase-service-account.json
+                                        echo "✅ firebase-service-account.json 로컬 복사 완료"
+                                    '''
+                                }
+
+                                // 도커 컴포즈 파일을 원격 서버에 복사
+                                sh '''
+                                    # ✅ 1. docker-compose.yml 안에 DB_URL, DB_USERNAME, DB_PASSWORD 직접 치환
+                                    sed -i "s|\\${DB_URL}|${DB_URL}|g" docker-compose.yml
+                                    sed -i "s|\\${DB_USERNAME}|${DB_USERNAME}|g" docker-compose.yml
+                                    sed -i "s|\\${DB_PASSWORD}|${DB_PASSWORD}|g" docker-compose.yml
+                                    echo "✅ docker-compose.yml DB 정보 치환 완료"
+
+                                    sed -i "s|\\${REDIS_PASSWORD}|${REDIS_PASSWORD}|g" docker-compose.yml
+                                    echo "✅ docker-compose.yml Redis 정보 치환 완료"
+
+                                    sed -i "s|\\${KAFKA_BOOTSTRAP_SERVERS}|${KAFKA_BOOTSTRAP_SERVERS}|g" docker-compose.yml
+                                    echo "✅ docker-compose.yml Kafka 정보 치환 완료"
+
+                                    sed -i "s|\\${ELK_URL}|${ELK_URL}|g" docker-compose.yml
+                                    echo "✅ docker-compose.yml Kafka 정보 치환 완료"
+
+                                    sed -i "s|\\${JWT_KEY}|${JWT_KEY}|g" docker-compose.yml
+                                    echo "✅ docker-compose.yml JWT 키 정보 치환 완료"
+
+                                    sed -i "s|\\${ALADIN_TTB_KEY}|${ALADIN_TTB_KEY}|g" docker-compose.yml
+                                    echo "✅ docker-compose.yml Aladin Key 값 치환 완료"
+
+                                    sed -i "s|\\${ALADIN_BASE_URL}|${ALADIN_BASE_URL}|g" docker-compose.yml
+                                    echo "✅ docker-compose.yml Aladin base-url 치환 완료"
+
+                                    sed -i "s|\\${NAVER_OCR_SECRET_KEY}|${NAVER_OCR_SECRET_KEY}|g" docker-compose.yml
+                                    echo "✅ docker-compose.yml OCR Secret Key 치환 완료"
+
+                                    sed -i "s|\\${NAVER_OCR_URL}|${NAVER_OCR_URL}|g" docker-compose.yml
+                                    echo "✅ docker-compose.yml OCR URL 치환 완료"
+
+                                    sed -i "s|\\${KAKAO_USER_INFO_URI}|${KAKAO_USER_INFO_URI}|g" docker-compose.yml
+                                    sed -i "s|\\${KAKAO_CLIENT_ID}|${KAKAO_CLIENT_ID}|g" docker-compose.yml
+                                    sed -i "s|\\${KAKAO_REDIRECT_URI}|${KAKAO_REDIRECT_URI}|g" docker-compose.yml
+
+                                    echo "✅ docker-compose.yml Kakao 정보 치환 완료"
+
+                                    # ✅ 2. 서버에 전송
+                                    ssh -o LogLevel=ERROR -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
+                                        mkdir -p /home/ubuntu
+                                        mkdir -p /home/ubuntu/secrets
+                                    "
+
+                                    scp -v -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${DEV_SERVER}:/home/ubuntu/
+                                    echo "✅ docker-compose.yml 복사 완료"
+
+                                    # ✅ 3. 배포 실행
+                                    ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} "
+                                        cd /home/ubuntu
+                                        docker-compose up -d
+                                        echo '✅ 백엔드 배포 완료'
+                                    "
+                                    '''
+                            }
+                        }
+                    } catch (Exception e) {
+                        // 오류 발생 시 파이프라인 중단
+                        error "❌ 배포 실패: ${e.getMessage()}"
+                    }
+                }
+            }
+        }
+
+        //성공적인 배포 후 이전 버전을 정리하는 단계
+        stage('Cleanup Old Deployment'){
+            steps {
+                // 이전 컨테이너 및 이미지 정리
+                sshagent(credentials: ['remote-server-credentials']) {
+                    sh '''
+                        # 사용하지 않는 컨테이너 정리
+                        ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} 'docker container prune -f'
+
+                        # 태그가 없는 이미지 정리
+                        ssh -o StrictHostKeyChecking=no ubuntu@${DEV_SERVER} 'docker image prune -f'
+
+                        echo "✅ 이전 배포 정리 완료"
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // 작업 공간 정리
+            cleanWs()
+        }
+        success {
+            echo '✅ 파이프라인이 성공!'
+        }
+        failure{
+            // 실패 시 알림
+            echo '❌ 파이프라인 실패'
+            emailext (
+                subject: "실패: 파이프라인 '${currentBuild.fullDisplayName}'",
+                body: "파이프라인이 실패했습니다. 빌드 URL: ${env.BUILD_URL}",
+                to: 'ghkdtnql@gmail.com'
+            )
+        }
+    }
+}
