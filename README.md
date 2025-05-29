@@ -7,8 +7,6 @@
 ![logo](./images/00.logo.gif)
 
 📽️ [시연 영상 바로가기](https://drive.google.com/file/d/1mJb7Dtvg7D853WkUg7NKR2r8eR2tngaM/view) 
-📝 [회의록 보기]()
-
 <br>
 
 ## 목차
