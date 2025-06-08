@@ -78,61 +78,6 @@ pipeline {
             }
         }
 
-        stage('Code Analysis'){
-            steps{
-                script{
-                    try{
-                        echo '✅ 코드 분석 시작'
-
-                        // 현재 디렉토리 확인
-                        sh 'echo "현재 디렉토리: $(pwd)"'
-                        sh 'echo "디렉토리 내용: $(ls -la)"'
-
-                        // SonarQube 환경 변수 확인
-                        sh 'echo "SonarQube URL: ${SONAR_HOST_URL}"'
-                        sh 'echo "SonarQube Project Key: ${SONAR_PROJECT_KEY}"'
-                        sh 'echo "Book-shy 디렉토리 확인: $(ls -la book-shy)"'
-
-                        //SonarQube 스캐너 설정으로 코드 분석 실행
-                        withSonarQubeEnv('SonarQube'){
-                            echo "✅ SonarQube 환경 설정 성공"
-
-                            dir("${env.WORKSPACE}/book-shy"){
-                                // 디렉토리 내용 확인
-                                sh 'echo "book-shy 디렉토리로 이동 성공"'
-                                sh 'echo "현재 위치: $(pwd)"'
-                                sh 'echo "디렉토리 내용: $(ls -la)"'
-
-                                // Gradle 설정 확인
-                                sh 'echo "Gradle 설정 파일 확인:"'
-                                sh 'cat build.gradle || echo "build.gradle not found"'
-
-                                // Gradle 권한 확인 및 부여
-                                sh 'echo "Gradle 권한 확인:"'
-                                sh 'ls -la gradlew || echo "gradlew not found"'
-                                sh 'chmod +x gradlew || echo "❌ 권한 부여 실패"'
-
-                                // 상세 로그와 함께 SonarQube 분석 실행 시도
-                                sh 'echo "✅ SonarQube 분석 시작"'
-                                sh '''
-                                    ./gradlew sonarqube \
-                                        -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                                        -Dsonar.projectName=backend \
-                                        -Dsonar.host.url=${SONAR_HOST_URL} \
-                                        -Dsonar.login=${SONAR_TOKEN} \
-                                        --stacktrace --info || echo "❌ Gradle SonarQube 실행 실패"
-                                '''
-                            }
-                        }
-                        echo '✅ 코드 분석 완료'
-                    } catch(Exception e){
-                        echo '❌ 코드 분석 실패'
-                        error "Code analysis failed: ${e.message}"
-                    }
-                }
-            }
-        }
-
         //Dockerfile을 사용하여 애플리케이션과 그 의존성을 포함한 이미지 생성
         stage('Build Docker Image') {
             steps {
