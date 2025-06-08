@@ -42,21 +42,6 @@ pipeline {
     }
 
     stages {
-        //gitLab 저장소에서 back 브랜치의 코드를 가져온 후 gitlab 자격 증명을 활용해 코드를 checkout
-        stage('Checkout Code') {
-            steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: 'back']],
-                    userRemoteConfigs: [[
-                        url: 'https://lab.ssafy.com/s12-final/S12P31D204.git',
-                        credentialsId: 'lab-token'
-                    ]]
-                ])
-                sh 'echo "✅ 코드 체크아웃 완료"'
-            }
-        }
-
         stage('Build') {
             steps {
                 script {
